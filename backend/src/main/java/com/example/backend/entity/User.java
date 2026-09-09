@@ -11,15 +11,17 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Data
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(nullable = false, unique = true)
     private String email;
+    @Column(nullable = false)
     private String password;
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false)
     private String fullName;
     @ManyToOne
     @JoinColumn(name = "role_id")
