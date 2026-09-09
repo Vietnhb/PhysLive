@@ -1,0 +1,14 @@
+spring.application.name=physlive-backend
+server.port=8080
+
+spring.datasource.url=jdbc:mysql://localhost:3306/physlive
+spring.datasource.username=YOUR_DB_USER
+spring.datasource.password=YOUR_DB_PASSWORD
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+
+jwt.secret=YOUR_LOCAL_JWT_SECRET
+jwt.expiration=86400000
