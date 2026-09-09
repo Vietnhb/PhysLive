@@ -1,22 +1,32 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import axios from "axios";
 import type { User } from "../types/user";
 import { getUsers } from "../api/userApi";
 import { getToken } from "../utils/token";
 import { getMe } from "../api/userApi";
 function Admin() {
     const navigate = useNavigate();
-    const [error, setError] = useState();
+    const [error, setError] = useState<string>();
     const [users, setUsers] = useState<User[]>([]);
     const token = getToken();
     useEffect(() => {
-        if (!token) navigate("/");
-        getMe().then((data) => { if (data.role != "ADMIN") { navigate("/") } });
-    }, [])
+        if (!token) {
+            navigate("/");
+            return;
+        }
+        void getMe()
+            .then((data) => { if (data.role !== "ADMIN") navigate("/"); })
+            .catch(() => navigate("/"));
+    }, [navigate, token])
     useEffect(() => {
-        getUsers().then((data) => { setUsers(data); })
-            .catch((err: any) => {
-                setError(err.response.data.message)
+        void getUsers().then((data) => { setUsers(data); })
+            .catch((err: unknown) => {
+                if (axios.isAxiosError<{ message?: string }>(err)) {
+                    setError(err.response?.data?.message ?? "Không thể tải danh sách người dùng");
+                    return;
+                }
+                setError("Không thể tải danh sách người dùng");
             })
     }, [])
 

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
 import { login } from "../api/authApi";
 import { setToken } from "../utils/token";
 function Login() {
@@ -13,15 +14,15 @@ function Login() {
             setToken(res.token);
             console.log(res);
             navigate("/")
-        } catch (err: any) {
+        } catch (err: unknown) {
             // Check lỗi kết nối trước
-            if (!err.response) {
+            if (!axios.isAxiosError<{ message?: string }>(err) || !err.response) {
                 setError("Không thể kết nối tới server");
                 return;
             }
             // Check lỗi 401
             if (err.response.status === 401) {
-                setError(err.response.data.message);
+                setError(err.response.data?.message ?? "Email hoặc mật khẩu không đúng");
                 return;
             }
             // Lỗi khác từ server

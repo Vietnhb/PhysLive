@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { signup } from "../api/authApi";
 function Signup() {
     const navigate = useNavigate();
@@ -12,11 +13,12 @@ function Signup() {
             const res = await signup(email, fullName, password);
             alert(res);
             navigate("/login")
-        } catch (err: any) {
-            if (err.response) {
-                setError(err.response.data.message);
+        } catch (err: unknown) {
+            if (axios.isAxiosError<{ message?: string }>(err) && err.response) {
+                setError(err.response.data?.message ?? "Đăng ký thất bại");
                 return;
             }
+            setError("Không thể kết nối tới server");
         }
     }
     return (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 import NavBar from "../components/NavBar";
 import { getToken } from "../utils/token";
 import { getMe } from "../api/userApi";
@@ -15,12 +16,15 @@ function Home() {
     const navigate = useNavigate();
     useEffect(() => {
         if (!token) return;
-        try {
-            getMe().then((data) => { setUser(data) });
-        } catch (err: any) {
-            setError(err.response.data.message);
-            return;
-        }
+        void getMe()
+            .then((data) => { setUser(data); })
+            .catch((err: unknown) => {
+                if (axios.isAxiosError<{ message?: string }>(err)) {
+                    setError(err.response?.data?.message ?? "Không thể tải thông tin người dùng");
+                    return;
+                }
+                setError("Không thể tải thông tin người dùng");
+            });
     }, [token])
 
     const addTodo = () => {
