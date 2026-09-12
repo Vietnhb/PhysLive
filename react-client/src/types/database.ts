@@ -8,7 +8,7 @@ export interface User {
   role: RoleType;
   email: string;
   full_name: string;
-  status: 'active' | 'suspended' | 'pending';
+  status: 'active' | 'disabled' | 'suspended' | 'pending';
   school_name?: string;
   created_at: string;
   updated_at: string;

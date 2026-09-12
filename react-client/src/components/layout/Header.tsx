@@ -68,6 +68,17 @@ export const Header: React.FC = () => {
             <span>🎯</span>
             <span>Thử thách dự đoán</span>
           </NavLink>
+
+          {currentUser?.role === 'ADMIN' && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+              style={{ color: '#dc2626', fontWeight: 700 }}
+            >
+              <span>⚙️</span>
+              <span>Quản trị User</span>
+            </NavLink>
+          )}
         </nav>
       </div>
 
