@@ -32,6 +32,9 @@ public class CreateUserRequest {
     @Schema(description = "Mã trường / tổ chức (tùy chọn)", example = "THPT_CHUYEN_HANOI")
     private String institutionId;
 
+    @Schema(description = "URL ảnh đại diện (tùy chọn)", example = "https://example.com/avatar.jpg")
+    private String avatarUrl;
+
     @Schema(description = "Trạng thái kích hoạt tài khoản (mặc định true)", example = "true")
     private Boolean enabled = true;
 }

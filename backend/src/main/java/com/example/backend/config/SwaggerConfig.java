@@ -13,29 +13,29 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 /**
  * Configures Springdoc OpenAPI / Swagger UI.
  *
- * <p>Registers a global Bearer token security scheme so that every endpoint
+ * <p>
+ * Registers a global Bearer token security scheme so that every endpoint
  * has an "Authorize" button in the Swagger UI for easy manual testing.
  */
 @Configuration
 public class SwaggerConfig {
 
-    @Bean
-    public OpenAPI openAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title("PhysLive API")
-                        .description("Backend API cho nền tảng mô phỏng vật lý tương tác PhysLive. " +
-                                     "Sử dụng nút **Authorize** để nhập JWT token và kiểm thử các endpoint bảo mật.")
-                        .version("v1.0")
-                        .contact(new Contact()
-                                .name("PhysLive Team")
-                                .email("physlive@example.com")))
-                .components(new Components()
-                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")
-                                .description("Nhập JWT token lấy từ endpoint /api/auth/login")))
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
-    }
+        @Bean
+        public OpenAPI openAPI() {
+                return new OpenAPI()
+                                .info(new Info()
+                                                .title("PhysLive API")
+                                                .description("Backend API cho nền tảng mô phỏng vật lý tương tác PhysLive. ")
+                                                .version("v1.0")
+                                                .contact(new Contact()
+                                                                .name("PhysLive Team")
+                                                                .email("")))
+                                .components(new Components()
+                                                .addSecuritySchemes("bearerAuth", new SecurityScheme()
+                                                                .type(SecurityScheme.Type.HTTP)
+                                                                .scheme("bearer")
+                                                                .bearerFormat("JWT")
+                                                                .description("Nhập JWT token lấy từ endpoint /api/auth/login")))
+                                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+        }
 }

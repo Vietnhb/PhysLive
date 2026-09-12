@@ -74,7 +74,10 @@ public class AuthService {
                 user.isEnabled(),
                 user.getActive(),
                 user.getInstitutionId(),
-                user.getLastLogin());
+                user.getLastLogin(),
+                user.getAvatarUrl(),
+                user.getCreatedAt(),
+                user.getUpdatedAt());
 
         return new LoginResponse(token, userInfo);
     }

@@ -30,4 +30,13 @@ public class UserResponse {
 
     /** UTC timestamp of the most recent successful login. {@code null} if never logged in. */
     private OffsetDateTime lastLogin;
+
+    /** URL of the user's avatar image. */
+    private String avatarUrl;
+
+    /** Timestamp when the account was created. */
+    private OffsetDateTime createdAt;
+
+    /** Timestamp when the account was last updated. */
+    private OffsetDateTime updatedAt;
 }

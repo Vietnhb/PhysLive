@@ -22,6 +22,9 @@ public class UpdateUserRequest {
     @Schema(description = "Mã trường / tổ chức (tùy chọn)", example = "THPT_CHUYEN_LEQUYDON")
     private String institutionId;
 
+    @Schema(description = "URL ảnh đại diện mới (tùy chọn)", example = "https://example.com/new-avatar.jpg")
+    private String avatarUrl;
+
     @Schema(description = "Role ID mới (chỉ ADMIN có quyền sửa): 1=ADMIN, 2=TEACHER, 3=REVIEWER, 4=STUDENT, 5=GUEST", example = "2")
     private Integer roleId;
 
