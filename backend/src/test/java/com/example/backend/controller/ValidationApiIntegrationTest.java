@@ -21,6 +21,7 @@ import com.example.backend.dto.validation.ValidationRunResponse;
 import com.example.backend.entity.ValidationRunStatus;
 import com.example.backend.physics.model.PhysicsArchetype;
 import com.example.backend.service.PhysicsValidationService;
+import com.example.backend.service.PhysicsSimulationService;
 import com.example.backend.service.SpecificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,6 +30,7 @@ class ValidationApiIntegrationTest {
 
     @Mock private SpecificationService specificationService;
     @Mock private PhysicsValidationService physicsValidationService;
+    @Mock private PhysicsSimulationService physicsSimulationService;
 
     private MockMvc mockMvc;
 
@@ -36,7 +38,7 @@ class ValidationApiIntegrationTest {
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(
                 new SpecificationController(specificationService, physicsValidationService),
-                new ValidationController(physicsValidationService)).build();
+                new ValidationController(physicsValidationService, physicsSimulationService)).build();
     }
 
     @Test
