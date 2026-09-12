@@ -17,9 +17,10 @@ import com.example.backend.entity.Simulation;
 import com.example.backend.entity.SimulationRun;
 import com.example.backend.entity.SimulationRunStatus;
 import com.example.backend.entity.SimulationStatus;
-import com.example.backend.entity.SolverType;
 import com.example.backend.entity.SolverVersion;
 import com.example.backend.entity.Snapshot;
+import com.example.backend.entity.ModuleReleaseStatus;
+import com.example.backend.entity.TopicModuleRelease;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ApiException;
 import com.example.backend.physics.model.SolverInput;
@@ -33,7 +34,6 @@ import com.example.backend.physics.solver.NumericalSolverRegistry;
 import com.example.backend.repository.SimulationRepository;
 import com.example.backend.repository.SimulationRunRepository;
 import com.example.backend.repository.SnapshotRepository;
-import com.example.backend.repository.SolverVersionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -46,7 +46,6 @@ public class PhysicsSimulationRunService {
     private final SimulationRepository simulationRepository;
     private final SimulationRunRepository runRepository;
     private final SnapshotRepository snapshotRepository;
-    private final SolverVersionRepository solverVersionRepository;
     private final CurrentUserService currentUserService;
     private final NumericalSolverRegistry numericalRegistry;
     private final SimulationParameterPolicy parameterPolicy;
@@ -65,7 +64,7 @@ public class PhysicsSimulationRunService {
         SolverInput baseInput = readBaseInput(simulation);
         SolverInput input = parameterPolicy.apply(baseInput, request);
         NumericalSolver solver = numericalRegistry.require(input.archetype());
-        SolverVersion solverVersion = resolveSolverVersion(simulation, solver);
+        SolverVersion solverVersion = requireApprovedSolverVersion(simulation, solver);
         SimulationRun run = startRun(simulation, solverVersion, input);
         long startedNanos = System.nanoTime();
 
@@ -121,21 +120,19 @@ public class PhysicsSimulationRunService {
         }
     }
 
-    private SolverVersion resolveSolverVersion(Simulation simulation, NumericalSolver solver) {
-        SolverVersion validatedVersion = simulation.getValidationRun().getNumericalSolverVersion();
-        if (validatedVersion.getVersion().equals(solver.version())) {
-            return validatedVersion;
+    private SolverVersion requireApprovedSolverVersion(Simulation simulation, NumericalSolver solver) {
+        TopicModuleRelease release = simulation.getValidationRun().getModuleRelease();
+        if (release == null || release.getStatus() != ModuleReleaseStatus.APPROVED) {
+            throw new ApiException(HttpStatus.CONFLICT,
+                    "Simulation module release is not approved for new runs");
         }
-        return solverVersionRepository.findByArchetypeAndSolverTypeAndVersion(
-                solver.archetype(), SolverType.NUMERICAL, solver.version()).orElseGet(() -> {
-                    SolverVersion version = new SolverVersion();
-                    version.setArchetype(solver.archetype());
-                    version.setSolverType(SolverType.NUMERICAL);
-                    version.setVersion(solver.version());
-                    version.setImplementationClass(solver.getClass().getName());
-                    version.setActive(true);
-                    return solverVersionRepository.save(version);
-                });
+        SolverVersion approvedVersion = release.getNumericalSolverVersion();
+        if (approvedVersion.getArchetype() != simulation.getValidationRun().getArchetype()
+                || !approvedVersion.getVersion().equals(solver.version())) {
+            throw new ApiException(HttpStatus.CONFLICT,
+                    "The approved numerical solver implementation is not available; create and approve a new release");
+        }
+        return approvedVersion;
     }
 
     private SimulationRun startRun(Simulation simulation, SolverVersion solverVersion, SolverInput input) {

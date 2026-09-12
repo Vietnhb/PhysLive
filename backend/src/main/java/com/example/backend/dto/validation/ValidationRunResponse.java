@@ -24,6 +24,8 @@ public record ValidationRunResponse(
         String schemaVersion,
         String numericalSolverVersion,
         String referenceSolverVersion,
+        UUID moduleReleaseId,
+        String moduleReleaseVersion,
         Instant startedAt,
         Instant completedAt,
         Long executionTimeMs,

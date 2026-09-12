@@ -79,6 +79,7 @@ class ValidationApiIntegrationTest {
                 mapper.createObjectNode().put("finalPosition", 0),
                 mapper.createObjectNode(), "1.0",
                 "uniform-motion-numerical-v1", "uniform-motion-reference-v1",
+                UUID.randomUUID(), "kinematics-uniform-v1",
                 Instant.parse("2026-09-12T00:00:00Z"), Instant.parse("2026-09-12T00:00:00.010Z"),
                 10L, null);
     }

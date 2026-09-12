@@ -10,10 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.validation.ValidationRunResponse;
-import com.example.backend.entity.SchemaVersion;
-import com.example.backend.entity.SolverType;
-import com.example.backend.entity.SolverVersion;
 import com.example.backend.entity.Specification;
+import com.example.backend.entity.TopicModuleRelease;
 import com.example.backend.entity.User;
 import com.example.backend.entity.ValidationRun;
 import com.example.backend.entity.ValidationRunStatus;
@@ -28,8 +26,6 @@ import com.example.backend.physics.solver.NumericalSolverRegistry;
 import com.example.backend.physics.solver.ReferenceSolver;
 import com.example.backend.physics.solver.ReferenceSolverRegistry;
 import com.example.backend.physics.validation.ResultComparator;
-import com.example.backend.repository.SchemaVersionRepository;
-import com.example.backend.repository.SolverVersionRepository;
 import com.example.backend.repository.SpecificationRepository;
 import com.example.backend.repository.ValidationRunRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,8 +38,6 @@ public class PhysicsValidationService {
 
     private final SpecificationRepository specificationRepository;
     private final ValidationRunRepository validationRunRepository;
-    private final SchemaVersionRepository schemaVersionRepository;
-    private final SolverVersionRepository solverVersionRepository;
     private final CurrentUserService currentUserService;
     private final SpecificationReadinessChecker readinessChecker;
     private final SpecificationToSolverInputAdapter adapter;
@@ -51,6 +45,7 @@ public class PhysicsValidationService {
     private final ReferenceSolverRegistry referenceRegistry;
     private final ResultComparator comparator;
     private final ObjectMapper objectMapper;
+    private final TopicModuleReleaseService releaseService;
 
     @Transactional
     public ValidationRunResponse validate(UUID specificationId) {
@@ -67,7 +62,10 @@ public class PhysicsValidationService {
         SolverInput input = adapter.convert(specification);
         NumericalSolver numericalSolver = numericalRegistry.require(input.archetype());
         ReferenceSolver referenceSolver = referenceRegistry.require(input.archetype());
-        ValidationRun run = startRun(specification, input, numericalSolver, referenceSolver);
+        TopicModuleRelease release = releaseService.requireApprovedCompatible(
+                input.archetype().topicCode(), input.schemaVersion(), input.archetype(),
+                numericalSolver.version(), referenceSolver.version());
+        ValidationRun run = startRun(specification, input, release);
         long startedNanos = System.nanoTime();
 
         try {
@@ -105,48 +103,18 @@ public class PhysicsValidationService {
     private ValidationRun startRun(
             Specification specification,
             SolverInput input,
-            NumericalSolver numericalSolver,
-            ReferenceSolver referenceSolver) {
+            TopicModuleRelease release) {
         ValidationRun run = new ValidationRun();
         run.setSpecification(specification);
-        run.setSchemaVersion(resolveSchemaVersion(input.schemaVersion()));
-        run.setNumericalSolverVersion(resolveSolverVersion(
-                input, SolverType.NUMERICAL, numericalSolver.version(), numericalSolver.getClass().getName()));
-        run.setReferenceSolverVersion(resolveSolverVersion(
-                input, SolverType.REFERENCE, referenceSolver.version(), referenceSolver.getClass().getName()));
+        run.setModuleRelease(release);
+        run.setSchemaVersion(release.getSchemaVersion());
+        run.setNumericalSolverVersion(release.getNumericalSolverVersion());
+        run.setReferenceSolverVersion(release.getReferenceSolverVersion());
         run.setArchetype(input.archetype());
         run.setStatus(ValidationRunStatus.RUNNING);
         run.setInputPayload(objectMapper.valueToTree(input));
         run.setStartedAt(Instant.now());
         return validationRunRepository.save(run);
-    }
-
-    private SchemaVersion resolveSchemaVersion(String version) {
-        return schemaVersionRepository.findByVersion(version).orElseGet(() -> {
-            SchemaVersion schema = new SchemaVersion();
-            schema.setVersion(version);
-            schema.setDescription("Automatically registered from a validated specification");
-            schema.setActive(true);
-            return schemaVersionRepository.save(schema);
-        });
-    }
-
-    private SolverVersion resolveSolverVersion(
-            SolverInput input,
-            SolverType type,
-            String version,
-            String implementationClass) {
-        return solverVersionRepository
-                .findByArchetypeAndSolverTypeAndVersion(input.archetype(), type, version)
-                .orElseGet(() -> {
-                    SolverVersion solver = new SolverVersion();
-                    solver.setArchetype(input.archetype());
-                    solver.setSolverType(type);
-                    solver.setVersion(version);
-                    solver.setImplementationClass(implementationClass);
-                    solver.setActive(true);
-                    return solverVersionRepository.save(solver);
-                });
     }
 
     private String safeFailureReason(RuntimeException exception) {
@@ -171,6 +139,8 @@ public class PhysicsValidationService {
                 run.getSchemaVersion().getVersion(),
                 run.getNumericalSolverVersion().getVersion(),
                 run.getReferenceSolverVersion().getVersion(),
+                run.getModuleRelease() == null ? null : run.getModuleRelease().getId(),
+                run.getModuleRelease() == null ? null : run.getModuleRelease().getReleaseVersion(),
                 run.getStartedAt(),
                 run.getCompletedAt(),
                 run.getExecutionTimeMs(),

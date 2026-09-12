@@ -55,4 +55,13 @@ public class TopicModuleRelease extends AuditedEntity {
     private Instant approvedAt;
 
     private Instant retiredAt;
+
+    @Column(name = "created_by", nullable = false)
+    private Integer createdBy;
+
+    @Column(name = "approved_by")
+    private Integer approvedBy;
+
+    @Column(name = "retired_by")
+    private Integer retiredBy;
 }
