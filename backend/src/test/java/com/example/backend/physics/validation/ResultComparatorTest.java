@@ -86,6 +86,27 @@ class ResultComparatorTest {
         assertThat(result.failureReason()).contains("Missing required output");
     }
 
+    @Test
+    void nearZeroReferenceUsesAbsoluteToleranceWithoutDividingByZero() {
+        ValidationResult result = comparator.compare(PhysicsArchetype.UNIFORM_MOTION,
+                scalarResult(SolverMethod.NUMERICAL, "finalPosition", "5E-10"),
+                scalarResult(SolverMethod.REFERENCE, "finalPosition", "0"));
+
+        assertThat(result.status()).isEqualTo(PhysicsValidationStatus.PASSED);
+        assertThat(result.absoluteErrors().get("finalPosition")).isEqualByComparingTo("5E-10");
+        assertThat(result.relativeErrors().get("finalPosition")).isEqualByComparingTo("0.5");
+    }
+
+    @Test
+    void nearZeroReferenceFailsOutsideAbsoluteTolerance() {
+        ValidationResult result = comparator.compare(PhysicsArchetype.UNIFORM_MOTION,
+                scalarResult(SolverMethod.NUMERICAL, "finalPosition", "2E-9"),
+                scalarResult(SolverMethod.REFERENCE, "finalPosition", "0"));
+
+        assertThat(result.status()).isEqualTo(PhysicsValidationStatus.FAILED);
+        assertThat(result.failureReason()).contains("finalPosition");
+    }
+
     private SolverResult scalarResult(SolverMethod method, String key, String value) {
         return new SolverResult(method, method.name().toLowerCase() + "-v1",
                 Map.of(key, decimal(value)), List.of());

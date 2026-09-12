@@ -44,4 +44,15 @@ class UnitNormalizerTest {
         assertThat(result.normalizedUnit()).isEqualTo("rad");
         assertThat(result.knownUnit()).isTrue();
     }
+
+    @Test
+    void recognizesUnicodeOhmAndSuperscriptAccelerationUnits() {
+        UnitNormalizer.NormalizedQuantity resistance = normalizer.normalize(new BigDecimal("10"), "\u03a9");
+        UnitNormalizer.NormalizedQuantity acceleration = normalizer.normalize(new BigDecimal("9.8"), "m/s\u00b2");
+
+        assertThat(resistance.normalizedUnit()).isEqualTo("ohm");
+        assertThat(resistance.knownUnit()).isTrue();
+        assertThat(acceleration.normalizedUnit()).isEqualTo("m/s2");
+        assertThat(acceleration.knownUnit()).isTrue();
+    }
 }
