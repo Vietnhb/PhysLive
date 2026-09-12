@@ -8,6 +8,9 @@ class UserModel {
   final bool? active;
   final String? institutionId;
   final DateTime? lastLogin;
+  final String? avatarUrl;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   UserModel({
     required this.id,
@@ -19,6 +22,9 @@ class UserModel {
     this.active,
     this.institutionId,
     this.lastLogin,
+    this.avatarUrl,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +40,13 @@ class UserModel {
       lastLogin: json['lastLogin'] != null
           ? DateTime.tryParse(json['lastLogin'].toString())
           : null,
+      avatarUrl: json['avatarUrl'] as String?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null,
     );
   }
 
@@ -48,6 +61,9 @@ class UserModel {
       'active': active,
       'institutionId': institutionId,
       'lastLogin': lastLogin?.toIso8601String(),
+      'avatarUrl': avatarUrl,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
