@@ -139,6 +139,28 @@ class PhysicsValidationServiceTest {
     }
 
     @Test
+    void persistsFailedDualValidationWithComparisonReason() {
+        prepareRunnableValidation();
+        SolverResult numerical = scalarResult(SolverMethod.NUMERICAL, "numerical-v1", "6.01");
+        SolverResult reference = scalarResult(SolverMethod.REFERENCE, "reference-v1", "6");
+        ValidationResult comparison = new ValidationResult(PhysicsValidationStatus.FAILED,
+                numerical, reference, Map.of("finalPosition", decimal("0.01")),
+                Map.of("finalPosition", decimal("0.0016666666666667")),
+                Map.of("finalPosition", new ComparisonTolerance(decimal("1E-9"), decimal("1E-9"))),
+                "Output 'finalPosition' exceeded tolerance");
+        when(numericalSolver.solve(input)).thenReturn(numerical);
+        when(referenceSolver.solve(input)).thenReturn(reference);
+        when(comparator.compare(input.archetype(), numerical, reference)).thenReturn(comparison);
+
+        ValidationRunResponse response = service.validate(specification.getId());
+
+        assertThat(response.status()).isEqualTo(ValidationRunStatus.FAILED);
+        assertThat(response.failureReason()).contains("finalPosition");
+        assertThat(response.absoluteErrors().get("finalPosition").decimalValue())
+                .isEqualByComparingTo("0.01");
+    }
+
+    @Test
     void refusesOfficialValidationWithoutCompatibleApprovedRelease() {
         when(currentUserService.requireCurrentUser()).thenReturn(owner);
         when(specificationRepository.findByIdAndSubmissionOwner(specification.getId(), owner))
