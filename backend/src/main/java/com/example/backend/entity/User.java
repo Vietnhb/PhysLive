@@ -59,7 +59,44 @@ public class User {
     @Column(name = "last_login")
     private OffsetDateTime lastLogin;
 
-    @ManyToOne
-    @JoinColumn(name = "role_id")
+    /**
+     * URL of the user's avatar image (nullable).
+     */
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    /**
+     * Creation timestamp (auto-set on insert).
+     */
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private OffsetDateTime createdAt;
+
+    /**
+     * Last modification timestamp (auto-updated on modification).
+     */
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "role_id", nullable = false)
     private Role role;
+
+    @jakarta.persistence.PrePersist
+    protected void onCreate() {
+        OffsetDateTime now = OffsetDateTime.now();
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        if (updatedAt == null) {
+            updatedAt = now;
+        }
+        if (active == null) {
+            active = true;
+        }
+    }
+
+    @jakarta.persistence.PreUpdate
+    protected void onUpdate() {
+        updatedAt = OffsetDateTime.now();
+    }
 }
