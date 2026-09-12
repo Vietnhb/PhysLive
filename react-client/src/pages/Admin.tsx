@@ -9,6 +9,19 @@ import {
   changeUserRoleApi,
 } from '../api/userApi';
 import { setAdminUsers, getAdminUsers } from '../mocks/mockUsers';
+import {
+  Users,
+  GraduationCap,
+  BookOpen,
+  ShieldCheck,
+  UserX,
+  Search,
+  RefreshCw,
+  UserPlus,
+  Eye,
+  RotateCcw,
+  ShieldAlert,
+} from 'lucide-react';
 
 export const Admin: React.FC = () => {
   const { currentUser } = useAuth();
@@ -217,7 +230,7 @@ export const Admin: React.FC = () => {
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-            <span style={{ fontSize: '24px' }}>⚡</span>
+            <ShieldAlert size={26} color="#dc2626" />
             <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>
               Quản Trị Người Dùng & Phân Quyền Hệ Thống (RBAC)
             </h1>
@@ -257,7 +270,8 @@ export const Admin: React.FC = () => {
               boxShadow: '0 2px 6px rgba(37,99,235,0.25)',
             }}
           >
-            <span>➕</span> Thêm tài khoản mới
+            <UserPlus size={15} strokeWidth={2.5} />
+            <span>Thêm tài khoản mới</span>
           </button>
           <button
             onClick={loadUsers}
@@ -270,10 +284,14 @@ export const Admin: React.FC = () => {
               fontSize: '13px',
               fontWeight: 600,
               cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
             }}
             title="Tải lại danh sách người dùng"
           >
-            🔄 Làm mới
+            <RefreshCw size={14} />
+            <span>Làm mới</span>
           </button>
         </div>
       </div>
@@ -281,23 +299,38 @@ export const Admin: React.FC = () => {
       {/* KPI Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
         <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>TỔNG NGƯỜI DÙNG</div>
+          <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Users size={14} />
+            <span>TỔNG NGƯỜI DÙNG</span>
+          </div>
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>{stats.total}</div>
         </div>
         <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 600 }}>👨‍🏫 GIÁO VIÊN</div>
+          <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <GraduationCap size={14} />
+            <span>GIÁO VIÊN</span>
+          </div>
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#2563eb', marginTop: '4px' }}>{stats.teachers}</div>
         </div>
         <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600 }}>🎒 HỌC SINH</div>
+          <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <BookOpen size={14} />
+            <span>HỌC SINH</span>
+          </div>
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#16a34a', marginTop: '4px' }}>{stats.students}</div>
         </div>
         <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '12px', color: '#9333ea', fontWeight: 600 }}>🔍 THẨM ĐỊNH</div>
+          <div style={{ fontSize: '12px', color: '#9333ea', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ShieldCheck size={14} />
+            <span>THẨM ĐỊNH</span>
+          </div>
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#9333ea', marginTop: '4px' }}>{stats.reviewers}</div>
         </div>
         <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '12px', color: '#dc2626', fontWeight: 600 }}>🚫 ĐÃ VÔ HIỆU HÓA</div>
+          <div style={{ fontSize: '12px', color: '#dc2626', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <UserX size={14} />
+            <span>ĐÃ VÔ HIỆU HÓA</span>
+          </div>
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#dc2626', marginTop: '4px' }}>{stats.disabled}</div>
         </div>
       </div>
@@ -317,14 +350,15 @@ export const Admin: React.FC = () => {
       >
         {/* Search Input */}
         <div style={{ flex: 1, position: 'relative' }}>
+          <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
-            placeholder="🔍 Tìm kiếm theo Họ tên, Email, Trường học..."
+            placeholder="Tìm kiếm theo Họ tên, Email, Trường học..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: '100%',
-              padding: '10px 14px',
+              padding: '10px 14px 10px 36px',
               borderRadius: '8px',
               border: '1px solid #cbd5e1',
               fontSize: '14px',
@@ -543,7 +577,7 @@ export const Admin: React.FC = () => {
                         <button
                           onClick={() => setViewingUser(u)}
                           style={{
-                            padding: '6px 10px',
+                            padding: '6px 12px',
                             backgroundColor: '#f1f5f9',
                             color: '#334155',
                             border: '1px solid #cbd5e1',
@@ -551,10 +585,14 @@ export const Admin: React.FC = () => {
                             fontSize: '12px',
                             fontWeight: 600,
                             cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
                           }}
                           title="Xem chi tiết hồ sơ tài khoản (View User)"
                         >
-                          👁️ Chi tiết
+                          <Eye size={13} />
+                          <span>Chi tiết</span>
                         </button>
 
                         {/* Disable / Restore Button */}
@@ -570,10 +608,14 @@ export const Admin: React.FC = () => {
                               fontSize: '12px',
                               fontWeight: 700,
                               cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
                             }}
                             title="Khôi phục tài khoản hoạt động bình thường (Restore User)"
                           >
-                            🔄 Mở khóa
+                            <RotateCcw size={13} />
+                            <span>Mở khóa</span>
                           </button>
                         ) : (
                           <button
@@ -588,10 +630,14 @@ export const Admin: React.FC = () => {
                               fontSize: '12px',
                               fontWeight: 700,
                               cursor: u.id === currentUser?.id ? 'not-allowed' : 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
                             }}
                             title={u.id === currentUser?.id ? 'Không thể tự khóa tài khoản của mình' : 'Vô hiệu hóa tài khoản (Disable User)'}
                           >
-                            🚫 Khóa
+                            <UserX size={13} />
+                            <span>Khóa</span>
                           </button>
                         )}
                       </div>

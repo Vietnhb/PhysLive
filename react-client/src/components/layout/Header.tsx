@@ -4,16 +4,32 @@ import { useAuth } from '../../context/AuthContext';
 import type { RoleType } from '../../types/database';
 import { RoleBadge } from '../common/RoleBadge';
 import { IS_MOCK_ENABLED } from '../../config/api';
+import {
+  Atom,
+  FlaskConical,
+  FileEdit,
+  Library as LibraryIcon,
+  Target,
+  Settings,
+  GraduationCap,
+  BookOpen,
+  ShieldCheck,
+  KeyRound,
+  LogOut,
+  LogIn,
+  UserPlus,
+  Zap,
+} from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { currentUser, isAuthenticated, switchRole, logout } = useAuth();
   const navigate = useNavigate();
 
-  const demoRoles: { role: RoleType; label: string; icon: string }[] = [
-    { role: 'TEACHER', label: 'Giáo viên', icon: '👨‍🏫' },
-    { role: 'STUDENT', label: 'Học sinh', icon: '🎒' },
-    { role: 'REVIEWER', label: 'Thẩm định', icon: '🔍' },
-    { role: 'ADMIN', label: 'Quản trị', icon: '⚡' },
+  const demoRoles: { role: RoleType; label: string; icon: React.ReactNode }[] = [
+    { role: 'TEACHER', label: 'Giáo viên', icon: <GraduationCap size={13} strokeWidth={2.5} /> },
+    { role: 'STUDENT', label: 'Học sinh', icon: <BookOpen size={13} strokeWidth={2.5} /> },
+    { role: 'REVIEWER', label: 'Thẩm định', icon: <ShieldCheck size={13} strokeWidth={2.5} /> },
+    { role: 'ADMIN', label: 'Quản trị', icon: <KeyRound size={13} strokeWidth={2.5} /> },
   ];
 
   const handleLogout = () => {
@@ -22,50 +38,80 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="studio-header">
+    <header
+      className="studio-header glass-panel"
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        backdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
+      }}
+    >
       {/* Brand Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <Link to="/" className="studio-brand">
-          <div className="studio-brand-badge">⚛️</div>
+        <Link to="/" className="studio-brand" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+          <div
+            className="studio-brand-badge"
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #2563eb, #06b6d4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)',
+            }}
+          >
+            <Atom size={22} className="spin-slow" strokeWidth={2.2} />
+          </div>
           <div>
-            <div className="studio-brand-name">PhysLive Studio</div>
-            <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 600, letterSpacing: '0.04em' }}>
-              INTERACTIVE PHYSICS PLATFORM
+            <div className="studio-brand-name" style={{ fontSize: '17px', fontWeight: 800, letterSpacing: '-0.02em', color: '#0f172a' }}>
+              PhysLive <span style={{ color: '#2563eb', fontSize: '13px', fontWeight: 700, backgroundColor: '#eff6ff', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>Studio</span>
+            </div>
+            <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              Interactive Physics Platform
             </div>
           </div>
         </Link>
 
         {/* Central Workspace Switcher Navigation Tabs */}
-        <nav className="studio-nav-tabs">
+        <nav className="studio-nav-tabs" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(241, 245, 249, 0.85)', padding: '4px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
           <NavLink
             to="/player"
             className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <span>🧪</span>
+            <FlaskConical size={14} strokeWidth={2.2} />
             <span>Phòng thí nghiệm (Player)</span>
           </NavLink>
 
           <NavLink
             to="/teacher/submit"
             className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <span>📝</span>
+            <FileEdit size={14} strokeWidth={2.2} />
             <span>Nộp đề & OCR</span>
           </NavLink>
 
           <NavLink
             to="/library"
             className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <span>📚</span>
+            <LibraryIcon size={14} strokeWidth={2.2} />
             <span>Thư viện chuyên đề</span>
           </NavLink>
 
           <NavLink
             to="/student/assignments"
             className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <span>🎯</span>
+            <Target size={14} strokeWidth={2.2} />
             <span>Thử thách dự đoán</span>
           </NavLink>
 
@@ -73,9 +119,9 @@ export const Header: React.FC = () => {
             <NavLink
               to="/admin"
               className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
-              style={{ color: '#dc2626', fontWeight: 700 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#dc2626', fontWeight: 700 }}
             >
-              <span>⚙️</span>
+              <Settings size={14} strokeWidth={2.2} />
               <span>Quản trị User</span>
             </NavLink>
           )}
@@ -88,15 +134,19 @@ export const Header: React.FC = () => {
           <span
             style={{
               fontSize: '11px',
-              padding: '3px 9px',
-              backgroundColor: '#fef3c7',
+              padding: '4px 8px',
+              backgroundColor: 'rgba(254, 243, 199, 0.9)',
               color: '#92400e',
               borderRadius: '6px',
               fontWeight: 700,
               border: '1px solid #fde68a',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
             }}
           >
-            ⚡ MOCK ON
+            <Zap size={12} strokeWidth={2.5} />
+            <span>MOCK ON</span>
           </span>
         )}
 
@@ -113,7 +163,7 @@ export const Header: React.FC = () => {
                 border: '1px solid #e2e8f0',
               }}
             >
-              <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, padding: '0 8px' }}>
+              <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, padding: '0 8px' }}>
                 Role:
               </span>
               {demoRoles.map((r) => {
@@ -131,11 +181,11 @@ export const Header: React.FC = () => {
                       fontSize: '12px',
                       fontWeight: isSelected ? 700 : 500,
                       cursor: 'pointer',
-                      boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                      boxShadow: isSelected ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
                       transition: 'all 0.15s ease',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px',
+                      gap: '5px',
                     }}
                   >
                     <span>{r.icon}</span>
@@ -155,7 +205,7 @@ export const Header: React.FC = () => {
                   gap: '8px',
                   textDecoration: 'none',
                   cursor: 'pointer',
-                  padding: '2px 6px',
+                  padding: '3px 8px',
                   borderRadius: '8px',
                   transition: 'background-color 0.15s ease',
                 }}
@@ -202,10 +252,14 @@ export const Header: React.FC = () => {
                   fontSize: '12px',
                   fontWeight: 600,
                   cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
                 }}
                 title="Đăng xuất khỏi hệ thống"
               >
-                Đăng xuất
+                <LogOut size={13} strokeWidth={2.2} />
+                <span>Đăng xuất</span>
               </button>
             </div>
           </>
@@ -223,9 +277,13 @@ export const Header: React.FC = () => {
                 fontSize: '13px',
                 fontWeight: 700,
                 textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              Đăng nhập
+              <LogIn size={14} strokeWidth={2.2} />
+              <span>Đăng nhập</span>
             </Link>
             <Link
               to="/signup"
@@ -238,10 +296,14 @@ export const Header: React.FC = () => {
                 fontSize: '13px',
                 fontWeight: 700,
                 textDecoration: 'none',
-                boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
+                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              Đăng ký
+              <UserPlus size={14} strokeWidth={2.2} />
+              <span>Đăng ký</span>
             </Link>
           </div>
         )}

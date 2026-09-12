@@ -2,6 +2,23 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { MOCK_SIMULATIONS } from '../../mocks/mockSimulations';
 import type { Simulation } from '../../types/database';
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  StepForward,
+  Sliders,
+  FileText,
+  Table as TableIcon,
+  Download,
+  Printer,
+  Sparkles,
+  Plus,
+  Activity,
+  Gauge,
+  Compass,
+  Atom,
+} from 'lucide-react';
 
 export const SimulationPlayerPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -463,7 +480,8 @@ export const SimulationPlayerPage: React.FC = () => {
                 gap: '6px',
               }}
             >
-              <span>➕</span> Nộp bài toán mới (AI OCR)
+              <Plus size={15} strokeWidth={2.5} />
+              <span>Nộp bài toán mới (AI OCR)</span>
             </button>
           </div>
         </div>
@@ -476,9 +494,9 @@ export const SimulationPlayerPage: React.FC = () => {
         {/* FORMULA HERO BAR */}
         <div className="formula-hero-bar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <span style={{ fontSize: '16px' }}>⚛️</span>
+            <Atom size={20} color="#38bdf8" strokeWidth={2.2} />
             <div>
-              <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>CÔNG THỨC THỜI GIAN THỰC (DYNAMIC FORMULA)</div>
+              <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 700, letterSpacing: '0.04em' }}>CÔNG THỨC THỜI GIAN THỰC (DYNAMIC FORMULA)</div>
               <div className="formula-latex-text">
                 {currentSim.id === 'sim-car-brake-003'
                   ? `v(t) = ${carV0} - ${Math.abs(carA)}·t (m/s)  |  s(t) = ${carV0}·t - ${(Math.abs(carA) / 2).toFixed(1)}·t²`
@@ -494,17 +512,21 @@ export const SimulationPlayerPage: React.FC = () => {
             <button
               onClick={handleReset}
               style={{
-                padding: '5px 10px',
+                padding: '6px 12px',
                 borderRadius: '6px',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 color: '#ffffff',
                 fontSize: '11px',
-                fontWeight: 600,
+                fontWeight: 700,
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
               }}
             >
-              Reset View ⟲
+              <RotateCcw size={12} />
+              <span>Reset View</span>
             </button>
           </div>
         </div>
@@ -524,8 +546,9 @@ export const SimulationPlayerPage: React.FC = () => {
               className="play-round-btn"
               onClick={() => setIsPlaying(!isPlaying)}
               title={isPlaying ? 'Tạm dừng' : 'Chạy mô phỏng'}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              {isPlaying ? '⏸' : '▶'}
+              {isPlaying ? <Pause size={16} fill="#ffffff" /> : <Play size={16} fill="#ffffff" style={{ marginLeft: '2px' }} />}
             </button>
 
             <button
@@ -534,13 +557,15 @@ export const SimulationPlayerPage: React.FC = () => {
                 background: 'transparent',
                 border: 'none',
                 color: '#94a3b8',
-                fontSize: '18px',
                 cursor: 'pointer',
                 padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
               title="Đặt lại từ đầu"
             >
-              ↺
+              <RotateCcw size={16} />
             </button>
 
             {/* Scrubber Range */}
@@ -569,15 +594,19 @@ export const SimulationPlayerPage: React.FC = () => {
                 background: 'rgba(255, 255, 255, 0.1)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 color: '#ffffff',
-                padding: '4px 8px',
+                padding: '5px 10px',
                 borderRadius: '6px',
                 fontSize: '11px',
                 fontWeight: 700,
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
               }}
               title="Bước tới 0.1 giây"
             >
-              +0.1s ⏭
+              <StepForward size={13} />
+              <span>+0.1s</span>
             </button>
 
             {/* Speed Selector */}
@@ -607,12 +636,18 @@ export const SimulationPlayerPage: React.FC = () => {
         {/* REAL-TIME METRICS DOCK DƯỚI CHÂN CANVAS */}
         <div className="realtime-metrics-dock">
           <div className="metric-pill">
-            <div className="metric-label">⏱️ THỜI GIAN THỰC (t)</div>
+            <div className="metric-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Activity size={12} color="#94a3b8" />
+              <span>THỜI GIAN THỰC (t)</span>
+            </div>
             <div className="metric-value">{currentTime.toFixed(2)} s</div>
           </div>
 
           <div className="metric-pill">
-            <div className="metric-label">🚀 VẬN TỐC HIỆN THỜI (v)</div>
+            <div className="metric-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Gauge size={12} color="#94a3b8" />
+              <span>VẬN TỐC HIỆN THỜI (v)</span>
+            </div>
             <div className="metric-value">
               {currentSim.id === 'sim-car-brake-003'
                 ? `${Math.max(0, carV0 + carA * currentTime).toFixed(2)} m/s`
@@ -621,7 +656,10 @@ export const SimulationPlayerPage: React.FC = () => {
           </div>
 
           <div className="metric-pill">
-            <div className="metric-label">📍 TOẠ ĐỘ VẬT THỂ (x, y)</div>
+            <div className="metric-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Compass size={12} color="#94a3b8" />
+              <span>TOẠ ĐỘ VẬT THỂ (x, y)</span>
+            </div>
             <div className="metric-value">
               {currentSim.id === 'sim-car-brake-003'
                 ? `x = ${(carV0 * currentTime + 0.5 * carA * currentTime * currentTime).toFixed(1)} m`
@@ -630,7 +668,10 @@ export const SimulationPlayerPage: React.FC = () => {
           </div>
 
           <div className="metric-pill">
-            <div className="metric-label">🏁 KẾT QUẢ CỰC ĐẠI</div>
+            <div className="metric-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Sparkles size={12} color="#38bdf8" />
+              <span>KẾT QUẢ CỰC ĐẠI</span>
+            </div>
             <div className="metric-value" style={{ color: '#38bdf8' }}>
               {currentSim.id === 'sim-car-brake-003'
                 ? `s_dừng = ${sStopCar.toFixed(1)} m`
@@ -649,26 +690,34 @@ export const SimulationPlayerPage: React.FC = () => {
           <button
             className={`inspector-tab-btn ${activeTab === 'sliders' ? 'active' : ''}`}
             onClick={() => setActiveTab('sliders')}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
           >
-            🎛️ Tham số
+            <Sliders size={13} />
+            <span>Tham số</span>
           </button>
           <button
             className={`inspector-tab-btn ${activeTab === 'steps' ? 'active' : ''}`}
             onClick={() => setActiveTab('steps')}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
           >
-            📐 Lời giải
+            <FileText size={13} />
+            <span>Lời giải</span>
           </button>
           <button
             className={`inspector-tab-btn ${activeTab === 'table' ? 'active' : ''}`}
             onClick={() => setActiveTab('table')}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
           >
-            📊 Bảng số
+            <TableIcon size={13} />
+            <span>Bảng số</span>
           </button>
           <button
             className={`inspector-tab-btn ${activeTab === 'export' ? 'active' : ''}`}
             onClick={() => setActiveTab('export')}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
           >
-            📥 Xuất
+            <Download size={13} />
+            <span>Xuất</span>
           </button>
         </div>
 
@@ -1115,7 +1164,8 @@ export const SimulationPlayerPage: React.FC = () => {
                   gap: '8px',
                 }}
               >
-                📄 Xuất các bước tính toán (.TXT)
+                <FileText size={15} />
+                <span>Xuất các bước tính toán (.TXT)</span>
               </button>
 
               {/* Tải JSON Replay Specification */}
@@ -1151,7 +1201,8 @@ export const SimulationPlayerPage: React.FC = () => {
                   gap: '8px',
                 }}
               >
-                📥 Tải JSON Replay Specification
+                <Download size={15} />
+                <span>Tải JSON Replay Specification</span>
               </button>
 
               {/* In báo cáo / Lưu PDF */}
@@ -1173,7 +1224,8 @@ export const SimulationPlayerPage: React.FC = () => {
                   boxShadow: '0 2px 6px rgba(37, 99, 235, 0.25)',
                 }}
               >
-                🖨️ In / Lưu PDF báo cáo thực nghiệm
+                <Printer size={15} />
+                <span>In / Lưu PDF báo cáo thực nghiệm</span>
               </button>
             </div>
           )}
