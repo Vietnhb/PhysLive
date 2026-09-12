@@ -14,6 +14,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(error);
     }
 
+    @ExceptionHandler(InvalidPhysicsInputException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPhysicsInput(InvalidPhysicsInputException ex) {
+        ErrorResponse error = new ErrorResponse(422, ex.getMessage());
+        return ResponseEntity.unprocessableEntity().body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllException(Exception ex) {
         ErrorResponse error = new ErrorResponse(500, "Internal server error");

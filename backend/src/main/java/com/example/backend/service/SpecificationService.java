@@ -1,7 +1,6 @@
 package com.example.backend.service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +35,7 @@ public class SpecificationService {
     private final ReviewerDecisionRepository decisionRepository;
     private final CurrentUserService currentUserService;
     private final ProblemResponseMapper mapper;
+    private final SpecificationReadinessChecker readinessChecker;
 
     @Transactional(readOnly = true)
     public SpecificationResponse get(UUID id) {
@@ -84,16 +84,7 @@ public class SpecificationService {
     @Transactional(readOnly = true)
     public ValidationReadinessResponse readiness(UUID id) {
         Specification specification = requireOwnedSpecification(id);
-        List<String> blockers = new ArrayList<>();
-        if (specification.getConfirmationState() == ConfirmationState.UNRESOLVED) {
-            blockers.add("Unresolved ambiguity cases remain");
-        }
-        if (!StringUtils.hasText(specification.getTopic())) {
-            blockers.add("Topic is missing");
-        }
-        if (specification.getQuantities() == null || specification.getQuantities().isEmpty()) {
-            blockers.add("No physical quantities were extracted");
-        }
+        List<String> blockers = readinessChecker.blockers(specification);
         return new ValidationReadinessResponse(specification.getId(), blockers.isEmpty(), List.copyOf(blockers));
     }
 
