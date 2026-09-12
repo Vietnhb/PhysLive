@@ -25,7 +25,7 @@ public class SwaggerConfig {
                 return new OpenAPI()
                                 .info(new Info()
                                                 .title("PhysLive API")
-                                                .description("Backend API cho nền tảng mô phỏng vật lý tương tác PhysLive. ")
+                                                .description("Backend API cho PhysLive System. ")
                                                 .version("v1.0")
                                                 .contact(new Contact()
                                                                 .name("PhysLive Team")
