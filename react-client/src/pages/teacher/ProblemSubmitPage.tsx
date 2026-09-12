@@ -3,6 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { MOCK_LESSONS } from '../../mocks/mockTaxonomy';
 import { MOCK_PROBLEMS } from '../../mocks/mockProblems';
 import type { AmbiguityFlag, ExtractedQuantity } from '../../types/database';
+import {
+  FileEdit,
+  Camera,
+  UploadCloud,
+  Sparkles,
+  AlertTriangle,
+  Play,
+  BookOpen,
+  CheckCircle2,
+} from 'lucide-react';
 
 export const ProblemSubmitPage: React.FC = () => {
   const navigate = useNavigate();
@@ -141,7 +151,10 @@ export const ProblemSubmitPage: React.FC = () => {
           {/* Lesson Selection */}
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
-              📚 Liên kết phân cấp học liệu (Curriculum Taxonomy)
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <BookOpen size={15} />
+                <span>Liên kết phân cấp học liệu (Curriculum Taxonomy)</span>
+              </span>
             </label>
             <select
               value={selectedLesson}
@@ -177,9 +190,13 @@ export const ProblemSubmitPage: React.FC = () => {
                 fontWeight: 600,
                 fontSize: '13px',
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              ✍️ Nhập văn bản / Dán đề
+              <FileEdit size={14} />
+              <span>Nhập văn bản / Dán đề</span>
             </button>
             <button
               onClick={() => setInputType('image')}
@@ -192,9 +209,13 @@ export const ProblemSubmitPage: React.FC = () => {
                 fontWeight: 600,
                 fontSize: '13px',
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              📷 Tải ảnh bài tập (OCR)
+              <Camera size={14} />
+              <span>Tải ảnh bài tập (OCR)</span>
             </button>
           </div>
 
@@ -214,7 +235,9 @@ export const ProblemSubmitPage: React.FC = () => {
                   setRawText('[OCR]: Một xe lăn khối lượng m = 2kg chuyển động trên dốc nghiêng 30 độ dài 10m.');
                 }}
               >
-                <div style={{ fontSize: '32px', marginBottom: '6px' }}>🖼️</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+                  <UploadCloud size={36} color="#2563eb" />
+                </div>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: '#1e40af' }}>
                   Kéo thả ảnh đề bài hoặc click để chọn ảnh (Hỗ trợ JPG, PNG)
                 </div>
@@ -301,9 +324,11 @@ export const ProblemSubmitPage: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
+                boxShadow: isAnalyzing ? 'none' : '0 4px 12px rgba(37, 99, 235, 0.25)',
               }}
             >
-              {isAnalyzing ? 'Đang trích xuất dữ liệu...' : '⚡ Phân tích bài toán (Understanding Engine)'}
+              <Sparkles size={16} />
+              <span>{isAnalyzing ? 'Đang trích xuất dữ liệu...' : 'Phân tích bài toán (Understanding Engine)'}</span>
             </button>
           </div>
         </div>
@@ -313,7 +338,7 @@ export const ProblemSubmitPage: React.FC = () => {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>
-                🔬 Đặc tả trích xuất (Specification JSON)
+                Đặc tả trích xuất (Specification JSON)
               </h3>
               <span style={{ fontSize: '12px', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
                 Archetype: KINEMATICS
@@ -376,8 +401,12 @@ export const ProblemSubmitPage: React.FC = () => {
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '18px' }}>{isAllAmbiguityResolved ? '✅' : '⚠️'}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      {isAllAmbiguityResolved ? (
+                        <CheckCircle2 size={22} color="#16a34a" />
+                      ) : (
+                        <AlertTriangle size={22} color="#dc2626" />
+                      )}
                       <div>
                         <div style={{ fontSize: '13px', fontWeight: 700, color: isAllAmbiguityResolved ? '#166534' : '#991b1b' }}>
                           {isAllAmbiguityResolved ? 'Tất cả dữ kiện đã rõ ràng!' : 'Có 1 dữ kiện mơ hồ cần xác nhận!'}
@@ -393,17 +422,17 @@ export const ProblemSubmitPage: React.FC = () => {
                     <button
                       onClick={() => setIsAmbiguityModalOpen(true)}
                       style={{
-                        padding: '6px 12px',
+                        padding: '6px 14px',
                         backgroundColor: isAllAmbiguityResolved ? '#ffffff' : '#dc2626',
                         color: isAllAmbiguityResolved ? '#166534' : '#ffffff',
                         border: isAllAmbiguityResolved ? '1px solid #86efac' : 'none',
                         borderRadius: '6px',
                         fontSize: '12px',
-                        fontWeight: 600,
+                        fontWeight: 700,
                         cursor: 'pointer',
                       }}
                     >
-                      {isAllAmbiguityResolved ? 'Xem lại lựa chọn' : 'Xác nhận ngay ⚡'}
+                      {isAllAmbiguityResolved ? 'Xem lại lựa chọn' : 'Xác nhận ngay'}
                     </button>
                   </div>
                 </div>
@@ -437,7 +466,8 @@ export const ProblemSubmitPage: React.FC = () => {
                 boxShadow: isAllAmbiguityResolved ? '0 4px 14px rgba(16, 185, 129, 0.3)' : 'none',
               }}
             >
-              <span>🚀</span> Khởi tạo phòng thí nghiệm mô phỏng (Interactive Player)
+              <Play size={16} fill="#ffffff" />
+              <span>Khởi tạo phòng thí nghiệm mô phỏng (Interactive Player)</span>
             </button>
             {!isAllAmbiguityResolved && (
               <div style={{ fontSize: '12px', color: '#ef4444', textAlign: 'center', marginTop: '8px', fontWeight: 600 }}>
@@ -488,10 +518,9 @@ export const ProblemSubmitPage: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '20px',
                 }}
               >
-                ⚠️
+                <AlertTriangle size={20} color="#dc2626" />
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
