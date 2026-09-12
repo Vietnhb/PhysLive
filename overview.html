@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PhysLive — Báo cáo Tổng quan Frontend Web (Sprint 1)</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --line: #e2e8f0;
+      --primary: #2563eb;
+      --primary-soft: #eff6ff;
+      --emerald: #10b981;
+      --emerald-soft: #ecfdf5;
+      --amber: #f59e0b;
+      --amber-soft: #fffbeb;
+      --cyan: #06b6d4;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+    }
+    .container {
+      width: min(1140px, calc(100% - 36px));
+      margin: 0 auto;
+      padding-bottom: 50px;
+    }
+    header {
+      margin: 28px 0 24px;
+      padding: 32px;
+      color: #ffffff;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #06b6d4 100%);
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 3.8vw, 36px);
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+    header p {
+      margin: 4px 0 0;
+      color: #e0f2fe;
+      font-size: 15px;
+      max-width: 750px;
+    }
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .pill {
+      padding: 6px 14px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 9999px;
+      color: #f8fafc;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .stat-number {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--primary);
+      margin: 4px 0;
+      font-family: 'Consolas', monospace;
+    }
+    .stat-desc {
+      font-size: 12px;
+      color: var(--emerald);
+      font-weight: 600;
+    }
+    .card {
+      padding: 26px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    h2 {
+      margin: 0 0 16px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+      font-size: 13.5px;
+    }
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+    th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    tr:last-child td { border-bottom: none; }
+    .badge-done {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: var(--emerald-soft);
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+    .code-tag {
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      background: #f1f5f9;
+      color: #2563eb;
+      font-weight: 700;
+    }
+    .demo-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .step-box {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .step-num {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .step-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .step-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+    .action-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+    .btn-secondary {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid var(--line);
+    }
+    @media (max-width: 840px) {
+      .grid-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 580px) {
+      .grid-stats { grid-template-columns: 1fr; }
+      header { padding: 22px; }
+      .demo-steps { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>PHYSLIVE — Báo cáo Tổng quan Frontend Web</h1>
+      <p>Nền tảng mô phỏng vật lý tương tác dành cho giáo viên và học sinh trung học phổ thông (Capstone FA26SE309)</p>
+      <div class="meta-bar">
+        <span class="pill">👨‍💻 Phụ trách: Nguyễn Thế Hùng (SE183807)</span>
+        <span class="pill">🔍 Reviewer: Võ Trần Tuấn Kiệt</span>
+        <span class="pill">⚡ Leader: Nguyễn Hoàng Bảo Việt</span>
+        <span class="pill">👨‍🏫 GVHD: Thầy Lâm Hữu Khánh Phương</span>
+        <span class="pill">🌿 Branch: feat/H01-H10-frontend-full</span>
+      </div>
+    </header>
+
+    <!-- STATS CARDS -->
+    <div class="grid-stats">
+      <div class="stat-card">
+        <div class="stat-label">Tiến độ Tasks H01 - H10</div>
+        <div class="stat-number">10/10</div>
+        <div class="stat-desc">✓ Hoàn thành 100% Sprint 1</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Thời gian Vite Build</div>
+        <div class="stat-number">692ms</div>
+        <div class="stat-desc">✓ 0 Errors • 0 Warnings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Mô hình Vật lý MVP</div>
+        <div class="stat-number">3 Models</div>
+        <div class="stat-desc">✓ Ném xiên • Xe phanh • Dốc nghiêng</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Phân cấp học liệu</div>
+        <div class="stat-number">4 Tầng</div>
+        <div class="stat-desc">✓ Topic → Module → Level → Lesson</div>
+      </div>
+    </div>
+
+    <!-- MAIN TASKS TABLE -->
+    <div class="card">
+      <h2>📋 Bảng chi tiết 10 Tasks phân công (Role Hùng)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã</th>
+              <th>Chức năng & Nghiệp vụ</th>
+              <th>Đường dẫn giao diện</th>
+              <th>Đặc điểm nổi bật</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="code-tag">H01</span></td>
+              <td><strong>App Shell & Role Routing</strong></td>
+              <td><code>/</code> (Dashboard)</td>
+              <td>Header Studio MathOS, Quick Role Switcher 1-click, Route Guard chặn 403.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+            <tr>
+              <td><span class="code-tag">H02</span></td>
+              <td><strong>Authentication & Profile</strong></td>
+              <td><code>/login</code> • <code>/profile</code></td>
+              <td>4 nút Đăng nhập nhanh Demo Presets, Form Đăng ký chọn role, Hồ sơ & Đổi mật khẩu.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+            <tr>
+              <td><span class="code-tag">H03</span></td>
+              <td><strong>Teacher Submit UI</strong></td>
+              <td><code>/teacher/submit</code></td>
+              <td>Nhập Text, Dán, Kéo thả ảnh (OCR dropzone), thanh tiến trình Understanding Engine, sửa văn bản sau OCR.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+            <tr>
+              <td><span class="code-tag">H04</span></td>
+              <td><strong>Ambiguity Confirmation</strong></td>
+              <td>Modal trong <code>/teacher/submit</code></td>
+              <td>Phát hiện dữ liệu mơ hồ (góc ném lên/xuống, ma sát), khoá tạo mô phỏng nếu chưa giải quyết.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+            <tr>
+              <td><span class="code-tag">H05</span></td>
+              <td><strong>Interactive Player (Lõi)</strong></td>
+              <td><code>/player</code></td>
+              <td>Bố cục 3-Pane Studio, Formula Live Bar động, Canvas toạ độ Grid vẽ vector v & a, vệt bánh xe phanh, thanh Sliders thời gian thực.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+            <tr>
+              <td><span class="code-tag">H06</span></td>
+              <td><strong>Library & Drafts</strong></td>
+              <td><code>/library</code></td>
+              <td>Thư viện mô phỏng cá nhân/lớp học, lưu bản nháp (Draft), lọc theo chủ đề và tìm kiếm.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+            <tr>
+              <td><span class="code-tag">H07</span></td>
+              <td><strong>Assignment & Student Flow</strong></td>
+              <td><code>/assignments</code><br/><code>/student/assignments</code></td>
+              <td>Giáo viên giao bài theo lớp kèm ghi chú bài trước; Học sinh bắt buộc dự đoán trước khi unlock mô phỏng, đối chiếu sai số thực nghiệm.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+            <tr>
+              <td><span class="code-tag">H08</span></td>
+              <td><strong>Export Features</strong></td>
+              <td>Tab "Xuất" trong <code>/player</code></td>
+              <td>Xuất các bước tính toán (.MD / .TXT) theo lưu ý Thầy Phương, xuất JSON Replay, In/Lưu PDF báo cáo.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+            <tr>
+              <td><span class="code-tag">H09</span></td>
+              <td><strong>Testing & Clean Code</strong></td>
+              <td>Toàn bộ source code</td>
+              <td>TypeScript strict mode, tách module độc lập, build sạch sẽ 0 lỗi, responsive mượt mà.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+            <tr>
+              <td><span class="code-tag">H10</span></td>
+              <td><strong>Curriculum Taxonomy</strong></td>
+              <td>Lọc trong <code>/library</code> & submit</td>
+              <td>Chuẩn 4 tầng: Topic (SGK 10 & 11) → Module → Level → ClassLesson kèm teacher_id.</td>
+              <td><span class="badge-done">Hoàn thành 100%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DEMO GUIDE FOR REVIEWERS -->
+    <div class="card">
+      <h2>🚀 Kịch bản Demo 5 bước dành cho Leader & Reviewer</h2>
+      <div class="demo-steps">
+        <div class="step-box">
+          <div class="step-num">Bước 01</div>
+          <div class="step-title">Chuyển vai trò Demo</div>
+          <div class="step-desc">Nhìn lên góc trên thanh Header, click các nút chuyển nhanh giữa <strong>Giáo viên</strong> và <strong>Học sinh</strong> để kiểm tra phân quyền.</div>
+        </div>
+        <div class="step-box">
+          <div class="step-num">Bước 02</div>
+          <div class="step-title">Nộp bài & Thử cờ mơ hồ</div>
+          <div class="step-desc">Vào <strong>Nộp đề & OCR</strong> → bấm <em>Phân tích bài toán</em> → kiểm tra Modal cảnh báo dữ liệu mơ hồ chặn tạo mô phỏng.</div>
+        </div>
+        <div class="step-box">
+          <div class="step-num">Bước 03</div>
+          <div class="step-title">Khám phá Player Studio</div>
+          <div class="step-desc">Vào <strong>Phòng thí nghiệm</strong>: trải nghiệm mô phỏng ném xiên và xe phanh chậm dần đều, kéo các Sliders xem công thức nhảy tức thời.</div>
+        </div>
+        <div class="step-box">
+          <div class="step-num">Bước 04</div>
+          <div class="step-title">Giao & Làm bài tập dự đoán</div>
+          <div class="step-desc">Vào <strong>Quản trị giao bài</strong> (Teacher) → Chuyển sang Học sinh vào <strong>Thử thách dự đoán</strong> để nhập số liệu trước khi unlock chạy máy.</div>
+        </div>
+        <div class="step-box">
+          <div class="step-num">Bước 05</div>
+          <div class="step-title">Xuất dữ liệu & Báo cáo</div>
+          <div class="step-desc">Tại tab Xuất trong Player: tải file Markdown lời giải, file JSON Replay hoặc bấm In/Lưu PDF báo cáo thực nghiệm.</div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button onclick="window.print()" class="btn btn-secondary">🖨️ In / Lưu file PDF Báo cáo</button>
+        <a href="http://localhost:5173" target="_blank" class="btn btn-primary">⚛️ Khởi chạy PhysLive Web Studio ➔</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
