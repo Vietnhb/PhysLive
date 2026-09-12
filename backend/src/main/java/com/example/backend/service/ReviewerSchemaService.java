@@ -1,5 +1,7 @@
 package com.example.backend.service;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,13 +15,16 @@ import com.example.backend.dto.CreateSolverVersionRequest;
 import com.example.backend.dto.SchemaVersionResponse;
 import com.example.backend.dto.SolverVersionResponse;
 import com.example.backend.dto.TopicModuleReleaseResponse;
+import com.example.backend.entity.ModuleReleaseStatus;
 import com.example.backend.entity.SchemaVersion;
 import com.example.backend.entity.SolverVersion;
+import com.example.backend.entity.Topic;
 import com.example.backend.entity.TopicModuleRelease;
 import com.example.backend.exception.ApiException;
 import com.example.backend.repository.SchemaVersionRepository;
 import com.example.backend.repository.SolverVersionRepository;
 import com.example.backend.repository.TopicModuleReleaseRepository;
+import com.example.backend.repository.TopicRepository;
 
 import lombok.AllArgsConstructor;
 
@@ -34,6 +39,7 @@ public class ReviewerSchemaService {
     private final SchemaVersionRepository schemaVersionRepository;
     private final SolverVersionRepository solverVersionRepository;
     private final TopicModuleReleaseRepository moduleReleaseRepository;
+    private final TopicRepository topicRepository;
 
     // ------------------------------------------------------------------ //
     // Schema Versions
@@ -71,6 +77,7 @@ public class ReviewerSchemaService {
         entity.setName(request.getName().trim());
         entity.setDefinition(request.getDefinition());
         entity.setEnabled(request.getEnabled() != null ? request.getEnabled() : true);
+        entity.setActive(true);
         entity.setLifecycleStatus("DRAFT");
 
         schemaVersionRepository.save(entity);
@@ -112,6 +119,7 @@ public class ReviewerSchemaService {
         entity.setVersion(request.getVersion().trim());
         entity.setOutputDefinition(request.getOutputDefinition());
         entity.setLifecycleStatus("DRAFT");
+        entity.setActive(true);
 
         solverVersionRepository.save(entity);
         return toSolverResponse(entity);
@@ -135,7 +143,7 @@ public class ReviewerSchemaService {
     public List<TopicModuleReleaseResponse> getTopicModuleReleases(String topic) {
         List<TopicModuleRelease> list;
         if (topic != null && !topic.trim().isEmpty()) {
-            list = moduleReleaseRepository.findByTopic(topic.trim().toLowerCase());
+            list = moduleReleaseRepository.findByTopic_SlugIgnoreCase(topic.trim().toLowerCase());
         } else {
             list = moduleReleaseRepository.findAll();
         }
@@ -144,12 +152,24 @@ public class ReviewerSchemaService {
 
     @Transactional
     public TopicModuleReleaseResponse createModuleRelease(CreateModuleReleaseRequest request) {
+        String topicSlug = request.getTopic().trim().toLowerCase();
+        Topic topic = topicRepository.findBySlug(topicSlug)
+                .orElseGet(() -> {
+                    Topic t = new Topic();
+                    t.setName(request.getTopic().trim());
+                    t.setSlug(topicSlug);
+                    t.setEnabled(true);
+                    return topicRepository.save(t);
+                });
+
         TopicModuleRelease entity = new TopicModuleRelease();
-        entity.setTopic(request.getTopic().trim().toLowerCase());
-        entity.setModuleName(request.getModuleName().trim());
-        entity.setSchemaId(request.getSchemaId().trim());
-        entity.setSchemaVersion(request.getSchemaVersion().trim());
-        entity.setLifecycleStatus("DRAFT");
+        entity.setTopic(topic);
+        entity.setReleaseVersion(request.getSchemaVersion() != null ? request.getSchemaVersion().trim() : "v1.0.0");
+        entity.setStatus(ModuleReleaseStatus.DRAFT);
+        entity.setCreatedBy(1);
+
+        schemaVersionRepository.findByVersion(request.getSchemaVersion().trim())
+                .ifPresent(entity::setSchemaVersion);
 
         moduleReleaseRepository.save(entity);
         return toReleaseResponse(entity);
@@ -161,7 +181,12 @@ public class ReviewerSchemaService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy module release với id: " + id));
 
         validateLifecycleStatus(status);
-        entity.setLifecycleStatus(status.trim().toUpperCase());
+        entity.setStatus(ModuleReleaseStatus.valueOf(status.trim().toUpperCase()));
+        if (entity.getStatus() == ModuleReleaseStatus.APPROVED) {
+            entity.setApprovedAt(Instant.now());
+        } else if (entity.getStatus() == ModuleReleaseStatus.RETIRED) {
+            entity.setRetiredAt(Instant.now());
+        }
         moduleReleaseRepository.save(entity);
         return toReleaseResponse(entity);
     }
@@ -187,11 +212,11 @@ public class ReviewerSchemaService {
                 entity.getTopic(),
                 entity.getVersion(),
                 entity.getName(),
-                entity.getDefinition(),
+                entity.getDefinitionAsMap(),
                 entity.isEnabled(),
                 entity.getLifecycleStatus(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+                entity.getCreatedAt() != null ? entity.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                entity.getUpdatedAt() != null ? entity.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 
     private SolverVersionResponse toSolverResponse(SolverVersion entity) {
@@ -200,21 +225,21 @@ public class ReviewerSchemaService {
                 entity.getSolverId(),
                 entity.getSchemaId(),
                 entity.getVersion(),
-                entity.getOutputDefinition(),
+                entity.getOutputDefinitionAsMap(),
                 entity.getLifecycleStatus(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+                entity.getCreatedAt() != null ? entity.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                entity.getUpdatedAt() != null ? entity.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 
     private TopicModuleReleaseResponse toReleaseResponse(TopicModuleRelease entity) {
         return new TopicModuleReleaseResponse(
                 entity.getId(),
-                entity.getTopic(),
-                entity.getModuleName(),
-                entity.getSchemaId(),
-                entity.getSchemaVersion(),
-                entity.getLifecycleStatus(),
-                entity.getCreatedAt(),
-                entity.getUpdatedAt());
+                entity.getTopic() != null ? entity.getTopic().getSlug() : null,
+                entity.getModuleName() != null ? entity.getModuleName() : (entity.getTopic() != null ? entity.getTopic().getName() : null),
+                entity.getSchemaVersion() != null ? entity.getSchemaVersion().getSchemaId() : entity.getSchemaId(),
+                entity.getSchemaVersion() != null ? entity.getSchemaVersion().getVersion() : entity.getReleaseVersion(),
+                entity.getStatus() != null ? entity.getStatus().name() : null,
+                entity.getCreatedAt() != null ? entity.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                entity.getUpdatedAt() != null ? entity.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 }

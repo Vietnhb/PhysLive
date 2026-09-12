@@ -1,6 +1,8 @@
 package com.example.backend.service;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,6 +14,7 @@ import com.example.backend.dto.AmbiguityCaseResponse;
 import com.example.backend.dto.ReviewDecisionRequest;
 import com.example.backend.dto.ReviewerDecisionResponse;
 import com.example.backend.entity.AmbiguityCase;
+import com.example.backend.entity.AmbiguityStatus;
 import com.example.backend.entity.ReviewerDecision;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ApiException;
@@ -34,9 +37,11 @@ public class ReviewerAmbiguityService {
     private final UserRepository userRepository;
 
     public List<AmbiguityCaseResponse> getAmbiguityCases(String status) {
+
+
         List<AmbiguityCase> list;
         if (status != null && !status.trim().isEmpty()) {
-            list = ambiguityCaseRepository.findByStatus(status.trim().toUpperCase());
+            list = ambiguityCaseRepository.findByStatus(AmbiguityStatus.valueOf(status.trim().toUpperCase()));
         } else {
             list = ambiguityCaseRepository.findAllByOrderByCreatedAtDesc();
         }
@@ -64,20 +69,20 @@ public class ReviewerAmbiguityService {
 
         // 1. Create ReviewerDecision record
         ReviewerDecision decision = new ReviewerDecision();
-        decision.setAmbiguityCaseId(ambiguityCase.getId());
+        decision.setAmbiguityCase(ambiguityCase);
         decision.setActorId(actor.getId());
         decision.setActorRole(actor.getRole() != null ? actor.getRole().getName() : "REVIEWER");
         decision.setAnswer(request.getAnswer().trim());
         decision.setComment(request.getComment() != null ? request.getComment().trim() : null);
         decision.setDecisionState(state);
-        decision.setDecidedAt(OffsetDateTime.now());
+        decision.setDecidedAt(Instant.now());
 
         reviewerDecisionRepository.save(decision);
 
         // 2. Update AmbiguityCase status and resolution
-        ambiguityCase.setStatus(state);
+        ambiguityCase.setStatus(AmbiguityStatus.valueOf(state));
         ambiguityCase.setResolution(request.getAnswer().trim());
-        ambiguityCase.setResolvedAt(OffsetDateTime.now());
+        ambiguityCase.setResolvedAt(Instant.now());
         ambiguityCaseRepository.save(ambiguityCase);
 
         return toDecisionResponse(decision);
@@ -98,10 +103,10 @@ public class ReviewerAmbiguityService {
                 c.getQuestion(),
                 c.getOptions(),
                 c.getResolution(),
-                c.getResolvedAt(),
-                c.getStatus(),
-                c.getCreatedAt(),
-                c.getUpdatedAt());
+                c.getResolvedAt() != null ? c.getResolvedAt().atOffset(ZoneOffset.UTC) : null,
+                c.getStatus() != null ? c.getStatus().name() : null,
+                c.getCreatedAt() != null ? c.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                c.getUpdatedAt() != null ? c.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 
     private ReviewerDecisionResponse toDecisionResponse(ReviewerDecision d) {
@@ -113,7 +118,8 @@ public class ReviewerAmbiguityService {
                 d.getAnswer(),
                 d.getComment(),
                 d.getDecisionState(),
-                d.getDecidedAt(),
-                d.getCreatedAt());
+                d.getDecidedAt() != null ? d.getDecidedAt().atOffset(ZoneOffset.UTC) : null,
+                d.getCreatedAt() != null ? d.getCreatedAt().atOffset(ZoneOffset.UTC) : null);
     }
+
 }

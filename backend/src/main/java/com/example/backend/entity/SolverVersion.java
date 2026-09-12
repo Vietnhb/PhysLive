@@ -1,68 +1,88 @@
 package com.example.backend.entity;
 
-import java.time.OffsetDateTime;
 import java.util.Map;
-import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.example.backend.physics.model.PhysicsArchetype;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "solver_versions", schema = "public")
+@Table(
+        name = "solver_versions",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_solver_versions_archetype_type_version",
+                columnNames = { "archetype", "solver_type", "version" }),
+        indexes = {
+                @Index(name = "idx_solver_versions_lookup", columnList = "archetype,solver_type,active"),
+                @Index(name = "idx_solver_versions_active", columnList = "active")
+        })
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class SolverVersion {
+public class SolverVersion extends AuditedEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Column(name = "solver_id", nullable = false)
-    private String solverId;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 40)
+    private PhysicsArchetype archetype = PhysicsArchetype.UNIFORM_MOTION;
 
-    @Column(name = "schema_id", nullable = false)
-    private String schemaId;
 
-    @Column(name = "version", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "solver_type", nullable = false, length = 16)
+    private SolverType solverType = SolverType.NUMERICAL;
+
+    @Column(nullable = false, length = 64)
     private String version;
 
+    @Column(name = "implementation_class", length = 255)
+    private String implementationClass;
+
+    @Column(length = 64)
+    private String checksum;
+
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @Column(length = 64)
+    private String solverId;
+
+    @Column(length = 64)
+    private String schemaId;
+
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "output_definition", columnDefinition = "jsonb", nullable = false)
-    private Map<String, Object> outputDefinition;
+    @Column(name = "output_definition", columnDefinition = "jsonb")
+    private JsonNode outputDefinition;
 
-    @Column(name = "lifecycle_status", nullable = false)
-    private String lifecycleStatus = "DRAFT"; // DRAFT, APPROVED, RETIRED
+    @Column(length = 32)
+    private String lifecycleStatus = "APPROVED";
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = OffsetDateTime.now();
-        if (updatedAt == null) updatedAt = OffsetDateTime.now();
+    public void setOutputDefinition(Map<String, Object> map) {
+        if (map == null) this.outputDefinition = null;
+        else this.outputDefinition = MAPPER.valueToTree(map);
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+    public void setOutputDefinition(JsonNode node) {
+        this.outputDefinition = node;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getOutputDefinitionAsMap() {
+        if (outputDefinition == null) return null;
+        return MAPPER.convertValue(outputDefinition, Map.class);
     }
 }

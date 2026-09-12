@@ -1,70 +1,57 @@
 package com.example.backend.entity;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "reviewer_decisions", schema = "public")
+@Table(name = "reviewer_decisions")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class ReviewerDecision {
+public class ReviewerDecision extends AuditedEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ambiguity_case_id", nullable = false)
+    private AmbiguityCase ambiguityCase;
 
-    @Column(name = "ambiguity_case_id", nullable = false)
-    private UUID ambiguityCaseId;
-
-    @Column(name = "actor_id", nullable = false)
+    @Column(nullable = false)
     private Integer actorId;
 
-    @Column(name = "actor_role", nullable = false)
+    @Column(nullable = false, length = 24)
     private String actorRole;
 
-    @Column(name = "answer", nullable = false, columnDefinition = "text")
-    private String answer;
-
-    @Column(name = "comment", columnDefinition = "text")
-    private String comment;
-
-    @Column(name = "decision_state", nullable = false)
+    @Column(nullable = false, length = 24)
     private String decisionState;
 
-    @Column(name = "decided_at", nullable = false)
-    private OffsetDateTime decidedAt;
+    @Column(nullable = false, columnDefinition = "text")
+    private String answer;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    @Column(columnDefinition = "text")
+    private String comment;
 
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
+    @Column(nullable = false)
+    private Instant decidedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        if (decidedAt == null) decidedAt = OffsetDateTime.now();
-        if (createdAt == null) createdAt = OffsetDateTime.now();
-        if (updatedAt == null) updatedAt = OffsetDateTime.now();
+    public UUID getAmbiguityCaseId() {
+        return ambiguityCase != null ? ambiguityCase.getId() : null;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+    public void setDecidedAt(OffsetDateTime dateTime) {
+        this.decidedAt = dateTime != null ? dateTime.toInstant() : null;
+    }
+
+    public void setDecidedAt(Instant decidedAt) {
+        this.decidedAt = decidedAt;
     }
 }

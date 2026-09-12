@@ -1,6 +1,8 @@
 package com.example.backend.service;
 
+import java.time.ZoneOffset;
 import java.util.List;
+
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -80,6 +82,7 @@ public class ReviewerBenchmarkService {
     }
 
     private BenchmarkProblemResponse toProblemResponse(BenchmarkProblem p) {
+
         return new BenchmarkProblemResponse(
                 p.getId(),
                 p.getTopic(),
@@ -87,9 +90,10 @@ public class ReviewerBenchmarkService {
                 p.getSourceCategory(),
                 p.getProblemText(),
                 p.isActive(),
-                p.getCreatedAt(),
-                p.getUpdatedAt());
+                p.getCreatedAt() != null ? p.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                p.getUpdatedAt() != null ? p.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
+
 
     private BenchmarkAdjudicationResponse toAdjudicationResponse(BenchmarkAdjudication a) {
         return new BenchmarkAdjudicationResponse(

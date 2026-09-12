@@ -1,63 +1,81 @@
 package com.example.backend.entity;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "topic_module_releases", schema = "public")
+@Table(
+        name = "topic_module_releases",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_topic_module_releases_topic_version",
+                columnNames = { "topic_id", "release_version" }),
+        indexes = {
+                @Index(name = "idx_topic_module_releases_topic_status", columnList = "topic_id,status"),
+                @Index(name = "idx_topic_module_releases_status", columnList = "status")
+        })
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class TopicModuleRelease {
+public class TopicModuleRelease extends AuditedEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "topic_id", nullable = false)
+    private Topic topic;
 
-    @Column(name = "topic", nullable = false)
-    private String topic;
+    @Column(name = "release_version", nullable = false, length = 32)
+    private String releaseVersion;
 
-    @Column(name = "module_name", nullable = false)
-    private String moduleName;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "schema_version_id", nullable = false)
+    private SchemaVersion schemaVersion;
 
-    @Column(name = "schema_id", nullable = false)
-    private String schemaId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "numerical_solver_version_id", nullable = false)
+    private SolverVersion numericalSolverVersion;
 
-    @Column(name = "schema_version", nullable = false)
-    private String schemaVersion;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "reference_solver_version_id", nullable = false)
+    private SolverVersion referenceSolverVersion;
 
-    @Column(name = "lifecycle_status", nullable = false)
-    private String lifecycleStatus = "DRAFT"; // DRAFT, APPROVED, RETIRED
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private ModuleReleaseStatus status;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    private Instant approvedAt;
 
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
+    private Instant retiredAt;
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = OffsetDateTime.now();
-        if (updatedAt == null) updatedAt = OffsetDateTime.now();
+    @Column(name = "created_by", nullable = false)
+    private Integer createdBy;
+
+    @Column(name = "approved_by")
+    private Integer approvedBy;
+
+    @Column(name = "retired_by")
+    private Integer retiredBy;
+
+    public String getModuleName() {
+        return topic != null ? topic.getName() : null;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+    public String getSchemaId() {
+        return schemaVersion != null ? schemaVersion.getSchemaId() : null;
+    }
+
+    public String getLifecycleStatus() {
+        return status != null ? status.name() : null;
     }
 }

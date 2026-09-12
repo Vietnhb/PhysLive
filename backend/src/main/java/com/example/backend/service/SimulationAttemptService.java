@@ -1,6 +1,8 @@
 package com.example.backend.service;
 
+import java.time.ZoneOffset;
 import java.util.List;
+
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -57,6 +59,7 @@ public class SimulationAttemptService {
     }
 
     private SimulationRunResponse toResponse(SimulationRun run) {
+
         return SimulationRunResponse.builder()
                 .id(run.getId())
                 .simulationId(run.getSimulationId())
@@ -64,8 +67,9 @@ public class SimulationAttemptService {
                 .result(run.getResult())
                 .runType(run.getRunType())
                 .validationPassed(run.isValidationPassed())
-                .createdAt(run.getCreatedAt())
-                .updatedAt(run.getUpdatedAt())
+                .createdAt(run.getCreatedAt() != null ? run.getCreatedAt().atOffset(ZoneOffset.UTC) : null)
+                .updatedAt(run.getUpdatedAt() != null ? run.getUpdatedAt().atOffset(ZoneOffset.UTC) : null)
                 .build();
     }
 }
+
