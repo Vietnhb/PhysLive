@@ -64,7 +64,7 @@ public class AdminUserController {
             content = @Content(array = @ArraySchema(schema = @Schema(implementation = UserResponse.class))))
     @GetMapping
     public ResponseEntity<List<UserResponse>> getUsers(
-            @Parameter(description = "Từ khoá email cần tìm kiếm (tùy chọn, vd: 'gmail', 'viet', 'teacher@')")
+            @Parameter(description = "Từ khoá email cần tìm kiếm (tùy chọn, vd: 'gmail', 'teacher@', 'student')")
             @RequestParam(required = false) String email) {
         return ResponseEntity.ok(userService.getUsers(email));
     }
