@@ -20,9 +20,11 @@ class ApiConstants {
   static String get login => '$baseUrl/api/auth/login';
   static String get signup => '$baseUrl/api/auth/signup';
 
-  // User endpoints
+  // User self-service endpoints
   static String get userMe => '$baseUrl/api/user/me';
-  static String get users => '$baseUrl/api/user';
-  static String userById(int id) => '$baseUrl/api/user/$id';
-  static String userState(int id) => '$baseUrl/api/user/$id/state';
+
+  // Admin user management endpoints
+  static String get adminUsers => '$baseUrl/api/admin/users';
+  static String adminUserById(int id) => '$baseUrl/api/admin/users/$id';
+  static String adminUserState(int id) => '$baseUrl/api/admin/users/$id/state';
 }

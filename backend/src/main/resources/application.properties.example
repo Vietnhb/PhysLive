@@ -16,3 +16,6 @@ spring.sql.init.mode=always
 
 jwt.secret=${JWT_SECRET}
 jwt.expiration=86400000
+
+# CORS
+cors.allowed-origins=http://localhost:5173

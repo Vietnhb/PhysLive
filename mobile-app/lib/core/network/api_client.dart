@@ -84,12 +84,16 @@ class ApiClient {
       }
     }
 
-    // Try parsing backend JSON ErrorResponse
+    // Try parsing backend RFC 7807 ProblemDetail or JSON error
     String errorMessage = 'Yêu cầu thất bại (Mã lỗi $statusCode)';
     try {
       final json = jsonDecode(bodyString);
-      if (json is Map && json.containsKey('message')) {
-        errorMessage = json['message'].toString();
+      if (json is Map) {
+        if (json.containsKey('detail') && json['detail'] != null) {
+          errorMessage = json['detail'].toString();
+        } else if (json.containsKey('message') && json['message'] != null) {
+          errorMessage = json['message'].toString();
+        }
       }
     } catch (_) {
       if (bodyString.isNotEmpty) {

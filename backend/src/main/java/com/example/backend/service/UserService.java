@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.CreateUserRequest;
+import com.example.backend.dto.UpdateProfileRequest;
 import com.example.backend.dto.UpdateUserRequest;
 import com.example.backend.dto.UserResponse;
 import com.example.backend.entity.Role;
@@ -44,6 +45,37 @@ public class UserService {
     public UserResponse getCurrentUser(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng"));
+        return toResponse(user);
+    }
+
+    /**
+     * Updates personal profile of the currently authenticated user (Self-service).
+     *
+     * @param email   resolved from JWT subject
+     * @param request profile update fields
+     */
+    @Transactional
+    public UserResponse updateMyProfile(String email, UpdateProfileRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng"));
+
+        if (request.getFullName() != null && !request.getFullName().trim().isEmpty()) {
+            user.setFullName(request.getFullName().trim());
+        }
+
+        if (request.getInstitutionId() != null) {
+            user.setInstitutionId(request.getInstitutionId().trim());
+        }
+
+        if (request.getAvatarUrl() != null) {
+            user.setAvatarUrl(request.getAvatarUrl().trim());
+        }
+
+        if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        userRepository.save(user);
         return toResponse(user);
     }
 

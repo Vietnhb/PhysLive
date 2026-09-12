@@ -28,16 +28,17 @@ class UserViewModel extends BaseViewModel {
   Future<bool> updateProfile({
     String? fullName,
     String? institutionId,
+    String? avatarUrl,
     String? password,
   }) async {
     if (_profile == null) return false;
 
     setState(ViewState.loading);
     try {
-      _profile = await _userRepository.updateUser(
-        id: _profile!.id,
+      _profile = await _userRepository.updateMyProfile(
         fullName: fullName,
         institutionId: institutionId,
+        avatarUrl: avatarUrl,
         password: password,
       );
       setState(ViewState.success);
