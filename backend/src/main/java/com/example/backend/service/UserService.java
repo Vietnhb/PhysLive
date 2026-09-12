@@ -109,6 +109,7 @@ public class UserService {
         user.setEnabled(request.getEnabled() != null ? request.getEnabled() : true);
         user.setActive(true);
         user.setInstitutionId(request.getInstitutionId() != null ? request.getInstitutionId().trim() : null);
+        user.setAvatarUrl(request.getAvatarUrl() != null ? request.getAvatarUrl().trim() : null);
         user.setLastLogin(OffsetDateTime.now());
 
         userRepository.save(user);
@@ -141,6 +142,10 @@ public class UserService {
 
         if (request.getInstitutionId() != null) {
             user.setInstitutionId(request.getInstitutionId().trim());
+        }
+
+        if (request.getAvatarUrl() != null) {
+            user.setAvatarUrl(request.getAvatarUrl().trim());
         }
 
         if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
@@ -230,6 +235,9 @@ public class UserService {
                 user.isEnabled(),
                 user.getActive(),
                 user.getInstitutionId(),
-                user.getLastLogin());
+                user.getLastLogin(),
+                user.getAvatarUrl(),
+                user.getCreatedAt(),
+                user.getUpdatedAt());
     }
 }
