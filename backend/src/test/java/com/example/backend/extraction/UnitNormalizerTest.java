@@ -35,4 +35,13 @@ class UnitNormalizerTest {
         assertThat(result.normalizedUnit()).isEqualTo("custom-unit");
         assertThat(result.knownUnit()).isFalse();
     }
+
+    @Test
+    void convertsDegreesToRadians() {
+        UnitNormalizer.NormalizedQuantity result = normalizer.normalize(new BigDecimal("30"), "°");
+
+        assertThat(result.normalizedValue()).isEqualByComparingTo("0.52359878");
+        assertThat(result.normalizedUnit()).isEqualTo("rad");
+        assertThat(result.knownUnit()).isTrue();
+    }
 }

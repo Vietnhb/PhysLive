@@ -33,7 +33,10 @@ public class UnitNormalizer {
             Map.entry("km/h", new UnitDefinition("m/s", new BigDecimal("0.2777777778"))),
             Map.entry("m/s2", new UnitDefinition("m/s2", BigDecimal.ONE)),
             Map.entry("m/s^2", new UnitDefinition("m/s2", BigDecimal.ONE)),
-            Map.entry("m/s²", new UnitDefinition("m/s2", BigDecimal.ONE)));
+            Map.entry("m/s²", new UnitDefinition("m/s2", BigDecimal.ONE)),
+            Map.entry("1", new UnitDefinition("1", BigDecimal.ONE)),
+            Map.entry("rad", new UnitDefinition("rad", BigDecimal.ONE)),
+            Map.entry("deg", new UnitDefinition("rad", new BigDecimal("0.0174532925199433"))));
 
     public NormalizedQuantity normalize(BigDecimal value, String originalUnit) {
         String key = normalizeKey(originalUnit);
@@ -51,7 +54,7 @@ public class UnitNormalizer {
             return "";
         }
         String normalized = Normalizer.normalize(unit.trim().toLowerCase(), Normalizer.Form.NFKC)
-                .replace("°", "")
+                .replace("°", "deg")
                 .replace(" ", "")
                 .replace("²", "2")
                 .replace("^2", "2")
