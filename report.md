@@ -40,6 +40,13 @@ Frontend Web (`react-client`) đã hoàn thành **100% khung giao diện và lu�
   * Xem và cập nhật thông tin cá nhân, trường học, vai trò RBAC.
   * Form đổi mật khẩu (Mật khẩu cũ, mật khẩu mới, xác nhận).
   * Nút Đăng xuất an toàn (xoá Token và reset trạng thái người dùng).
+* **Trang Quản trị Người Dùng & Phân quyền RBAC (`/admin`)**:
+  * **List users**: Bảng danh sách toàn bộ tài khoản với đầy đủ thông tin (Họ tên, Email, Trường học, Vai trò, Trạng thái, Ngày tham gia). Kèm thanh tìm kiếm tức thì, bộ lọc theo vai trò (TEACHER, STUDENT, REVIEWER, ADMIN) và bộ lọc theo trạng thái (`active`, `disabled`), kèm 5 thẻ KPI thống kê tổng số lượng từng nhóm.
+  * **View user**: Modal xem chi tiết hồ sơ tài khoản (User ID UUID, ngày khởi tạo, lần cập nhật cuối, quyền hạn phân vai trò).
+  * **Disable user**: Nút Khóa tài khoản (chuyển sang trạng thái `disabled`, gắn badge đỏ, chặn không cho tự khóa tài khoản Admin của chính mình).
+  * **Restore user**: Nút Khôi phục tài khoản (chuyển trạng thái trở lại `active`, hiển thị badge xanh lá).
+  * **Change role**: Dropdown và Modal đổi vai trò RBAC tức thì cho từng tài khoản, lưu và đồng bộ state/localStorage/Backend API.
+  * **Create user**: Modal thêm người dùng mới nhanh chóng.
 * **Kiến trúc CSS Tinh gọn (Single Style Entrypoint)**:
   * Toàn bộ Style của hệ thống được quy hoạch duy nhất tại `src/styles/layout.css` và chỉ nạp 1 lần ở `src/main.tsx`.
   * Xoá bỏ hoàn toàn các file style rác cũ (`NavBar.css`, `Home.tsx`), chấm dứt triệt để tình trạng import style phân tán, lẫn lộn.
