@@ -2,7 +2,6 @@ package com.example.backend.service;
 
 import java.time.ZoneOffset;
 import java.util.List;
-
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -13,10 +12,10 @@ import com.example.backend.dto.AdjudicateBenchmarkRequest;
 import com.example.backend.dto.BenchmarkAdjudicationResponse;
 import com.example.backend.dto.BenchmarkProblemRequest;
 import com.example.backend.dto.BenchmarkProblemResponse;
-import com.example.backend.entity.BenchmarkAdjudication;
+import com.example.backend.entity.Adjudication;
 import com.example.backend.entity.BenchmarkProblem;
 import com.example.backend.exception.ApiException;
-import com.example.backend.repository.BenchmarkAdjudicationRepository;
+import com.example.backend.repository.AdjudicationRepository;
 import com.example.backend.repository.BenchmarkProblemRepository;
 
 import lombok.AllArgsConstructor;
@@ -29,7 +28,7 @@ import lombok.AllArgsConstructor;
 public class ReviewerBenchmarkService {
 
     private final BenchmarkProblemRepository problemRepository;
-    private final BenchmarkAdjudicationRepository adjudicationRepository;
+    private final AdjudicationRepository adjudicationRepository;
 
     public List<BenchmarkProblemResponse> getBenchmarkProblems(String topic) {
         List<BenchmarkProblem> list;
@@ -65,8 +64,8 @@ public class ReviewerBenchmarkService {
         BenchmarkProblem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy benchmark problem với id: " + problemId));
 
-        BenchmarkAdjudication adjudication = new BenchmarkAdjudication();
-        adjudication.setBenchmarkProblemId(problem.getId());
+        Adjudication adjudication = new Adjudication();
+        adjudication.setBenchmarkProblem(problem);
         adjudication.setReviewerReference(request.getReviewerReference().trim());
         adjudication.setDisagreementState(request.getDisagreementState().trim());
         adjudication.setResolvedSpecification(request.getResolvedSpecification());
@@ -82,7 +81,6 @@ public class ReviewerBenchmarkService {
     }
 
     private BenchmarkProblemResponse toProblemResponse(BenchmarkProblem p) {
-
         return new BenchmarkProblemResponse(
                 p.getId(),
                 p.getTopic(),
@@ -94,15 +92,14 @@ public class ReviewerBenchmarkService {
                 p.getUpdatedAt() != null ? p.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 
-
-    private BenchmarkAdjudicationResponse toAdjudicationResponse(BenchmarkAdjudication a) {
+    private BenchmarkAdjudicationResponse toAdjudicationResponse(Adjudication a) {
         return new BenchmarkAdjudicationResponse(
                 a.getId(),
                 a.getBenchmarkProblemId(),
                 a.getReviewerReference(),
                 a.getDisagreementState(),
-                a.getResolvedSpecification(),
-                a.getCreatedAt(),
-                a.getUpdatedAt());
+                a.getResolvedSpecificationAsMap(),
+                a.getCreatedAt() != null ? a.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                a.getUpdatedAt() != null ? a.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 }
