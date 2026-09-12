@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.simulation.SimulationResponse;
 import com.example.backend.entity.Simulation;
+import com.example.backend.entity.ModuleReleaseStatus;
 import com.example.backend.entity.SimulationStatus;
 import com.example.backend.entity.User;
 import com.example.backend.entity.ValidationRun;
@@ -59,6 +60,11 @@ public class PhysicsSimulationService {
     private void requirePassed(ValidationRun validation) {
         ValidationRunStatus status = validation.getStatus();
         if (status == ValidationRunStatus.PASSED) {
+            if (validation.getModuleRelease() == null
+                    || validation.getModuleRelease().getStatus() != ModuleReleaseStatus.APPROVED) {
+                throw new ApiException(HttpStatus.CONFLICT,
+                        "Validation module release is not approved; simulation creation is not allowed");
+            }
             return;
         }
         String reason = switch (status) {

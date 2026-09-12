@@ -2,6 +2,7 @@ package com.example.backend.security;
 
 import java.util.List;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,6 +31,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/module-releases/*/retire").hasRole("ADMIN")
+                        .requestMatchers("/api/module-releases/**").hasAnyRole("REVIEWER", "ADMIN")
                         .requestMatchers("/api/user/me").authenticated()
                         .requestMatchers("/api/user/all").hasRole("ADMIN")
                         .anyRequest().authenticated())

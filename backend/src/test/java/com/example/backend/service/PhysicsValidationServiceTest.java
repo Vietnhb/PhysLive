@@ -26,6 +26,7 @@ import com.example.backend.entity.SchemaVersion;
 import com.example.backend.entity.SolverType;
 import com.example.backend.entity.SolverVersion;
 import com.example.backend.entity.Specification;
+import com.example.backend.entity.TopicModuleRelease;
 import com.example.backend.entity.User;
 import com.example.backend.entity.ValidationRun;
 import com.example.backend.entity.ValidationRunStatus;
@@ -43,8 +44,6 @@ import com.example.backend.physics.solver.NumericalSolverRegistry;
 import com.example.backend.physics.solver.ReferenceSolver;
 import com.example.backend.physics.solver.ReferenceSolverRegistry;
 import com.example.backend.physics.validation.ResultComparator;
-import com.example.backend.repository.SchemaVersionRepository;
-import com.example.backend.repository.SolverVersionRepository;
 import com.example.backend.repository.SpecificationRepository;
 import com.example.backend.repository.ValidationRunRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,8 +53,6 @@ class PhysicsValidationServiceTest {
 
     @Mock private SpecificationRepository specificationRepository;
     @Mock private ValidationRunRepository validationRunRepository;
-    @Mock private SchemaVersionRepository schemaVersionRepository;
-    @Mock private SolverVersionRepository solverVersionRepository;
     @Mock private CurrentUserService currentUserService;
     @Mock private SpecificationReadinessChecker readinessChecker;
     @Mock private SpecificationToSolverInputAdapter adapter;
@@ -64,17 +61,19 @@ class PhysicsValidationServiceTest {
     @Mock private ResultComparator comparator;
     @Mock private NumericalSolver numericalSolver;
     @Mock private ReferenceSolver referenceSolver;
+    @Mock private TopicModuleReleaseService releaseService;
 
     private PhysicsValidationService service;
     private User owner;
     private Specification specification;
     private SolverInput input;
+    private TopicModuleRelease release;
 
     @BeforeEach
     void setUp() {
         service = new PhysicsValidationService(specificationRepository, validationRunRepository,
-                schemaVersionRepository, solverVersionRepository, currentUserService, readinessChecker,
-                adapter, numericalRegistry, referenceRegistry, comparator, new ObjectMapper());
+                currentUserService, readinessChecker, adapter, numericalRegistry, referenceRegistry,
+                comparator, new ObjectMapper(), releaseService);
         owner = new User();
         owner.setId(7);
         ProblemSubmission submission = new ProblemSubmission();
@@ -85,6 +84,7 @@ class PhysicsValidationServiceTest {
         input = new SolverInput(specification.getId(), "1.0", PhysicsArchetype.UNIFORM_MOTION,
                 Map.of("velocity", decimal("2"), "duration", decimal("3")),
                 Map.of("velocity", "m/s", "duration", "s"));
+        release = release();
     }
 
     @Test
@@ -139,6 +139,29 @@ class PhysicsValidationServiceTest {
     }
 
     @Test
+    void refusesOfficialValidationWithoutCompatibleApprovedRelease() {
+        when(currentUserService.requireCurrentUser()).thenReturn(owner);
+        when(specificationRepository.findByIdAndSubmissionOwner(specification.getId(), owner))
+                .thenReturn(Optional.of(specification));
+        when(readinessChecker.blockers(specification)).thenReturn(List.of());
+        when(adapter.convert(specification)).thenReturn(input);
+        when(numericalRegistry.require(input.archetype())).thenReturn(numericalSolver);
+        when(referenceRegistry.require(input.archetype())).thenReturn(referenceSolver);
+        when(numericalSolver.version()).thenReturn("numerical-v1");
+        when(referenceSolver.version()).thenReturn("reference-v1");
+        when(releaseService.requireApprovedCompatible(
+                "KINEMATICS", "1.0", PhysicsArchetype.UNIFORM_MOTION,
+                "numerical-v1", "reference-v1"))
+                .thenThrow(new ApiException(org.springframework.http.HttpStatus.CONFLICT,
+                        "No approved module release"));
+
+        assertThatThrownBy(() -> service.validate(specification.getId()))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("No approved");
+        verify(validationRunRepository, never()).save(any());
+    }
+
+    @Test
     void getUsesOwnerScopedRepositoryQuery() {
         ValidationRun run = runWithVersions();
         when(currentUserService.requireCurrentUser()).thenReturn(owner);
@@ -161,11 +184,9 @@ class PhysicsValidationServiceTest {
         when(referenceRegistry.require(input.archetype())).thenReturn(referenceSolver);
         when(numericalSolver.version()).thenReturn("numerical-v1");
         when(referenceSolver.version()).thenReturn("reference-v1");
-        when(schemaVersionRepository.findByVersion("1.0")).thenReturn(Optional.empty());
-        when(schemaVersionRepository.save(any(SchemaVersion.class))).thenAnswer(call -> call.getArgument(0));
-        when(solverVersionRepository.findByArchetypeAndSolverTypeAndVersion(any(), any(), any()))
-                .thenReturn(Optional.empty());
-        when(solverVersionRepository.save(any(SolverVersion.class))).thenAnswer(call -> call.getArgument(0));
+        when(releaseService.requireApprovedCompatible(
+                "KINEMATICS", "1.0", PhysicsArchetype.UNIFORM_MOTION,
+                "numerical-v1", "reference-v1")).thenReturn(release);
         when(validationRunRepository.save(any(ValidationRun.class))).thenAnswer(call -> {
             ValidationRun run = call.getArgument(0);
             if (run.getId() == null) {
@@ -188,7 +209,20 @@ class PhysicsValidationServiceTest {
         SolverVersion reference = version(SolverType.REFERENCE, "reference-v1");
         run.setNumericalSolverVersion(numerical);
         run.setReferenceSolverVersion(reference);
+        run.setModuleRelease(release);
         return run;
+    }
+
+    private TopicModuleRelease release() {
+        TopicModuleRelease result = new TopicModuleRelease();
+        result.setId(UUID.randomUUID());
+        result.setReleaseVersion("kinematics-uniform-v1");
+        SchemaVersion schema = new SchemaVersion();
+        schema.setVersion("1.0");
+        result.setSchemaVersion(schema);
+        result.setNumericalSolverVersion(version(SolverType.NUMERICAL, "numerical-v1"));
+        result.setReferenceSolverVersion(version(SolverType.REFERENCE, "reference-v1"));
+        return result;
     }
 
     private SolverVersion version(SolverType type, String value) {

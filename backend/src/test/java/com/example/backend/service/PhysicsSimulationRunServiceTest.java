@@ -25,12 +25,14 @@ import com.example.backend.entity.Simulation;
 import com.example.backend.entity.SimulationRun;
 import com.example.backend.entity.SimulationRunStatus;
 import com.example.backend.entity.SimulationStatus;
+import com.example.backend.entity.ModuleReleaseStatus;
 import com.example.backend.entity.SolverType;
 import com.example.backend.entity.SolverVersion;
 import com.example.backend.entity.Specification;
 import com.example.backend.entity.Snapshot;
 import com.example.backend.entity.User;
 import com.example.backend.entity.ValidationRun;
+import com.example.backend.entity.TopicModuleRelease;
 import com.example.backend.exception.ApiException;
 import com.example.backend.physics.model.PhysicsArchetype;
 import com.example.backend.physics.model.SimulationFrame;
@@ -46,7 +48,6 @@ import com.example.backend.physics.solver.NumericalSolverRegistry;
 import com.example.backend.repository.SimulationRepository;
 import com.example.backend.repository.SimulationRunRepository;
 import com.example.backend.repository.SnapshotRepository;
-import com.example.backend.repository.SolverVersionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +56,6 @@ class PhysicsSimulationRunServiceTest {
     @Mock private SimulationRepository simulationRepository;
     @Mock private SimulationRunRepository runRepository;
     @Mock private SnapshotRepository snapshotRepository;
-    @Mock private SolverVersionRepository solverVersionRepository;
     @Mock private CurrentUserService currentUserService;
     @Mock private NumericalSolverRegistry numericalRegistry;
     @Mock private SimulationParameterPolicy parameterPolicy;
@@ -72,7 +72,7 @@ class PhysicsSimulationRunServiceTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         service = new PhysicsSimulationRunService(simulationRepository, runRepository, snapshotRepository,
-                solverVersionRepository, currentUserService, numericalRegistry, parameterPolicy,
+                currentUserService, numericalRegistry, parameterPolicy,
                 payloadBuilder, objectMapper);
         owner = new User();
         owner.setId(5);
@@ -118,29 +118,16 @@ class PhysicsSimulationRunServiceTest {
     }
 
     @Test
-    void pinsNewSolverVersionOnRun() {
+    void blocksRunWhenLoadedSolverDoesNotMatchApprovedRelease() {
         prepareOwnedSimulation();
         when(parameterPolicy.apply(any(SolverInput.class), any())).thenReturn(baseInput);
         when(numericalRegistry.require(baseInput.archetype())).thenReturn(solver);
         when(solver.version()).thenReturn("numerical-v2");
-        when(solver.archetype()).thenReturn(PhysicsArchetype.UNIFORM_MOTION);
-        SolverVersion versionTwo = solverVersion("numerical-v2");
-        when(solverVersionRepository.findByArchetypeAndSolverTypeAndVersion(
-                PhysicsArchetype.UNIFORM_MOTION, SolverType.NUMERICAL, "numerical-v2"))
-                .thenReturn(Optional.of(versionTwo));
-        when(runRepository.save(any(SimulationRun.class))).thenAnswer(call -> {
-            SimulationRun run = call.getArgument(0);
-            if (run.getId() == null) run.setId(UUID.randomUUID());
-            return run;
-        });
-        SolverResult result = new SolverResult(SolverMethod.NUMERICAL, "numerical-v2",
-                Map.of("finalPosition", decimal("6")), List.of());
-        when(solver.solve(baseInput)).thenReturn(result);
-        when(payloadBuilder.build(baseInput, result)).thenReturn(artifacts());
 
-        SimulationRunResponse response = service.create(simulation.getId(), null);
-
-        assertThat(response.solverVersion()).isEqualTo("numerical-v2");
+        assertThatThrownBy(() -> service.create(simulation.getId(), null))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("new release");
+        verify(runRepository, never()).save(any());
     }
 
     @Test
@@ -203,6 +190,7 @@ class PhysicsSimulationRunServiceTest {
                 .thenReturn(Optional.of(run));
         when(snapshotRepository.findBySimulationRunIdOrderBySequenceNumberAsc(run.getId()))
                 .thenReturn(List.of(snapshot));
+        simulation.getValidationRun().getModuleRelease().setStatus(ModuleReleaseStatus.RETIRED);
 
         SimulationRunResponse response = service.get(run.getId());
         var snapshots = service.snapshots(run.getId());
@@ -228,6 +216,10 @@ class PhysicsSimulationRunServiceTest {
         validation.setSpecification(specification);
         validation.setArchetype(input.archetype());
         validation.setNumericalSolverVersion(solverVersion("numerical-v1"));
+        TopicModuleRelease release = new TopicModuleRelease();
+        release.setStatus(ModuleReleaseStatus.APPROVED);
+        release.setNumericalSolverVersion(validation.getNumericalSolverVersion());
+        validation.setModuleRelease(release);
         Simulation result = new Simulation();
         result.setId(UUID.randomUUID());
         result.setValidationRun(validation);

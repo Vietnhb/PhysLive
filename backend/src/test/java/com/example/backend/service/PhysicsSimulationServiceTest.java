@@ -20,6 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.backend.entity.ProblemSubmission;
+import com.example.backend.entity.ModuleReleaseStatus;
+import com.example.backend.entity.TopicModuleRelease;
 import com.example.backend.entity.Simulation;
 import com.example.backend.entity.SimulationStatus;
 import com.example.backend.entity.Specification;
@@ -59,6 +61,9 @@ class PhysicsSimulationServiceTest {
         validation.setSpecification(specification);
         validation.setArchetype(PhysicsArchetype.UNIFORM_MOTION);
         validation.setInputPayload(new ObjectMapper().createObjectNode().put("duration", 3));
+        TopicModuleRelease release = new TopicModuleRelease();
+        release.setStatus(ModuleReleaseStatus.APPROVED);
+        validation.setModuleRelease(release);
         when(currentUserService.requireCurrentUser()).thenReturn(owner);
     }
 
@@ -134,6 +139,19 @@ class PhysicsSimulationServiceTest {
 
         assertThat(result.created()).isFalse();
         assertThat(result.simulation().id()).isEqualTo(existing.getId());
+        verify(simulationRepository, never()).save(any());
+    }
+
+    @Test
+    void blocksPassedValidationWhoseReleaseWasRetired() {
+        validation.setStatus(ValidationRunStatus.PASSED);
+        validation.getModuleRelease().setStatus(ModuleReleaseStatus.RETIRED);
+        when(validationRunRepository.findOwnedForSimulationGate(validation.getId(), owner))
+                .thenReturn(Optional.of(validation));
+
+        assertThatThrownBy(() -> service.createFromValidation(validation.getId()))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("not approved");
         verify(simulationRepository, never()).save(any());
     }
 
