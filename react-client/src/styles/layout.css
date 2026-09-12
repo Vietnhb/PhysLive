@@ -518,3 +518,223 @@ body {
   }
 }
 
+/* ==========================================================================
+   PHET-INSPIRED INTERACTIVE LIBRARY & PLAYER ENHANCEMENTS
+   ========================================================================== */
+
+/* Main layout with collapsible/sticky multi-dimensional filter sidebar */
+.phet-library-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+@media (max-width: 960px) {
+  .phet-library-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.phet-filter-sidebar {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  padding: 22px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+  position: sticky;
+  top: 86px;
+}
+
+.phet-filter-group {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.phet-filter-group:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.phet-filter-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.phet-filter-item-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.phet-filter-item-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.phet-filter-item-btn.active {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.phet-filter-badge {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.phet-filter-item-btn.active .phet-filter-badge {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+/* Simulation Preview Card */
+.phet-sim-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.phet-sim-card:hover {
+  transform: translateY(-4px);
+  border-color: #93c5fd;
+  box-shadow: 0 16px 36px -10px rgba(37, 99, 235, 0.14);
+}
+
+.phet-preview-area {
+  position: relative;
+  height: 180px;
+  background: radial-gradient(circle at 50% 30%, #172554 0%, #090d16 100%);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phet-preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.22s ease;
+  z-index: 5;
+}
+
+.phet-sim-card:hover .phet-preview-overlay {
+  opacity: 1;
+}
+
+.phet-play-pulse-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px rgba(37, 99, 235, 0.7);
+  transform: scale(0.9);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.phet-sim-card:hover .phet-play-pulse-btn {
+  transform: scale(1.08);
+  background: #1d4ed8;
+}
+
+/* Fullscreen mode for player */
+.player-fullscreen-active {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  background: #090d16 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.player-fullscreen-active canvas {
+  width: 100vw !important;
+  height: calc(100vh - 80px) !important;
+  object-fit: contain !important;
+}
+
+/* Embed Modal Dialog */
+.phet-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.phet-modal-content {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  width: 100%;
+  max-width: 620px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+  0% {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+

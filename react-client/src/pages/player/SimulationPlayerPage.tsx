@@ -18,6 +18,15 @@ import {
   Gauge,
   Compass,
   Atom,
+  Maximize2,
+  Minimize2,
+  Share2,
+  BookOpen,
+  Lightbulb,
+  HelpCircle,
+  Check,
+  Copy,
+  X,
 } from 'lucide-react';
 
 export const SimulationPlayerPage: React.FC = () => {
@@ -49,10 +58,26 @@ export const SimulationPlayerPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
-  const [activeTab, setActiveTab] = useState<'sliders' | 'steps' | 'table' | 'export'>('sliders');
+  const [activeTab, setActiveTab] = useState<'sliders' | 'steps' | 'table' | 'tips' | 'export'>('sliders');
   const [catalogSearch, setCatalogSearch] = useState<string>('');
 
+  // PhET-inspired features: Fullscreen Projector Mode & LMS Embed Modal
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [showEmbedModal, setShowEmbedModal] = useState<boolean>(false);
+  const [copiedEmbed, setCopiedEmbed] = useState<boolean>(false);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Listen to Escape key to exit fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
 
   // Reset time when switching simulation
   useEffect(() => {
@@ -509,6 +534,51 @@ export const SimulationPlayerPage: React.FC = () => {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="formula-tag">Dual-Validation: PASSED</span>
+
+            {/* Nút Lấy mã nhúng LMS (PhET Embed Feature) */}
+            <button
+              onClick={() => setShowEmbedModal(true)}
+              style={{
+                padding: '6px 11px',
+                borderRadius: '6px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#ffffff',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+              title="Nhúng mô phỏng vào bài giảng LMS (Moodle, Canvas)"
+            >
+              <Share2 size={12} />
+              <span>Nhúng LMS</span>
+            </button>
+
+            {/* Nút Toàn màn hình / Trình chiếu lớp học (PhET Fullscreen Mode) */}
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              style={{
+                padding: '6px 11px',
+                borderRadius: '6px',
+                backgroundColor: isFullscreen ? '#2563eb' : 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#ffffff',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+              title="Chế độ máy chiếu / Toàn màn hình (F11/ESC)"
+            >
+              {isFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+              <span>{isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}</span>
+            </button>
+
             <button
               onClick={handleReset}
               style={{
@@ -531,12 +601,40 @@ export const SimulationPlayerPage: React.FC = () => {
           </div>
         </div>
 
-        {/* CANVAS WORKSPACE */}
-        <div className="canvas-wrapper">
+        {/* CANVAS WORKSPACE (HỖ TRỢ FULLSCREEN MÁY CHIẾU LỚP HỌC) */}
+        <div className={`canvas-wrapper ${isFullscreen ? 'player-fullscreen-active' : ''}`}>
+          {isFullscreen && (
+            <button
+              onClick={() => setIsFullscreen(false)}
+              style={{
+                position: 'fixed',
+                top: '18px',
+                right: '24px',
+                zIndex: 100005,
+                background: 'rgba(15, 23, 42, 0.85)',
+                backdropFilter: 'blur(10px)',
+                color: '#ffffff',
+                border: '1px solid rgba(255, 255, 255, 0.25)',
+                borderRadius: '10px',
+                padding: '8px 16px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '13px',
+                fontWeight: 700,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+              }}
+            >
+              <Minimize2 size={16} />
+              <span>Thoát toàn màn hình (ESC)</span>
+            </button>
+          )}
+
           <canvas
             ref={canvasRef}
-            width={860}
-            height={520}
+            width={isFullscreen ? 1280 : 860}
+            height={isFullscreen ? 720 : 520}
             className="studio-canvas"
           />
 
@@ -718,6 +816,15 @@ export const SimulationPlayerPage: React.FC = () => {
           >
             <Download size={13} />
             <span>Xuất</span>
+          </button>
+          <button
+            className={`inspector-tab-btn ${activeTab === 'tips' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tips')}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+            title="Mục tiêu bài học & Câu hỏi gợi mở sư phạm (PhET Teacher Tips)"
+          >
+            <BookOpen size={13} />
+            <span>Sư phạm</span>
           </button>
         </div>
 
@@ -1229,8 +1336,187 @@ export const SimulationPlayerPage: React.FC = () => {
               </button>
             </div>
           )}
+
+          {/* TAB 5: GỢI Ý SƯ PHẠM & DÀNH CHO GIÁO VIÊN (PHET TEACHER TIPS) */}
+          {activeTab === 'tips' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Box 1: Mục tiêu bài học */}
+              <div style={{ backgroundColor: '#eff6ff', borderRadius: '12px', padding: '16px', border: '1px solid #bfdbfe' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#1d4ed8', fontWeight: 800, fontSize: '13px' }}>
+                  <Sparkles size={16} />
+                  <span>MỤC TIÊU BÀI HỌC (CHUẨN SGK 2018)</span>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: '#1e3a8a', lineHeight: 1.6 }}>
+                  <li>Nắm vững mối liên hệ giữa các đại lượng động học và động lực học.</li>
+                  <li>Khảo sát trực quan ảnh hưởng của các thông số đầu vào đến chuyển động.</li>
+                  <li>Kiểm chứng nghiệm số giải tích so với mô phỏng Runge-Kutta sai số &lt; 2%.</li>
+                </ul>
+              </div>
+
+              {/* Box 2: Câu hỏi gợi mở tư duy cho giờ dạy */}
+              <div style={{ backgroundColor: '#fefce8', borderRadius: '12px', padding: '16px', border: '1px solid #fef08a' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#854d0e', fontWeight: 800, fontSize: '13px' }}>
+                  <Lightbulb size={16} />
+                  <span>CÂU HỎI THẢO LUẬN GỢI MỞ (INQUIRY PROMPTS)</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', color: '#713f12', lineHeight: 1.5 }}>
+                  {currentSim.id === 'sim-car-brake-003' ? (
+                    <>
+                      <div>
+                        <strong>1. Thử thách vận tốc:</strong> Nếu tăng gấp đôi vận tốc ban đầu (từ 36 km/h lên 72 km/h), quãng đường hãm phanh s tăng lên gấp mấy lần? Hãy kéo thanh trượt v₀ để kiểm chứng.
+                      </div>
+                      <div>
+                        <strong>2. Phân tích vector:</strong> Gia tốc a = -4 m/s² mang dấu âm thể hiện điều gì về hướng của lực ma sát hãm so với chiều chuyển động của xe?
+                      </div>
+                      <div>
+                        <strong>3. Thực tế giao thông:</strong> Tại sao biển báo hạn chế tốc độ 50 km/h trong đô thị lại giảm thiểu tai nạn đáng kể so với 60 km/h?
+                      </div>
+                    </>
+                  ) : currentSim.id === 'sim-proj-001' ? (
+                    <>
+                      <div>
+                        <strong>1. Thử thách góc bắn:</strong> Khi ném từ độ cao ban đầu h = 20 m, góc bắn α để đạt tầm xa cực đại có còn là 45° không? Hãy thử nghiệm α = 30°, 45°, 35°.
+                      </div>
+                      <div>
+                        <strong>2. Đỉnh quỹ đạo:</strong> Tại điểm cao nhất của quỹ đạo parabol, vận tốc của vật có bằng 0 không? Thành phần vận tốc nào bị triệt tiêu?
+                      </div>
+                      <div>
+                        <strong>3. Thời gian bay:</strong> Thay đổi vận tốc v₀ có làm thay đổi thời gian vật chạm đất không nếu bắn theo phương ngang (α = 0°)?
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <strong>1. Điều kiện trượt:</strong> Để vật có thể tự trượt xuống từ mặt phẳng nghiêng, hệ số ma sát $\mu$ và góc dốc $\alpha$ phải thoả mãn điều kiện gì?
+                      </div>
+                      <div>
+                        <strong>2. Khối lượng vật:</strong> Khối lượng $m$ có ảnh hưởng đến gia tốc trượt và vận tốc ở chân dốc không? Hãy lý giải bằng công thức Newton 2.
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Box 3: Sai lầm thường gặp của học sinh */}
+              <div style={{ backgroundColor: '#fff1f2', borderRadius: '12px', padding: '16px', border: '1px solid #fecdd3' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#9f1239', fontWeight: 800, fontSize: '13px' }}>
+                  <HelpCircle size={16} />
+                  <span>SAI LẦM THƯỜNG GẶP CỦA HỌC SINH</span>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: '#881337', lineHeight: 1.6 }}>
+                  <li>Quên quy đổi vận tốc từ km/h sang m/s (chuẩn SI) dẫn đến sai lệch kết quả gấp 3.6 lần.</li>
+                  <li>Quên dấu âm của gia tốc trong chuyển động chậm dần đều khi lập phương trình toạ độ.</li>
+                  <li>Nhầm lẫn rằng tại điểm cao nhất của chuyển động ném xiên thì toàn bộ vận tốc bằng 0.</li>
+                </ul>
+              </div>
+
+              {/* Box 4: Ghi chú giảng dạy lớp học */}
+              <div style={{ backgroundColor: '#f8fafc', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '11px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                  GHI CHÚ SƯ PHẠM BÀI HỌC TRƯỚC
+                </div>
+                <div style={{ fontSize: '12px', color: '#334155', fontStyle: 'italic', lineHeight: 1.5 }}>
+                  "Giáo viên nên cho học sinh nhập số liệu dự đoán trước (Prediction Hypothesis), sau đó mới bấm Chạy mô phỏng để các em đối chiếu trực tiếp với kết quả đo thực tế."
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </aside>
+
+      {/* ============================================================= */}
+      {/* MODAL LẤY MÃ NHÚNG LMS (PHET EMBED FEATURE)                   */}
+      {/* ============================================================= */}
+      {showEmbedModal && (
+        <div className="phet-modal-backdrop" onClick={() => setShowEmbedModal(false)}>
+          <div className="phet-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Share2 size={20} color="#2563eb" />
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                  Nhúng phòng thí nghiệm vào bài giảng LMS
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowEmbedModal(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>Bài toán đang mở:</span>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                  {currentSim.title}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                  Đoạn mã HTML iFrame sẵn sàng:
+                </label>
+                <div
+                  style={{
+                    backgroundColor: '#0f172a',
+                    padding: '14px',
+                    borderRadius: '10px',
+                    color: '#38bdf8',
+                    fontFamily: 'Consolas, monospace',
+                    fontSize: '12px',
+                    lineHeight: 1.5,
+                    wordBreak: 'break-all',
+                    border: '1px solid #334155',
+                  }}
+                >
+                  {`<iframe src="${window.location.origin}/player?id=${currentSim.id}&embed=true" width="100%" height="580" frameborder="0" allowfullscreen="true" style="border-radius:12px; border:1px solid #cbd5e1;"></iframe>`}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px' }}>
+                <div style={{ fontSize: '12px', color: '#64748b' }}>
+                  Tương thích hoàn hảo với Canvas, Moodle, Google Sites, PowerPoint.
+                </div>
+                <button
+                  onClick={() => {
+                    const embedCode = `<iframe src="${window.location.origin}/player?id=${currentSim.id}&embed=true" width="100%" height="580" frameborder="0" allowfullscreen="true" style="border-radius:12px; border:1px solid #cbd5e1;"></iframe>`;
+                    navigator.clipboard.writeText(embedCode);
+                    setCopiedEmbed(true);
+                    setTimeout(() => setCopiedEmbed(false), 2200);
+                  }}
+                  style={{
+                    padding: '9px 18px',
+                    backgroundColor: copiedEmbed ? '#10b981' : '#2563eb',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {copiedEmbed ? (
+                    <>
+                      <Check size={16} />
+                      <span>Đã sao chép!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={16} />
+                      <span>Sao chép mã nhúng</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
