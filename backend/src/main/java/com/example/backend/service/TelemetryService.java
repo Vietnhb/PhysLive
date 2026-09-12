@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.ExtractionRunResponse;
 import com.example.backend.dto.PipelineTelemetryResponse;
+import com.example.backend.entity.ExtractionPath;
 import com.example.backend.entity.ExtractionRun;
+import com.example.backend.entity.ExtractionRunStatus;
 import com.example.backend.repository.ExtractionRunRepository;
 
 import lombok.AllArgsConstructor;
@@ -27,8 +30,8 @@ public class TelemetryService {
      */
     public PipelineTelemetryResponse getPipelineTelemetry() {
         long total = extractionRunRepository.count();
-        long succeeded = extractionRunRepository.countByStatus("SUCCEEDED");
-        long failed = extractionRunRepository.countByStatus("FAILED");
+        long succeeded = extractionRunRepository.countByStatus(ExtractionRunStatus.SUCCEEDED);
+        long failed = extractionRunRepository.countByStatus(ExtractionRunStatus.FAILED);
 
         double successRate = total > 0 ? (double) succeeded / total * 100.0 : 100.0;
         // Round to 2 decimal places
@@ -39,10 +42,10 @@ public class TelemetryService {
         providerBreakdown.put("RULE_BASED", extractionRunRepository.countByProviderName("RULE_BASED"));
 
         Map<String, Long> pathBreakdown = new HashMap<>();
-        pathBreakdown.put("OPENROUTER", extractionRunRepository.countByExtractionPath("OPENROUTER"));
-        pathBreakdown.put("RULE_BASED", extractionRunRepository.countByExtractionPath("RULE_BASED"));
+        pathBreakdown.put("OPENROUTER", extractionRunRepository.countByExtractionPath(ExtractionPath.OPENROUTER));
+        pathBreakdown.put("RULE_BASED", extractionRunRepository.countByExtractionPath(ExtractionPath.RULE_BASED));
 
-        List<ExtractionRunResponse> recentFailures = extractionRunRepository.findByStatusOrderByCreatedAtDesc("FAILED").stream()
+        List<ExtractionRunResponse> recentFailures = extractionRunRepository.findByStatusOrderByCreatedAtDesc(ExtractionRunStatus.FAILED).stream()
                 .limit(10)
                 .map(this::toResponse)
                 .toList();
@@ -63,7 +66,7 @@ public class TelemetryService {
     public List<ExtractionRunResponse> getRecentRuns(String status) {
         List<ExtractionRun> runs;
         if (status != null && !status.trim().isEmpty()) {
-            runs = extractionRunRepository.findByStatusOrderByCreatedAtDesc(status.trim().toUpperCase());
+            runs = extractionRunRepository.findByStatusOrderByCreatedAtDesc(ExtractionRunStatus.valueOf(status.trim().toUpperCase()));
         } else {
             runs = extractionRunRepository.findTop20ByOrderByCreatedAtDesc();
         }
@@ -75,11 +78,11 @@ public class TelemetryService {
                 run.getId(),
                 run.getSubmissionId(),
                 run.getProviderName(),
-                run.getExtractionPath(),
+                run.getExtractionPath() != null ? run.getExtractionPath().name() : null,
                 run.getModelVersion(),
-                run.getStatus(),
-                run.getOutcome(),
+                run.getStatus() != null ? run.getStatus().name() : null,
+                run.getOutcome() != null ? run.getOutcome().name() : null,
                 run.getErrorMessage(),
-                run.getCreatedAt());
+                run.getCreatedAt() != null ? run.getCreatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 }

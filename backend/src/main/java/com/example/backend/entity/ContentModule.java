@@ -1,67 +1,53 @@
 package com.example.backend.entity;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "content_modules", schema = "public")
+@Table(name = "content_modules", uniqueConstraints = @UniqueConstraint(name = "uk_modules_topic_slug", columnNames = { "topic_id", "slug" }))
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContentModule {
+public class ContentModule extends AuditedEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
-
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Column(name = "slug", nullable = false)
-    private String slug;
-
-    @Column(name = "active", nullable = false)
-    private boolean active = true;
-
-    @Column(name = "sort_order", nullable = false)
-    private int sortOrder = 0;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    @Column(nullable = false, length = 120)
+    private String name;
 
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
+    @Column(nullable = false, length = 100)
+    private String slug;
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = OffsetDateTime.now();
-        if (updatedAt == null) updatedAt = OffsetDateTime.now();
-    }
+    @Column(nullable = false)
+    private int sortOrder = 0;
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<GradeLevel> levels = new ArrayList<>();
+
+    public void addLevel(GradeLevel level) {
+        levels.add(level);
+        level.setModule(this);
     }
 }

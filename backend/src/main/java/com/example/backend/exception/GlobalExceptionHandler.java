@@ -55,6 +55,12 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(403, "Bạn không có quyền thực hiện thao tác này"));
     }
 
+    @ExceptionHandler(InvalidPhysicsInputException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPhysicsInput(InvalidPhysicsInputException ex) {
+        ErrorResponse error = new ErrorResponse(422, ex.getMessage());
+        return ResponseEntity.unprocessableEntity().body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllException(Exception ex) {
         log.error("Unhandled exception", ex);

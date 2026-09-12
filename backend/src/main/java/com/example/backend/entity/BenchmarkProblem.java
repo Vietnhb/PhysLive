@@ -1,63 +1,55 @@
 package com.example.backend.entity;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "benchmark_problems", schema = "public")
+@Table(name = "benchmark_problems")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class BenchmarkProblem {
+public class BenchmarkProblem extends AuditedEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
-
-    @Column(name = "topic", nullable = false)
-    private String topic;
-
-    @Column(name = "grade_scope", nullable = false)
-    private String gradeScope;
-
-    @Column(name = "source_category", nullable = false)
-    private String sourceCategory;
-
-    @Column(name = "problem_text", nullable = false, columnDefinition = "text")
+    @Column(nullable = false, columnDefinition = "text")
     private String problemText;
 
-    @Column(name = "active", nullable = false)
+    @Column(nullable = false, length = 32)
+    private String topic;
+
+    @Column(nullable = false, length = 32)
+    private String gradeScope;
+
+    @Column(nullable = false, length = 80)
+    private String sourceCategory;
+
+    @Column(nullable = false)
     private boolean active = true;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    @OneToMany(mappedBy = "benchmarkProblem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
+    private List<GoldAnnotation> annotations = new ArrayList<>();
 
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
+    @OneToMany(mappedBy = "benchmarkProblem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
+    private List<Adjudication> adjudications = new ArrayList<>();
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = OffsetDateTime.now();
-        if (updatedAt == null) updatedAt = OffsetDateTime.now();
+    public void addAnnotation(GoldAnnotation annotation) {
+        annotations.add(annotation);
+        annotation.setBenchmarkProblem(this);
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+    public void addAdjudication(Adjudication adjudication) {
+        adjudications.add(adjudication);
+        adjudication.setBenchmarkProblem(this);
     }
 }

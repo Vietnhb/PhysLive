@@ -1,77 +1,108 @@
 package com.example.backend.entity;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "simulation_runs", schema = "public")
+@Table(
+        name = "simulation_runs",
+        indexes = {
+                @Index(name = "idx_simulation_runs_simulation", columnList = "simulation_id,created_at"),
+                @Index(name = "idx_simulation_runs_status", columnList = "status")
+        })
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class SimulationRun {
+public class SimulationRun extends AuditedEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Column(name = "simulation_id", nullable = false)
-    private UUID simulationId;
-
-    @ManyToOne
-    @JoinColumn(name = "simulation_id", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "simulation_id", nullable = false)
     private Simulation simulation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "solver_version_id")
+    private SolverVersion solverVersion;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private SimulationRunStatus status = SimulationRunStatus.COMPLETED;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "input_parameters", columnDefinition = "jsonb")
+    private JsonNode inputParameters;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "output_payload", columnDefinition = "jsonb")
+    private JsonNode outputPayload;
+
+    @Column(name = "frame_count", nullable = false)
+    private int frameCount = 0;
+
+    private Instant startedAt;
+
+    private Instant completedAt;
+
+    @Column(name = "execution_time_ms")
+    private Long executionTimeMs;
+
+    @Column(name = "error_message", columnDefinition = "text")
+    private String errorMessage;
 
     @Column(name = "duration_seconds", nullable = false)
     private Double durationSeconds = 0.0;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "result", columnDefinition = "jsonb", nullable = false)
-    private java.util.Map<String, Object> result;
+    @Column(name = "result", columnDefinition = "jsonb")
+    private JsonNode result;
 
-    @Column(name = "run_type", nullable = false)
-    private String runType = "INTERACTIVE"; // INTERACTIVE, BENCHMARK, VALIDATION
+    @Column(name = "run_type", nullable = false, length = 32)
+    private String runType = "INTERACTIVE";
 
     @Column(name = "validation_passed", nullable = false)
     private boolean validationPassed = true;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    @PrePersist
-    public void prePersist() {
-        OffsetDateTime now = OffsetDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-        if (this.durationSeconds == null) {
-            this.durationSeconds = 0.0;
-        }
+    public UUID getSimulationId() {
+        return simulation != null ? simulation.getId() : null;
     }
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = OffsetDateTime.now();
+    public void setSimulationId(UUID id) {
+        // simulation is set directly via setSimulation
+    }
+
+    public void setResult(Map<String, Object> map) {
+        if (map == null) this.result = null;
+        else this.result = MAPPER.valueToTree(map);
+    }
+
+    public void setResult(JsonNode resultNode) {
+        this.result = resultNode;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getResult() {
+        if (result == null) return null;
+        return MAPPER.convertValue(result, Map.class);
     }
 }

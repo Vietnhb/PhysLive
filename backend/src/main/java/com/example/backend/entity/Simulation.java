@@ -1,84 +1,97 @@
 package com.example.backend.entity;
 
-import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "simulations", schema = "public")
+@Table(
+        name = "simulations",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_simulations_validation_run",
+                columnNames = "validation_run_id"),
+        indexes = @Index(name = "idx_simulations_status", columnList = "status"))
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class Simulation {
+public class Simulation extends AuditedEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Column(name = "schema_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "validation_run_id")
+    private ValidationRun validationRun;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private SimulationStatus status = SimulationStatus.READY;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "initial_parameters", columnDefinition = "jsonb")
+    private JsonNode initialParameters;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "scene_definition", columnDefinition = "jsonb")
+    private JsonNode sceneDefinition;
+
+    @Column(length = 64)
     private String schemaId;
 
-    @Column(name = "solver_version", nullable = false)
+    @Column(length = 64)
     private String solverVersion;
-
-    @Column(name = "status", nullable = false)
-    private Short status = 1; // 0=DRAFT, 1=READY, 2=FAILED, 3=ARCHIVED
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "latest_result", columnDefinition = "jsonb")
-    private java.util.Map<String, Object> latestResult;
+    private JsonNode latestResult;
 
-    @Column(name = "owner_id", nullable = false)
-    private Integer ownerId;
-
-    @ManyToOne
-    @JoinColumn(name = "owner_id", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
     private User owner;
 
-    @Column(name = "specification_id", nullable = false)
-    private UUID specificationId;
-
-    @ManyToOne
-    @JoinColumn(name = "specification_id", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specification_id")
     private Specification specification;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    @PrePersist
-    public void prePersist() {
-        OffsetDateTime now = OffsetDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-        if (this.status == null) {
-            this.status = 1;
-        }
+    public Integer getOwnerId() {
+        return owner != null ? owner.getId() : null;
     }
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = OffsetDateTime.now();
+    public UUID getSpecificationId() {
+        return specification != null ? specification.getId() : null;
+    }
+
+    public void setLatestResult(Map<String, Object> map) {
+        if (map == null) this.latestResult = null;
+        else this.latestResult = MAPPER.valueToTree(map);
+    }
+
+    public void setLatestResult(JsonNode node) {
+        this.latestResult = node;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getLatestResult() {
+        if (latestResult == null) return null;
+        return MAPPER.convertValue(latestResult, Map.class);
     }
 }

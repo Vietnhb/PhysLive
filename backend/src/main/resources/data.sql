@@ -12,3 +12,4 @@ INSERT INTO public.roles (name) VALUES
     ('STUDENT'),
     ('GUEST')
 ON CONFLICT (name) DO NOTHING;
+

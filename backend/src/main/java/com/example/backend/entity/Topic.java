@@ -1,60 +1,46 @@
 package com.example.backend.entity;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "topics", schema = "public")
+@Table(name = "topics", uniqueConstraints = @UniqueConstraint(name = "uk_topics_slug", columnNames = "slug"))
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Topic {
+public class Topic extends AuditedEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
-
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false, length = 80)
     private String name;
 
-    @Column(name = "slug", nullable = false, unique = true)
+    @Column(nullable = false, length = 80)
     private String slug;
 
-    @Column(name = "enabled", nullable = false)
+    @Column(nullable = false)
     private boolean enabled = true;
 
-    @Column(name = "sort_order", nullable = false)
+    @Column(nullable = false)
     private int sortOrder = 0;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<ContentModule> modules = new ArrayList<>();
 
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = OffsetDateTime.now();
-        if (updatedAt == null) updatedAt = OffsetDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
+    public void addModule(ContentModule module) {
+        modules.add(module);
+        module.setTopic(this);
     }
 }

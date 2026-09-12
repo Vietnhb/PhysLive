@@ -1,103 +1,108 @@
 package com.example.backend.entity;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "specifications", schema = "public")
+@Table(name = "specifications")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class Specification {
+public class Specification extends AuditedEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "submission_id", nullable = false)
+    private ProblemSubmission submission;
 
-    @Column(name = "schema_version", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "extraction_run_id", nullable = false)
+    private ExtractionRun extractionRun;
+
+    @Column(nullable = false, length = 16)
     private String schemaVersion = "v1.0";
 
-    @Column(name = "schema_id")
+    @Column(length = 64)
     private String schemaId;
 
-    @Column(name = "topic")
+    @Column(length = 32)
     private String topic;
 
-    @Column(name = "confidence", nullable = false)
+    @Column(nullable = false, precision = 5, scale = 4)
     private BigDecimal confidence = BigDecimal.ONE;
 
-    @Column(name = "confirmation_state", nullable = false)
-    private String confirmationState = "NO_AMBIGUITY"; // NO_AMBIGUITY, UNRESOLVED, CONFIRMED
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private JsonNode objects;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "objects", columnDefinition = "jsonb", nullable = false)
-    private Object objects;
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private JsonNode quantities;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "quantities", columnDefinition = "jsonb", nullable = false)
-    private Object quantities;
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private JsonNode relations;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "relations", columnDefinition = "jsonb", nullable = false)
-    private Object relations;
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private JsonNode ambiguity;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "ambiguity", columnDefinition = "jsonb", nullable = false)
-    private Object ambiguity;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 24)
+    private ConfirmationState confirmationState = ConfirmationState.NO_AMBIGUITY;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "validation_result", columnDefinition = "jsonb")
-    private Object validationResult;
+    private JsonNode validationResult;
 
-    @Column(name = "validation_status")
+    @Column(name = "validation_status", length = 32)
     private String validationStatus;
 
-    @Column(name = "extraction_run_id", nullable = false)
-    private UUID extractionRunId;
+    @OneToMany(mappedBy = "specification", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
+    private List<AmbiguityCase> ambiguityCases = new ArrayList<>();
 
-    @Column(name = "submission_id", nullable = false)
-    private UUID submissionId;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    @PrePersist
-    public void prePersist() {
-        OffsetDateTime now = OffsetDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-        if (this.confidence == null) {
-            this.confidence = BigDecimal.ONE;
-        }
-        if (this.confirmationState == null) {
-            this.confirmationState = "NO_AMBIGUITY";
-        }
+    public void addAmbiguityCase(AmbiguityCase ambiguityCase) {
+        ambiguityCases.add(ambiguityCase);
+        ambiguityCase.setSpecification(this);
     }
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = OffsetDateTime.now();
+    public UUID getSubmissionId() {
+        return submission != null ? submission.getId() : null;
+    }
+
+    public UUID getExtractionRunId() {
+        return extractionRun != null ? extractionRun.getId() : null;
+    }
+
+    public void setConfirmationState(ConfirmationState state) {
+        this.confirmationState = state;
+    }
+
+    public void setConfirmationState(String stateStr) {
+        if (stateStr != null) {
+            this.confirmationState = ConfirmationState.valueOf(stateStr.toUpperCase());
+        }
     }
 }

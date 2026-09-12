@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +14,11 @@ import com.example.backend.dto.GradeLevelResponse;
 import com.example.backend.dto.LessonResponse;
 import com.example.backend.dto.TopicRequest;
 import com.example.backend.dto.TopicResponse;
+import com.example.backend.dto.curriculum.CurriculumTreeResponse;
+import com.example.backend.dto.curriculum.CurriculumTreeResponse.LessonItem;
+import com.example.backend.dto.curriculum.CurriculumTreeResponse.LevelItem;
+import com.example.backend.dto.curriculum.CurriculumTreeResponse.ModuleItem;
+import com.example.backend.dto.curriculum.CurriculumTreeResponse.TopicItem;
 import com.example.backend.entity.ContentModule;
 import com.example.backend.entity.GradeLevel;
 import com.example.backend.entity.Lesson;
@@ -23,14 +29,14 @@ import com.example.backend.repository.GradeLevelRepository;
 import com.example.backend.repository.LessonRepository;
 import com.example.backend.repository.TopicRepository;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Service managing curriculum hierarchy (Topics, Content Modules, Grade Levels, Lessons).
- * Allows Administrator to toggle modules on/off for schools.
+ * Allows Administrator to toggle modules on/off for schools, as well as tree queries.
  */
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CurriculumService {
 
     private final TopicRepository topicRepository;
@@ -39,7 +45,67 @@ public class CurriculumService {
     private final LessonRepository lessonRepository;
 
     // ------------------------------------------------------------------ //
-    // Topics
+    // Tree Query
+    // ------------------------------------------------------------------ //
+
+    @Transactional(readOnly = true)
+    public CurriculumTreeResponse getTree(boolean includeInactive) {
+        List<TopicItem> topics = topicRepository.findAllByOrderBySortOrderAsc().stream()
+                .filter(topic -> includeInactive || topic.isEnabled())
+                .map(topic -> toTopic(topic, includeInactive))
+                .toList();
+        return new CurriculumTreeResponse(topics);
+    }
+
+    private TopicItem toTopic(Topic topic, boolean includeInactive) {
+        return new TopicItem(
+                topic.getId(),
+                topic.getName(),
+                topic.getSlug(),
+                topic.isEnabled(),
+                topic.getSortOrder(),
+                topic.getModules().stream()
+                        .filter(module -> includeInactive || module.isActive())
+                        .map(module -> toModule(module, includeInactive))
+                        .toList());
+    }
+
+    private ModuleItem toModule(ContentModule module, boolean includeInactive) {
+        return new ModuleItem(
+                module.getId(),
+                module.getName(),
+                module.getSlug(),
+                module.isActive(),
+                module.getSortOrder(),
+                module.getLevels().stream()
+                        .filter(level -> includeInactive || level.isActive())
+                        .map(level -> toLevel(level, includeInactive))
+                        .toList());
+    }
+
+    private LevelItem toLevel(GradeLevel level, boolean includeInactive) {
+        return new LevelItem(
+                level.getId(),
+                level.getName(),
+                level.isActive(),
+                level.getSortOrder(),
+                level.getLessons().stream()
+                        .filter(lesson -> includeInactive || lesson.isActive())
+                        .map(this::toLesson)
+                        .toList());
+    }
+
+    private LessonItem toLesson(Lesson lesson) {
+        return new LessonItem(
+                lesson.getId(),
+                lesson.getName(),
+                lesson.getSlug(),
+                lesson.isActive(),
+                lesson.getSortOrder());
+    }
+
+    // ------------------------------------------------------------------ //
+    // Topics CRUD
     // ------------------------------------------------------------------ //
 
     public List<TopicResponse> getAllTopics() {
@@ -106,7 +172,7 @@ public class CurriculumService {
     }
 
     // ------------------------------------------------------------------ //
-    // Content Modules
+    // Content Modules CRUD
     // ------------------------------------------------------------------ //
 
     public List<ContentModuleResponse> getModulesByTopic(UUID topicId) {
@@ -168,7 +234,7 @@ public class CurriculumService {
     }
 
     // ------------------------------------------------------------------ //
-    // Grade Levels & Lessons
+    // Grade Levels & Lessons CRUD
     // ------------------------------------------------------------------ //
 
     public List<GradeLevelResponse> getLevelsByModule(UUID moduleId) {
@@ -212,8 +278,8 @@ public class CurriculumService {
                 topic.getSlug(),
                 topic.isEnabled(),
                 topic.getSortOrder(),
-                topic.getCreatedAt(),
-                topic.getUpdatedAt());
+                topic.getCreatedAt() != null ? topic.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                topic.getUpdatedAt() != null ? topic.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 
     private ContentModuleResponse toModuleResponse(ContentModule module) {
@@ -225,8 +291,8 @@ public class CurriculumService {
                 module.getSortOrder(),
                 module.getTopic() != null ? module.getTopic().getId() : null,
                 module.getTopic() != null ? module.getTopic().getName() : null,
-                module.getCreatedAt(),
-                module.getUpdatedAt());
+                module.getCreatedAt() != null ? module.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                module.getUpdatedAt() != null ? module.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 
     private GradeLevelResponse toLevelResponse(GradeLevel level) {
@@ -236,8 +302,8 @@ public class CurriculumService {
                 level.getSortOrder(),
                 level.isActive(),
                 level.getModule() != null ? level.getModule().getId() : null,
-                level.getCreatedAt(),
-                level.getUpdatedAt());
+                level.getCreatedAt() != null ? level.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                level.getUpdatedAt() != null ? level.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 
     private LessonResponse toLessonResponse(Lesson lesson) {
@@ -248,7 +314,7 @@ public class CurriculumService {
                 lesson.getSortOrder(),
                 lesson.isActive(),
                 lesson.getLevel() != null ? lesson.getLevel().getId() : null,
-                lesson.getCreatedAt(),
-                lesson.getUpdatedAt());
+                lesson.getCreatedAt() != null ? lesson.getCreatedAt().atOffset(ZoneOffset.UTC) : null,
+                lesson.getUpdatedAt() != null ? lesson.getUpdatedAt().atOffset(ZoneOffset.UTC) : null);
     }
 }

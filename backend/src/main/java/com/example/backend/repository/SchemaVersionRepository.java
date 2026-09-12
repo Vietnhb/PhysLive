@@ -14,4 +14,5 @@ public interface SchemaVersionRepository extends JpaRepository<SchemaVersion, UU
     List<SchemaVersion> findByTopic(String topic);
     List<SchemaVersion> findByLifecycleStatus(String lifecycleStatus);
     Optional<SchemaVersion> findBySchemaIdAndVersion(String schemaId, String version);
+    Optional<SchemaVersion> findByVersion(String version);
 }
