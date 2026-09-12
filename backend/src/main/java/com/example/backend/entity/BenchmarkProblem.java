@@ -10,12 +10,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "benchmark_problems")
 @Getter
 @Setter
+@NoArgsConstructor
 public class BenchmarkProblem extends AuditedEntity {
 
     @Column(nullable = false, columnDefinition = "text")
@@ -31,7 +33,7 @@ public class BenchmarkProblem extends AuditedEntity {
     private String sourceCategory;
 
     @Column(nullable = false)
-    private boolean active;
+    private boolean active = true;
 
     @OneToMany(mappedBy = "benchmarkProblem", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("createdAt ASC")

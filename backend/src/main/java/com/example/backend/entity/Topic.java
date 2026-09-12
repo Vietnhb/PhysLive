@@ -10,13 +10,17 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "topics", uniqueConstraints = @UniqueConstraint(name = "uk_topics_slug", columnNames = "slug"))
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Topic extends AuditedEntity {
 
     @Column(nullable = false, length = 80)
@@ -26,10 +30,10 @@ public class Topic extends AuditedEntity {
     private String slug;
 
     @Column(nullable = false)
-    private boolean enabled;
+    private boolean enabled = true;
 
     @Column(nullable = false)
-    private int sortOrder;
+    private int sortOrder = 0;
 
     @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")

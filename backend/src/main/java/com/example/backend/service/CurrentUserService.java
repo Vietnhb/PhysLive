@@ -1,5 +1,7 @@
 package com.example.backend.service;
 
+import java.util.Arrays;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,5 +26,16 @@ public class CurrentUserService {
         }
         return userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Authenticated user no longer exists"));
+    }
+
+    public User requireAnyRole(String... allowedRoles) {
+        User user = requireCurrentUser();
+        String role = user.getRole() == null ? null : user.getRole().getName();
+        boolean allowed = role != null && Arrays.stream(allowedRoles)
+                .anyMatch(candidate -> candidate.equalsIgnoreCase(role));
+        if (!allowed) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Required role: " + String.join(" or ", allowedRoles));
+        }
+        return user;
     }
 }
