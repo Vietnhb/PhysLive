@@ -7,13 +7,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "lessons", uniqueConstraints = @UniqueConstraint(name = "uk_lessons_level_slug", columnNames = { "level_id", "slug" }))
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Lesson extends AuditedEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -27,8 +31,8 @@ public class Lesson extends AuditedEntity {
     private String slug;
 
     @Column(nullable = false)
-    private int sortOrder;
+    private int sortOrder = 0;
 
     @Column(nullable = false)
-    private boolean active;
+    private boolean active = true;
 }

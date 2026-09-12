@@ -35,4 +35,24 @@ class UnitNormalizerTest {
         assertThat(result.normalizedUnit()).isEqualTo("custom-unit");
         assertThat(result.knownUnit()).isFalse();
     }
+
+    @Test
+    void convertsDegreesToRadians() {
+        UnitNormalizer.NormalizedQuantity result = normalizer.normalize(new BigDecimal("30"), "°");
+
+        assertThat(result.normalizedValue()).isEqualByComparingTo("0.52359878");
+        assertThat(result.normalizedUnit()).isEqualTo("rad");
+        assertThat(result.knownUnit()).isTrue();
+    }
+
+    @Test
+    void recognizesUnicodeOhmAndSuperscriptAccelerationUnits() {
+        UnitNormalizer.NormalizedQuantity resistance = normalizer.normalize(new BigDecimal("10"), "\u03a9");
+        UnitNormalizer.NormalizedQuantity acceleration = normalizer.normalize(new BigDecimal("9.8"), "m/s\u00b2");
+
+        assertThat(resistance.normalizedUnit()).isEqualTo("ohm");
+        assertThat(resistance.knownUnit()).isTrue();
+        assertThat(acceleration.normalizedUnit()).isEqualTo("m/s2");
+        assertThat(acceleration.knownUnit()).isTrue();
+    }
 }
