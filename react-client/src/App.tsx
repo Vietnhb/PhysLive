@@ -74,7 +74,14 @@ function App() {
           />
 
           {/* Profile & Settings (H02) */}
-          <Route path="profile" element={<ProfilePage />} />
+          <Route
+            path="profile"
+            element={
+              <RouteGuard>
+                <ProfilePage />
+              </RouteGuard>
+            }
+          />
 
           {/* Admin flow */}
           <Route

@@ -9,7 +9,7 @@ import { IS_MOCK_ENABLED } from "../config/api";
 
 function Login() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { loginWithUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,24 +28,27 @@ function Login() {
 
     try {
       const res = await login(email, password);
-      setToken(res.token);
       // Cập nhật user từ response
       if (res.user) {
-        setUser({
-          id: String(res.user.id),
-          role_id: `r-${res.user.role.toLowerCase()}`,
-          role: res.user.role as any,
-          email: res.user.email,
-          full_name: res.user.fullName || res.user.email,
-          status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
+        loginWithUser(
+          {
+            id: String(res.user.id),
+            role_id: `r-${res.user.role.toLowerCase()}`,
+            role: res.user.role as any,
+            email: res.user.email,
+            full_name: res.user.fullName || res.user.email,
+            status: 'active',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          res.token
+        );
+      } else {
+        setToken(res.token);
       }
       navigate("/");
     } catch (err: unknown) {
       if (!axios.isAxiosError<{ message?: string }>(err) || !err.response) {
-        // Nếu không kết nối được server mà đang bật Mock Mode, gợi ý đăng nhập demo
         if (IS_MOCK_ENABLED) {
           setError("Chưa kết nối được Server Spring Boot. Bạn có thể sử dụng các nút Đăng nhập nhanh Demo bên dưới để trải nghiệm ngay!");
         } else {
@@ -66,8 +69,7 @@ function Login() {
   // Đăng nhập nhanh Demo dành cho Hùng và Team test
   const handleDemoLogin = (targetEmail: string) => {
     const user = MOCK_USERS.find(u => u.email === targetEmail) || MOCK_USERS[0];
-    setUser(user);
-    setToken("mock_jwt_token_physlive_demo");
+    loginWithUser(user, `mock_jwt_token_${user.role.toLowerCase()}`);
     navigate("/");
   };
 

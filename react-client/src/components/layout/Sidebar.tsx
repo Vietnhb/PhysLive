@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 
 export const Sidebar: React.FC = () => {
   const { currentUser } = useAuth();
-  const role = currentUser.role;
+  const role = currentUser?.role;
 
   return (
     <aside className="app-sidebar">

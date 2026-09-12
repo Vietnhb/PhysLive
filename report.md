@@ -1,4 +1,4 @@
-# BÁO CÁO KẾT QUẢ TRIỂN KHAI FRONTEND WEB (REACT-CLIENT)
+ # BÁO CÁO KẾT QUẢ TRIỂN KHAI FRONTEND WEB (REACT-CLIENT)
 ## DỰ ÁN PHYSLIVE — NỀN TẢNG MÔ PHỎNG VẬT LÝ TƯƠNG TÁC
 > **Người thực hiện**: Nguyễn Thế Hùng (Mã SV: SE183807) — Vai trò: **Frontend Web Lead**  
 > **Người Review Code**: Võ Trần Tuấn Kiệt (Platform / Flutter Lead)  
@@ -25,16 +25,24 @@ Frontend Web (`react-client`) đã hoàn thành **100% khung giao diện và lu�
 * **Route Guard & UI States**: Bảo vệ định tuyến an toàn theo RoleType (hiển thị trang 403 thân thiện nếu không đủ quyền), có sẵn các component trạng thái: `LoadingSkeleton`, `EmptyState`, `ErrorBanner`.
 
 ### 📌 Task H02: Authentication & Profile (Hoàn thành 100%)
+* **Cơ chế Xác thực Chuẩn (Strict Authentication)**:
+  * Trạng thái `isAuthenticated` được tính toán động dựa trên JWT Token còn hạn và đối tượng người dùng hợp lệ (`currentUser != null`).
+  * Tuyệt đối không hardcode `isAuthenticated: true` hay tự động đăng nhập nếu không có token hoặc token đã hết hạn.
+  * Các route cần quyền (`/profile`, `/teacher/*`, `/assignments`, `/student/*`, v.v.) được bọc bởi `RouteGuard`, tự động chuyển hướng khách (Guest) về `/login`.
+  * Topbar Header tự động đổi giao diện linh hoạt: hiển thị nút *"Đăng nhập / Đăng ký"* khi chưa có phiên đăng nhập, và hiển thị cụm *"Tên, Avatar, Bộ chuyển vai trò, Đăng xuất"* khi đã đăng nhập.
 * **Trang Đăng nhập (`/login`)**:
   * Form đăng nhập kết nối API Backend thật (`/api/auth/login`).
   * Tích hợp sẵn cụm nút **"Đăng nhập nhanh Demo 1-Click"** (Thầy Hùng, Em Nam, Kiệt Reviewer, Admin) giúp test giao diện độc lập ngay cả khi Backend chưa bật.
 * **Trang Đăng ký (`/signup`)**:
   * Form đăng ký chọn vai trò trực quan (Giáo viên / Học sinh), xác thực mật khẩu.
 * **Trang Hồ sơ cá nhân (`/profile`)**:
-  * Click trực tiếp vào Tên hoặc Avatar trên Header để mở.
+  * Click trực tiếp vào Tên hoặc Avatar trên Header để mở (có RouteGuard bảo vệ).
   * Xem và cập nhật thông tin cá nhân, trường học, vai trò RBAC.
   * Form đổi mật khẩu (Mật khẩu cũ, mật khẩu mới, xác nhận).
-  * Nút Đăng xuất an toàn.
+  * Nút Đăng xuất an toàn (xoá Token và reset trạng thái người dùng).
+* **Kiến trúc CSS Tinh gọn (Single Style Entrypoint)**:
+  * Toàn bộ Style của hệ thống được quy hoạch duy nhất tại `src/styles/layout.css` và chỉ nạp 1 lần ở `src/main.tsx`.
+  * Xoá bỏ hoàn toàn các file style rác cũ (`NavBar.css`, `Home.tsx`), chấm dứt triệt để tình trạng import style phân tán, lẫn lộn.
 
 ### 📌 Task H03: Teacher Submit UI (Hoàn thành 100%)
 * **Đa dạng phương thức nhập**:

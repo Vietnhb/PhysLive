@@ -39,14 +39,14 @@ export const Dashboard: React.FC = () => {
             PHYSLIVE STUDIO — VẬT LÝ TƯƠNG TÁC ĐA NỀN TẢNG
           </span>
           <h1 style={{ margin: '0 0 10px', fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em' }}>
-            Xin chào, {currentUser.full_name}! 👋
+            Xin chào, {currentUser ? currentUser.full_name : 'bạn'}! 👋
           </h1>
           <p style={{ margin: '0 0 20px', fontSize: '15px', color: '#e0f2fe', lineHeight: 1.6 }}>
             Hệ thống biến bài toán vật lý tĩnh thành mô phỏng tương tác 2D/3D sinh động, đối chiếu kiểm chứng hai lõi và hỗ trợ giảng dạy trực quan.
           </p>
 
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            {currentUser.role === 'TEACHER' || currentUser.role === 'ADMIN' ? (
+            {currentUser && (currentUser.role === 'TEACHER' || currentUser.role === 'ADMIN') ? (
               <Link
                 to="/teacher/submit"
                 style={{

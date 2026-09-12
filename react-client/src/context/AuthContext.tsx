@@ -1,45 +1,72 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, RoleType } from '../types/database';
 import { MOCK_USERS, getStoredUser, setStoredUser } from '../mocks/mockUsers';
+import { getToken, setToken, clearToken } from '../utils/token';
+import { isTokenExpired } from '../utils/jwt';
 
 interface AuthContextType {
-  currentUser: User;
-  switchRole: (role: RoleType) => void;
-  setUser: (user: User) => void;
+  currentUser: User | null;
   isAuthenticated: boolean;
+  switchRole: (role: RoleType) => void;
+  setUser: (user: User | null) => void;
+  loginWithUser: (user: User, token?: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUserState] = useState<User>(getStoredUser());
+  const [currentUser, setCurrentUserState] = useState<User | null>(() => getStoredUser());
+
+  // Kiểm tra token còn hợp lệ và có currentUser không
+  const token = getToken();
+  const isAuthenticated = Boolean(currentUser && token && !isTokenExpired(token));
 
   useEffect(() => {
-    setStoredUser(currentUser);
-  }, [currentUser]);
+    // Tự động clear nếu token hết hạn
+    const currentToken = getToken();
+    if (currentToken && isTokenExpired(currentToken)) {
+      clearToken();
+      setCurrentUserState(null);
+      setStoredUser(null);
+    }
+  }, []);
 
   const switchRole = (role: RoleType) => {
     const targetUser = MOCK_USERS.find(u => u.role === role) || MOCK_USERS[0];
     setCurrentUserState(targetUser);
+    setStoredUser(targetUser);
+    if (!getToken()) {
+      setToken(`mock_token_${role.toLowerCase()}`);
+    }
   };
 
-  const setUser = (user: User) => {
+  const setUser = (user: User | null) => {
     setCurrentUserState(user);
+    setStoredUser(user);
+  };
+
+  const loginWithUser = (user: User, authToken?: string) => {
+    const tokenToSave = authToken || `mock_token_${user.role.toLowerCase()}`;
+    setToken(tokenToSave);
+    setCurrentUserState(user);
+    setStoredUser(user);
   };
 
   const logout = () => {
-    // Để tiện test giao diện, khi logout ta có thể chuyển về student hoặc giữ trạng thái
-    localStorage.removeItem('token');
+    clearToken();
+    setCurrentUserState(null);
+    setStoredUser(null);
   };
 
   return (
     <AuthContext.Provider
       value={{
         currentUser,
+        isAuthenticated,
         switchRole,
         setUser,
-        isAuthenticated: true,
+        loginWithUser,
         logout,
       }}
     >

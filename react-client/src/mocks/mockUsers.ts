@@ -1,4 +1,6 @@
 import type { User } from '../types/database';
+import { getToken } from '../utils/token';
+import { isTokenExpired } from '../utils/jwt';
 
 export const MOCK_USERS: User[] = [
   {
@@ -48,18 +50,28 @@ export const MOCK_USERS: User[] = [
 
 export const CURRENT_USER_KEY = 'physlive_current_user';
 
-export const getStoredUser = (): User => {
+export const getStoredUser = (): User | null => {
+  const token = getToken();
+  // Nếu không có token hoặc token đã hết hạn, không tự động đăng nhập
+  if (!token || isTokenExpired(token)) {
+    return null;
+  }
+
   const stored = localStorage.getItem(CURRENT_USER_KEY);
   if (stored) {
     try {
       return JSON.parse(stored);
     } catch {
-      // Fallback
+      return null;
     }
   }
-  return MOCK_USERS[0]; // Mặc định là Thầy Hùng
+  return null;
 };
 
-export const setStoredUser = (user: User) => {
-  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+export const setStoredUser = (user: User | null) => {
+  if (user) {
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+  } else {
+    localStorage.removeItem(CURRENT_USER_KEY);
+  }
 };

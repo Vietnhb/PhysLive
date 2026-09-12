@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { RoleBadge } from '../../components/common/RoleBadge';
 
@@ -8,9 +8,9 @@ export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
 
   // Profile fields state
-  const [fullName, setFullName] = useState(currentUser.full_name);
-  const [email] = useState(currentUser.email);
-  const [schoolName, setSchoolName] = useState(currentUser.school_name || 'THPT Chuyên Khoa Học Tự Nhiên');
+  const [fullName, setFullName] = useState(currentUser?.full_name || '');
+  const [email] = useState(currentUser?.email || '');
+  const [schoolName, setSchoolName] = useState(currentUser?.school_name || 'THPT Chuyên Khoa Học Tự Nhiên');
   const [notification, setNotification] = useState<string | null>(null);
 
   // Password change state
@@ -19,8 +19,20 @@ export const ProfilePage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pwdError, setPwdError] = useState('');
 
+  useEffect(() => {
+    if (currentUser) {
+      setFullName(currentUser.full_name);
+      setSchoolName(currentUser.school_name || 'THPT Chuyên Khoa Học Tự Nhiên');
+    }
+  }, [currentUser]);
+
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentUser) return;
     setUser({
       ...currentUser,
       full_name: fullName,

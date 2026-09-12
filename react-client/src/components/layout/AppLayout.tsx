@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from './Header';
-import '../../styles/layout.css';
 
 export const AppLayout: React.FC = () => {
   const location = useLocation();
