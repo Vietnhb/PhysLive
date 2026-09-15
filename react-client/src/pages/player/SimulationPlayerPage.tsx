@@ -27,7 +27,9 @@ import {
   Check,
   Copy,
   X,
+  LineChart as ChartIcon,
 } from 'lucide-react';
+import { LearningChart, type ChartSeries } from '../../components/common/LearningChart';
 
 export const SimulationPlayerPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -58,7 +60,8 @@ export const SimulationPlayerPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
-  const [activeTab, setActiveTab] = useState<'sliders' | 'steps' | 'table' | 'tips' | 'export'>('sliders');
+  const [activeTab, setActiveTab] = useState<'sliders' | 'steps' | 'table' | 'chart' | 'tips' | 'export'>('sliders');
+  const [selectedChartVar, setSelectedChartVar] = useState<'v' | 's' | 'a'>('v');
   const [catalogSearch, setCatalogSearch] = useState<string>('');
 
   // PhET-inspired features: Fullscreen Projector Mode & LMS Embed Modal
@@ -117,6 +120,94 @@ export const SimulationPlayerPage: React.FC = () => {
       : currentSim.id === 'sim-incline-002'
       ? tSlide
       : tFlightProj;
+
+  // Dữ liệu đồ thị SVG thời gian thực (Dynamic SVG Curves)
+  const chartTimes = React.useMemo(() => {
+    const numPoints = 120;
+    const dur = Math.max(0.1, maxDuration);
+    const arr: number[] = [];
+    for (let i = 0; i <= numPoints; i++) {
+      arr.push((i / numPoints) * dur);
+    }
+    return arr;
+  }, [maxDuration]);
+
+  const chartSeries = React.useMemo<ChartSeries>(() => {
+    if (currentSim.id === 'sim-car-brake-003') {
+      if (selectedChartVar === 'v') {
+        return {
+          label: 'Vận tốc v(t)',
+          unit: 'm/s',
+          color: '#10b981',
+          data: chartTimes.map((t) => Math.max(0, carV0 + carA * t)),
+        };
+      }
+      if (selectedChartVar === 'a') {
+        return {
+          label: 'Gia tốc a(t)',
+          unit: 'm/s²',
+          color: '#ef4444',
+          data: chartTimes.map((t) => (t <= sStopCar / Math.max(0.1, carV0 / 2) ? carA : 0)),
+        };
+      }
+      return {
+        label: 'Quãng đường s(t)',
+        unit: 'm',
+        color: '#3b82f6',
+        data: chartTimes.map((t) => Math.min(sStopCar, carV0 * t + 0.5 * carA * t * t)),
+      };
+    } else if (currentSim.id === 'sim-proj-001') {
+      if (selectedChartVar === 'v') {
+        return {
+          label: 'Vận tốc tức thời v(t)',
+          unit: 'm/s',
+          color: '#10b981',
+          data: chartTimes.map((t) => {
+            const vy = v0y - g * t;
+            return Math.sqrt(v0x * v0x + vy * vy);
+          }),
+        };
+      }
+      if (selectedChartVar === 'a') {
+        return {
+          label: 'Gia tốc g(t)',
+          unit: 'm/s²',
+          color: '#ef4444',
+          data: chartTimes.map(() => 9.8),
+        };
+      }
+      return {
+        label: 'Độ cao y(t)',
+        unit: 'm',
+        color: '#38bdf8',
+        data: chartTimes.map((t) => Math.max(0, h + v0y * t - 0.5 * g * t * t)),
+      };
+    } else {
+      // Incline plane
+      if (selectedChartVar === 'v') {
+        return {
+          label: 'Vận tốc trượt v(t)',
+          unit: 'm/s',
+          color: '#10b981',
+          data: chartTimes.map((t) => Math.min(Math.sqrt(2 * inclineAcc * inclineS), inclineAcc * t)),
+        };
+      }
+      if (selectedChartVar === 'a') {
+        return {
+          label: 'Gia tốc trượt a(t)',
+          unit: 'm/s²',
+          color: '#f59e0b',
+          data: chartTimes.map(() => inclineAcc),
+        };
+      }
+      return {
+        label: 'Quãng đường s(t)',
+        unit: 'm',
+        color: '#38bdf8',
+        data: chartTimes.map((t) => Math.min(inclineS, 0.5 * inclineAcc * t * t)),
+      };
+    }
+  }, [currentSim.id, selectedChartVar, chartTimes, carV0, carA, sStopCar, v0x, v0y, g, h, inclineAcc, inclineS]);
 
   // Animation Frame Loop
   useEffect(() => {
@@ -1557,6 +1648,15 @@ export const SimulationPlayerPage: React.FC = () => {
             <span>Bảng số</span>
           </button>
           <button
+            className={`inspector-tab-btn ${activeTab === 'chart' ? 'active' : ''}`}
+            onClick={() => setActiveTab('chart')}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+            title="Đồ thị hàm số thời gian thực (Real-time SVG Curve)"
+          >
+            <ChartIcon size={13} />
+            <span>Đồ thị SVG</span>
+          </button>
+          <button
             className={`inspector-tab-btn ${activeTab === 'export' ? 'active' : ''}`}
             onClick={() => setActiveTab('export')}
             style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
@@ -1576,6 +1676,82 @@ export const SimulationPlayerPage: React.FC = () => {
         </div>
 
         <div className="inspector-content">
+          {/* TAB 0: ĐỒ THỊ VẬT LÝ SVG THỜI GIAN THỰC */}
+          {activeTab === 'chart' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
+                  ĐỒ THỊ THỜI GIAN THỰC (SVG)
+                </span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                    onClick={() => setSelectedChartVar('v')}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      border: '1px solid',
+                      borderColor: selectedChartVar === 'v' ? '#10b981' : '#cbd5e1',
+                      cursor: 'pointer',
+                      backgroundColor: selectedChartVar === 'v' ? '#10b981' : '#ffffff',
+                      color: selectedChartVar === 'v' ? '#ffffff' : '#334155',
+                    }}
+                  >
+                    v(t)
+                  </button>
+                  <button
+                    onClick={() => setSelectedChartVar('s')}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      border: '1px solid',
+                      borderColor: selectedChartVar === 's' ? '#3b82f6' : '#cbd5e1',
+                      cursor: 'pointer',
+                      backgroundColor: selectedChartVar === 's' ? '#3b82f6' : '#ffffff',
+                      color: selectedChartVar === 's' ? '#ffffff' : '#334155',
+                    }}
+                  >
+                    {currentSim.id === 'sim-proj-001' ? 'y(t)' : 's(t)'}
+                  </button>
+                  <button
+                    onClick={() => setSelectedChartVar('a')}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      border: '1px solid',
+                      borderColor: selectedChartVar === 'a' ? '#ef4444' : '#cbd5e1',
+                      cursor: 'pointer',
+                      backgroundColor: selectedChartVar === 'a' ? '#ef4444' : '#ffffff',
+                      color: selectedChartVar === 'a' ? '#ffffff' : '#334155',
+                    }}
+                  >
+                    a(t)
+                  </button>
+                </div>
+              </div>
+
+              <LearningChart
+                series={chartSeries}
+                times={chartTimes}
+                currentTime={currentTime}
+                onSeek={(t) => {
+                  setIsPlaying(false);
+                  setCurrentTime(Math.max(0, Math.min(maxDuration, t)));
+                }}
+                height={220}
+              />
+
+              <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', fontSize: '12px', color: '#1e40af', lineHeight: 1.5 }}>
+                ✨ <strong>Tương tác nhanh:</strong> Chạm hoặc kéo chuột trực tiếp trên đường cong đồ thị SVG để tua con trỏ thời gian tương ứng trên canvas mô phỏng.
+              </div>
+            </div>
+          )}
+
           {/* TAB 1: SLIDERS & EXACT VALUE INPUT */}
           {activeTab === 'sliders' && (
             <>

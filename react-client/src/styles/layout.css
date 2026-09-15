@@ -42,6 +42,56 @@
   --shadow-dock: 0 12px 36px rgba(0, 0, 0, 0.12);
 }
 
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --bg-page: #0b0f19;
+  --bg-card: #131b2e;
+  --bg-surface: #131b2e;
+  --surface-muted: #1e293b;
+  --border-card: #283548;
+  --border-subtle: #283548;
+  --border-input: #334155;
+  --text-main: #f8fafc;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-soft: rgba(26, 115, 232, 0.2);
+  --accent-text-dark: #8ab4f8;
+}
+
+/* SVG ICON & DYNAMIC SVG CHART STYLES */
+.svg-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, stroke 0.15s ease;
+}
+
+.learn-chart {
+  width: 100%;
+  position: relative;
+}
+
+.learn-chart svg {
+  display: block;
+  overflow: visible;
+}
+
+.learn-chart-grid {
+  stroke: #e2e8f0;
+  stroke-dasharray: 4 4;
+}
+
+[data-theme="dark"] .learn-chart-grid {
+  stroke: #283548;
+}
+
+.learn-chart-cursor {
+  stroke: #ef4444;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
 * {
   box-sizing: border-box;
 }
