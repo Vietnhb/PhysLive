@@ -277,17 +277,17 @@ export const Admin: React.FC = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-card)',
           padding: '24px',
           borderRadius: '16px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid var(--border-subtle)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
         }}
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
             <ShieldAlert size={26} color="#dc2626" />
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>
               Quản Trị Người Dùng & Phân Quyền Hệ Thống (RBAC)
             </h1>
             <span
@@ -303,7 +303,7 @@ export const Admin: React.FC = () => {
               ADMIN ONLY
             </span>
           </div>
-          <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+          <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
             Quản lý tập trung toàn bộ danh sách tài khoản, khóa / khôi phục truy cập và thay đổi vai trò phân quyền hệ thống.
           </p>
         </div>
@@ -337,9 +337,9 @@ export const Admin: React.FC = () => {
             onClick={loadUsers}
             style={{
               padding: '10px 16px',
-              backgroundColor: '#f8fafc',
-              color: '#475569',
-              border: '1px solid #cbd5e1',
+              backgroundColor: 'var(--surface-muted)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border-input)',
               borderRadius: '8px',
               fontSize: '13px',
               fontWeight: 600,
@@ -358,35 +358,35 @@ export const Admin: React.FC = () => {
 
       {/* KPI Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
-        <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Users size={14} />
             <span>TỔNG NGƯỜI DÙNG</span>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>{stats.total}</div>
+          <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>{stats.total}</div>
         </div>
-        <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
           <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
             <GraduationCap size={14} />
             <span>GIÁO VIÊN</span>
           </div>
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#2563eb', marginTop: '4px' }}>{stats.teachers}</div>
         </div>
-        <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
           <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
             <BookOpen size={14} />
             <span>HỌC SINH</span>
           </div>
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#16a34a', marginTop: '4px' }}>{stats.students}</div>
         </div>
-        <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
           <div style={{ fontSize: '12px', color: '#9333ea', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
             <ShieldCheck size={14} />
             <span>THẨM ĐỊNH</span>
           </div>
           <div style={{ fontSize: '26px', fontWeight: 800, color: '#9333ea', marginTop: '4px' }}>{stats.reviewers}</div>
         </div>
-        <div style={{ backgroundColor: '#ffffff', padding: '18px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
           <div style={{ fontSize: '12px', color: '#dc2626', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
             <UserX size={14} />
             <span>ĐÃ VÔ HIỆU HÓA</span>
@@ -398,10 +398,10 @@ export const Admin: React.FC = () => {
       {/* Filter and Search Bar */}
       <div
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-card)',
           padding: '18px 24px',
           borderRadius: '14px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid var(--border-subtle)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -420,7 +420,7 @@ export const Admin: React.FC = () => {
               width: '100%',
               padding: '10px 14px 10px 36px',
               borderRadius: '8px',
-              border: '1px solid #cbd5e1',
+              border: '1px solid var(--border-input)',
               fontSize: '14px',
               outline: 'none',
             }}
@@ -429,17 +429,17 @@ export const Admin: React.FC = () => {
 
         {/* Filter Role */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>Vai trò:</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600 }}>Vai trò:</span>
           <select
             value={selectedRoleFilter}
             onChange={(e) => setSelectedRoleFilter(e.target.value)}
             style={{
               padding: '9px 12px',
               borderRadius: '8px',
-              border: '1px solid #cbd5e1',
+              border: '1px solid var(--border-input)',
               fontSize: '13px',
               fontWeight: 600,
-              backgroundColor: '#f8fafc',
+              backgroundColor: 'var(--surface-muted)',
               cursor: 'pointer',
               outline: 'none',
             }}
@@ -454,17 +454,17 @@ export const Admin: React.FC = () => {
 
         {/* Filter Status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 600 }}>Trạng thái:</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 600 }}>Trạng thái:</span>
           <select
             value={selectedStatusFilter}
             onChange={(e) => setSelectedStatusFilter(e.target.value)}
             style={{
               padding: '9px 12px',
               borderRadius: '8px',
-              border: '1px solid #cbd5e1',
+              border: '1px solid var(--border-input)',
               fontSize: '13px',
               fontWeight: 600,
-              backgroundColor: '#f8fafc',
+              backgroundColor: 'var(--surface-muted)',
               cursor: 'pointer',
               outline: 'none',
             }}
@@ -666,16 +666,16 @@ export const Admin: React.FC = () => {
       {/* Users Table */}
       <div
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-card)',
           borderRadius: '16px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid var(--border-subtle)',
           overflow: 'hidden',
           boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
         }}
       >
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#475569', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <tr style={{ backgroundColor: 'var(--surface-muted)', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               <th style={{ padding: '14px 20px', fontWeight: 700 }}>Người dùng</th>
               <th style={{ padding: '14px 16px', fontWeight: 700 }}>Trường / Đơn vị</th>
               <th style={{ padding: '14px 16px', fontWeight: 700 }}>Vai trò (RBAC)</th>
@@ -687,13 +687,13 @@ export const Admin: React.FC = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+                <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Đang tải danh sách người dùng...
                 </td>
               </tr>
             ) : filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+                <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Không tìm thấy tài khoản nào phù hợp với bộ lọc hiện tại.
                 </td>
               </tr>
@@ -704,8 +704,8 @@ export const Admin: React.FC = () => {
                   <tr
                     key={u.id}
                     style={{
-                      borderBottom: '1px solid #f1f5f9',
-                      backgroundColor: isDisabled ? '#fff7ed' : '#ffffff',
+                      borderBottom: '1px solid var(--border-subtle)',
+                      backgroundColor: isDisabled ? 'var(--status-warn-bg)' : 'var(--bg-card)',
                       transition: 'background-color 0.15s ease',
                     }}
                   >
@@ -730,7 +730,7 @@ export const Admin: React.FC = () => {
                           {u.full_name.charAt(0)}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 700, color: isDisabled ? '#64748b' : '#0f172a', fontSize: '14px' }}>
+                          <div style={{ fontWeight: 700, color: isDisabled ? 'var(--text-muted)' : 'var(--text-primary)', fontSize: '14px' }}>
                             {u.full_name}
                             {u.id === currentUser?.id && (
                               <span style={{ marginLeft: '6px', fontSize: '11px', color: '#2563eb', fontWeight: 600 }}>
@@ -738,13 +738,13 @@ export const Admin: React.FC = () => {
                               </span>
                             )}
                           </div>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>{u.email}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{u.email}</div>
                         </div>
                       </div>
                     </td>
 
                     {/* School */}
-                    <td style={{ padding: '14px 16px', fontSize: '13px', color: '#475569' }}>
+                    <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--text-secondary)' }}>
                       {u.school_name || '—'}
                     </td>
 
@@ -759,10 +759,10 @@ export const Admin: React.FC = () => {
                           style={{
                             padding: '4px 8px',
                             borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
+                            border: '1px solid var(--border-input)',
                             fontSize: '12px',
                             fontWeight: 600,
-                            backgroundColor: '#ffffff',
+                            backgroundColor: 'var(--bg-card)',
                             cursor: 'pointer',
                             outline: 'none',
                           }}
@@ -813,7 +813,7 @@ export const Admin: React.FC = () => {
                     </td>
 
                     {/* Date */}
-                    <td style={{ padding: '14px 16px', fontSize: '12px', color: '#64748b' }}>
+                    <td style={{ padding: '14px 16px', fontSize: '12px', color: 'var(--text-muted)' }}>
                       {u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : '—'}
                     </td>
 

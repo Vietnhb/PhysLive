@@ -147,10 +147,10 @@ export const ProblemSubmitPage: React.FC = () => {
       {/* Main Grid: Input Form vs Extracted Preview */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
         {/* Left Column: Input Form */}
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+        <div className="card" style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', border: '1px solid var(--border-card)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
           {/* Lesson Selection */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 <BookOpen size={15} />
                 <span>Liên kết phân cấp học liệu (Curriculum Taxonomy)</span>
@@ -163,14 +163,15 @@ export const ProblemSubmitPage: React.FC = () => {
                 width: '100%',
                 padding: '10px 12px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
+                border: '1px solid var(--border-subtle)',
                 fontSize: '14px',
                 outline: 'none',
-                backgroundColor: '#f8fafc',
+                backgroundColor: 'var(--surface-muted)',
+                color: 'var(--text-primary)',
               }}
             >
               {MOCK_LESSONS.map((les) => (
-                <option key={les.id} value={les.id}>
+                <option key={les.id} value={les.id} style={{ backgroundColor: 'var(--bg-card)', color: 'var(--text-primary)' }}>
                   Lớp {les.grade_level}: {les.name}
                 </option>
               ))}
@@ -178,15 +179,15 @@ export const ProblemSubmitPage: React.FC = () => {
           </div>
 
           {/* Mode Tabs */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px' }}>
             <button
               onClick={() => setInputType('text')}
               style={{
                 padding: '8px 16px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: inputType === 'text' ? '#2563eb' : '#f1f5f9',
-                color: inputType === 'text' ? '#ffffff' : '#64748b',
+                backgroundColor: inputType === 'text' ? 'var(--primary)' : 'var(--surface-muted)',
+                color: inputType === 'text' ? '#ffffff' : 'var(--text-secondary)',
                 fontWeight: 600,
                 fontSize: '13px',
                 cursor: 'pointer',
@@ -204,8 +205,8 @@ export const ProblemSubmitPage: React.FC = () => {
                 padding: '8px 16px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: inputType === 'image' ? '#2563eb' : '#f1f5f9',
-                color: inputType === 'image' ? '#ffffff' : '#64748b',
+                backgroundColor: inputType === 'image' ? 'var(--primary)' : 'var(--surface-muted)',
+                color: inputType === 'image' ? '#ffffff' : 'var(--text-secondary)',
                 fontWeight: 600,
                 fontSize: '13px',
                 cursor: 'pointer',
@@ -223,11 +224,11 @@ export const ProblemSubmitPage: React.FC = () => {
             <div style={{ marginBottom: '16px' }}>
               <div
                 style={{
-                  border: '2px dashed #93c5fd',
+                  border: '2px dashed var(--primary)',
                   borderRadius: '12px',
                   padding: '24px',
                   textAlign: 'center',
-                  backgroundColor: '#f0f7ff',
+                  backgroundColor: 'var(--accent-soft)',
                   cursor: 'pointer',
                 }}
                 onClick={() => {
@@ -236,12 +237,12 @@ export const ProblemSubmitPage: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
-                  <UploadCloud size={36} color="#2563eb" />
+                  <UploadCloud size={36} color="var(--primary)" />
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#1e40af' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent-text-dark)' }}>
                   Kéo thả ảnh đề bài hoặc click để chọn ảnh (Hỗ trợ JPG, PNG)
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                   Hệ thống sử dụng OpenRouter OCR model để bóc tách văn bản tự động
                 </div>
               </div>
@@ -253,7 +254,7 @@ export const ProblemSubmitPage: React.FC = () => {
                     alt="Upload preview"
                     style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px' }}
                   />
-                  <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600 }}>
+                  <div style={{ fontSize: '12px', color: 'var(--status-success-text)', fontWeight: 600 }}>
                     ✓ Đã nhận diện ảnh thành công! Bạn có thể xem và sửa văn bản OCR bên dưới.
                   </div>
                 </div>
@@ -263,7 +264,7 @@ export const ProblemSubmitPage: React.FC = () => {
 
           {/* Text Area */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '8px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
               {inputType === 'image' ? 'Nội dung OCR nhận diện (Có thể chỉnh sửa):' : 'Nội dung đề bài Vật lý:'}
             </label>
             <textarea
@@ -275,29 +276,30 @@ export const ProblemSubmitPage: React.FC = () => {
                 width: '100%',
                 padding: '12px',
                 borderRadius: '10px',
-                border: '1px solid #cbd5e1',
+                border: '1px solid var(--border-subtle)',
                 fontSize: '14px',
                 lineHeight: 1.5,
                 outline: 'none',
                 fontFamily: 'inherit',
-                backgroundColor: '#fafafa',
+                backgroundColor: 'var(--surface-muted)',
+                color: 'var(--text-primary)',
               }}
             />
           </div>
 
           {/* Progress Indicator when Analyzing */}
           {isAnalyzing && (
-            <div style={{ marginBottom: '20px', padding: '14px', backgroundColor: '#f0fdf4', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 600, color: '#166534', marginBottom: '6px' }}>
+            <div style={{ marginBottom: '20px', padding: '14px', backgroundColor: 'var(--status-success-bg)', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 600, color: 'var(--status-success-text)', marginBottom: '6px' }}>
                 <span>{progressStage}</span>
                 <span>{analysisProgress}%</span>
               </div>
-              <div style={{ height: '8px', backgroundColor: '#dcfce7', borderRadius: '9999px', overflow: 'hidden' }}>
+              <div style={{ height: '8px', backgroundColor: 'var(--surface-muted)', borderRadius: '9999px', overflow: 'hidden' }}>
                 <div
                   style={{
                     height: '100%',
                     width: `${analysisProgress}%`,
-                    backgroundColor: '#16a34a',
+                    backgroundColor: 'var(--primary)',
                     transition: 'width 0.4s ease',
                   }}
                 />
@@ -313,7 +315,7 @@ export const ProblemSubmitPage: React.FC = () => {
               style={{
                 flex: 1,
                 padding: '12px',
-                backgroundColor: isAnalyzing ? '#94a3b8' : '#2563eb',
+                backgroundColor: isAnalyzing ? 'var(--text-muted)' : 'var(--primary)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '10px',
@@ -334,13 +336,13 @@ export const ProblemSubmitPage: React.FC = () => {
         </div>
 
         {/* Right Column: Extracted Specifications & Ambiguity Status */}
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div className="card" style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', border: '1px solid var(--border-card)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '12px' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Đặc tả trích xuất (Specification JSON)
               </h3>
-              <span style={{ fontSize: '12px', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#475569', fontWeight: 600 }}>
+              <span style={{ fontSize: '12px', padding: '3px 8px', borderRadius: '4px', backgroundColor: 'var(--surface-muted)', color: 'var(--text-secondary)', fontWeight: 600 }}>
                 Archetype: KINEMATICS
               </span>
             </div>
@@ -349,25 +351,25 @@ export const ProblemSubmitPage: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {/* Extracted Quantities Table */}
                 <div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                     1. Các đại lượng vật lý đã nhận diện:
                   </div>
-                  <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                  <div style={{ border: '1px solid var(--border-subtle)', borderRadius: '8px', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                      <thead style={{ backgroundColor: '#f8fafc' }}>
+                      <thead style={{ backgroundColor: 'var(--surface-muted)' }}>
                         <tr>
-                          <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Đại lượng</th>
-                          <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Ký hiệu</th>
-                          <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Giá trị</th>
-                          <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>Loại</th>
+                          <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>Đại lượng</th>
+                          <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>Ký hiệu</th>
+                          <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>Giá trị</th>
+                          <th style={{ padding: '8px 12px', textAlign: 'left', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>Loại</th>
                         </tr>
                       </thead>
                       <tbody>
                         {extractedQuantities.map((q, idx) => (
-                          <tr key={idx} style={{ borderBottom: idx === extractedQuantities.length - 1 ? 'none' : '1px solid #f1f5f9' }}>
-                            <td style={{ padding: '8px 12px', color: '#1e293b', fontWeight: 500 }}>{q.name}</td>
-                            <td style={{ padding: '8px 12px', color: '#2563eb', fontWeight: 600 }}>{q.symbol}</td>
-                            <td style={{ padding: '8px 12px', color: '#0f172a', fontWeight: 600 }}>
+                          <tr key={idx} style={{ borderBottom: idx === extractedQuantities.length - 1 ? 'none' : '1px solid var(--border-subtle)' }}>
+                            <td style={{ padding: '8px 12px', color: 'var(--text-primary)', fontWeight: 500 }}>{q.name}</td>
+                            <td style={{ padding: '8px 12px', color: 'var(--primary)', fontWeight: 600 }}>{q.symbol}</td>
+                            <td style={{ padding: '8px 12px', color: 'var(--text-primary)', fontWeight: 600 }}>
                               {q.value !== undefined ? `${q.value} ${q.unit}` : 'Chưa có (?)'}
                             </td>
                             <td style={{ padding: '8px 12px' }}>
@@ -376,8 +378,8 @@ export const ProblemSubmitPage: React.FC = () => {
                                   fontSize: '11px',
                                   padding: '2px 6px',
                                   borderRadius: '4px',
-                                  backgroundColor: q.is_given ? '#ecfdf5' : '#eff6ff',
-                                  color: q.is_given ? '#047857' : '#1d4ed8',
+                                  backgroundColor: q.is_given ? 'var(--status-success-bg)' : 'var(--accent-soft)',
+                                  color: q.is_given ? 'var(--status-success-text)' : 'var(--accent-text-dark)',
                                   fontWeight: 600,
                                 }}
                               >
