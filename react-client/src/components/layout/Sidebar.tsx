@@ -11,7 +11,7 @@ export const Sidebar: React.FC = () => {
       {/* Brand Header */}
       <div className="app-sidebar-header">
         <Link to="/" className="brand-logo">
-          <div className="brand-icon">⚛️</div>
+          <img className="brand-icon" src="/favicon.ico" alt="PhysLive" />
           <div>
             <div className="brand-title">PhysLive</div>
             <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>

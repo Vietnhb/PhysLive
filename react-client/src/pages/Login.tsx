@@ -112,7 +112,7 @@ function Login() {
               boxShadow: "0 8px 20px rgba(37, 99, 235, 0.3)",
             }}
           >
-            ⚛️
+            <img src="/favicon.ico" alt="PhysLive" width="28" height="28" />
           </div>
           <h1 style={{ margin: "0 0 6px", fontSize: "22px", fontWeight: 800, color: "#0f172a" }}>
             Đăng nhập PhysLive Studio
