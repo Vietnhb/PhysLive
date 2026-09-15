@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { signup } from "../api/authApi";
 
@@ -44,250 +44,103 @@ function Signup() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0b1329 100%)",
-        padding: "20px",
-        fontFamily: "'Inter', sans-serif",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "480px",
-          backgroundColor: "#ffffff",
-          borderRadius: "20px",
-          padding: "36px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.4)",
-        }}
-      >
-        {/* Header Logo */}
-        <div style={{ textAlign: "center", marginBottom: "24px" }}>
-          <div
-            style={{
-              width: "56px",
-              height: "56px",
-              borderRadius: "14px",
-              background: "linear-gradient(135deg, #2563eb, #06b6d4)",
-              color: "#ffffff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "28px",
-              margin: "0 auto 14px",
-              boxShadow: "0 8px 20px rgba(37, 99, 235, 0.3)",
-            }}
-          >
-            ⚛️
-          </div>
-          <h1 style={{ margin: "0 0 6px", fontSize: "22px", fontWeight: 800, color: "#0f172a" }}>
-            Tạo tài khoản PhysLive
-          </h1>
-          <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-            Đăng ký để khám phá và tương tác với các phòng thí nghiệm vật lý
-          </p>
-        </div>
+    <main className="auth-page">
+      <form className="auth-card" onSubmit={handleSignup}>
+        <p className="auth-kicker">PhysLive workspace</p>
+        <h1>Tạo tài khoản mới</h1>
+        <p className="muted">Đăng ký để khám phá và tương tác với các phòng thí nghiệm vật lý.</p>
 
-        {/* Error notification */}
         {error && (
           <div
+            className="ambiguity"
             style={{
-              padding: "12px 14px",
-              backgroundColor: "#fef2f2",
-              border: "1px solid #fecaca",
-              borderRadius: "10px",
-              color: "#991b1b",
-              fontSize: "13px",
-              marginBottom: "20px",
+              borderColor: '#fca5a5',
+              background: '#fef2f2',
+              color: '#991b1b',
+              marginBottom: 18,
             }}
           >
             ⚠️ {error}
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
-              Họ và tên của bạn
-            </label>
-            <input
-              type="text"
-              placeholder="ví dụ: Nguyễn Thế Hùng"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 14px",
-                borderRadius: "10px",
-                border: "1px solid #cbd5e1",
-                fontSize: "14px",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
-              Địa chỉ Email
-            </label>
-            <input
-              type="email"
-              placeholder="email@physlive.edu.vn"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 14px",
-                borderRadius: "10px",
-                border: "1px solid #cbd5e1",
-                fontSize: "14px",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-
-          {/* Vai trò */}
-          <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
-              Vai trò của bạn
-            </label>
-            <div style={{ display: "flex", gap: "10px" }}>
-              <label
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  borderRadius: "8px",
-                  border: role === "TEACHER" ? "2px solid #2563eb" : "1px solid #cbd5e1",
-                  backgroundColor: role === "TEACHER" ? "#eff6ff" : "#f8fafc",
-                  cursor: "pointer",
-                  textAlign: "center",
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  color: role === "TEACHER" ? "#1d4ed8" : "#475569",
-                }}
-              >
-                <input
-                  type="radio"
-                  name="role"
-                  value="TEACHER"
-                  checked={role === "TEACHER"}
-                  onChange={() => setRole("TEACHER")}
-                  style={{ display: "none" }}
-                />
-                👨‍🏫 Giáo viên
-              </label>
-
-              <label
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  borderRadius: "8px",
-                  border: role === "STUDENT" ? "2px solid #2563eb" : "1px solid #cbd5e1",
-                  backgroundColor: role === "STUDENT" ? "#eff6ff" : "#f8fafc",
-                  cursor: "pointer",
-                  textAlign: "center",
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  color: role === "STUDENT" ? "#1d4ed8" : "#475569",
-                }}
-              >
-                <input
-                  type="radio"
-                  name="role"
-                  value="STUDENT"
-                  checked={role === "STUDENT"}
-                  onChange={() => setRole("STUDENT")}
-                  style={{ display: "none" }}
-                />
-                🎒 Học sinh
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
-              Mật khẩu
-            </label>
-            <input
-              type="password"
-              placeholder="Tối thiểu 6 ký tự..."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 14px",
-                borderRadius: "10px",
-                border: "1px solid #cbd5e1",
-                fontSize: "14px",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
-              Xác nhận mật khẩu
-            </label>
-            <input
-              type="password"
-              placeholder="Nhập lại mật khẩu..."
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 14px",
-                borderRadius: "10px",
-                border: "1px solid #cbd5e1",
-                fontSize: "14px",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              marginTop: "8px",
-              padding: "12px",
-              backgroundColor: loading ? "#94a3b8" : "#2563eb",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "10px",
-              fontWeight: 700,
-              fontSize: "14px",
-              cursor: loading ? "not-allowed" : "pointer",
-              boxShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
-            }}
-          >
-            {loading ? "Đang tạo tài khoản..." : "Đăng ký ngay"}
-          </button>
-        </form>
-
-        {/* Footer */}
-        <div style={{ marginTop: "24px", textAlign: "center", fontSize: "13px", color: "#64748b" }}>
-          Đã có tài khoản?{" "}
-          <Link to="/login" style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none" }}>
-            Đăng nhập tại đây
-          </Link>
-          <div style={{ marginTop: "8px" }}>
-            <Link to="/" style={{ color: "#94a3b8", fontSize: "12px", textDecoration: "none" }}>
-              ← Quay về Trang chủ
-            </Link>
-          </div>
+        <div className="field">
+          <label htmlFor="signup-name">Họ và tên</label>
+          <input
+            id="signup-name"
+            type="text"
+            placeholder="ví dụ: Nguyễn Thế Hùng"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+          />
         </div>
-      </div>
-    </div>
+
+        <div className="field">
+          <label htmlFor="signup-email">Địa chỉ Email</label>
+          <input
+            id="signup-email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="signup-role">Vai trò của bạn</label>
+          <select
+            id="signup-role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          >
+            <option value="TEACHER">Giáo viên (Teacher) — Biên soạn đề & Quản lý lớp</option>
+            <option value="STUDENT">Học sinh (Student) — Thực nghiệm & Dự đoán</option>
+            <option value="REVIEWER">Kiểm duyệt (Reviewer) — Thẩm định Schema Solver</option>
+          </select>
+        </div>
+
+        <div className="field">
+          <label htmlFor="signup-password">Mật khẩu</label>
+          <input
+            id="signup-password"
+            type="password"
+            placeholder="Tối thiểu 6 ký tự"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="signup-confirm-pwd">Xác nhận mật khẩu</label>
+          <input
+            id="signup-confirm-pwd"
+            type="password"
+            placeholder="Nhập lại mật khẩu"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="actions">
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? "Đang xử lý..." : "Tạo tài khoản"}
+          </button>
+          <button type="button" className="secondary" onClick={() => navigate("/login")}>
+            Đã có tài khoản? Đăng nhập
+          </button>
+        </div>
+
+        <p className="auth-footer">
+          Bằng việc đăng ký, bạn đồng ý với <a href="#terms">Điều khoản sử dụng</a> PhysLive.
+        </p>
+      </form>
+    </main>
   );
 }
 
 export default Signup;
+export { Signup };

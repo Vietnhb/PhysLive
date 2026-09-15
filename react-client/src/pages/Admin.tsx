@@ -32,11 +32,14 @@ export const Admin: React.FC = () => {
   const [selectedRoleFilter, setSelectedRoleFilter] = useState<string>('ALL');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('ALL');
 
-  // Modal view detail user
-  const [viewingUser, setViewingUser] = useState<User | null>(null);
+  // Native Card View / Edit state (Section 6.3)
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editFullName, setEditFullName] = useState('');
+  const [editRole, setEditRole] = useState<RoleType>('STUDENT');
+  const [editSchool, setEditSchool] = useState('');
 
-  // Modal create user
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Native Card Create state
+  const [isCreating, setIsCreating] = useState(false);
   const [newFullName, setNewFullName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState<RoleType>('STUDENT');
@@ -96,6 +99,59 @@ export const Admin: React.FC = () => {
     return { total, teachers, students, reviewers, disabled };
   }, [users]);
 
+  // Bắt đầu chỉnh sửa người dùng dạng Native Card (Sec 6.3)
+  const handleStartEdit = (user: User) => {
+    setIsCreating(false);
+    setEditingUser(user);
+    setEditFullName(user.full_name);
+    setEditRole(user.role);
+    setEditSchool(user.school_name || '');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+    setIsCreating(false);
+  };
+
+  // Lưu chỉnh sửa người dùng dạng Native Card
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    if (!editFullName.trim()) {
+      showToast('Họ và tên không được để trống', 'danger');
+      return;
+    }
+
+    try {
+      let nextRoleList = users;
+      if (editRole !== editingUser.role) {
+        nextRoleList = await changeUserRoleApi(editingUser.id, editRole);
+      }
+
+      const updatedUsers = nextRoleList.map((u) =>
+        u.id === editingUser.id
+          ? {
+              ...u,
+              full_name: editFullName.trim(),
+              school_name: editSchool.trim(),
+              role: editRole,
+              role_id: `r-${editRole.toLowerCase()}`,
+              updated_at: new Date().toISOString(),
+            }
+          : u
+      );
+
+      setUsers(updatedUsers);
+      setAdminUsers(updatedUsers);
+      setEditingUser(null);
+      showToast(`Đã lưu cập nhật thông tin cho "${editFullName.trim()}"`, 'success');
+    } catch {
+      showToast('Lỗi khi lưu thông tin người dùng', 'danger');
+    }
+  };
+
   // 1. Vô hiệu hóa người dùng (Disable User)
   const handleDisableUser = async (user: User) => {
     if (user.id === currentUser?.id) {
@@ -108,8 +164,8 @@ export const Admin: React.FC = () => {
     try {
       const updatedList = await disableUserApi(user.id);
       setUsers(updatedList);
-      if (viewingUser?.id === user.id) {
-        setViewingUser({ ...viewingUser, status: 'disabled' });
+      if (editingUser?.id === user.id) {
+        setEditingUser({ ...editingUser, status: 'disabled' });
       }
       showToast(`Đã khóa thành công tài khoản: ${user.full_name}`, 'danger');
     } catch {
@@ -125,8 +181,8 @@ export const Admin: React.FC = () => {
     try {
       const updatedList = await restoreUserApi(user.id);
       setUsers(updatedList);
-      if (viewingUser?.id === user.id) {
-        setViewingUser({ ...viewingUser, status: 'active' });
+      if (editingUser?.id === user.id) {
+        setEditingUser({ ...editingUser, status: 'active' });
       }
       showToast(`Đã khôi phục hoạt động cho tài khoản: ${user.full_name}`, 'success');
     } catch {
@@ -134,7 +190,7 @@ export const Admin: React.FC = () => {
     }
   };
 
-  // 3. Đổi vai trò (Change Role)
+  // 3. Đổi vai trò (Change Role) trực tiếp trên table
   const handleChangeRole = async (user: User, nextRole: RoleType) => {
     if (user.role === nextRole) return;
     if (user.id === currentUser?.id && nextRole !== 'ADMIN') {
@@ -145,8 +201,8 @@ export const Admin: React.FC = () => {
     try {
       const updatedList = await changeUserRoleApi(user.id, nextRole);
       setUsers(updatedList);
-      if (viewingUser?.id === user.id) {
-        setViewingUser({ ...viewingUser, role: nextRole, role_id: `r-${nextRole.toLowerCase()}` });
+      if (editingUser?.id === user.id) {
+        setEditingUser({ ...editingUser, role: nextRole, role_id: `r-${nextRole.toLowerCase()}` });
       }
       showToast(`Đã cập nhật vai trò của "${user.full_name}" thành: ${nextRole}`, 'success');
     } catch {
@@ -158,7 +214,7 @@ export const Admin: React.FC = () => {
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newFullName.trim() || !newEmail.trim()) {
-      alert('Vui lòng nhập đầy đủ họ tên và email!');
+      showToast('Vui lòng nhập đầy đủ họ tên và email!', 'danger');
       return;
     }
 
@@ -183,7 +239,7 @@ export const Admin: React.FC = () => {
     setNewFullName('');
     setNewEmail('');
     setNewRole('STUDENT');
-    setIsCreateModalOpen(false);
+    setIsCreating(false);
   };
 
   return (
@@ -254,20 +310,24 @@ export const Admin: React.FC = () => {
 
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => {
+              setIsCreating(true);
+              setEditingUser(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             style={{
               padding: '10px 18px',
-              backgroundColor: '#2563eb',
+              backgroundColor: 'var(--color-primary)',
               color: '#ffffff',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-sm)',
               fontSize: '13px',
               fontWeight: 700,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 2px 6px rgba(37,99,235,0.25)',
+              boxShadow: '0 2px 6px rgba(26,115,232,0.25)',
             }}
           >
             <UserPlus size={15} strokeWidth={2.5} />
@@ -415,6 +475,193 @@ export const Admin: React.FC = () => {
           </select>
         </div>
       </div>
+
+      {/* NATIVE CARD: Chỉnh sửa thông tin tài khoản (Section 6.3) */}
+      {editingUser && (
+        <div className="card ops-form" style={{ borderColor: 'var(--color-primary)', boxShadow: 'var(--shadow-md)', animation: 'fadeIn 0.25s ease' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <div className="eyebrow">Hồ sơ người dùng • Quản trị viên (RBAC)</div>
+              <h2 style={{ margin: '0.25rem 0 0.5rem', fontSize: '1.25rem', fontWeight: 800 }}>
+                Chỉnh sửa thông tin tài khoản: {editingUser.full_name}
+              </h2>
+              <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <span>Mã ID: <code>{editingUser.id}</code></span>
+                <span>•</span>
+                <span className={`status ${editingUser.status === 'active' ? '' : 'bad'}`}>
+                  {editingUser.status === 'active' ? '● Đang hoạt động' : '● Đã vô hiệu hóa'}
+                </span>
+                <span>•</span>
+                <span>Tạo ngày: {new Date(editingUser.created_at).toLocaleDateString('vi-VN')}</span>
+              </div>
+            </div>
+            <button type="button" className="secondary" onClick={handleCancelEdit} style={{ fontSize: '13px', padding: '6px 14px' }}>
+              ✕ Đóng form
+            </button>
+          </div>
+
+          <form onSubmit={handleSaveEdit} style={{ marginTop: '20px' }}>
+            <div className="ops-form-grid">
+              <div className="ops-field">
+                <label>Họ và tên *</label>
+                <input
+                  type="text"
+                  value={editFullName}
+                  onChange={(e) => setEditFullName(e.target.value)}
+                  required
+                  placeholder="Nhập họ và tên..."
+                />
+              </div>
+
+              <div className="ops-field">
+                <label>Email đăng nhập (Cố định theo hệ thống)</label>
+                <input
+                  type="email"
+                  value={editingUser.email}
+                  disabled
+                  style={{ backgroundColor: 'var(--color-surface-variant)', color: 'var(--color-text-secondary)', cursor: 'not-allowed' }}
+                />
+              </div>
+
+              <div className="ops-field">
+                <label>Vai trò phân quyền hệ thống (Role)</label>
+                <select
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value as RoleType)}
+                >
+                  <option value="TEACHER">TEACHER (Giáo viên)</option>
+                  <option value="STUDENT">STUDENT (Học sinh)</option>
+                  <option value="REVIEWER">REVIEWER (Thẩm định viên)</option>
+                  <option value="ADMIN">ADMIN (Quản trị viên)</option>
+                </select>
+              </div>
+
+              <div className="ops-field">
+                <label>Trường học / Đơn vị công tác</label>
+                <input
+                  type="text"
+                  value={editSchool}
+                  onChange={(e) => setEditSchool(e.target.value)}
+                  placeholder="Ví dụ: THPT Chuyên Khoa Học Tự Nhiên"
+                />
+              </div>
+            </div>
+
+            <div className="ops-actions" style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                {editingUser.status === 'disabled' ? (
+                  <button
+                    type="button"
+                    onClick={() => handleRestoreUser(editingUser)}
+                    style={{ backgroundColor: '#10b981', color: '#ffffff', border: 'none', borderRadius: 'var(--radius-sm)', padding: '10px 18px', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <RotateCcw size={14} />
+                    <span>Khôi phục tài khoản (Restore)</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="danger"
+                    onClick={() => handleDisableUser(editingUser)}
+                    disabled={editingUser.id === currentUser?.id}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <UserX size={14} />
+                    <span>Khóa tài khoản (Disable)</span>
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button type="button" className="secondary" onClick={handleCancelEdit}>
+                  Hủy thao tác
+                </button>
+                <button type="submit">
+                  Lưu cập nhật tài khoản
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* NATIVE CARD: Thêm tài khoản mới (Section 6.3) */}
+      {isCreating && (
+        <div className="card ops-form" style={{ borderColor: 'var(--color-primary)', boxShadow: 'var(--shadow-md)', animation: 'fadeIn 0.25s ease' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div className="eyebrow">Tài khoản mới • Quản trị viên (RBAC)</div>
+              <h2 style={{ margin: '0.25rem 0 0.5rem', fontSize: '1.25rem', fontWeight: 800 }}>
+                Thêm tài khoản người dùng mới
+              </h2>
+              <p style={{ margin: 0, fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                Khởi tạo tài khoản trực tiếp trên hệ thống PhysLive với phân quyền chuẩn.
+              </p>
+            </div>
+            <button type="button" className="secondary" onClick={() => setIsCreating(false)} style={{ fontSize: '13px', padding: '6px 14px' }}>
+              ✕ Đóng form
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateUser} style={{ marginTop: '20px' }}>
+            <div className="ops-form-grid">
+              <div className="ops-field">
+                <label>Họ và tên *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ví dụ: Thầy Trần Quốc Anh"
+                  value={newFullName}
+                  onChange={(e) => setNewFullName(e.target.value)}
+                />
+              </div>
+
+              <div className="ops-field">
+                <label>Email đăng nhập *</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="quocanh.teacher@physlive.edu.vn"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="ops-field">
+                <label>Vai trò phân quyền (Role) *</label>
+                <select
+                  value={newRole}
+                  onChange={(e) => setNewRole(e.target.value as RoleType)}
+                >
+                  <option value="TEACHER">TEACHER (Giáo viên)</option>
+                  <option value="STUDENT">STUDENT (Học sinh)</option>
+                  <option value="REVIEWER">REVIEWER (Thẩm định viên)</option>
+                  <option value="ADMIN">ADMIN (Quản trị viên)</option>
+                </select>
+              </div>
+
+              <div className="ops-field">
+                <label>Trường học / Đơn vị</label>
+                <input
+                  type="text"
+                  placeholder="THPT Chuyên Hà Nội - Amsterdam"
+                  value={newSchool}
+                  onChange={(e) => setNewSchool(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="ops-actions" style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button type="button" className="secondary" onClick={() => setIsCreating(false)}>
+                Hủy bỏ
+              </button>
+              <button type="submit">
+                Lưu & Khởi tạo tài khoản
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Users Table */}
       <div
@@ -573,26 +820,26 @@ export const Admin: React.FC = () => {
                     {/* Actions */}
                     <td style={{ padding: '14px 20px', textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                        {/* View User Button */}
+                        {/* Edit / View User Button */}
                         <button
-                          onClick={() => setViewingUser(u)}
+                          onClick={() => handleStartEdit(u)}
                           style={{
                             padding: '6px 12px',
-                            backgroundColor: '#f1f5f9',
-                            color: '#334155',
-                            border: '1px solid #cbd5e1',
+                            backgroundColor: '#eef3fe',
+                            color: '#1a73e8',
+                            border: '1px solid #c2e7ff',
                             borderRadius: '6px',
                             fontSize: '12px',
-                            fontWeight: 600,
+                            fontWeight: 700,
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
                           }}
-                          title="Xem chi tiết hồ sơ tài khoản (View User)"
+                          title="Xem và chỉnh sửa hồ sơ tài khoản"
                         >
                           <Eye size={13} />
-                          <span>Chi tiết</span>
+                          <span>Sửa & Xem</span>
                         </button>
 
                         {/* Disable / Restore Button */}
@@ -649,321 +896,6 @@ export const Admin: React.FC = () => {
           </tbody>
         </table>
       </div>
-
-      {/* MODAL 1: View User Detail (View User) */}
-      {viewingUser && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px',
-          }}
-          onClick={() => setViewingUser(null)}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '20px',
-              maxWidth: '560px',
-              width: '100%',
-              padding: '28px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
-                👤 Thông tin chi tiết Người Dùng (View User)
-              </h2>
-              <button
-                onClick={() => setViewingUser(null)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '20px',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* User Profile Card Header */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                backgroundColor: '#f8fafc',
-                padding: '18px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-              }}
-            >
-              <div
-                style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #2563eb, #06b6d4)',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '22px',
-                  fontWeight: 800,
-                }}
-              >
-                {viewingUser.full_name.charAt(0)}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
-                    {viewingUser.full_name}
-                  </span>
-                  <RoleBadge role={viewingUser.role} />
-                </div>
-                <div style={{ fontSize: '13px', color: '#64748b' }}>{viewingUser.email}</div>
-              </div>
-            </div>
-
-            {/* Detail Attributes List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Mã định danh (User ID):</span>
-                <span style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: 700 }}>{viewingUser.id}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Trường học / Đơn vị:</span>
-                <span style={{ fontWeight: 600, color: '#0f172a' }}>{viewingUser.school_name || 'Chưa cập nhật'}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Trạng thái tài khoản:</span>
-                <span style={{ fontWeight: 700, color: viewingUser.status === 'disabled' ? '#dc2626' : '#16a34a' }}>
-                  {viewingUser.status === 'disabled' ? '🚫 Đã vô hiệu hóa (Disabled)' : '✓ Đang hoạt động (Active)'}
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Ngày khởi tạo tài khoản:</span>
-                <span>{new Date(viewingUser.created_at).toLocaleString('vi-VN')}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ color: '#64748b', fontWeight: 600 }}>Cập nhật lần cuối:</span>
-                <span>{new Date(viewingUser.updated_at).toLocaleString('vi-VN')}</span>
-              </div>
-            </div>
-
-            {/* Role Assignment Selector inside modal */}
-            <div style={{ backgroundColor: '#f1f5f9', padding: '14px 16px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>Phân quyền vai trò (Change Role):</div>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>Thay đổi quyền truy cập các module theo vai trò</div>
-              </div>
-              <select
-                value={viewingUser.role}
-                onChange={(e) => handleChangeRole(viewingUser, e.target.value as RoleType)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  backgroundColor: '#ffffff',
-                  cursor: 'pointer',
-                }}
-              >
-                <option value="TEACHER">TEACHER (Giáo viên)</option>
-                <option value="STUDENT">STUDENT (Học sinh)</option>
-                <option value="REVIEWER">REVIEWER (Thẩm định)</option>
-                <option value="ADMIN">ADMIN (Quản trị viên)</option>
-              </select>
-            </div>
-
-            {/* Modal Actions */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-              {viewingUser.status === 'disabled' ? (
-                <button
-                  onClick={() => handleRestoreUser(viewingUser)}
-                  style={{
-                    padding: '9px 18px',
-                    backgroundColor: '#10b981',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
-                >
-                  🔄 Khôi phục tài khoản này (Restore)
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleDisableUser(viewingUser)}
-                  disabled={viewingUser.id === currentUser?.id}
-                  style={{
-                    padding: '9px 18px',
-                    backgroundColor: '#ef4444',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    cursor: viewingUser.id === currentUser?.id ? 'not-allowed' : 'pointer',
-                    opacity: viewingUser.id === currentUser?.id ? 0.6 : 1,
-                  }}
-                >
-                  🚫 Khóa tài khoản này (Disable)
-                </button>
-              )}
-
-              <button
-                onClick={() => setViewingUser(null)}
-                style={{
-                  padding: '9px 18px',
-                  backgroundColor: '#f1f5f9',
-                  color: '#334155',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                }}
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: Create User */}
-      {isCreateModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px',
-          }}
-          onClick={() => setIsCreateModalOpen(false)}
-        >
-          <div
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '20px',
-              maxWidth: '500px',
-              width: '100%',
-              padding: '28px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
-                ➕ Thêm tài khoản người dùng mới
-              </h2>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                style={{ background: 'none', border: 'none', fontSize: '20px', color: '#94a3b8', cursor: 'pointer' }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                  Họ và tên
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ví dụ: Thầy Trần Quốc Anh"
-                  value={newFullName}
-                  onChange={(e) => setNewFullName(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                  Email đăng nhập
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="quocanh.teacher@physlive.edu.vn"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                  Vai trò phân quyền (Role)
-                </label>
-                <select
-                  value={newRole}
-                  onChange={(e) => setNewRole(e.target.value as RoleType)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', backgroundColor: '#ffffff' }}
-                >
-                  <option value="TEACHER">Giáo viên (TEACHER)</option>
-                  <option value="STUDENT">Học sinh (STUDENT)</option>
-                  <option value="REVIEWER">Thẩm định viên (REVIEWER)</option>
-                  <option value="ADMIN">Quản trị viên (ADMIN)</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                  Trường học / Đơn vị
-                </label>
-                <input
-                  type="text"
-                  placeholder="THPT Chuyên Hà Nội - Amsterdam"
-                  value={newSchool}
-                  onChange={(e) => setNewSchool(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  style={{ padding: '10px 16px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  style={{ padding: '10px 20px', backgroundColor: '#2563eb', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer' }}
-                >
-                  Lưu & Khởi tạo tài khoản
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

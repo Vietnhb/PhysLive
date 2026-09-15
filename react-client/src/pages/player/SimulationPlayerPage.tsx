@@ -70,6 +70,7 @@ export const SimulationPlayerPage: React.FC = () => {
   const [showVectors, setShowVectors] = useState<boolean>(true);
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [showRuler, setShowRuler] = useState<boolean>(true);
+  const [displayMode, setDisplayMode] = useState<'clean' | 'detailed'>('clean');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -154,7 +155,7 @@ export const SimulationPlayerPage: React.FC = () => {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Helper: Vẽ mũi tên vector sắc nét có bóng đổ và huy hiệu nhãn thông số
+    // Helper: Vẽ vector mũi tên lực / vận tốc (Vector Arrow with Clean / Detailed Mode)
     const drawVector = (
       fromX: number,
       fromY: number,
@@ -162,6 +163,7 @@ export const SimulationPlayerPage: React.FC = () => {
       toY: number,
       color: string,
       label: string,
+      cleanSymbol: string = '',
       badgeOffsetX: number = 0,
       badgeOffsetY: number = -14
     ) => {
@@ -175,10 +177,10 @@ export const SimulationPlayerPage: React.FC = () => {
 
       ctx.save();
       ctx.shadowColor = color;
-      ctx.shadowBlur = 8;
+      ctx.shadowBlur = displayMode === 'clean' ? 4 : 8;
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
-      ctx.lineWidth = 2.8;
+      ctx.lineWidth = displayMode === 'clean' ? 2.2 : 2.8;
       ctx.lineCap = 'round';
 
       // Trục vector
@@ -195,8 +197,18 @@ export const SimulationPlayerPage: React.FC = () => {
       ctx.closePath();
       ctx.fill();
 
-      // Huy hiệu nhãn thông số nổi
-      if (label) {
+      // Hiển thị nhãn: Trong chế độ Tối giản (Clean), vẽ ký hiệu vector thanh mảnh, không phủ hộp đen che khuất
+      if (displayMode === 'clean') {
+        if (cleanSymbol) {
+          ctx.shadowBlur = 0;
+          ctx.font = 'bold 12px "Google Sans", Inter, sans-serif';
+          ctx.fillStyle = color;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(cleanSymbol, toX + badgeOffsetX, toY + badgeOffsetY);
+        }
+      } else if (label) {
+        // Chế độ Chi tiết (Detailed): Huy hiệu nhãn thông số số học đầy đủ
         ctx.shadowBlur = 0;
         ctx.font = 'bold 11px Consolas, monospace';
         const textWidth = ctx.measureText(label).width;
@@ -251,7 +263,7 @@ export const SimulationPlayerPage: React.FC = () => {
       ctx.font = 'bold 12px Consolas, monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(label, textX, textY);
+      ctx.fillText(displayMode === 'clean' ? 'α' : label, textX, textY);
       ctx.restore();
     };
 
@@ -387,12 +399,13 @@ export const SimulationPlayerPage: React.FC = () => {
       // Biển báo cờ đích dừng
       ctx.fillStyle = '#ef4444';
       ctx.beginPath();
-      ctx.roundRect(stopMarkX - 55, roadY - 68, 110, 22, 6);
+      const badgeW = displayMode === 'clean' ? 52 : 110;
+      ctx.roundRect(stopMarkX - badgeW / 2, roadY - 68, badgeW, 22, 6);
       ctx.fill();
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 11px Consolas, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(`ĐÍCH: s = ${sStopCar.toFixed(1)}m`, stopMarkX, roadY - 53);
+      ctx.fillText(displayMode === 'clean' ? 's_dừng' : `ĐÍCH: s = ${sStopCar.toFixed(1)}m`, stopMarkX, roadY - 53);
       ctx.restore();
 
       // E. VẾT TRƯỢT LỐP CAO SU TRÊN MẶT ĐƯỜNG (DYNAMIC SKID MARKS)
@@ -534,8 +547,9 @@ export const SimulationPlayerPage: React.FC = () => {
           carBodyY + 4,
           '#10b981',
           `v = ${currentV.toFixed(1)} m/s (${(currentV * 3.6).toFixed(0)} km/h)`,
-          0,
-          -16
+          'v⃗',
+          14,
+          0
         );
 
         // Vector gia tốc hãm a (Đỏ hướng ngược lại)
@@ -547,8 +561,9 @@ export const SimulationPlayerPage: React.FC = () => {
           carBodyY - 12,
           '#f43f5e',
           `a = ${carA} m/s²`,
-          0,
-          -16
+          'a⃗',
+          -14,
+          0
         );
       }
     }
@@ -697,7 +712,7 @@ export const SimulationPlayerPage: React.FC = () => {
         ctx.fill();
         ctx.font = 'bold 11px Consolas, monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(`H_max = ${hMaxProj.toFixed(1)}m`, apexX, apexY - 12);
+        ctx.fillText(displayMode === 'clean' ? 'H_max' : `H_max = ${hMaxProj.toFixed(1)}m`, apexX, apexY - 12);
       }
       ctx.restore();
 
@@ -746,7 +761,7 @@ export const SimulationPlayerPage: React.FC = () => {
       ctx.fillStyle = '#f8fafc';
       ctx.font = 'bold 11px Consolas, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(`L_max = ${lMaxProj.toFixed(1)}m`, landX, groundY + 36);
+      ctx.fillText(displayMode === 'clean' ? 'L_max' : `L_max = ${lMaxProj.toFixed(1)}m`, landX, groundY + 36);
       ctx.restore();
 
       // G. QUẢ CẦU VẬT THỂ PHÁT SÁNG (GLOWING PROJECTILE ORB)
@@ -782,6 +797,7 @@ export const SimulationPlayerPage: React.FC = () => {
           canvasBallY - curVy * vScale,
           '#10b981',
           `v = ${vInstant.toFixed(1)} m/s`,
+          'v⃗',
           16,
           -14
         );
@@ -794,6 +810,7 @@ export const SimulationPlayerPage: React.FC = () => {
           canvasBallY + g * 3.2,
           '#ef4444',
           `g = 9.8 m/s²`,
+          'g⃗',
           0,
           16
         );
@@ -924,13 +941,15 @@ export const SimulationPlayerPage: React.FC = () => {
       ctx.lineWidth = 1.5;
       ctx.strokeRect(-blockW / 2, -blockH, blockW, blockH);
 
-      // Khắc nhãn khối lượng m lên khối
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 11px Consolas, monospace';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`m=${inclineM}kg`, 0, -blockH / 2);
+      // Khắc nhãn khối lượng m lên khối (chỉ hiện trong chế độ chi tiết theo yêu cầu Clean UI)
+      if (displayMode === 'detailed') {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 11px Consolas, monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`m=${inclineM}kg`, 0, -blockH / 2);
+      }
       ctx.restore();
 
       // D. ĐẦY ĐỦ 4 VECTOR VẬT LÝ THEO CHUẨN SGK VẬT LÝ 10 (FULL FORCES & VELOCITY)
@@ -952,6 +971,7 @@ export const SimulationPlayerPage: React.FC = () => {
           blockMidY + P_mag * P_scale,
           '#f59e0b',
           `P = ${P_mag.toFixed(1)} N`,
+          'P⃗',
           0,
           16
         );
@@ -966,6 +986,7 @@ export const SimulationPlayerPage: React.FC = () => {
           blockMidY + nLen * Math.sin(nAngle),
           '#38bdf8',
           `N = ${N_mag.toFixed(1)} N`,
+          'N⃗',
           0,
           -14
         );
@@ -981,6 +1002,7 @@ export const SimulationPlayerPage: React.FC = () => {
             blockMidY + fmsLen * Math.sin(fmsAngle),
             '#ef4444',
             `Fms = ${Fms_mag.toFixed(2)} N`,
+            'F⃗ms',
             0,
             -14
           );
@@ -996,6 +1018,7 @@ export const SimulationPlayerPage: React.FC = () => {
             blockMidY + vLen * Math.sin(inclineRad),
             '#10b981',
             `v = ${currentV.toFixed(2)} m/s`,
+            'v⃗',
             12,
             14
           );
@@ -1027,6 +1050,7 @@ export const SimulationPlayerPage: React.FC = () => {
     showVectors,
     showGrid,
     showRuler,
+    displayMode,
   ]);
 
   const handleReset = () => {
@@ -1260,6 +1284,30 @@ export const SimulationPlayerPage: React.FC = () => {
               boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
             }}
           >
+            {/* Chế độ hiển thị: Tối giản (Clean) vs Chi tiết (Detailed) theo chỉ đạo Leader */}
+            <button
+              onClick={() => setDisplayMode(displayMode === 'clean' ? 'detailed' : 'clean')}
+              style={{
+                padding: '4px 10px',
+                borderRadius: '6px',
+                border: '1px solid',
+                borderColor: displayMode === 'clean' ? '#10b981' : '#f59e0b',
+                backgroundColor: displayMode === 'clean' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(245, 158, 11, 0.25)',
+                color: displayMode === 'clean' ? '#6ee7b7' : '#fcd34d',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s ease',
+              }}
+              title="Chuyển đổi giữa chế độ Clean (Tối giản trực quan) và Chi tiết (Hiển thị đầy đủ số liệu)"
+            >
+              <Sparkles size={12} color={displayMode === 'clean' ? '#6ee7b7' : '#fcd34d'} />
+              <span>{displayMode === 'clean' ? 'Tối giản (Clean)' : 'Chi tiết (Detailed)'}</span>
+            </button>
+
             <button
               onClick={() => setShowVectors(!showVectors)}
               style={{
