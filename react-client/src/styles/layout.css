@@ -1269,12 +1269,48 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
    SPLIT-SCREEN AUTH LAYOUT (Login & Signup)
    ========================================================================== */
 
+.auth-wrapper-with-header {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bg-page);
+}
+
 .auth-split-page {
   display: flex;
-  height: 100vh;
+  flex: 1;
+  min-height: calc(100vh - 65px);
   width: 100%;
   overflow: hidden;
   background-color: var(--bg-page);
+}
+
+.auth-demo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 5;
+}
+
+.auth-demo-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.2);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.auth-demo-btn:active {
+  transform: translateY(0);
 }
 
 .auth-split-visual {

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Key, CheckCircle, AlertCircle, X, LogOut, Info } from 'lucide-react';
-import { AppLayout } from '../../components/layout/AppLayout';
 
 export const ProfilePage: React.FC = () => {
   const { currentUser, updateProfile, logout } = useAuth();
@@ -48,16 +47,15 @@ export const ProfilePage: React.FC = () => {
   if (!currentUser) return null;
 
   return (
-    <AppLayout>
-      <div style={{ padding: '32px 20px' }}>
-        <div style={{ marginBottom: '24px', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 8px', color: 'var(--text-primary)' }}>
-            Tài khoản của tôi
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
-            Quản lý thông tin cá nhân và bảo mật
-          </p>
-        </div>
+    <div style={{ padding: '32px 20px', minHeight: 'calc(100vh - 70px)' }}>
+      <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 8px', color: 'var(--text-primary)' }}>
+          Tài khoản của tôi
+        </h1>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
+          Quản lý thông tin cá nhân và bảo mật
+        </p>
+      </div>
 
         <div className="profile-modular-grid">
           {/* Cột trái: Avatar và Tóm tắt */}
@@ -215,12 +213,11 @@ export const ProfilePage: React.FC = () => {
 
           </div>
         </div>
-      </div>
 
       {showPasswordModal && (
         <ChangePasswordModal onClose={() => setShowPasswordModal(false)} />
       )}
-    </AppLayout>
+    </div>
   );
 };
 
