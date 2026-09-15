@@ -1272,18 +1272,20 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
 .auth-wrapper-with-header {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
-  background-color: var(--bg-page);
+  background-color: #090d16;
+  overflow: hidden;
 }
 
 .auth-split-page {
   display: flex;
   flex: 1;
-  min-height: calc(100vh - 65px);
+  height: calc(100vh - 65px);
   width: 100%;
   overflow: hidden;
-  background-color: var(--bg-page);
+  background-color: #090d16;
+  align-items: stretch;
 }
 
 .auth-demo-btn {
@@ -1320,18 +1322,23 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
 
 @media (min-width: 1024px) {
   .auth-split-visual {
-    display: block;
+    display: flex;
+    flex-direction: column;
     width: 55%;
     height: 100%;
+    align-self: stretch;
     flex-shrink: 0;
     position: relative;
-    border-right: 1px solid var(--border-subtle);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: #090d16;
+    overflow: hidden;
   }
 }
 
 .auth-split-form-container {
   display: flex;
   width: 100%;
+  height: 100%;
   flex-direction: column;
   justify-content: center;
   overflow-y: auto;
