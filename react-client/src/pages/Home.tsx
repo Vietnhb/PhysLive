@@ -36,15 +36,15 @@ export const Home: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            backgroundColor: '#eef3fe',
-            color: '#174ea6',
+            backgroundColor: 'var(--accent-soft)',
+            color: 'var(--accent-text-dark)',
             padding: '6px 14px',
             borderRadius: '9999px',
             marginBottom: '20px',
-            border: '1px solid #c2e7ff',
+            border: '1px solid var(--border-subtle)',
           }}
         >
-          <Sparkles size={14} color="#1a73e8" />
+          <Sparkles size={14} color="var(--primary)" />
           <span>NỀN TẢNG MÔ PHỎNG VẬT LÝ SỐ THẾ HỆ MỚI • CAPSTONE FA26</span>
         </div>
 
@@ -55,18 +55,18 @@ export const Home: React.FC = () => {
             fontWeight: 800,
             lineHeight: 1.15,
             letterSpacing: '-0.04em',
-            color: '#202124',
+            color: 'var(--text-primary)',
           }}
         >
           Mô phỏng Vật lý Trực quan, <br />
-          <span style={{ color: '#1a73e8' }}>Chuẩn hóa & Sinh động</span>
+          <span style={{ color: 'var(--primary)' }}>Chuẩn hóa & Sinh động</span>
         </h1>
 
         <p
           style={{
             fontSize: '17px',
             lineHeight: 1.6,
-            color: '#5f6368',
+            color: 'var(--text-secondary)',
             maxWidth: '720px',
             margin: '0 0 32px',
           }}
@@ -81,7 +81,7 @@ export const Home: React.FC = () => {
             onClick={() => navigate('/player')}
             style={{
               padding: '12px 26px',
-              backgroundColor: '#1a73e8',
+              backgroundColor: 'var(--primary)',
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -94,8 +94,8 @@ export const Home: React.FC = () => {
               boxShadow: '0 4px 14px rgba(26, 115, 232, 0.35)',
               transition: 'transform 0.15s ease, background-color 0.15s ease',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1765cc')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#1a73e8')}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
           >
             <FlaskConical size={18} />
             <span>Vào phòng thí nghiệm</span>
@@ -106,9 +106,9 @@ export const Home: React.FC = () => {
             onClick={() => navigate('/library')}
             style={{
               padding: '12px 22px',
-              backgroundColor: '#eef3fe',
-              color: '#174ea6',
-              border: '1px solid #c2e7ff',
+              backgroundColor: 'var(--accent-soft)',
+              color: 'var(--accent-text-dark)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               fontSize: '15px',
               fontWeight: 700,
@@ -118,8 +118,6 @@ export const Home: React.FC = () => {
               gap: '8px',
               transition: 'all 0.15s ease',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e0ecfe')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#eef3fe')}
           >
             <BookOpen size={18} />
             <span>Thư viện chuyên đề</span>
@@ -129,9 +127,9 @@ export const Home: React.FC = () => {
             onClick={() => navigate('/student/assignments')}
             style={{
               padding: '12px 20px',
-              backgroundColor: '#ffffff',
-              color: '#202124',
-              border: '1px solid #e1e5eb',
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-card)',
               borderRadius: '8px',
               fontSize: '15px',
               fontWeight: 700,
@@ -150,8 +148,8 @@ export const Home: React.FC = () => {
       <section style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
-            <div className="eyebrow" style={{ color: '#174ea6', marginBottom: '6px' }}>CHỦ ĐỀ TIÊU BIỂU</div>
-            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#202124' }}>
+            <div className="eyebrow" style={{ color: 'var(--accent-text-dark)', marginBottom: '6px' }}>CHỦ ĐỀ TIÊU BIỂU</div>
+            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>
               Mô hình Vật lý Sẵn sàng Tương tác
             </h2>
           </div>
@@ -160,7 +158,7 @@ export const Home: React.FC = () => {
             style={{
               background: 'none',
               border: 'none',
-              color: '#1a73e8',
+              color: 'var(--primary)',
               fontWeight: 700,
               fontSize: '14px',
               cursor: 'pointer',
@@ -196,30 +194,30 @@ export const Home: React.FC = () => {
                     style={{
                       fontSize: '11px',
                       fontWeight: 700,
-                      backgroundColor: '#eef3fe',
-                      color: '#174ea6',
+                      backgroundColor: 'var(--accent-soft)',
+                      color: 'var(--accent-text-dark)',
                       padding: '3px 8px',
                       borderRadius: '6px',
                     }}
                   >
                     {sim.spec_json.topic}
                   </span>
-                  <span style={{ fontSize: '12px', color: '#137333', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircle2 size={13} color="#137333" />
+                  <span style={{ fontSize: '12px', color: 'var(--status-success-text)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <CheckCircle2 size={13} color="var(--status-success-text)" />
                     <span>Dual-Valid</span>
                   </span>
                 </div>
 
-                <h3 style={{ margin: '0 0 8px', fontSize: '17px', fontWeight: 800, color: '#202124' }}>
+                <h3 style={{ margin: '0 0 8px', fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' }}>
                   {sim.title}
                 </h3>
-                <p style={{ margin: '0 0 16px', fontSize: '13px', color: '#5f6368', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 16px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   {sim.description}
                 </p>
               </div>
 
-              <div style={{ borderTop: '1px solid #f1f3f4', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#1a73e8', fontWeight: 700 }}>
+              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--primary)', fontWeight: 700 }}>
                   {sim.id === 'sim-car-brake-003'
                     ? 'v(t) = v₀ - a·t'
                     : sim.id === 'sim-proj-001'
@@ -231,7 +229,7 @@ export const Home: React.FC = () => {
                   style={{
                     fontSize: '13px',
                     fontWeight: 700,
-                    color: '#1a73e8',
+                    color: 'var(--primary)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
@@ -249,57 +247,57 @@ export const Home: React.FC = () => {
       {/* 3. FOUR CORE ADVANTAGES (TÍNH NĂNG ĐẮT GIÁ) */}
       <section style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <div className="eyebrow" style={{ color: '#174ea6', marginBottom: '6px' }}>CÔNG NGHỆ & ĐỔI MỚI</div>
-          <h2 style={{ margin: 0, fontSize: '26px', fontWeight: 800, color: '#202124' }}>
+          <div className="eyebrow" style={{ color: 'var(--accent-text-dark)', marginBottom: '6px' }}>CÔNG NGHỆ & ĐỔI MỚI</div>
+          <h2 style={{ margin: 0, fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)' }}>
             Trực quan hóa Đột phá cho Giảng dạy Vật lý
           </h2>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
           <div className="card" style={{ padding: '24px', borderRadius: '16px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#eef3fe', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: '#1a73e8' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: 'var(--primary)' }}>
               <FlaskConical size={22} />
             </div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: '#202124' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
               Mô phỏng Canvas Tinh Gọn
             </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#5f6368', lineHeight: 1.55 }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               Khử nhiễu số học đè lên vật thể, chuyển đổi linh hoạt giữa chế độ Tối giản (Clean) và Chi tiết (Detailed) theo đúng mục tiêu bài giảng.
             </p>
           </div>
 
           <div className="card" style={{ padding: '24px', borderRadius: '16px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#e6f4ea', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: '#137333' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'var(--status-success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: 'var(--status-success-text)' }}>
               <LineChart size={22} />
             </div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: '#202124' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
               Đồ thị SVG Thời gian thực
             </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#5f6368', lineHeight: 1.55 }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               Vẽ đồng thời đồ thị v(t), s(t), a(t) bằng vector SVG sắc nét; học sinh có thể bấm kéo trên đồ thị để tua con trỏ thời gian mô phỏng.
             </p>
           </div>
 
           <div className="card" style={{ padding: '24px', borderRadius: '16px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#fef7e0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: '#b06000' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'var(--status-warn-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: 'var(--status-warn-text)' }}>
               <BrainCircuit size={22} />
             </div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: '#202124' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
               Trích xuất Bài toán AI OCR
             </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#5f6368', lineHeight: 1.55 }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               Nhập đề bài bằng văn bản hoặc ảnh chụp SGK; hệ thống tự động bóc tách tham số và làm rõ các giả thiết vật lý cần thiết.
             </p>
           </div>
 
           <div className="card" style={{ padding: '24px', borderRadius: '16px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#fce8e6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: '#c5221f' }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'var(--status-danger-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: 'var(--status-danger-text)' }}>
               <ShieldCheck size={22} />
             </div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: '#202124' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
               Thẩm định Kép (Dual-Validation)
             </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: '#5f6368', lineHeight: 1.55 }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
               So sánh sai số giữa phương trình giải tích lý thuyết và tích phân số học Euler/Verlet, đảm bảo tính chuẩn xác khoa học tuyệt đối.
             </p>
           </div>
@@ -308,22 +306,22 @@ export const Home: React.FC = () => {
 
       {/* 4. ROLE ENTRY POINTS (DÀNH CHO GIÁO VIÊN & HỌC SINH) */}
       <section style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '20px', border: '1px solid #e1e5eb', padding: '36px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border-card)', padding: '36px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <GraduationCap size={22} color="#1a73e8" />
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#202124' }}>Dành cho Giáo viên</h3>
+              <GraduationCap size={22} color="var(--primary)" />
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>Dành cho Giáo viên</h3>
             </div>
-            <p style={{ fontSize: '14px', color: '#5f6368', lineHeight: 1.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '16px' }}>
               Tạo bài giảng sinh động, quản lý kho chuyên đề bài tập, nhúng trực tiếp thí nghiệm ảo vào hệ thống LMS (Moodle, Canvas) của trường.
             </p>
             <button
               onClick={() => navigate('/teacher/submit')}
               style={{
                 padding: '8px 16px',
-                backgroundColor: '#eef3fe',
-                color: '#174ea6',
-                border: '1px solid #c2e7ff',
+                backgroundColor: 'var(--accent-soft)',
+                color: 'var(--accent-text-dark)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '8px',
                 fontSize: '13px',
                 fontWeight: 700,
@@ -336,19 +334,19 @@ export const Home: React.FC = () => {
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <BookOpen size={22} color="#137333" />
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#202124' }}>Dành cho Học sinh</h3>
+              <BookOpen size={22} color="var(--status-success-text)" />
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>Dành cho Học sinh</h3>
             </div>
-            <p style={{ fontSize: '14px', color: '#5f6368', lineHeight: 1.6, marginBottom: '16px' }}>
+            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '16px' }}>
               Tham gia thử thách dự đoán vận tốc, khoảng cách dừng và tầm xa trước khi chạy mô phỏng, ghi nhận điểm rèn luyện tư duy thực nghiệm.
             </p>
             <button
               onClick={() => navigate('/student/assignments')}
               style={{
                 padding: '8px 16px',
-                backgroundColor: '#e6f4ea',
-                color: '#137333',
-                border: '1px solid #b7e1cd',
+                backgroundColor: 'var(--status-success-bg)',
+                color: 'var(--status-success-text)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '8px',
                 fontSize: '13px',
                 fontWeight: 700,

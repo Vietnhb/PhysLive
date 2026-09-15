@@ -29,8 +29,21 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
 
   const [isDarkMode, setIsDarkMode] = React.useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('physlive.theme');
+      if (saved) {
+        document.documentElement.dataset.theme = saved;
+        return saved === 'dark';
+      }
+    } catch {
+      // ignore
+    }
     return document.documentElement.dataset.theme === 'dark';
   });
+
+  React.useEffect(() => {
+    document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light';
+  }, [isDarkMode]);
 
   const toggleTheme = () => {
     const next = !isDarkMode;
@@ -63,11 +76,11 @@ export const Header: React.FC = () => {
         top: 0,
         zIndex: 50,
         backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
+        borderBottom: '1px solid var(--border-subtle)',
       }}
     >
-      {/* Brand Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+      {/* 1. Left: Brand Logo */}
+      <div className="studio-header-left">
         <Link to="/" className="studio-brand" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
           <div
             className="studio-brand-badge"
@@ -86,97 +99,97 @@ export const Header: React.FC = () => {
             <Atom size={22} className="spin-slow" strokeWidth={2.2} />
           </div>
           <div>
-            <div className="studio-brand-name" style={{ fontSize: '17px', fontWeight: 800, letterSpacing: '-0.02em', color: '#0f172a' }}>
-              PhysLive <span style={{ color: '#2563eb', fontSize: '13px', fontWeight: 700, backgroundColor: '#eff6ff', padding: '1px 6px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>Studio</span>
+            <div className="studio-brand-name" style={{ fontSize: '17px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+              PhysLive <span style={{ color: '#2563eb', fontSize: '13px', fontWeight: 700, backgroundColor: 'var(--accent-soft)', padding: '1px 6px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>Studio</span>
             </div>
-            <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
               Interactive Physics Platform
             </div>
           </div>
         </Link>
-
-        {/* Central Workspace Switcher Navigation Tabs */}
-        <nav className="studio-nav-tabs" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(241, 245, 249, 0.85)', padding: '4px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <HomeIcon size={14} strokeWidth={2.2} />
-            <span>Trang chủ</span>
-          </NavLink>
-
-          <NavLink
-            to="/player"
-            className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <FlaskConical size={14} strokeWidth={2.2} />
-            <span>Phòng thí nghiệm (Player)</span>
-          </NavLink>
-
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <LayoutDashboard size={14} strokeWidth={2.2} />
-            <span>Tổng quan</span>
-          </NavLink>
-
-          <NavLink
-            to="/teacher/submit"
-            className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <FileEdit size={14} strokeWidth={2.2} />
-            <span>Nộp đề & OCR</span>
-          </NavLink>
-
-          <NavLink
-            to="/library"
-            className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <LibraryIcon size={14} strokeWidth={2.2} />
-            <span>Thư viện chuyên đề</span>
-          </NavLink>
-
-          <NavLink
-            to="/student/assignments"
-            className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <Target size={14} strokeWidth={2.2} />
-            <span>Thử thách dự đoán</span>
-          </NavLink>
-
-          {currentUser?.role === 'ADMIN' && (
-            <NavLink
-              to="/admin"
-              className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#dc2626', fontWeight: 700 }}
-            >
-              <Settings size={14} strokeWidth={2.2} />
-              <span>Quản trị User</span>
-            </NavLink>
-          )}
-        </nav>
       </div>
 
-      {/* Right Controls: Role Switcher & User Profile */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      {/* 2. Center: Navigation Tabs (Điều tiết ở giữa màn hình) */}
+      <nav className="studio-nav-tabs studio-header-center">
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        >
+          <HomeIcon size={14} strokeWidth={2.2} />
+          <span>Trang chủ</span>
+        </NavLink>
+
+        <NavLink
+          to="/player"
+          className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        >
+          <FlaskConical size={14} strokeWidth={2.2} />
+          <span>Phòng thí nghiệm (Player)</span>
+        </NavLink>
+
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        >
+          <LayoutDashboard size={14} strokeWidth={2.2} />
+          <span>Tổng quan</span>
+        </NavLink>
+
+        <NavLink
+          to="/teacher/submit"
+          className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        >
+          <FileEdit size={14} strokeWidth={2.2} />
+          <span>Nộp đề & OCR</span>
+        </NavLink>
+
+        <NavLink
+          to="/library"
+          className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        >
+          <LibraryIcon size={14} strokeWidth={2.2} />
+          <span>Thư viện chuyên đề</span>
+        </NavLink>
+
+        <NavLink
+          to="/student/assignments"
+          className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        >
+          <Target size={14} strokeWidth={2.2} />
+          <span>Thử thách dự đoán</span>
+        </NavLink>
+
+        {currentUser?.role === 'ADMIN' && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#dc2626', fontWeight: 700 }}
+          >
+            <Settings size={14} strokeWidth={2.2} />
+            <span>Quản trị User</span>
+          </NavLink>
+        )}
+      </nav>
+
+      {/* 3. Right Controls: Role Switcher & User Profile */}
+      <div className="studio-header-right">
         {IS_MOCK_ENABLED && (
           <span
             style={{
               fontSize: '11px',
               padding: '4px 8px',
-              backgroundColor: 'rgba(254, 243, 199, 0.9)',
-              color: '#92400e',
+              backgroundColor: isDarkMode ? 'rgba(217, 119, 6, 0.2)' : 'rgba(254, 243, 199, 0.9)',
+              color: isDarkMode ? '#fde047' : '#92400e',
               borderRadius: '6px',
               fontWeight: 700,
-              border: '1px solid #fde68a',
+              border: isDarkMode ? '1px solid rgba(217, 119, 6, 0.3)' : '1px solid #fde68a',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '4px',
@@ -194,13 +207,13 @@ export const Header: React.FC = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                backgroundColor: '#f1f5f9',
+                backgroundColor: 'var(--surface-muted)',
                 padding: '3px 4px',
                 borderRadius: '999px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--border-subtle)',
               }}
             >
-              <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, padding: '0 8px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, padding: '0 8px' }}>
                 Role:
               </span>
               {demoRoles.map((r) => {
@@ -211,14 +224,14 @@ export const Header: React.FC = () => {
                     onClick={() => switchRole(r.role)}
                     style={{
                       border: 'none',
-                      backgroundColor: isSelected ? '#ffffff' : 'transparent',
-                      color: isSelected ? '#2563eb' : '#64748b',
+                      backgroundColor: isSelected ? 'var(--bg-card)' : 'transparent',
+                      color: isSelected ? 'var(--primary)' : 'var(--text-secondary)',
                       padding: '4px 10px',
                       borderRadius: '999px',
                       fontSize: '12px',
                       fontWeight: isSelected ? 700 : 500,
                       cursor: 'pointer',
-                      boxShadow: isSelected ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+                      boxShadow: isSelected ? 'var(--shadow-sm)' : 'none',
                       transition: 'all 0.15s ease',
                       display: 'flex',
                       alignItems: 'center',
@@ -238,9 +251,9 @@ export const Header: React.FC = () => {
               style={{
                 padding: '6px 11px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc',
-                color: isDarkMode ? '#fef08a' : '#475569',
+                border: '1px solid var(--border-subtle)',
+                backgroundColor: 'var(--surface-muted)',
+                color: isDarkMode ? '#fef08a' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -256,7 +269,7 @@ export const Header: React.FC = () => {
             </button>
 
             {/* User Info & Avatar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '6px', borderLeft: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '6px', borderLeft: '1px solid var(--border-subtle)' }}>
               <Link
                 to="/profile"
                 style={{
@@ -270,11 +283,11 @@ export const Header: React.FC = () => {
                   transition: 'background-color 0.15s ease',
                 }}
                 title="Xem & Chỉnh sửa Hồ sơ cá nhân"
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = 'var(--surface-muted)')}
                 onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {currentUser.full_name}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px' }}>
@@ -306,9 +319,9 @@ export const Header: React.FC = () => {
                 style={{
                   padding: '6px 12px',
                   borderRadius: '8px',
-                  border: '1px solid #fecaca',
-                  backgroundColor: '#fef2f2',
-                  color: '#dc2626',
+                  border: isDarkMode ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid #fecaca',
+                  backgroundColor: isDarkMode ? 'rgba(239, 68, 68, 0.15)' : '#fef2f2',
+                  color: isDarkMode ? '#f87171' : '#dc2626',
                   fontSize: '12px',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -331,9 +344,9 @@ export const Header: React.FC = () => {
               style={{
                 padding: '7px 11px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc',
-                color: isDarkMode ? '#fef08a' : '#475569',
+                border: '1px solid var(--border-subtle)',
+                backgroundColor: 'var(--surface-muted)',
+                color: isDarkMode ? '#fef08a' : 'var(--text-secondary)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -353,9 +366,9 @@ export const Header: React.FC = () => {
               style={{
                 padding: '7px 16px',
                 borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                color: '#1e293b',
+                border: '1px solid var(--border-subtle)',
+                backgroundColor: 'var(--bg-card)',
+                color: 'var(--text-primary)',
                 fontSize: '13px',
                 fontWeight: 700,
                 textDecoration: 'none',
