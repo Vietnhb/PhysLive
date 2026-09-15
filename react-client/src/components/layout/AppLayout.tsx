@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from './Header';
+import { MockDevToolbar } from '../common/MockDevToolbar';
 
 export const AppLayout: React.FC = () => {
   const location = useLocation();
@@ -18,6 +19,7 @@ export const AppLayout: React.FC = () => {
           </div>
         )}
       </main>
+      <MockDevToolbar />
     </div>
   );
 };

@@ -324,11 +324,12 @@ export const LibraryPage: React.FC = () => {
       {/* 2. TOP FILTER & SEARCH BAR                                    */}
       {/* ============================================================= */}
       <div
+        className="card"
         style={{
-          backgroundColor: '#ffffff',
+          backgroundColor: 'var(--bg-card)',
           borderRadius: '16px',
           padding: '16px 20px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid var(--border-card)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -343,15 +344,15 @@ export const LibraryPage: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            background: '#f8fafc',
+            background: 'var(--surface-muted)',
             padding: '8px 14px',
             borderRadius: '10px',
-            border: '1px solid #cbd5e1',
+            border: '1px solid var(--border-subtle)',
             flex: '1',
             minWidth: '260px',
           }}
         >
-          <Search size={16} color="#64748b" />
+          <Search size={16} color="var(--text-secondary)" />
           <input
             type="text"
             placeholder="Tìm kiếm theo tên hiện tượng, công thức, vật thể (ví dụ: ném xiên, phanh xe, dốc nghiêng)..."
@@ -363,13 +364,13 @@ export const LibraryPage: React.FC = () => {
               outline: 'none',
               fontSize: '13px',
               width: '100%',
-              color: '#0f172a',
+              color: 'var(--text-primary)',
             }}
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
-              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex' }}
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex' }}
             >
               <X size={15} />
             </button>

@@ -234,12 +234,13 @@ body {
 
 /* PANE LEFT: TOPIC CATALOG */
 .catalog-pane {
-  background: #ffffff;
+  background: var(--bg-card);
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  color: var(--text-primary);
 }
 
 .catalog-header {
@@ -252,7 +253,8 @@ body {
   padding: 8px 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
-  background: #f8fafc;
+  background: var(--surface-muted);
+  color: var(--text-primary);
   font-size: 13px;
   outline: none;
   transition: border-color 0.2s;
@@ -260,7 +262,7 @@ body {
 
 .catalog-search-input:focus {
   border-color: var(--border-focus);
-  background: #ffffff;
+  background: var(--bg-card);
 }
 
 .catalog-list {
@@ -276,23 +278,24 @@ body {
   padding: 12px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
-  background: #f8fafc;
+  background: var(--surface-muted);
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
 }
 
 .catalog-item-card:hover {
-  background: #ffffff;
-  border-color: #cbd5e1;
+  background: var(--bg-card);
+  border-color: var(--primary);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
 
 .catalog-item-card.active {
-  background: #eff6ff;
-  border-color: #93c5fd;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+  background: var(--accent-soft);
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
 }
 
 /* PANE CENTER: INTERACTIVE CANVAS VIEWPORT */
@@ -425,18 +428,19 @@ body {
 
 /* PANE RIGHT: INSPECTOR & PARAMETERS */
 .inspector-pane {
-  background: #ffffff;
+  background: var(--bg-card);
   border-left: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  color: var(--text-primary);
 }
 
 .inspector-tabs {
   display: flex;
   border-bottom: 1px solid var(--border-subtle);
-  background: #f8fafc;
+  background: var(--surface-muted);
 }
 
 .inspector-tab-btn {
@@ -446,7 +450,7 @@ body {
   font-weight: 600;
   border: none;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
@@ -454,7 +458,7 @@ body {
 
 .inspector-tab-btn.active {
   color: var(--primary);
-  background: #ffffff;
+  background: var(--bg-card);
   border-bottom-color: var(--primary);
 }
 
@@ -495,6 +499,7 @@ body {
   font-weight: 700;
   font-family: 'Consolas', monospace;
   color: var(--primary);
+  background: var(--surface-muted);
   text-align: right;
   outline: none;
 }
@@ -653,9 +658,9 @@ body {
 }
 
 .phet-filter-sidebar {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 16px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-card);
   padding: 22px;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
   position: sticky;
@@ -665,7 +670,7 @@ body {
 .phet-filter-group {
   margin-bottom: 22px;
   padding-bottom: 18px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .phet-filter-group:last-child {
@@ -677,7 +682,7 @@ body {
 .phet-filter-title {
   font-size: 13px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 12px;
@@ -695,7 +700,7 @@ body {
   border-radius: 8px;
   border: 1px solid transparent;
   background: transparent;
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -705,14 +710,14 @@ body {
 }
 
 .phet-filter-item-btn:hover {
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--surface-muted);
+  color: var(--text-primary);
 }
 
 .phet-filter-item-btn.active {
-  background: #eff6ff;
-  border-color: #bfdbfe;
-  color: #2563eb;
+  background: var(--accent-soft);
+  border-color: var(--primary);
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -720,21 +725,21 @@ body {
   font-size: 11px;
   padding: 2px 7px;
   border-radius: 9999px;
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--surface-muted);
+  color: var(--text-secondary);
   font-weight: 600;
 }
 
 .phet-filter-item-btn.active .phet-filter-badge {
-  background: #2563eb;
+  background: var(--primary);
   color: #ffffff;
 }
 
 /* Simulation Preview Card */
 .phet-sim-card {
-  background: #ffffff;
+  background: var(--bg-card);
   border-radius: 18px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-card);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -948,7 +953,7 @@ button.danger:hover:not(:disabled), .danger:hover {
 .field label {
   font-size: 13px;
   font-weight: 700;
-  color: #3c4043;
+  color: var(--text-secondary);
 }
 
 .field input, .field textarea, .field select,
@@ -957,7 +962,7 @@ input.form-control, textarea.form-control, select.form-control {
   border: 1px solid var(--border-input);
   border-radius: var(--radius-md);
   padding: 11px 13px;
-  background: #ffffff;
+  background: var(--bg-card);
   color: var(--text-primary);
   font-size: 14px;
   box-sizing: border-box;
@@ -1058,7 +1063,7 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
    ========================================================================== */
 
 .ops-form {
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-lg);
   padding: 24px;
@@ -1097,7 +1102,7 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
   gap: 6px;
   font-size: 13px;
   font-weight: 700;
-  color: #3c4043;
+  color: var(--text-secondary);
 }
 
 .ops-field input, .ops-field select, .ops-field textarea {
@@ -1105,7 +1110,7 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
   border: 1px solid var(--border-input);
   border-radius: var(--radius-md);
   padding: 10px 12px;
-  background: #ffffff;
+  background: var(--bg-card);
   color: var(--text-primary);
   font-size: 14px;
   font-family: inherit;
@@ -1141,7 +1146,7 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
 .table-wrap {
   width: 100%;
   overflow-x: auto;
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -1155,7 +1160,7 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
 
 .table-wrap th {
   padding: 14px 18px;
-  background: #f8fafd;
+  background: var(--surface-muted);
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 800;
@@ -1177,7 +1182,7 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
 }
 
 .table-wrap tr:hover td {
-  background-color: #fcfdfe;
+  background-color: var(--surface-muted);
 }
 
 /* ==========================================================================
@@ -1198,7 +1203,7 @@ input.form-control:focus, textarea.form-control:focus, select.form-control:focus
 .auth-card {
   width: 100%;
   max-width: 440px;
-  background: #ffffff;
+  background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: 16px;
   padding: 36px 32px;

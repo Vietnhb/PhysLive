@@ -155,12 +155,12 @@ export const Dashboard: React.FC = () => {
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Layers size={18} color="#2563eb" />
-            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
+            <Layers size={18} color="var(--primary)" />
+            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>
               3 Chủ đề Vật lý cốt lõi (MVP Baseline)
             </h2>
           </div>
-          <span style={{ fontSize: '13px', color: '#64748b' }}>Chuẩn phân loại học liệu SGK mới 4 tầng</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Chuẩn phân loại học liệu SGK mới 4 tầng</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
@@ -179,12 +179,12 @@ export const Dashboard: React.FC = () => {
             return (
               <div
                 key={topic.id}
-                className="studio-card-interactive"
+                className="studio-card-interactive card"
                 style={{
-                  backgroundColor: '#ffffff',
+                  backgroundColor: 'var(--bg-card)',
                   borderRadius: '16px',
                   padding: '22px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid var(--border-card)',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
                   display: 'flex',
                   flexDirection: 'column',
@@ -199,8 +199,8 @@ export const Dashboard: React.FC = () => {
                         width: '42px',
                         height: '42px',
                         borderRadius: '10px',
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
+                        backgroundColor: 'var(--surface-muted)',
+                        border: '1px solid var(--border-subtle)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -209,27 +209,27 @@ export const Dashboard: React.FC = () => {
                       {icons[topic.code]}
                     </div>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+                      <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
                         {topic.name}
                       </h3>
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 700 }}>
                         CODE: {topic.code}
                       </span>
                     </div>
                   </div>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                     {topic.description}
                   </p>
                 </div>
 
-                <div style={{ marginTop: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid #f1f5f9' }}>
-                  <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ marginTop: '18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--status-success-text)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                     <CheckCircle2 size={13} />
                     <span>2 Archetypes sẵn sàng</span>
                   </span>
                   <Link
                     to="/player"
-                    style={{ fontSize: '13px', color: '#2563eb', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                   >
                     <span>Xem mô phỏng</span>
                     <ArrowRight size={13} />
@@ -244,14 +244,14 @@ export const Dashboard: React.FC = () => {
       {/* Quick Access Sections: Submissions & Simulations */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px' }}>
         {/* Recent Problems */}
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '22px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+        <div className="card" style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '22px', border: '1px solid var(--border-card)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
               Bài toán giáo viên vừa nộp
             </h3>
             <Link
               to="/teacher/submit"
-              style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+              style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
             >
               <span>Tạo đề mới</span>
               <ArrowRight size={12} />
@@ -265,15 +265,15 @@ export const Dashboard: React.FC = () => {
                 style={{
                   padding: '14px',
                   borderRadius: '10px',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'var(--surface-muted)',
+                  border: '1px solid var(--border-subtle)',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '6px',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {prob.extraction.extracted_spec.archetype}
                   </span>
                   <span
@@ -282,14 +282,14 @@ export const Dashboard: React.FC = () => {
                       padding: '2px 8px',
                       borderRadius: '9999px',
                       fontWeight: 700,
-                      backgroundColor: prob.submission.status === 'Completed' ? '#dcfce7' : '#fef3c7',
-                      color: prob.submission.status === 'Completed' ? '#15803d' : '#92400e',
+                      backgroundColor: prob.submission.status === 'Completed' ? 'var(--status-success-bg)' : 'var(--status-warn-bg)',
+                      color: prob.submission.status === 'Completed' ? 'var(--status-success-text)' : 'var(--status-warn-text)',
                     }}
                   >
                     {prob.submission.status === 'Completed' ? 'Sẵn sàng mô phỏng' : 'Chờ bóc tách'}
                   </span>
                 </div>
-                <p style={{ margin: 0, fontSize: '12px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {prob.submission.raw_text}
                 </p>
               </div>
@@ -298,14 +298,14 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Available Simulations */}
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '22px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+        <div className="card" style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '22px', border: '1px solid var(--border-card)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
               Mô phỏng vật lý sẵn có
             </h3>
             <Link
               to="/library"
-              style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+              style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
             >
               <span>Vào thư viện</span>
               <ArrowRight size={12} />
@@ -319,12 +319,12 @@ export const Dashboard: React.FC = () => {
                 style={{
                   padding: '14px',
                   borderRadius: '10px',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: 'var(--surface-muted)',
+                  border: '1px solid var(--border-subtle)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
                     {sim.title}
                   </span>
                   <span
@@ -333,8 +333,8 @@ export const Dashboard: React.FC = () => {
                       padding: '2px 8px',
                       borderRadius: '9999px',
                       fontWeight: 700,
-                      backgroundColor: '#dcfce7',
-                      color: '#15803d',
+                      backgroundColor: 'var(--status-success-bg)',
+                      color: 'var(--status-success-text)',
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px',
@@ -344,18 +344,18 @@ export const Dashboard: React.FC = () => {
                     <span>Đã kiểm chứng</span>
                   </span>
                 </div>
-                <p style={{ margin: '0 0 10px', fontSize: '12px', color: '#64748b' }}>
+                <p style={{ margin: '0 0 10px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                   {sim.description}
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600 }}>
                     {sim.spec_json.variables.length} thông số điều chỉnh
                   </span>
                   <Link
                     to={`/player?id=${sim.id}`}
                     style={{
                       padding: '6px 14px',
-                      backgroundColor: '#2563eb',
+                      backgroundColor: 'var(--primary)',
                       color: '#ffffff',
                       borderRadius: '7px',
                       fontSize: '12px',

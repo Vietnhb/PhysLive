@@ -138,7 +138,7 @@ export const SimulationPlayerPage: React.FC = () => {
         return {
           label: 'Vận tốc v(t)',
           unit: 'm/s',
-          color: '#10b981',
+          color: 'var(--status-success-text)',
           data: chartTimes.map((t) => Math.max(0, carV0 + carA * t)),
         };
       }
@@ -161,7 +161,7 @@ export const SimulationPlayerPage: React.FC = () => {
         return {
           label: 'Vận tốc tức thời v(t)',
           unit: 'm/s',
-          color: '#10b981',
+          color: 'var(--status-success-text)',
           data: chartTimes.map((t) => {
             const vy = v0y - g * t;
             return Math.sqrt(v0x * v0x + vy * vy);
@@ -188,7 +188,7 @@ export const SimulationPlayerPage: React.FC = () => {
         return {
           label: 'Vận tốc trượt v(t)',
           unit: 'm/s',
-          color: '#10b981',
+          color: 'var(--status-success-text)',
           data: chartTimes.map((t) => Math.min(Math.sqrt(2 * inclineAcc * inclineS), inclineAcc * t)),
         };
       }
@@ -1166,10 +1166,10 @@ export const SimulationPlayerPage: React.FC = () => {
       <aside className="catalog-pane">
         <div className="catalog-header">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.04em' }}>
               CHỦ ĐỀ & MÔ HÌNH VẬT LÝ
             </span>
-            <span style={{ fontSize: '11px', color: '#2563eb', fontWeight: 700 }}>
+            <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 700 }}>
               {MOCK_SIMULATIONS.length} MODELS
             </span>
           </div>
@@ -1193,19 +1193,19 @@ export const SimulationPlayerPage: React.FC = () => {
                 onClick={() => setSearchParams({ id: s.id })}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                  <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', backgroundColor: isSelected ? '#dbeafe' : '#e2e8f0', color: isSelected ? '#1d4ed8' : '#475569', fontWeight: 700 }}>
+                  <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', backgroundColor: isSelected ? 'var(--accent-soft)' : 'var(--surface-muted)', color: isSelected ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 700 }}>
                     {s.spec_json.topic}
                   </span>
-                  <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 600 }}>
+                  <span style={{ fontSize: '11px', color: 'var(--status-success-text)', fontWeight: 600 }}>
                     PASS ✓
                   </span>
                 </div>
 
-                <div style={{ fontSize: '13px', fontWeight: 700, color: isSelected ? '#1d4ed8' : '#0f172a', lineHeight: 1.35, marginBottom: '4px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: isSelected ? 'var(--primary)' : 'var(--text-primary)', lineHeight: 1.35, marginBottom: '4px' }}>
                   {s.title}
                 </div>
 
-                <div style={{ fontSize: '11px', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {s.description}
                 </div>
               </div>
@@ -1219,9 +1219,9 @@ export const SimulationPlayerPage: React.FC = () => {
                 width: '100%',
                 padding: '10px',
                 borderRadius: '8px',
-                border: '1px dashed #3b82f6',
-                backgroundColor: '#eff6ff',
-                color: '#2563eb',
+                border: '1px dashed var(--primary)',
+                backgroundColor: 'var(--accent-soft)',
+                color: 'var(--primary)',
                 fontSize: '13px',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -1680,7 +1680,7 @@ export const SimulationPlayerPage: React.FC = () => {
           {activeTab === 'chart' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>
                   ĐỒ THỊ THỜI GIAN THỰC (SVG)
                 </span>
                 <div style={{ display: 'flex', gap: '6px' }}>
@@ -1692,10 +1692,10 @@ export const SimulationPlayerPage: React.FC = () => {
                       fontSize: '11px',
                       fontWeight: 700,
                       border: '1px solid',
-                      borderColor: selectedChartVar === 'v' ? '#10b981' : '#cbd5e1',
+                      borderColor: selectedChartVar === 'v' ? '#10b981' : 'var(--border-input)',
                       cursor: 'pointer',
-                      backgroundColor: selectedChartVar === 'v' ? '#10b981' : '#ffffff',
-                      color: selectedChartVar === 'v' ? '#ffffff' : '#334155',
+                      backgroundColor: selectedChartVar === 'v' ? '#10b981' : 'var(--bg-card)',
+                      color: selectedChartVar === 'v' ? '#ffffff' : 'var(--text-primary)',
                     }}
                   >
                     v(t)
@@ -1708,10 +1708,10 @@ export const SimulationPlayerPage: React.FC = () => {
                       fontSize: '11px',
                       fontWeight: 700,
                       border: '1px solid',
-                      borderColor: selectedChartVar === 's' ? '#3b82f6' : '#cbd5e1',
+                      borderColor: selectedChartVar === 's' ? '#3b82f6' : 'var(--border-input)',
                       cursor: 'pointer',
-                      backgroundColor: selectedChartVar === 's' ? '#3b82f6' : '#ffffff',
-                      color: selectedChartVar === 's' ? '#ffffff' : '#334155',
+                      backgroundColor: selectedChartVar === 's' ? '#3b82f6' : 'var(--bg-card)',
+                      color: selectedChartVar === 's' ? '#ffffff' : 'var(--text-primary)',
                     }}
                   >
                     {currentSim.id === 'sim-proj-001' ? 'y(t)' : 's(t)'}
@@ -1724,10 +1724,10 @@ export const SimulationPlayerPage: React.FC = () => {
                       fontSize: '11px',
                       fontWeight: 700,
                       border: '1px solid',
-                      borderColor: selectedChartVar === 'a' ? '#ef4444' : '#cbd5e1',
+                      borderColor: selectedChartVar === 'a' ? '#ef4444' : 'var(--border-input)',
                       cursor: 'pointer',
-                      backgroundColor: selectedChartVar === 'a' ? '#ef4444' : '#ffffff',
-                      color: selectedChartVar === 'a' ? '#ffffff' : '#334155',
+                      backgroundColor: selectedChartVar === 'a' ? '#ef4444' : 'var(--bg-card)',
+                      color: selectedChartVar === 'a' ? '#ffffff' : 'var(--text-primary)',
                     }}
                   >
                     a(t)
@@ -1746,7 +1746,7 @@ export const SimulationPlayerPage: React.FC = () => {
                 height={220}
               />
 
-              <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', fontSize: '12px', color: '#1e40af', lineHeight: 1.5 }}>
+              <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: 'var(--accent-soft)', border: '1px solid var(--border-focus)', fontSize: '12px', color: 'var(--accent-text-dark)', lineHeight: 1.5 }}>
                 ✨ <strong>Tương tác nhanh:</strong> Chạm hoặc kéo chuột trực tiếp trên đường cong đồ thị SVG để tua con trỏ thời gian tương ứng trên canvas mô phỏng.
               </div>
             </div>
@@ -1783,7 +1783,7 @@ export const SimulationPlayerPage: React.FC = () => {
                       }}
                       className="slider-range-control"
                     />
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                       Tương đương: <strong>{(carV0 * 3.6).toFixed(0)} km/h</strong> (chuẩn hoá SI)
                     </div>
                   </div>
@@ -2027,7 +2027,7 @@ export const SimulationPlayerPage: React.FC = () => {
                 </>
               )}
 
-              <div style={{ marginTop: '10px', padding: '12px', borderRadius: '8px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', fontSize: '12px', color: '#166534', lineHeight: 1.5 }}>
+              <div style={{ marginTop: '10px', padding: '12px', borderRadius: '8px', backgroundColor: 'var(--status-success-bg)', border: '1px solid var(--status-success-text)', fontSize: '12px', color: 'var(--status-success-text)', lineHeight: 1.5 }}>
                 💡 <strong>Tương tác Model-View:</strong> Khi bạn thay đổi bất kỳ tham số nào, toàn bộ quỹ đạo và vector lực sẽ được tính toán lại ngay tức khắc mà không cần tải lại trang.
               </div>
             </>
@@ -2037,7 +2037,7 @@ export const SimulationPlayerPage: React.FC = () => {
           {activeTab === 'steps' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', fontWeight: 800, color: '#475569', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
                   CÁC BƯỚC GIẢI CHI TIẾT
                 </span>
                 <button
@@ -2073,7 +2073,7 @@ export const SimulationPlayerPage: React.FC = () => {
                     borderRadius: '6px',
                     border: '1px solid #3b82f6',
                     backgroundColor: '#eff6ff',
-                    color: '#1d4ed8',
+                    color: 'var(--accent-text-dark)',
                     fontSize: '11px',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -2093,13 +2093,13 @@ export const SimulationPlayerPage: React.FC = () => {
                     border: '1px solid #e2e8f0',
                   }}
                 >
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--primary)', marginBottom: '4px' }}>
                     BƯỚC {step.step_number}: {step.formula}
                   </div>
-                  <div style={{ fontSize: '13px', color: '#334155', marginBottom: '8px', lineHeight: 1.4 }}>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px', lineHeight: 1.4 }}>
                     {step.description}
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: 700, color: '#047857', backgroundColor: '#ecfdf5', padding: '5px 10px', borderRadius: '6px', display: 'inline-block' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--status-success-text)', backgroundColor: 'var(--status-success-bg)', padding: '5px 10px', borderRadius: '6px', display: 'inline-block' }}>
                     Kết quả: {step.result}
                   </div>
                 </div>
@@ -2110,15 +2110,15 @@ export const SimulationPlayerPage: React.FC = () => {
           {/* TAB 3: DATA TABLE */}
           {activeTab === 'table' && (
             <div>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: '#475569', marginBottom: '8px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px' }}>
                 BẢNG BIẾN THIÊN THEO THỜI GIAN
               </div>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                <thead style={{ backgroundColor: '#f1f5f9' }}>
+                <thead style={{ backgroundColor: 'var(--surface-muted)' }}>
                   <tr>
-                    <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid #cbd5e1' }}>t (s)</th>
-                    <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid #cbd5e1' }}>v (m/s)</th>
-                    <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid #cbd5e1' }}>s (m)</th>
+                    <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid var(--border-input)' }}>t (s)</th>
+                    <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid var(--border-input)' }}>v (m/s)</th>
+                    <th style={{ padding: '6px 8px', textAlign: 'left', borderBottom: '1px solid var(--border-input)' }}>s (m)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2133,10 +2133,10 @@ export const SimulationPlayerPage: React.FC = () => {
                         ? carV0 * tVal + 0.5 * carA * tVal * tVal
                         : v0x * tVal;
                     return (
-                      <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <td style={{ padding: '6px 8px', fontWeight: 700 }}>{tVal.toFixed(2)}</td>
-                        <td style={{ padding: '6px 8px', color: '#2563eb' }}>{vVal.toFixed(2)}</td>
-                        <td style={{ padding: '6px 8px', color: '#10b981' }}>{sVal.toFixed(2)}</td>
+                        <td style={{ padding: '6px 8px', color: 'var(--primary)' }}>{vVal.toFixed(2)}</td>
+                        <td style={{ padding: '6px 8px', color: 'var(--status-success-text)' }}>{sVal.toFixed(2)}</td>
                       </tr>
                     );
                   })}
@@ -2148,7 +2148,7 @@ export const SimulationPlayerPage: React.FC = () => {
           {/* TAB 4: EXPORT FEATURES (TASK H08) */}
           {activeTab === 'export' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                 Xuất gói dữ liệu tự trị phục vụ dạy học và kiểm chứng theo yêu cầu của Giảng viên hướng dẫn:
               </div>
 
@@ -2221,7 +2221,7 @@ export const SimulationPlayerPage: React.FC = () => {
                   borderRadius: '8px',
                   border: '1px solid #2563eb',
                   backgroundColor: '#ffffff',
-                  color: '#2563eb',
+                  color: 'var(--primary)',
                   fontWeight: 700,
                   fontSize: '13px',
                   cursor: 'pointer',
@@ -2264,12 +2264,12 @@ export const SimulationPlayerPage: React.FC = () => {
           {activeTab === 'tips' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* Box 1: Mục tiêu bài học */}
-              <div style={{ backgroundColor: '#eff6ff', borderRadius: '12px', padding: '16px', border: '1px solid #bfdbfe' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#1d4ed8', fontWeight: 800, fontSize: '13px' }}>
+              <div style={{ backgroundColor: 'var(--accent-soft)', borderRadius: '12px', padding: '16px', border: '1px solid var(--border-focus)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--accent-text-dark)', fontWeight: 800, fontSize: '13px' }}>
                   <Sparkles size={16} />
                   <span>MỤC TIÊU BÀI HỌC (CHUẨN SGK 2018)</span>
                 </div>
-                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: '#1e3a8a', lineHeight: 1.6 }}>
+                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: 'var(--text-primary)', lineHeight: 1.6 }}>
                   <li>Nắm vững mối liên hệ giữa các đại lượng động học và động lực học.</li>
                   <li>Khảo sát trực quan ảnh hưởng của các thông số đầu vào đến chuyển động.</li>
                   <li>Kiểm chứng nghiệm số giải tích so với mô phỏng Runge-Kutta sai số &lt; 2%.</li>
@@ -2277,12 +2277,12 @@ export const SimulationPlayerPage: React.FC = () => {
               </div>
 
               {/* Box 2: Câu hỏi gợi mở tư duy cho giờ dạy */}
-              <div style={{ backgroundColor: '#fefce8', borderRadius: '12px', padding: '16px', border: '1px solid #fef08a' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#854d0e', fontWeight: 800, fontSize: '13px' }}>
+              <div style={{ backgroundColor: 'var(--status-warn-bg)', borderRadius: '12px', padding: '16px', border: '1px solid var(--status-warn-text)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--status-warn-text)', fontWeight: 800, fontSize: '13px' }}>
                   <Lightbulb size={16} />
                   <span>CÂU HỎI THẢO LUẬN GỢI MỞ (INQUIRY PROMPTS)</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', color: '#713f12', lineHeight: 1.5 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', color: 'var(--text-primary)', lineHeight: 1.5 }}>
                   {currentSim.id === 'sim-car-brake-003' ? (
                     <>
                       <div>
@@ -2321,12 +2321,12 @@ export const SimulationPlayerPage: React.FC = () => {
               </div>
 
               {/* Box 3: Sai lầm thường gặp của học sinh */}
-              <div style={{ backgroundColor: '#fff1f2', borderRadius: '12px', padding: '16px', border: '1px solid #fecdd3' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#9f1239', fontWeight: 800, fontSize: '13px' }}>
+              <div style={{ backgroundColor: 'var(--status-danger-bg)', borderRadius: '12px', padding: '16px', border: '1px solid var(--status-danger-text)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--status-danger-text)', fontWeight: 800, fontSize: '13px' }}>
                   <HelpCircle size={16} />
                   <span>SAI LẦM THƯỜNG GẶP CỦA HỌC SINH</span>
                 </div>
-                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: '#881337', lineHeight: 1.6 }}>
+                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: 'var(--text-primary)', lineHeight: 1.6 }}>
                   <li>Quên quy đổi vận tốc từ km/h sang m/s (chuẩn SI) dẫn đến sai lệch kết quả gấp 3.6 lần.</li>
                   <li>Quên dấu âm của gia tốc trong chuyển động chậm dần đều khi lập phương trình toạ độ.</li>
                   <li>Nhầm lẫn rằng tại điểm cao nhất của chuyển động ném xiên thì toàn bộ vận tốc bằng 0.</li>
@@ -2335,10 +2335,10 @@ export const SimulationPlayerPage: React.FC = () => {
 
               {/* Box 4: Ghi chú giảng dạy lớp học */}
               <div style={{ backgroundColor: '#f8fafc', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '11px', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '6px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '6px' }}>
                   GHI CHÚ SƯ PHẠM BÀI HỌC TRƯỚC
                 </div>
-                <div style={{ fontSize: '12px', color: '#334155', fontStyle: 'italic', lineHeight: 1.5 }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic', lineHeight: 1.5 }}>
                   "Giáo viên nên cho học sinh nhập số liệu dự đoán trước (Prediction Hypothesis), sau đó mới bấm Chạy mô phỏng để các em đối chiếu trực tiếp với kết quả đo thực tế."
                 </div>
               </div>
@@ -2353,16 +2353,16 @@ export const SimulationPlayerPage: React.FC = () => {
       {showEmbedModal && (
         <div className="phet-modal-backdrop" onClick={() => setShowEmbedModal(false)}>
           <div className="phet-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Share2 size={20} color="#2563eb" />
-                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' }}>
                   Nhúng phòng thí nghiệm vào bài giảng LMS
                 </h3>
               </div>
               <button
                 onClick={() => setShowEmbedModal(false)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
               >
                 <X size={20} />
               </button>
@@ -2370,14 +2370,14 @@ export const SimulationPlayerPage: React.FC = () => {
 
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>Bài toán đang mở:</span>
-                <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)' }}>Bài toán đang mở:</span>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
                   {currentSim.title}
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Đoạn mã HTML iFrame sẵn sàng:
                 </label>
                 <div
@@ -2398,7 +2398,7 @@ export const SimulationPlayerPage: React.FC = () => {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px' }}>
-                <div style={{ fontSize: '12px', color: '#64748b' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                   Tương thích hoàn hảo với Canvas, Moodle, Google Sites, PowerPoint.
                 </div>
                 <button

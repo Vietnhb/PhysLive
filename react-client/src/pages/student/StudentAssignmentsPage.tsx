@@ -75,12 +75,12 @@ export const StudentAssignmentsPage: React.FC = () => {
       {/* Page Header */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <Target size={22} color="#10b981" strokeWidth={2.5} />
-          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>
+          <Target size={22} color="var(--primary)" strokeWidth={2.5} />
+          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>
             Không Gian Bài Tập & Thử Thách Dự Đoán
           </h1>
         </div>
-        <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
+        <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)' }}>
           Học sinh tính toán lý thuyết và đưa ra con số dự đoán trước khi hệ thống mở khóa mô phỏng vật lý đối chiếu thực nghiệm.
         </p>
       </div>
@@ -89,7 +89,7 @@ export const StudentAssignmentsPage: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px' }}>
         {/* Danh sách bài tập được giao */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ fontSize: '13px', fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Bài tập lớp học ({MOCK_ASSIGNMENTS.length})
           </div>
 
@@ -104,8 +104,8 @@ export const StudentAssignmentsPage: React.FC = () => {
                 style={{
                   padding: '16px',
                   borderRadius: '12px',
-                  border: isSelected ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                  backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
+                  border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-subtle)',
+                  backgroundColor: isSelected ? 'var(--accent-soft)' : 'var(--bg-card)',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                   boxShadow: isSelected ? '0 4px 12px rgba(37, 99, 235, 0.12)' : 'none',
@@ -117,8 +117,8 @@ export const StudentAssignmentsPage: React.FC = () => {
                       fontSize: '11px',
                       padding: '2px 8px',
                       borderRadius: '4px',
-                      backgroundColor: isDone ? '#dcfce7' : '#fef3c7',
-                      color: isDone ? '#166534' : '#92400e',
+                      backgroundColor: isDone ? 'var(--status-success-bg)' : 'var(--status-warn-bg)',
+                      color: isDone ? 'var(--status-success-text)' : 'var(--status-warn-text)',
                       fontWeight: 700,
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -128,12 +128,12 @@ export const StudentAssignmentsPage: React.FC = () => {
                     {isDone ? <CheckCircle2 size={11} /> : <Clock size={11} />}
                     <span>{isDone ? 'Đã gửi dự đoán' : 'Chờ dự đoán'}</span>
                   </span>
-                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                     {new Date(asg.due_date).toLocaleDateString('vi-VN')}
                   </span>
                 </div>
 
-                <div style={{ fontSize: '14px', fontWeight: 700, color: isSelected ? '#1d4ed8' : '#0f172a', lineHeight: 1.4 }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: isSelected ? 'var(--primary)' : 'var(--text-primary)', lineHeight: 1.4 }}>
                   {asg.title}
                 </div>
               </div>
@@ -142,17 +142,17 @@ export const StudentAssignmentsPage: React.FC = () => {
         </div>
 
         {/* Khung nội dung làm bài tập */}
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '28px', display: 'flex', flexDirection: 'column', gap: '22px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-subtle)', padding: '28px', display: 'flex', flexDirection: 'column', gap: '22px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
           {/* Metadata header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
             <div>
-              <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#475569', fontWeight: 700 }}>
+              <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', backgroundColor: 'var(--surface-muted)', color: 'var(--text-secondary)', fontWeight: 700 }}>
                 {classLesson.class_name} • {classLesson.name}
               </span>
-              <h2 style={{ margin: '8px 0 4px', fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>
+              <h2 style={{ margin: '8px 0 4px', fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)' }}>
                 {currentAssignment.title}
               </h2>
-              <div style={{ fontSize: '13px', color: '#64748b' }}>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                 Giáo viên phụ trách: <strong>Thầy Nguyễn Thế Hùng</strong>
               </div>
             </div>
@@ -162,8 +162,8 @@ export const StudentAssignmentsPage: React.FC = () => {
                 fontSize: '12px',
                 padding: '5px 12px',
                 borderRadius: '999px',
-                backgroundColor: hasSubmitted ? '#dcfce7' : '#fef9c3',
-                color: hasSubmitted ? '#15803d' : '#854d0e',
+                backgroundColor: hasSubmitted ? 'var(--status-success-bg)' : 'var(--status-warn-bg)',
+                color: hasSubmitted ? 'var(--status-success-text)' : 'var(--status-warn-text)',
                 fontWeight: 700,
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -176,33 +176,33 @@ export const StudentAssignmentsPage: React.FC = () => {
           </div>
 
           {/* Lời dặn dò của giáo viên từ bài trước (Teacher Explanation Notes) */}
-          <div style={{ padding: '16px 18px', backgroundColor: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+          <div style={{ padding: '16px 18px', backgroundColor: 'var(--status-success-bg)', borderRadius: '12px', border: '1px solid var(--status-success-bg)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <GraduationCap size={18} color="#166534" />
-              <span style={{ fontSize: '13px', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              <GraduationCap size={18} color="var(--status-success-text)" />
+              <span style={{ fontSize: '13px', fontWeight: 800, color: 'var(--status-success-text)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                 Ghi chú hướng dẫn bài giải từ bài học trước của Thầy:
               </span>
             </div>
-            <p style={{ margin: 0, fontSize: '13px', color: '#14532d', lineHeight: 1.6 }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--status-success-text)', lineHeight: 1.6 }}>
               {classLesson.explanation_notes}
             </p>
           </div>
 
           {/* Đề bài và hướng dẫn */}
           <div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <FileText size={15} color="#2563eb" />
+            <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <FileText size={15} color="var(--primary)" />
               <span>Yêu cầu bài tập:</span>
             </div>
-            <div style={{ fontSize: '14px', color: '#475569', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               {currentAssignment.instructions}
             </div>
           </div>
 
           {/* KHỐI NHẬP DỰ ĐOÁN CỦA HỌC SINH (CORE WORKFLOW) */}
-          <div style={{ padding: '20px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '14px', fontWeight: 800, color: '#1e293b', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <HelpCircle size={17} color="#2563eb" />
+          <div style={{ padding: '20px', backgroundColor: 'var(--surface-muted)', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <HelpCircle size={17} color="var(--primary)" />
               <span>{currentAssignment.target_question}</span>
             </div>
 
@@ -218,7 +218,9 @@ export const StudentAssignmentsPage: React.FC = () => {
                     flex: 1,
                     padding: '12px 14px',
                     borderRadius: '8px',
-                    border: '1px solid #cbd5e1',
+                    border: '1px solid var(--border-input)',
+                    backgroundColor: 'var(--bg-page)',
+                    color: 'var(--text-primary)',
                     fontSize: '14px',
                     outline: 'none',
                     fontWeight: 600,
@@ -228,7 +230,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                   type="submit"
                   style={{
                     padding: '12px 22px',
-                    backgroundColor: '#2563eb',
+                    backgroundColor: 'var(--primary)',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '8px',
@@ -249,37 +251,37 @@ export const StudentAssignmentsPage: React.FC = () => {
               // BẢNG ĐỐI CHIẾU KẾT QUẢ THỰC NGHIỆM VÀ DỰ ĐOÁN
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                  <div style={{ padding: '14px', backgroundColor: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
-                    <div style={{ fontSize: '11px', color: '#1d4ed8', fontWeight: 700, textTransform: 'uppercase' }}>DỰ ĐOÁN CỦA EM</div>
-                    <div style={{ fontSize: '22px', fontWeight: 800, color: '#1e40af', fontFamily: 'Consolas, monospace', marginTop: '4px' }}>
+                  <div style={{ padding: '14px', backgroundColor: 'var(--accent-soft)', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase' }}>DỰ ĐOÁN CỦA EM</div>
+                    <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--primary)', fontFamily: 'Consolas, monospace', marginTop: '4px' }}>
                       {studentPred} m
                     </div>
                   </div>
 
-                  <div style={{ padding: '14px', backgroundColor: '#ecfdf5', borderRadius: '10px', border: '1px solid #a7f3d0' }}>
-                    <div style={{ fontSize: '11px', color: '#047857', fontWeight: 700, textTransform: 'uppercase' }}>THỰC NGHIỆM MÔ PHỎNG</div>
-                    <div style={{ fontSize: '22px', fontWeight: 800, color: '#065f46', fontFamily: 'Consolas, monospace', marginTop: '4px' }}>
+                  <div style={{ padding: '14px', backgroundColor: 'var(--status-success-bg)', borderRadius: '10px', border: '1px solid var(--status-success-bg)' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--status-success-text)', fontWeight: 700, textTransform: 'uppercase' }}>THỰC NGHIỆM MÔ PHỎNG</div>
+                    <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--status-success-text)', fontFamily: 'Consolas, monospace', marginTop: '4px' }}>
                       {actualValue} m
                     </div>
                   </div>
 
-                  <div style={{ padding: '14px', backgroundColor: isPassed ? '#f0fdf4' : '#fef2f2', borderRadius: '10px', border: isPassed ? '1px solid #86efac' : '1px solid #fecaca' }}>
-                    <div style={{ fontSize: '11px', color: isPassed ? '#166534' : '#991b1b', fontWeight: 700, textTransform: 'uppercase' }}>ĐỘ LỆCH SAI SỐ (Δ)</div>
-                    <div style={{ fontSize: '22px', fontWeight: 800, color: isPassed ? '#16a34a' : '#dc2626', fontFamily: 'Consolas, monospace', marginTop: '4px' }}>
+                  <div style={{ padding: '14px', backgroundColor: isPassed ? 'var(--status-success-bg)' : 'var(--status-danger-bg)', borderRadius: '10px', border: isPassed ? '1px solid var(--status-success-bg)' : '1px solid var(--status-danger-bg)' }}>
+                    <div style={{ fontSize: '11px', color: isPassed ? 'var(--status-success-text)' : 'var(--status-danger-text)', fontWeight: 700, textTransform: 'uppercase' }}>ĐỘ LỆCH SAI SỐ (Δ)</div>
+                    <div style={{ fontSize: '22px', fontWeight: 800, color: isPassed ? 'var(--status-success-text)' : 'var(--status-danger-text)', fontFamily: 'Consolas, monospace', marginTop: '4px' }}>
                       {discrepancy.toFixed(2)}% {isPassed ? '✓' : '✗'}
                     </div>
                   </div>
                 </div>
 
-                <div style={{ fontSize: '13px', color: isPassed ? '#15803d' : '#b91c1c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ fontSize: '13px', color: isPassed ? 'var(--status-success-text)' : 'var(--status-danger-text)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                   {isPassed ? (
                     <>
-                      <Sparkles size={16} color="#16a34a" />
+                      <Sparkles size={16} color="var(--status-success-text)" />
                       <span>Xuất sắc! Kết quả dự đoán của em khớp với thực nghiệm vật lý trong ngưỡng cho phép (sai số ≤ 2%).</span>
                     </>
                   ) : (
                     <>
-                      <AlertTriangle size={16} color="#dc2626" />
+                      <AlertTriangle size={16} color="var(--status-danger-text)" />
                       <span>Độ lệch giữa tính toán lý thuyết và thực nghiệm máy tính vượt quá 2%. Em hãy khởi chạy mô phỏng bên dưới để xem lại từng bước giải nhé!</span>
                     </>
                   )}
@@ -289,8 +291,8 @@ export const StudentAssignmentsPage: React.FC = () => {
           </div>
 
           {/* ACTION UNLOCK LAUNCH SIMULATION */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
-            <div style={{ fontSize: '13px', color: '#64748b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)' }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
               Mô hình thực nghiệm: <strong>{currentSim.title}</strong>
             </div>
 
@@ -298,8 +300,8 @@ export const StudentAssignmentsPage: React.FC = () => {
               to={`/player?id=${currentSim.id}`}
               style={{
                 padding: '12px 24px',
-                backgroundColor: hasSubmitted ? '#10b981' : '#cbd5e1',
-                color: '#ffffff',
+                backgroundColor: hasSubmitted ? 'var(--primary)' : 'var(--surface-muted)',
+                color: hasSubmitted ? '#ffffff' : 'var(--text-muted)',
                 borderRadius: '10px',
                 fontWeight: 700,
                 fontSize: '14px',
@@ -308,7 +310,7 @@ export const StudentAssignmentsPage: React.FC = () => {
                 alignItems: 'center',
                 gap: '8px',
                 pointerEvents: hasSubmitted ? 'auto' : 'none',
-                boxShadow: hasSubmitted ? '0 4px 14px rgba(16, 185, 129, 0.3)' : 'none',
+                boxShadow: hasSubmitted ? '0 4px 14px rgba(37, 99, 235, 0.3)' : 'none',
                 cursor: hasSubmitted ? 'pointer' : 'not-allowed',
               }}
             >

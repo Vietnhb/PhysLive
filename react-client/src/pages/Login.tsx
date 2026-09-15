@@ -128,7 +128,7 @@ function Login() {
         </div>
 
         {/* Demo Fast Login Switcher (Gọn gàng & chuyên nghiệp) */}
-        <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid #e1e5eb' }}>
+        <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid var(--border-subtle)' }}>
           <button
             type="button"
             className="secondary"
@@ -149,18 +149,18 @@ function Login() {
                     padding: '8px 10px',
                     fontSize: 11,
                     textAlign: 'left',
-                    background: '#f8fafd',
-                    border: '1px solid #e1e5eb',
+                    background: 'var(--surface-muted)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: 6,
-                    color: '#202124',
+                    color: 'var(--text-primary)',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 2,
                   }}
                 >
-                  <strong style={{ color: '#1a73e8' }}>{u.role}</strong>
-                  <span style={{ fontSize: 10, color: '#5f6368', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  <strong style={{ color: 'var(--primary)' }}>{u.role}</strong>
+                  <span style={{ fontSize: 10, color: 'var(--text-secondary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                     {u.email}
                   </span>
                 </button>

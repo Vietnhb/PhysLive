@@ -1,9 +1,7 @@
 import React from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import type { RoleType } from '../../types/database';
 import { RoleBadge } from '../common/RoleBadge';
-import { IS_MOCK_ENABLED } from '../../config/api';
 import {
   Atom,
   FlaskConical,
@@ -11,21 +9,16 @@ import {
   Library as LibraryIcon,
   Target,
   Settings,
-  GraduationCap,
-  BookOpen,
-  ShieldCheck,
-  KeyRound,
   LogOut,
   LogIn,
   UserPlus,
-  Zap,
   Home as HomeIcon,
   LayoutDashboard,
 } from 'lucide-react';
 import { SvgIcon } from '../common/SvgIcon';
 
 export const Header: React.FC = () => {
-  const { currentUser, isAuthenticated, switchRole, logout } = useAuth();
+  const { currentUser, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
   const [isDarkMode, setIsDarkMode] = React.useState<boolean>(() => {
@@ -55,13 +48,6 @@ export const Header: React.FC = () => {
       // ignore
     }
   };
-
-  const demoRoles: { role: RoleType; label: string; icon: React.ReactNode }[] = [
-    { role: 'TEACHER', label: 'Giáo viên', icon: <GraduationCap size={13} strokeWidth={2.5} /> },
-    { role: 'STUDENT', label: 'Học sinh', icon: <BookOpen size={13} strokeWidth={2.5} /> },
-    { role: 'REVIEWER', label: 'Thẩm định', icon: <ShieldCheck size={13} strokeWidth={2.5} /> },
-    { role: 'ADMIN', label: 'Quản trị', icon: <KeyRound size={13} strokeWidth={2.5} /> },
-  ];
 
   const handleLogout = () => {
     logout();
@@ -178,73 +164,10 @@ export const Header: React.FC = () => {
         )}
       </nav>
 
-      {/* 3. Right Controls: Role Switcher & User Profile */}
+      {/* 3. Right Controls: Theme Toggle, User Profile & Actions */}
       <div className="studio-header-right">
-        {IS_MOCK_ENABLED && (
-          <span
-            style={{
-              fontSize: '11px',
-              padding: '4px 8px',
-              backgroundColor: isDarkMode ? 'rgba(217, 119, 6, 0.2)' : 'rgba(254, 243, 199, 0.9)',
-              color: isDarkMode ? '#fde047' : '#92400e',
-              borderRadius: '6px',
-              fontWeight: 700,
-              border: isDarkMode ? '1px solid rgba(217, 119, 6, 0.3)' : '1px solid #fde68a',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <Zap size={12} strokeWidth={2.5} />
-            <span>MOCK ON</span>
-          </span>
-        )}
-
         {isAuthenticated && currentUser ? (
           <>
-            {/* Quick Role Switcher khi đã đăng nhập */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: 'var(--surface-muted)',
-                padding: '3px 4px',
-                borderRadius: '999px',
-                border: '1px solid var(--border-subtle)',
-              }}
-            >
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, padding: '0 8px' }}>
-                Role:
-              </span>
-              {demoRoles.map((r) => {
-                const isSelected = currentUser.role === r.role;
-                return (
-                  <button
-                    key={r.role}
-                    onClick={() => switchRole(r.role)}
-                    style={{
-                      border: 'none',
-                      backgroundColor: isSelected ? 'var(--bg-card)' : 'transparent',
-                      color: isSelected ? 'var(--primary)' : 'var(--text-secondary)',
-                      padding: '4px 10px',
-                      borderRadius: '999px',
-                      fontSize: '12px',
-                      fontWeight: isSelected ? 700 : 500,
-                      cursor: 'pointer',
-                      boxShadow: isSelected ? 'var(--shadow-sm)' : 'none',
-                      transition: 'all 0.15s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                    }}
-                  >
-                    <span>{r.icon}</span>
-                    <span>{r.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
             {/* Theme Toggle Button (Light / Dark) */}
             <button
               onClick={toggleTheme}
