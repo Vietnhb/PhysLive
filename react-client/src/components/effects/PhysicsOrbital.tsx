@@ -11,16 +11,16 @@ export const PhysicsOrbital: React.FC = () => {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let particles: Particle[] = [];
-    
-    // Resize handler
-    const resizeCanvas = () => {
-      if (canvas.parentElement) {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
-        initParticles();
-      }
-    };
+
+    interface Shockwave {
+      x: number;
+      y: number;
+      radius: number;
+      maxRadius: number;
+      opacity: number;
+    }
+
+    let shockwaves: Shockwave[] = [];
 
     // Particle definition
     class Particle {
@@ -30,65 +30,101 @@ export const PhysicsOrbital: React.FC = () => {
       vy: number;
       radius: number;
       color: string;
-      mass: number;
+      isHub: boolean;
 
-      constructor(canvasWidth: number, canvasHeight: number) {
-        this.x = Math.random() * canvasWidth;
-        this.y = Math.random() * canvasHeight;
+      constructor(w: number, h: number) {
+        this.x = Math.random() * (w || 800);
+        this.y = Math.random() * (h || 600);
         this.vx = (Math.random() - 0.5) * 1.5;
         this.vy = (Math.random() - 0.5) * 1.5;
-        this.radius = Math.random() * 2 + 1.5;
-        this.mass = this.radius * 2;
-        // Techy blue/purple hues
-        const hues = ['#4f46e5', '#8b5cf6', '#3b82f6', '#14b8a6'];
+        this.isHub = Math.random() < 0.18;
+        this.radius = this.isHub ? Math.random() * 2 + 4.5 : Math.random() * 2 + 2.5;
+        const hues = ['#818cf8', '#a855f7', '#38bdf8', '#22d3ee', '#c084fc', '#60a5fa'];
         this.color = hues[Math.floor(Math.random() * hues.length)];
       }
 
-      update(canvasWidth: number, canvasHeight: number, mouseX: number, mouseY: number) {
+      update(w: number, h: number, mouseX: number, mouseY: number) {
         // Bounce off walls
-        if (this.x < 0 || this.x > canvasWidth) this.vx *= -1;
-        if (this.y < 0 || this.y > canvasHeight) this.vy *= -1;
+        if (this.x < 0 || this.x > w) this.vx *= -1;
+        if (this.y < 0 || this.y > h) this.vy *= -1;
 
-        // Electrostatic repulsion from mouse
+        // Mouse repulsion
         const dx = this.x - mouseX;
         const dy = this.y - mouseY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 150) {
-          const force = (150 - distance) / 150;
-          this.vx += (dx / distance) * force * 0.5;
-          this.vy += (dy / distance) * force * 0.5;
+        const distSq = dx * dx + dy * dy;
+        if (distSq < 180 * 180 && distSq > 1) {
+          const dist = Math.sqrt(distSq);
+          const force = ((180 - dist) / 180) * 0.8;
+          this.vx += (dx / dist) * force;
+          this.vy += (dy / dist) * force;
         }
 
-        // Apply friction
+        // Friction
         this.vx *= 0.99;
         this.vy *= 0.99;
 
-        // Ensure minimum speed
+        // Speed clamping
         const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-        if (speed < 0.2) {
-          this.vx *= 1.1;
-          this.vy *= 1.1;
+        if (speed < 0.3) {
+          this.vx *= 1.08;
+          this.vy *= 1.08;
+        } else if (speed > 7) {
+          this.vx *= 0.96;
+          this.vy *= 0.96;
         }
 
         this.x += this.vx;
         this.y += this.vy;
       }
 
-      draw(ctx: CanvasRenderingContext2D) {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
+      draw(context: CanvasRenderingContext2D) {
+        context.save();
+        // Halo
+        context.beginPath();
+        context.arc(this.x, this.y, this.radius * 2.2, 0, Math.PI * 2);
+        context.fillStyle = this.color;
+        context.globalAlpha = this.isHub ? 0.35 : 0.18;
+        context.fill();
+
+        // Core
+        context.beginPath();
+        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        context.fillStyle = this.color;
+        context.globalAlpha = 1.0;
+        context.fill();
+        context.restore();
       }
     }
 
-    const initParticles = () => {
+    let particles: Particle[] = [];
+
+    const initParticles = (w: number, h: number) => {
       particles = [];
-      const numParticles = Math.floor((canvas.width * canvas.height) / 10000); // Density
-      for (let i = 0; i < numParticles; i++) {
-        particles.push(new Particle(canvas.width, canvas.height));
+      const count = Math.max(70, Math.min(220, Math.floor((w * h) / 7500)));
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle(w, h));
       }
     };
+
+    // Resize handler
+    const resizeCanvas = () => {
+      const parent = canvas.parentElement;
+      const w = Math.round(parent?.clientWidth || canvas.clientWidth || window.innerWidth * 0.55);
+      const h = Math.round(parent?.clientHeight || canvas.clientHeight || window.innerHeight - 65);
+      if (w > 0 && h > 0 && (canvas.width !== w || canvas.height !== h)) {
+        canvas.width = w;
+        canvas.height = h;
+        initParticles(w, h);
+      }
+    };
+
+    resizeCanvas();
+    const resizeObserver = new ResizeObserver(() => {
+      resizeCanvas();
+    });
+    if (canvas.parentElement) {
+      resizeObserver.observe(canvas.parentElement);
+    }
 
     let mouseX = -1000;
     let mouseY = -1000;
@@ -104,36 +140,99 @@ export const PhysicsOrbital: React.FC = () => {
       mouseY = -1000;
     };
 
+    const handleClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      shockwaves.push({
+        x: clickX,
+        y: clickY,
+        radius: 10,
+        maxRadius: 280,
+        opacity: 1,
+      });
+
+      // Blast impulse to particles
+      particles.forEach((p) => {
+        const dx = p.x - clickX;
+        const dy = p.y - clickY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 260 && dist > 1) {
+          const force = ((260 - dist) / 260) * 12;
+          p.vx += (dx / dist) * force;
+          p.vy += (dy / dist) * force;
+        }
+      });
+    };
+
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mouseleave', handleMouseLeave);
+    canvas.addEventListener('click', handleClick);
 
     const animate = () => {
-      // Create trailing effect
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'; // Assuming white background (light mode)
-      
-      // If dark mode, this would be 'rgba(9, 13, 22, 0.2)' but we'll use clearRect and rely on parent bg
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (particles.length === 0 && canvas.width > 0 && canvas.height > 0) {
+        initParticles(canvas.width, canvas.height);
+      }
+
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Draw connections
+      ctx.save();
+      const maxConnectDist = 170;
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+          const distSq = dx * dx + dy * dy;
 
-          if (distance < 120) {
+          if (distSq < maxConnectDist * maxConnectDist) {
+            const dist = Math.sqrt(distSq);
+            const factor = 1 - dist / maxConnectDist;
+            const opacity = factor * 0.55;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            // Opacity based on distance
-            const opacity = 1 - distance / 120;
-            ctx.strokeStyle = `rgba(139, 92, 246, ${opacity * 0.4})`;
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
+            ctx.lineWidth = factor > 0.6 ? 1.4 : 0.9;
             ctx.stroke();
           }
         }
       }
+      ctx.restore();
 
+      // Shockwaves
+      if (shockwaves.length > 0) {
+        ctx.save();
+        for (let i = shockwaves.length - 1; i >= 0; i--) {
+          const sw = shockwaves[i];
+          sw.radius += 5.5;
+          sw.opacity -= 0.022;
+
+          if (sw.opacity <= 0 || sw.radius >= sw.maxRadius) {
+            shockwaves.splice(i, 1);
+            continue;
+          }
+
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(168, 85, 247, ${sw.opacity})`;
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+
+          if (sw.radius > 12) {
+            ctx.beginPath();
+            ctx.arc(sw.x, sw.y, sw.radius - 10, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(56, 189, 248, ${sw.opacity * 0.7})`;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+      }
+
+      // Update & draw particles
       particles.forEach((p) => {
         p.update(canvas.width, canvas.height, mouseX, mouseY);
         p.draw(ctx);
@@ -142,26 +241,92 @@ export const PhysicsOrbital: React.FC = () => {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
     animate();
 
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
+      resizeObserver.disconnect();
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
+      canvas.removeEventListener('click', handleClick);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
+    <div
       style={{
+        position: 'absolute',
+        inset: 0,
         width: '100%',
         height: '100%',
-        display: 'block',
+        backgroundColor: '#090d16',
+        overflow: 'hidden',
       }}
-    />
+    >
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          display: 'block',
+          cursor: 'crosshair',
+        }}
+      />
+      {/* HUD Badge */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '28px',
+          left: '28px',
+          right: '28px',
+          pointerEvents: 'none',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          zIndex: 10,
+        }}
+      >
+        <div
+          style={{
+            background: 'rgba(15, 23, 42, 0.85)',
+            backdropFilter: 'blur(14px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: '12px',
+            padding: '12px 18px',
+            maxWidth: '400px',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <span
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: '#10b981',
+                display: 'inline-block',
+                boxShadow: '0 0 8px #10b981',
+              }}
+            />
+            <span
+              style={{
+                fontSize: '12px',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                color: '#38bdf8',
+              }}
+            >
+              Mô phỏng động lực học hạt (Interactive Lab)
+            </span>
+          </div>
+          <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8', lineHeight: 1.5 }}>
+            Rê chuột để đẩy hạt • Nhấp chuột để kích hoạt sóng xung kích gợn sóng
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
