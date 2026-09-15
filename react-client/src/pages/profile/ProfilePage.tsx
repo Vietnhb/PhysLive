@@ -2,22 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { RoleBadge } from '../../components/common/RoleBadge';
+import { UserCheck, Edit3, KeyRound, LogOut, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
   const { currentUser, setUser, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Profile fields state
-  const [fullName, setFullName] = useState(currentUser?.full_name || '');
-  const [email] = useState(currentUser?.email || '');
-  const [schoolName, setSchoolName] = useState(currentUser?.school_name || 'THPT Chuyên Khoa Học Tự Nhiên');
-  const [notification, setNotification] = useState<string | null>(null);
+  // Mode: 'view' | 'edit' | 'password' (Chuyển native sang thẻ khác theo yêu cầu Leader)
+  const [mode, setMode] = useState<'view' | 'edit' | 'password'>('view');
 
-  // Password change state
+  // Edit fields
+  const [fullName, setFullName] = useState(currentUser?.full_name || '');
+  const [schoolName, setSchoolName] = useState(currentUser?.school_name || 'THPT Chuyên Khoa Học Tự Nhiên');
+  const [newPasswordOptional, setNewPasswordOptional] = useState('');
+
+  // Dedicated Password change fields
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [pwdError, setPwdError] = useState('');
+
+  const [notification, setNotification] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentUser) {
@@ -30,43 +35,56 @@ export const ProfilePage: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const showToast = (msg: string, isError = false) => {
+    if (isError) {
+      setErrorMessage(msg);
+      setTimeout(() => setErrorMessage(null), 3500);
+    } else {
+      setNotification(msg);
+      setTimeout(() => setNotification(null), 3500);
+    }
+  };
+
+  // Lưu thông tin từ thẻ Edit (Mục 6.3)
+  const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser) return;
+    if (!fullName.trim()) {
+      showToast('Họ và tên không được để trống!', true);
+      return;
+    }
+
     setUser({
       ...currentUser,
-      full_name: fullName,
+      full_name: fullName.trim(),
       school_name: schoolName,
       updated_at: new Date().toISOString(),
     });
-    setNotification('Cập nhật thông tin hồ sơ thành công!');
-    setTimeout(() => setNotification(null), 3000);
+
+    setMode('view');
+    showToast('Đã lưu thông tin tài khoản thành công!');
   };
 
+  // Đổi mật khẩu
   const handleChangePassword = (e: React.FormEvent) => {
     e.preventDefault();
-    setPwdError('');
-
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setPwdError('Vui lòng điền đầy đủ thông tin đổi mật khẩu!');
+      showToast('Vui lòng điền đầy đủ các trường mật khẩu!', true);
       return;
     }
-
     if (newPassword.length < 6) {
-      setPwdError('Mật khẩu mới phải có ít nhất 6 ký tự!');
+      showToast('Mật khẩu mới phải có ít nhất 6 ký tự!', true);
       return;
     }
-
     if (newPassword !== confirmPassword) {
-      setPwdError('Mật khẩu xác nhận không khớp!');
+      showToast('Xác nhận mật khẩu mới không khớp!', true);
       return;
     }
 
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
-    setNotification('Đổi mật khẩu thành công!');
-    setTimeout(() => setNotification(null), 3000);
+    setMode('view');
+    showToast('Đổi mật khẩu thành công!');
   };
 
   const handleLogout = () => {
@@ -75,231 +93,298 @@ export const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '900px', margin: '0 auto' }}>
-      {/* Header */}
+    <div style={{ maxWidth: '820px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Header gọn gàng, chuẩn typography */}
       <div>
-        <h1 style={{ margin: '0 0 6px', fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>
-          Hồ sơ cá nhân & Cài đặt tài khoản (Task H02)
+        <span className="eyebrow">Hồ sơ cá nhân & Định danh</span>
+        <h1 style={{ margin: '4px 0 6px', fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>
+          Tài khoản của bạn
         </h1>
-        <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
-          Quản lý thông tin định danh, trường học và bảo mật tài khoản PhysLive Studio của bạn.
+        <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--text-secondary)' }}>
+          Quản lý thông tin định danh và phân quyền trong hệ thống PhysLive Studio.
         </p>
       </div>
 
+      {/* Thông báo trạng thái */}
       {notification && (
-        <div style={{ padding: '12px 18px', backgroundColor: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0', borderRadius: '10px', fontSize: '14px', fontWeight: 600 }}>
-          ✓ {notification}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', background: '#e6f4ea', border: '1px solid #ceead6', borderRadius: '10px', color: '#137333', fontSize: '13.5px', fontWeight: 600 }}>
+          <CheckCircle2 size={18} color="#137333" />
+          <span>{notification}</span>
         </div>
       )}
 
-      {/* User Hero Banner */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          padding: '24px',
-          border: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #2563eb, #06b6d4)',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '26px',
-              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
-            }}
-          >
-            {currentUser.full_name.charAt(0)}
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#0f172a' }}>
-                {currentUser.full_name}
-              </h2>
-              <RoleBadge role={currentUser.role} />
-            </div>
-            <div style={{ fontSize: '13px', color: '#64748b' }}>
-              {currentUser.email} • {currentUser.school_name || 'THPT Chuyên KHTN'}
-            </div>
-          </div>
+      {errorMessage && (
+        <div className="ambiguity" style={{ background: '#fce8e6', borderColor: '#fad2cf', color: '#c5221f', margin: 0 }}>
+          ⚠️ {errorMessage}
         </div>
+      )}
 
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#fee2e2',
-            color: '#dc2626',
-            border: '1px solid #fca5a5',
-            borderRadius: '8px',
-            fontSize: '13px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >
-          Đăng xuất tài khoản ➔
-        </button>
-      </div>
+      {/* ==================================================================== */}
+      {/* THẺ 1: XEM THÔNG TIN TỔNG QUAN (VIEW CARD MODE)                      */}
+      {/* ==================================================================== */}
+      {mode === 'view' && (
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Top User Hero */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', paddingBottom: '20px', borderBottom: '1px solid var(--border-card)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div
+                style={{
+                  width: '58px',
+                  height: '58px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #1a73e8, #174ea6)',
+                  color: '#ffffff',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontWeight: 800,
+                  fontSize: '22px',
+                  boxShadow: '0 3px 10px rgba(26, 115, 232, 0.25)',
+                }}
+              >
+                {currentUser.full_name.charAt(0).toUpperCase()}
+              </div>
 
-      {/* 2-Column Section: Personal Info vs Change Password */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px' }}>
-        {/* Left Column: Personal Information Form */}
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0' }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>
-            👤 Thông tin tài khoản
-          </h3>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                  <h2 style={{ margin: 0, fontSize: '19px', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {currentUser.full_name}
+                  </h2>
+                  <RoleBadge role={currentUser.role} />
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  {currentUser.email}
+                </div>
+              </div>
+            </div>
 
-          <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <span className="status">
+              Hoạt động
+            </span>
+          </div>
+
+          {/* Clean 2-Column Info Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px 24px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                 Họ và tên
-              </label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
-              />
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                {currentUser.full_name}
+              </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                Địa chỉ Email (Định danh đăng nhập)
-              </label>
-              <input
-                type="email"
-                disabled
-                value={email}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#64748b', fontSize: '14px', cursor: 'not-allowed' }}
-              />
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                Địa chỉ Email
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                {currentUser.email}
+              </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                Trường học / Đơn vị công tác
-              </label>
-              <input
-                type="text"
-                value={schoolName}
-                onChange={(e) => setSchoolName(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
-              />
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                Vai trò hệ thống
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a73e8' }}>
+                {currentUser.role}
+              </div>
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                Vai trò phân quyền hệ thống (RBAC)
-              </label>
-              <input
-                type="text"
-                disabled
-                value={currentUser.role}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', color: '#2563eb', fontWeight: 700, fontSize: '14px', cursor: 'not-allowed' }}
-              />
+              <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                Trường học / Đơn vị liên kết
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                {currentUser.school_name || 'THPT Chuyên Khoa Học Tự Nhiên'}
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons: Chuyển Native sang thẻ Edit */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', paddingTop: '18px', borderTop: '1px solid var(--border-card)' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setMode('edit')}
+              >
+                <Edit3 size={15} />
+                <span>Chỉnh sửa thông tin</span>
+              </button>
+
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => setMode('password')}
+              >
+                <KeyRound size={15} />
+                <span>Đổi mật khẩu</span>
+              </button>
             </div>
 
             <button
-              type="submit"
-              style={{
-                marginTop: '8px',
-                padding: '11px',
-                backgroundColor: '#2563eb',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '13px',
-                cursor: 'pointer',
+              type="button"
+              className="danger"
+              onClick={handleLogout}
+            >
+              <LogOut size={14} />
+              <span>Đăng xuất</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================================== */}
+      {/* THẺ 2: NATIVE FORM CHỈNH SỬA THÔNG TIN 2 CỘT (MỤC 6.3 UI_DESIGN_GUIDE)*/}
+      {/* ==================================================================== */}
+      {mode === 'edit' && (
+        <form className="ops-form" onSubmit={handleSaveProfile}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0 }}>Chỉnh sửa thông tin · {currentUser.email}</h3>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Mục 6.3 Design System</span>
+          </div>
+
+          <div className="ops-form-grid">
+            <label className="ops-field">
+              Họ và tên
+              <input
+                name="fullName"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                maxLength={200}
+                placeholder="Nhập họ và tên đầy đủ"
+              />
+            </label>
+
+            <label className="ops-field">
+              Vai trò (Role)
+              <select name="role" defaultValue={currentUser.role} disabled style={{ backgroundColor: '#f1f3f4', cursor: 'not-allowed' }}>
+                <option value="TEACHER">TEACHER (Giáo viên)</option>
+                <option value="STUDENT">STUDENT (Học sinh)</option>
+                <option value="REVIEWER">REVIEWER (Kiểm duyệt viên)</option>
+                <option value="ADMIN">ADMIN (Quản trị viên)</option>
+              </select>
+            </label>
+
+            <label className="ops-field">
+              Trường học / Đơn vị liên kết
+              <select
+                name="schoolName"
+                value={schoolName}
+                onChange={(e) => setSchoolName(e.target.value)}
+              >
+                <option value="THPT Chuyên Khoa Học Tự Nhiên">THPT Chuyên Khoa Học Tự Nhiên</option>
+                <option value="THPT Chuyên Hà Nội - Amsterdam">THPT Chuyên Hà Nội - Amsterdam</option>
+                <option value="THPT FPT Hà Nội">THPT FPT Hà Nội</option>
+                <option value="THPT FPT Cần Thơ">THPT FPT Cần Thơ</option>
+                <option value="THPT Chuyên Lê Hồng Phong TP.HCM">THPT Chuyên Lê Hồng Phong TP.HCM</option>
+              </select>
+            </label>
+
+            <label className="ops-field">
+              Mật khẩu mới (Nếu cần đổi)
+              <input
+                type="password"
+                name="password"
+                minLength={6}
+                placeholder="Để trống nếu giữ nguyên"
+                value={newPasswordOptional}
+                onChange={(e) => setNewPasswordOptional(e.target.value)}
+              />
+            </label>
+          </div>
+
+          <div className="ops-actions">
+            <button type="submit" className="btn-primary">
+              <UserCheck size={16} />
+              <span>Lưu tài khoản</span>
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => {
+                setFullName(currentUser.full_name);
+                setSchoolName(currentUser.school_name || 'THPT Chuyên Khoa Học Tự Nhiên');
+                setNewPasswordOptional('');
+                setMode('view');
               }}
             >
-              Lưu thay đổi thông tin
+              <ArrowLeft size={15} />
+              <span>Hủy</span>
             </button>
-          </form>
-        </div>
+          </div>
+        </form>
+      )}
 
-        {/* Right Column: Password Change Form */}
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0' }}>
-          <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 700, color: '#0f172a' }}>
-            🔒 Đổi mật khẩu
-          </h3>
+      {/* ==================================================================== */}
+      {/* THẺ 3: FORM ĐỔI MẬT KHẨU RIÊNG BIỆT (PASSWORD CHANGE CARD)           */}
+      {/* ==================================================================== */}
+      {mode === 'password' && (
+        <form className="ops-form" onSubmit={handleChangePassword}>
+          <h3>Đổi mật khẩu bảo vệ tài khoản</h3>
+          <p style={{ margin: '0 0 18px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+            Mật khẩu mới cần tối thiểu 6 ký tự để đảm bảo an toàn truy cập.
+          </p>
 
-          {pwdError && (
-            <div style={{ padding: '10px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b', fontSize: '12px', marginBottom: '14px' }}>
-              ⚠️ {pwdError}
-            </div>
-          )}
-
-          <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                Mật khẩu hiện tại
-              </label>
+          <div style={{ display: 'grid', gap: '14px', maxWidth: '460px' }}>
+            <label className="ops-field">
+              Mật khẩu hiện tại
               <input
                 type="password"
-                placeholder="Nhập mật khẩu cũ..."
+                placeholder="Nhập mật khẩu đang dùng..."
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
+                required
               />
-            </div>
+            </label>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                Mật khẩu mới
-              </label>
+            <label className="ops-field">
+              Mật khẩu mới
               <input
                 type="password"
-                placeholder="Tối thiểu 6 ký tự..."
+                placeholder="Nhập mật khẩu mới..."
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
+                required
+                minLength={6}
               />
-            </div>
+            </label>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                Xác nhận mật khẩu mới
-              </label>
+            <label className="ops-field">
+              Xác nhận mật khẩu mới
               <input
                 type="password"
                 placeholder="Nhập lại mật khẩu mới..."
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none' }}
+                required
               />
-            </div>
+            </label>
+          </div>
 
+          <div className="ops-actions">
+            <button type="submit" className="btn-primary">
+              <span>Xác nhận đổi mật khẩu</span>
+            </button>
             <button
-              type="submit"
-              style={{
-                marginTop: '8px',
-                padding: '11px',
-                backgroundColor: '#0f172a',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '13px',
-                cursor: 'pointer',
+              type="button"
+              className="secondary"
+              onClick={() => {
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+                setMode('view');
               }}
             >
-              Cập nhật mật khẩu
+              <span>Hủy</span>
             </button>
-          </form>
-        </div>
-      </div>
+          </div>
+        </form>
+      )}
     </div>
   );
 };
+
+export default ProfilePage;

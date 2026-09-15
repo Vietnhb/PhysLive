@@ -14,8 +14,9 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showDemoLogins, setShowDemoLogins] = useState(false);
 
-  // Xử lý đăng nhập với Backend API thật
+  // Xử lý đăng nhập với Backend API
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -28,7 +29,6 @@ function Login() {
 
     try {
       const res = await login(email, password);
-      // Cập nhật user từ response
       if (res.user) {
         loginWithUser(
           {
@@ -66,7 +66,7 @@ function Login() {
     }
   };
 
-  // Đăng nhập nhanh Demo dành cho Hùng và Team test
+  // Đăng nhập nhanh Demo dành cho Giáo viên / Học sinh / Kiểm duyệt / Admin
   const handleDemoLogin = (targetEmail: string) => {
     const user = MOCK_USERS.find(u => u.email === targetEmail) || MOCK_USERS[0];
     loginWithUser(user, `mock_jwt_token_${user.role.toLowerCase()}`);
@@ -74,235 +74,108 @@ function Login() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0b1329 100%)",
-        padding: "20px",
-        fontFamily: "'Inter', sans-serif",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "460px",
-          backgroundColor: "#ffffff",
-          borderRadius: "20px",
-          padding: "36px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.4)",
-        }}
-      >
-        {/* Header Logo */}
-        <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          <div
-            style={{
-              width: "56px",
-              height: "56px",
-              borderRadius: "14px",
-              background: "linear-gradient(135deg, #2563eb, #06b6d4)",
-              color: "#ffffff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "28px",
-              margin: "0 auto 14px",
-              boxShadow: "0 8px 20px rgba(37, 99, 235, 0.3)",
-            }}
-          >
-            ⚛️
-          </div>
-          <h1 style={{ margin: "0 0 6px", fontSize: "22px", fontWeight: 800, color: "#0f172a" }}>
-            Đăng nhập PhysLive Studio
-          </h1>
-          <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
-            Nền tảng mô phỏng vật lý tương tác dành cho Giáo viên & Học sinh
-          </p>
-        </div>
+    <main className="auth-page">
+      <form className="auth-card" onSubmit={handleLogin}>
+        <p className="auth-kicker">PhysLive workspace</p>
+        <h1>Chào mừng trở lại</h1>
+        <p className="muted">Đăng nhập để tiếp tục xây dựng và quản trị nền tảng.</p>
 
-        {/* Error notification */}
         {error && (
           <div
+            className="ambiguity"
             style={{
-              padding: "12px 14px",
-              backgroundColor: "#fef2f2",
-              border: "1px solid #fecaca",
-              borderRadius: "10px",
-              color: "#991b1b",
-              fontSize: "13px",
-              marginBottom: "20px",
-              lineHeight: 1.4,
+              borderColor: '#fca5a5',
+              background: '#fef2f2',
+              color: '#991b1b',
+              marginBottom: 18,
             }}
           >
             ⚠️ {error}
           </div>
         )}
 
-        {/* Login Form */}
-        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
-              Địa chỉ Email
-            </label>
-            <input
-              type="email"
-              placeholder="ví dụ: teacher@physlive.edu.vn"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "11px 14px",
-                borderRadius: "10px",
-                border: "1px solid #cbd5e1",
-                fontSize: "14px",
-                outline: "none",
-                boxSizing: "border-box",
-                transition: "border-color 0.2s",
-              }}
-            />
-          </div>
+        <div className="field">
+          <label htmlFor="login-email">Email</label>
+          <input
+            id="login-email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
 
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-              <label style={{ fontSize: "13px", fontWeight: 700, color: "#334155" }}>
-                Mật khẩu
-              </label>
-              <a href="#forgot" onClick={(e) => { e.preventDefault(); alert("Vui lòng liên hệ Admin để cấp lại mật khẩu!"); }} style={{ fontSize: "12px", color: "#2563eb", textDecoration: "none", fontWeight: 600 }}>
-                Quên mật khẩu?
-              </a>
-            </div>
-            <input
-              type="password"
-              placeholder="Nhập mật khẩu..."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "11px 14px",
-                borderRadius: "10px",
-                border: "1px solid #cbd5e1",
-                fontSize: "14px",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
+        <div className="field">
+          <label htmlFor="login-password">Mật khẩu</label>
+          <input
+            id="login-password"
+            type="password"
+            placeholder="Nhập mật khẩu"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              marginTop: "6px",
-              padding: "13px",
-              backgroundColor: loading ? "#94a3b8" : "#2563eb",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "10px",
-              fontWeight: 700,
-              fontSize: "14px",
-              cursor: loading ? "not-allowed" : "pointer",
-              boxShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
-              transition: "background-color 0.2s",
-            }}
-          >
-            {loading ? "Đang xác thực..." : "Đăng nhập hệ thống"}
+        <div className="actions">
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
-        </form>
-
-        {/* Quick Demo Login Buttons (Rất hữu ích khi test) */}
-        <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid #f1f5f9" }}>
-          <div style={{ fontSize: "11px", fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "center", marginBottom: "12px" }}>
-            ⚡ ĐĂNG NHẬP NHANH THỬ NGHIỆM (DEMO PRESETS)
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-            <button
-              onClick={() => handleDemoLogin("hung.teacher@physlive.edu.vn")}
-              style={{
-                padding: "8px 10px",
-                borderRadius: "8px",
-                border: "1px solid #bfdbfe",
-                backgroundColor: "#eff6ff",
-                color: "#1d4ed8",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer",
-                textAlign: "center",
-              }}
-            >
-              👨‍🏫 Thầy Hùng (Teacher)
-            </button>
-
-            <button
-              onClick={() => handleDemoLogin("nam.student@physlive.edu.vn")}
-              style={{
-                padding: "8px 10px",
-                borderRadius: "8px",
-                border: "1px solid #bbf7d0",
-                backgroundColor: "#f0fdf4",
-                color: "#15803d",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer",
-                textAlign: "center",
-              }}
-            >
-              🎒 Em Nam (Student)
-            </button>
-
-            <button
-              onClick={() => handleDemoLogin("kiet.reviewer@physlive.edu.vn")}
-              style={{
-                padding: "8px 10px",
-                borderRadius: "8px",
-                border: "1px solid #e9d5ff",
-                backgroundColor: "#faf5ff",
-                color: "#7e22ce",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer",
-                textAlign: "center",
-              }}
-            >
-              🔍 Kiệt (Reviewer)
-            </button>
-
-            <button
-              onClick={() => handleDemoLogin("admin@physlive.edu.vn")}
-              style={{
-                padding: "8px 10px",
-                borderRadius: "8px",
-                border: "1px solid #fed7aa",
-                backgroundColor: "#fff7ed",
-                color: "#c2410c",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer",
-                textAlign: "center",
-              }}
-            >
-              ⚡ Quản trị Admin
-            </button>
-          </div>
+          <button type="button" className="secondary" onClick={() => navigate("/")}>
+            Trang chủ
+          </button>
         </div>
 
-        {/* Footer link to Signup */}
-        <div style={{ marginTop: "24px", textAlign: "center", fontSize: "13px", color: "#64748b" }}>
-          Chưa có tài khoản?{" "}
-          <Link to="/signup" style={{ color: "#2563eb", fontWeight: 700, textDecoration: "none" }}>
-            Đăng ký tài khoản mới
-          </Link>
-          <div style={{ marginTop: "8px" }}>
-            <Link to="/" style={{ color: "#94a3b8", fontSize: "12px", textDecoration: "none" }}>
-              ← Quay về Trang chủ
-            </Link>
-          </div>
+        {/* Demo Fast Login Switcher (Gọn gàng & chuyên nghiệp) */}
+        <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid #e1e5eb' }}>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => setShowDemoLogins(!showDemoLogins)}
+            style={{ width: '100%', minHeight: 34, fontSize: 12, padding: '6px 12px' }}
+          >
+            ⚡ {showDemoLogins ? "Ẩn danh sách tài khoản Demo" : "Đăng nhập nhanh với tài khoản Demo"}
+          </button>
+
+          {showDemoLogins && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12 }}>
+              {MOCK_USERS.map((u) => (
+                <button
+                  key={u.id}
+                  type="button"
+                  onClick={() => handleDemoLogin(u.email)}
+                  style={{
+                    padding: '8px 10px',
+                    fontSize: 11,
+                    textAlign: 'left',
+                    background: '#f8fafd',
+                    border: '1px solid #e1e5eb',
+                    borderRadius: 6,
+                    color: '#202124',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                  }}
+                >
+                  <strong style={{ color: '#1a73e8' }}>{u.role}</strong>
+                  <span style={{ fontSize: 10, color: '#5f6368', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                    {u.email}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+
+        <p className="auth-footer">
+          Chưa có tài khoản? <Link to="/signup">Đăng ký ngay</Link>
+        </p>
+      </form>
+    </main>
   );
 }
 
 export default Login;
+export { Login };

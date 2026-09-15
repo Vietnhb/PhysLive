@@ -1,25 +1,42 @@
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: #eff6ff;
-  --accent-cyan: #06b6d4;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-rose: #f43f5e;
-  --text-main: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --bg-page: #f8fafc;
+  /* Brand & Accents (UI_DESIGN_GUIDE.md Sec 2.1) */
+  --primary: #1a73e8;
+  --primary-hover: #1765cc;
+  --accent-soft: #eef3fe;
+  --accent-text-dark: #174ea6;
+  --focus-ring: #8ab4f8;
+
+  /* Surfaces & Backgrounds (UI_DESIGN_GUIDE.md Sec 2.2) */
+  --bg-page: #f8fafd;
+  --bg-card: #ffffff;
   --bg-surface: #ffffff;
+  --surface-muted: #f1f3f4;
+  --border-card: #e1e5eb;
+  --border-subtle: #e1e5eb;
+  --border-input: #bdc1c6;
+  --border-focus: #1a73e8;
   --bg-canvas: #090d16;
-  --border-subtle: #e2e8f0;
-  --border-focus: #3b82f6;
+
+  /* Typography Colors (UI_DESIGN_GUIDE.md Sec 2.3) */
+  --text-main: #202124;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --text-muted: #80868b;
+
+  /* Status Colors (UI_DESIGN_GUIDE.md Sec 2.4) */
+  --status-success-bg: #e6f4ea;
+  --status-success-text: #137333;
+  --status-warn-bg: #fef7e0;
+  --status-warn-text: #b06000;
+  --status-danger-bg: #fce8e6;
+  --status-danger-text: #c5221f;
+
   --header-height: 64px;
   --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-md: 8px;
   --radius-lg: 14px;
-  --radius-xl: 20px;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --radius-xl: 18px;
+  --shadow-sm: 0 1px 2px rgba(32, 33, 36, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
   --shadow-dock: 0 12px 36px rgba(0, 0, 0, 0.12);
@@ -31,9 +48,10 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: var(--text-main);
+  font-family: 'Google Sans', 'Inter', Roboto, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-primary);
   background-color: var(--bg-page);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -719,22 +737,427 @@ body {
   background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  max-width: 580px;
   width: 100%;
-  max-width: 620px;
-  overflow: hidden;
-  border: 1px solid #cbd5e1;
-  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 24px;
 }
 
-@keyframes modalPop {
-  0% {
-    transform: scale(0.94);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
+/* ==========================================================================
+   UI_DESIGN_GUIDE.MD CORE DESIGN SYSTEM & UTILITY CLASSES
+   ========================================================================== */
+
+/* Eyebrow lead label */
+.eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  color: var(--accent-text-dark);
+}
+
+/* Card trắng bo góc cao cấp */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  border-color: #d2d8e2;
+}
+
+/* Base button & variants */
+button.btn-primary, .btn-primary {
+  min-height: 40px;
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  cursor: pointer;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+button.btn-primary:hover:not(:disabled), .btn-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 2px 5px rgba(26, 115, 232, 0.25);
+}
+
+button.btn-primary:active:not(:disabled), .btn-primary:active {
+  transform: translateY(1px);
+}
+
+button.secondary, .secondary {
+  background: var(--accent-soft);
+  color: var(--accent-text-dark);
+  border: 1px solid transparent;
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: background-color 0.18s ease;
+}
+
+button.secondary:hover:not(:disabled), .secondary:hover {
+  background: #e2ebfd;
+}
+
+button.danger, .danger {
+  background: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #fad2cf;
+  min-height: 38px;
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.18s ease;
+}
+
+button.danger:hover:not(:disabled), .danger:hover {
+  background: #f8c9c4;
+}
+
+/* Form Fields */
+.field {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #3c4043;
+}
+
+.field input, .field textarea, .field select,
+input.form-control, textarea.form-control, select.form-control {
+  width: 100%;
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  padding: 11px 13px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font-size: 14px;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.field input:focus, .field textarea:focus, .field select:focus,
+input.form-control:focus, textarea.form-control:focus, select.form-control:focus {
+  outline: 3px solid var(--focus-ring);
+  border-color: var(--primary);
+}
+
+/* Status Pill (Viên thuốc trạng thái) */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+  border: 1px solid rgba(19, 115, 51, 0.15);
+}
+
+.status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status.warn {
+  background: var(--status-warn-bg);
+  color: var(--status-warn-text);
+  border-color: rgba(176, 96, 0, 0.2);
+}
+
+.status.bad {
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+  border-color: rgba(197, 34, 31, 0.2);
+}
+
+/* Hộp cảnh báo đề bài mơ hồ / Ambiguity Warning Box */
+.ambiguity {
+  background: #fffaf0;
+  border: 1px solid #f6d98b;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 14px 0;
+  color: #5f4100;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* Tiến trình 3 bước (Stepper list) */
+.step-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step-list li {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 12px;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.step-list li strong {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e8f0fe;
+  color: #1967d2;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.step-list li span {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 650;
+}
+
+/* ==========================================================================
+   OPERATIONS & FORM SỬA THÔNG TIN 2 CỘT (UI_DESIGN_GUIDE.MD SEC 6.3)
+   ========================================================================== */
+
+.ops-form {
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+  animation: fadeInDown 0.2s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ops-form h3 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.ops-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+@media (max-width: 720px) {
+  .ops-form-grid {
+    grid-template-columns: 1fr;
   }
 }
+
+.ops-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3c4043;
+}
+
+.ops-field input, .ops-field select, .ops-field textarea {
+  width: 100%;
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: #ffffff;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.18s ease, outline 0.18s ease;
+}
+
+.ops-field input:focus, .ops-field select:focus, .ops-field textarea:focus {
+  outline: 3px solid var(--focus-ring);
+  border-color: var(--primary);
+}
+
+.ops-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.ops-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ops-badge.good { background: #e6f4ea; color: #137333; }
+.ops-badge.warn { background: #fef7e0; color: #b06000; }
+.ops-badge.bad { background: #fce8e6; color: #c5221f; }
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table-wrap th {
+  padding: 14px 18px;
+  background: #f8fafd;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border-card);
+}
+
+.table-wrap td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.table-wrap tr:last-child td {
+  border-bottom: none;
+}
+
+.table-wrap tr:hover td {
+  background-color: #fcfdfe;
+}
+
+/* ==========================================================================
+   AUTH PAGES (UI_DESIGN_GUIDE.MD SEC 6.4)
+   ========================================================================== */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-page);
+  padding: 30px 20px;
+  box-sizing: border-box;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 20px rgba(32, 33, 36, 0.06);
+}
+
+.auth-kicker {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  color: var(--accent-text-dark);
+  margin: 0 0 8px;
+}
+
+.auth-card h1 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.auth-card p.muted {
+  margin: 0 0 24px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.auth-card .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.auth-card .actions button {
+  width: 100%;
+}
+
+.auth-footer {
+  margin: 24px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.auth-footer a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
 
 
