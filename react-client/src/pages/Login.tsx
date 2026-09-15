@@ -1,181 +1,116 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
-import { login } from "../api/authApi";
-import { setToken } from "../utils/token";
-import { useAuth } from "../context/AuthContext";
-import { MOCK_USERS } from "../mocks/mockUsers";
-import { IS_MOCK_ENABLED } from "../config/api";
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
+import { LogIn, ArrowRight } from 'lucide-react';
+import { PhysicsOrbital } from '../components/effects/PhysicsOrbital';
 
-function Login() {
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login, loginDemo } = useAuth();
   const navigate = useNavigate();
-  const { loginWithUser } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showDemoLogins, setShowDemoLogins] = useState(false);
 
-  // Xử lý đăng nhập với Backend API
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Vui lòng nhập đầy đủ Email và Mật khẩu!");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await login(email, password);
-      if (res.user) {
-        loginWithUser(
-          {
-            id: String(res.user.id),
-            role_id: `r-${res.user.role.toLowerCase()}`,
-            role: res.user.role as any,
-            email: res.user.email,
-            full_name: res.user.fullName || res.user.email,
-            status: 'active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          res.token
-        );
-      } else {
-        setToken(res.token);
-      }
-      navigate("/");
-    } catch (err: unknown) {
-      if (!axios.isAxiosError<{ message?: string }>(err) || !err.response) {
-        if (IS_MOCK_ENABLED) {
-          setError("Chưa kết nối được Server Spring Boot. Bạn có thể sử dụng các nút Đăng nhập nhanh Demo bên dưới để trải nghiệm ngay!");
-        } else {
-          setError("Không thể kết nối tới server. Vui lòng kiểm tra lại Backend!");
-        }
-        return;
-      }
-      if (err.response.status === 401) {
-        setError(err.response.data?.message ?? "Email hoặc mật khẩu không đúng");
-        return;
-      }
-      setError("Có lỗi xảy ra từ máy chủ backend");
-    } finally {
-      setLoading(false);
-    }
+    login(email, password);
+    navigate('/dashboard');
   };
 
-  // Đăng nhập nhanh Demo dành cho Giáo viên / Học sinh / Kiểm duyệt / Admin
-  const handleDemoLogin = (targetEmail: string) => {
-    const user = MOCK_USERS.find(u => u.email === targetEmail) || MOCK_USERS[0];
-    loginWithUser(user, `mock_jwt_token_${user.role.toLowerCase()}`);
-    navigate("/");
+  const handleDemo = (role: 'teacher' | 'student' | 'reviewer' | 'admin') => {
+    loginDemo(role);
+    if (role === 'teacher') navigate('/teacher/problem-submit');
+    else if (role === 'student') navigate('/student/assignments');
+    else if (role === 'reviewer') navigate('/reviewer/schema');
+    else if (role === 'admin') navigate('/admin');
+    else navigate('/dashboard');
   };
 
   return (
-    <main className="auth-page">
-      <form className="auth-card" onSubmit={handleLogin}>
-        <p className="auth-kicker">PhysLive workspace</p>
-        <h1>Chào mừng trở lại</h1>
-        <p className="muted">Đăng nhập để tiếp tục xây dựng và quản trị nền tảng.</p>
+    <div className="auth-split-page">
+      {/* Left Column: Physics Animation */}
+      <div className="auth-split-visual">
+        <PhysicsOrbital />
+      </div>
 
-        {error && (
-          <div
-            className="ambiguity"
-            style={{
-              borderColor: '#fca5a5',
-              background: '#fef2f2',
-              color: '#991b1b',
-              marginBottom: 18,
-            }}
-          >
-            ⚠️ {error}
-          </div>
-        )}
-
-        <div className="field">
-          <label htmlFor="login-email">Email</label>
-          <input
-            id="login-email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="login-password">Mật khẩu</label>
-          <input
-            id="login-password"
-            type="password"
-            placeholder="Nhập mật khẩu"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="actions">
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-          </button>
-          <button type="button" className="secondary" onClick={() => navigate("/")}>
-            Trang chủ
-          </button>
-        </div>
-
-        {/* Demo Fast Login Switcher (Gọn gàng & chuyên nghiệp) */}
-        <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid var(--border-subtle)' }}>
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => setShowDemoLogins(!showDemoLogins)}
-            style={{ width: '100%', minHeight: 34, fontSize: 12, padding: '6px 12px' }}
-          >
-            ⚡ {showDemoLogins ? "Ẩn danh sách tài khoản Demo" : "Đăng nhập nhanh với tài khoản Demo"}
-          </button>
-
-          {showDemoLogins && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12 }}>
-              {MOCK_USERS.map((u) => (
-                <button
-                  key={u.id}
-                  type="button"
-                  onClick={() => handleDemoLogin(u.email)}
-                  style={{
-                    padding: '8px 10px',
-                    fontSize: 11,
-                    textAlign: 'left',
-                    background: 'var(--surface-muted)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 6,
-                    color: 'var(--text-primary)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
-                  }}
-                >
-                  <strong style={{ color: 'var(--primary)' }}>{u.role}</strong>
-                  <span style={{ fontSize: 10, color: 'var(--text-secondary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    {u.email}
-                  </span>
-                </button>
-              ))}
+      {/* Right Column: Form */}
+      <div className="auth-split-form-container">
+        <div className="auth-split-form-inner">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+            <div style={{ background: '#8b5cf6', padding: '8px', borderRadius: '10px', display: 'flex' }}>
+              <LogIn color="white" size={24} />
             </div>
-          )}
+            <h2 style={{ margin: 0 }}>Đăng nhập</h2>
+          </div>
+          
+          <p className="muted">
+            Chào mừng trở lại trạm không gian PhysLive. Vui lòng đăng nhập để tiếp tục.
+          </p>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="field" style={{ margin: 0 }}>
+              <label>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="teacher@physlive.edu.vn"
+              />
+            </div>
+            <div className="field" style={{ margin: 0 }}>
+              <label>Mật khẩu</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button type="submit" className="btn-primary" style={{ marginTop: '8px' }}>
+              Tiếp tục <ArrowRight size={18} />
+            </button>
+          </form>
+
+          <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '14px' }}>
+            <Link to="/signup" style={{ color: '#94a3b8', textDecoration: 'none' }}>
+              Chưa có tài khoản? <span style={{ color: '#fff', fontWeight: 600 }}>Đăng ký</span>
+            </Link>
+          </div>
+
+          <div className="auth-split-divider">
+            <span>Đăng nhập nhanh (Demo)</span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button 
+              type="button" 
+              className="secondary" 
+              onClick={() => handleDemo('teacher')}
+              style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.2)' }}
+            >
+              👨‍🏫 Bấm vào đây để Test luồng Giáo viên
+            </button>
+            <button 
+              type="button" 
+              className="secondary" 
+              onClick={() => handleDemo('student')}
+              style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#4ade80', border: '1px solid rgba(34, 197, 94, 0.2)' }}
+            >
+              🎒 Bấm vào đây để Test luồng Học sinh
+            </button>
+            <button 
+              type="button" 
+              className="secondary" 
+              onClick={() => handleDemo('admin')}
+              style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+            >
+              ⚡ Bấm vào đây để Test luồng Admin
+            </button>
+          </div>
         </div>
-
-        <p className="auth-footer">
-          Chưa có tài khoản? <Link to="/signup">Đăng ký ngay</Link>
-        </p>
-      </form>
-    </main>
+      </div>
+    </div>
   );
-}
-
-export default Login;
-export { Login };
+};
