@@ -15,6 +15,7 @@ import { ProfilePage } from "./pages/profile/ProfilePage";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import { Home } from "./pages/Home";
 
 function App() {
   return (
@@ -26,8 +27,10 @@ function App() {
 
         {/* Main App Layout */}
         <Route path="/" element={<AppLayout />}>
-          {/* Dashboard chung */}
-          <Route index element={<Dashboard />} />
+          {/* Landing / Trang chủ PhysLive */}
+          <Route index element={<Home />} />
+          <Route path="home" element={<Home />} />
+          <Route path="dashboard" element={<Dashboard />} />
 
           {/* Teacher flow (H03 + H04) */}
           <Route

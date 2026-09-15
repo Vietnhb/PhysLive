@@ -19,11 +19,29 @@ import {
   LogIn,
   UserPlus,
   Zap,
+  Home as HomeIcon,
+  LayoutDashboard,
 } from 'lucide-react';
+import { SvgIcon } from '../common/SvgIcon';
 
 export const Header: React.FC = () => {
   const { currentUser, isAuthenticated, switchRole, logout } = useAuth();
   const navigate = useNavigate();
+
+  const [isDarkMode, setIsDarkMode] = React.useState<boolean>(() => {
+    return document.documentElement.dataset.theme === 'dark';
+  });
+
+  const toggleTheme = () => {
+    const next = !isDarkMode;
+    setIsDarkMode(next);
+    document.documentElement.dataset.theme = next ? 'dark' : 'light';
+    try {
+      localStorage.setItem('physlive.theme', next ? 'dark' : 'light');
+    } catch {
+      // ignore
+    }
+  };
 
   const demoRoles: { role: RoleType; label: string; icon: React.ReactNode }[] = [
     { role: 'TEACHER', label: 'Giáo viên', icon: <GraduationCap size={13} strokeWidth={2.5} /> },
@@ -80,12 +98,31 @@ export const Header: React.FC = () => {
         {/* Central Workspace Switcher Navigation Tabs */}
         <nav className="studio-nav-tabs" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(241, 245, 249, 0.85)', padding: '4px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
           <NavLink
+            to="/"
+            end
+            className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <HomeIcon size={14} strokeWidth={2.2} />
+            <span>Trang chủ</span>
+          </NavLink>
+
+          <NavLink
             to="/player"
             className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
             <FlaskConical size={14} strokeWidth={2.2} />
             <span>Phòng thí nghiệm (Player)</span>
+          </NavLink>
+
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) => `studio-nav-link ${isActive ? 'active' : ''}`}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <LayoutDashboard size={14} strokeWidth={2.2} />
+            <span>Tổng quan</span>
           </NavLink>
 
           <NavLink
@@ -195,6 +232,29 @@ export const Header: React.FC = () => {
               })}
             </div>
 
+            {/* Theme Toggle Button (Light / Dark) */}
+            <button
+              onClick={toggleTheme}
+              style={{
+                padding: '6px 11px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc',
+                color: isDarkMode ? '#fef08a' : '#475569',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '12px',
+                fontWeight: 700,
+                transition: 'all 0.15s ease',
+              }}
+              title={isDarkMode ? 'Chuyển sang chế độ Sáng (Light Mode)' : 'Chuyển sang chế độ Tối (Dark Mode)'}
+            >
+              <SvgIcon name={isDarkMode ? 'sun' : 'moon'} size={14} color={isDarkMode ? '#fef08a' : '#475569'} />
+              <span>{isDarkMode ? 'Sáng' : 'Tối'}</span>
+            </button>
+
             {/* User Info & Avatar */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '6px', borderLeft: '1px solid #e2e8f0' }}>
               <Link
@@ -266,6 +326,28 @@ export const Header: React.FC = () => {
         ) : (
           /* Khi CHƯA ĐĂNG NHẬP */
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={toggleTheme}
+              style={{
+                padding: '7px 11px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: isDarkMode ? '#1e293b' : '#f8fafc',
+                color: isDarkMode ? '#fef08a' : '#475569',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '12px',
+                fontWeight: 700,
+                transition: 'all 0.15s ease',
+              }}
+              title={isDarkMode ? 'Chuyển sang chế độ Sáng (Light Mode)' : 'Chuyển sang chế độ Tối (Dark Mode)'}
+            >
+              <SvgIcon name={isDarkMode ? 'sun' : 'moon'} size={14} color={isDarkMode ? '#fef08a' : '#475569'} />
+              <span>{isDarkMode ? 'Sáng' : 'Tối'}</span>
+            </button>
+
             <Link
               to="/login"
               style={{
