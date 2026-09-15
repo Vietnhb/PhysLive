@@ -7,7 +7,7 @@ export const AppLayout: React.FC = () => {
   const isPlayerPage = location.pathname === '/player';
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f8fafc' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-page)', color: 'var(--text-primary)', transition: 'background-color 0.2s ease, color 0.2s ease' }}>
       <Header />
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {isPlayerPage ? (
