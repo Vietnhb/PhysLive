@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import type { User, RoleType } from '../types/database';
-import { RoleBadge } from '../components/common/RoleBadge';
 import { useAuth } from '../context/AuthContext';
 import {
   getUsers,
@@ -20,7 +19,6 @@ import {
   UserPlus,
   Eye,
   RotateCcw,
-  ShieldAlert,
 } from 'lucide-react';
 
 export const Admin: React.FC = () => {
@@ -271,40 +269,41 @@ export const Admin: React.FC = () => {
         </div>
       )}
 
-      {/* Header Banner */}
+      {/* Header Banner - Minimalist & Clean */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           backgroundColor: 'var(--bg-card)',
-          padding: '24px',
-          borderRadius: '16px',
+          padding: '20px 24px',
+          borderRadius: '12px',
           border: '1px solid var(--border-subtle)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+          flexWrap: 'wrap',
+          gap: '16px',
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-            <ShieldAlert size={26} color="#dc2626" />
-            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              Quản Trị Người Dùng & Phân Quyền Hệ Thống (RBAC)
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Quản trị người dùng
             </h1>
             <span
               style={{
                 fontSize: '11px',
-                fontWeight: 700,
-                backgroundColor: '#fee2e2',
-                color: '#dc2626',
-                padding: '3px 8px',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                backgroundColor: 'var(--surface-muted)',
+                padding: '2px 8px',
                 borderRadius: '6px',
+                border: '1px solid var(--border-subtle)',
               }}
             >
-              ADMIN ONLY
+              Hệ thống RBAC
             </span>
           </div>
-          <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
-            Quản lý tập trung toàn bộ danh sách tài khoản, khóa / khôi phục truy cập và thay đổi vai trò phân quyền hệ thống.
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+            Quản lý danh sách tài khoản, phân quyền vai trò và trạng thái truy cập.
           </p>
         </div>
 
@@ -316,30 +315,10 @@ export const Admin: React.FC = () => {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             style={{
-              padding: '10px 18px',
-              backgroundColor: 'var(--color-primary)',
+              padding: '8px 16px',
+              backgroundColor: '#2563eb',
               color: '#ffffff',
               border: 'none',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '13px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              boxShadow: '0 2px 6px rgba(26,115,232,0.25)',
-            }}
-          >
-            <UserPlus size={15} strokeWidth={2.5} />
-            <span>Thêm tài khoản mới</span>
-          </button>
-          <button
-            onClick={loadUsers}
-            style={{
-              padding: '10px 16px',
-              backgroundColor: 'var(--surface-muted)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-input)',
               borderRadius: '8px',
               fontSize: '13px',
               fontWeight: 600,
@@ -347,51 +326,76 @@ export const Admin: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <UserPlus size={14} />
+            <span>Thêm tài khoản</span>
+          </button>
+          <button
+            onClick={loadUsers}
+            style={{
+              padding: '8px 14px',
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border-input)',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.15s ease',
             }}
             title="Tải lại danh sách người dùng"
           >
-            <RefreshCw size={14} />
+            <RefreshCw size={13} />
             <span>Làm mới</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Users size={14} />
+      {/* KPI Stats Grid - Minimalist & Harmonious (No loud rainbow colors) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 18px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <Users size={14} color="var(--text-muted)" />
             <span>TỔNG NGƯỜI DÙNG</span>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>{stats.total}</div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)' }}>{stats.total}</div>
         </div>
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <GraduationCap size={14} />
+
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 18px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <GraduationCap size={14} color="var(--text-muted)" />
             <span>GIÁO VIÊN</span>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: '#2563eb', marginTop: '4px' }}>{stats.teachers}</div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)' }}>{stats.teachers}</div>
         </div>
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <BookOpen size={14} />
+
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 18px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <BookOpen size={14} color="var(--text-muted)" />
             <span>HỌC SINH</span>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: '#16a34a', marginTop: '4px' }}>{stats.students}</div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)' }}>{stats.students}</div>
         </div>
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '12px', color: '#9333ea', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ShieldCheck size={14} />
+
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 18px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <ShieldCheck size={14} color="var(--text-muted)" />
             <span>THẨM ĐỊNH</span>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: '#9333ea', marginTop: '4px' }}>{stats.reviewers}</div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)' }}>{stats.reviewers}</div>
         </div>
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '12px', color: '#dc2626', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <UserX size={14} />
+
+        <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px 18px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <UserX size={14} color="var(--text-muted)" />
             <span>ĐÃ VÔ HIỆU HÓA</span>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: '#dc2626', marginTop: '4px' }}>{stats.disabled}</div>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)' }}>{stats.disabled}</div>
         </div>
       </div>
 
@@ -705,7 +709,8 @@ export const Admin: React.FC = () => {
                     key={u.id}
                     style={{
                       borderBottom: '1px solid var(--border-subtle)',
-                      backgroundColor: isDisabled ? 'var(--status-warn-bg)' : 'var(--bg-card)',
+                      backgroundColor: 'var(--bg-card)',
+                      opacity: isDisabled ? 0.72 : 1,
                       transition: 'background-color 0.15s ease',
                     }}
                   >
@@ -714,27 +719,28 @@ export const Admin: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div
                           style={{
-                            width: '38px',
-                            height: '38px',
+                            width: '36px',
+                            height: '36px',
                             borderRadius: '50%',
-                            backgroundColor: isDisabled ? '#94a3b8' : '#2563eb',
-                            color: '#ffffff',
+                            backgroundColor: 'var(--surface-muted)',
+                            color: 'var(--text-secondary)',
+                            border: '1px solid var(--border-subtle)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontWeight: 700,
-                            fontSize: '15px',
+                            fontWeight: 600,
+                            fontSize: '14px',
                             flexShrink: 0,
                           }}
                         >
                           {u.full_name.charAt(0)}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 700, color: isDisabled ? 'var(--text-muted)' : 'var(--text-primary)', fontSize: '14px' }}>
+                          <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             {u.full_name}
                             {u.id === currentUser?.id && (
-                              <span style={{ marginLeft: '6px', fontSize: '11px', color: '#2563eb', fontWeight: 600 }}>
-                                (Bạn)
+                              <span style={{ fontSize: '11px', color: 'var(--text-muted)', backgroundColor: 'var(--surface-muted)', padding: '1px 6px', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
+                                Bạn
                               </span>
                             )}
                           </div>
@@ -748,66 +754,60 @@ export const Admin: React.FC = () => {
                       {u.school_name || '—'}
                     </td>
 
-                    {/* Role & Role Switcher */}
+                    {/* Role Selector (Single, sleek dropdown - no redundant colored badge) */}
                     <td style={{ padding: '14px 16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <RoleBadge role={u.role} />
-                        <select
-                          value={u.role}
-                          onChange={(e) => handleChangeRole(u, e.target.value as RoleType)}
-                          title="Đổi vai trò phân quyền người dùng này"
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: '6px',
-                            border: '1px solid var(--border-input)',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            backgroundColor: 'var(--bg-card)',
-                            cursor: 'pointer',
-                            outline: 'none',
-                          }}
-                        >
-                          <option value="TEACHER">TEACHER</option>
-                          <option value="STUDENT">STUDENT</option>
-                          <option value="REVIEWER">REVIEWER</option>
-                          <option value="ADMIN">ADMIN</option>
-                        </select>
-                      </div>
+                      <select
+                        value={u.role}
+                        onChange={(e) => handleChangeRole(u, e.target.value as RoleType)}
+                        title="Thay đổi vai trò người dùng"
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-input)',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          color: 'var(--text-primary)',
+                          backgroundColor: 'var(--bg-card)',
+                          cursor: 'pointer',
+                          outline: 'none',
+                        }}
+                      >
+                        <option value="TEACHER">Giáo viên (Teacher)</option>
+                        <option value="STUDENT">Học sinh (Student)</option>
+                        <option value="REVIEWER">Thẩm định (Reviewer)</option>
+                        <option value="ADMIN">Quản trị viên (Admin)</option>
+                      </select>
                     </td>
 
-                    {/* Status */}
+                    {/* Status (Minimal dot + text) */}
                     <td style={{ padding: '14px 16px' }}>
                       {isDisabled ? (
                         <span
                           style={{
-                            padding: '4px 10px',
-                            borderRadius: '9999px',
-                            backgroundColor: '#fee2e2',
-                            color: '#dc2626',
                             fontSize: '12px',
-                            fontWeight: 700,
+                            fontWeight: 500,
+                            color: 'var(--text-muted)',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '4px',
+                            gap: '6px',
                           }}
                         >
-                          ● Đã khóa
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#94a3b8', flexShrink: 0 }} />
+                          Đã khóa
                         </span>
                       ) : (
                         <span
                           style={{
-                            padding: '4px 10px',
-                            borderRadius: '9999px',
-                            backgroundColor: '#dcfce7',
-                            color: '#15803d',
                             fontSize: '12px',
-                            fontWeight: 700,
+                            fontWeight: 500,
+                            color: '#15803d',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '4px',
+                            gap: '6px',
                           }}
                         >
-                          ● Hoạt động
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981', flexShrink: 0 }} />
+                          Hoạt động
                         </span>
                       )}
                     </td>
@@ -817,29 +817,30 @@ export const Admin: React.FC = () => {
                       {u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : '—'}
                     </td>
 
-                    {/* Actions */}
+                    {/* Actions (Clean, minimal outline buttons) */}
                     <td style={{ padding: '14px 20px', textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                        {/* Edit / View User Button */}
+                        {/* Edit Button */}
                         <button
                           onClick={() => handleStartEdit(u)}
                           style={{
-                            padding: '6px 12px',
-                            backgroundColor: '#eef3fe',
-                            color: '#1a73e8',
-                            border: '1px solid #c2e7ff',
+                            padding: '5px 10px',
+                            backgroundColor: 'transparent',
+                            color: 'var(--text-secondary)',
+                            border: '1px solid var(--border-input)',
                             borderRadius: '6px',
                             fontSize: '12px',
-                            fontWeight: 700,
+                            fontWeight: 500,
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
+                            transition: 'all 0.15s ease',
                           }}
                           title="Xem và chỉnh sửa hồ sơ tài khoản"
                         >
                           <Eye size={13} />
-                          <span>Sửa & Xem</span>
+                          <span>Sửa</span>
                         </button>
 
                         {/* Disable / Restore Button */}
@@ -847,19 +848,20 @@ export const Admin: React.FC = () => {
                           <button
                             onClick={() => handleRestoreUser(u)}
                             style={{
-                              padding: '6px 12px',
-                              backgroundColor: '#ecfdf5',
+                              padding: '5px 10px',
+                              backgroundColor: 'transparent',
                               color: '#059669',
-                              border: '1px solid #a7f3d0',
+                              border: '1px solid rgba(16, 185, 129, 0.4)',
                               borderRadius: '6px',
                               fontSize: '12px',
-                              fontWeight: 700,
+                              fontWeight: 500,
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '4px',
+                              transition: 'all 0.15s ease',
                             }}
-                            title="Khôi phục tài khoản hoạt động bình thường (Restore User)"
+                            title="Khôi phục tài khoản"
                           >
                             <RotateCcw size={13} />
                             <span>Mở khóa</span>
@@ -869,19 +871,20 @@ export const Admin: React.FC = () => {
                             onClick={() => handleDisableUser(u)}
                             disabled={u.id === currentUser?.id}
                             style={{
-                              padding: '6px 12px',
-                              backgroundColor: u.id === currentUser?.id ? '#f1f5f9' : '#fef2f2',
-                              color: u.id === currentUser?.id ? '#94a3b8' : '#dc2626',
-                              border: u.id === currentUser?.id ? '1px solid #e2e8f0' : '1px solid #fecaca',
+                              padding: '5px 10px',
+                              backgroundColor: 'transparent',
+                              color: u.id === currentUser?.id ? 'var(--text-muted)' : '#dc2626',
+                              border: u.id === currentUser?.id ? '1px solid var(--border-subtle)' : '1px solid rgba(239, 68, 68, 0.35)',
                               borderRadius: '6px',
                               fontSize: '12px',
-                              fontWeight: 700,
+                              fontWeight: 500,
                               cursor: u.id === currentUser?.id ? 'not-allowed' : 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '4px',
+                              transition: 'all 0.15s ease',
                             }}
-                            title={u.id === currentUser?.id ? 'Không thể tự khóa tài khoản của mình' : 'Vô hiệu hóa tài khoản (Disable User)'}
+                            title={u.id === currentUser?.id ? 'Không thể tự khóa tài khoản của mình' : 'Vô hiệu hóa tài khoản'}
                           >
                             <UserX size={13} />
                             <span>Khóa</span>
