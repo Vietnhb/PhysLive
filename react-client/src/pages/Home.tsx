@@ -1,365 +1,392 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MOCK_SIMULATIONS } from '../mocks/mockSimulations';
-import {
-  Sparkles,
-  ArrowRight,
-  FlaskConical,
-  LineChart,
-  BrainCircuit,
-  ShieldCheck,
-  GraduationCap,
-  BookOpen,
-  CheckCircle2,
-} from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { getToken } from "../utils/token";
+import { getMe } from "../api/userApi";
+import type { User } from "../types/user";
+import "../styles/home.css";
 
-export const Home: React.FC = () => {
+function Home() {
+  const token = getToken();
   const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!token) return;
+    void getMe()
+      .then((data) => { setUser(data); })
+      .catch((err: unknown) => {
+        if (axios.isAxiosError<{ message?: string }>(err)) {
+          setError(err.response?.data?.message ?? "Không thể tải thông tin người dùng");
+          return;
+        }
+        setError("Không thể tải thông tin người dùng");
+      });
+  }, [token]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '56px', paddingBottom: '48px' }}>
-      {/* 1. HERO SECTION */}
-      <section
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          padding: '48px 16px 20px',
-          maxWidth: '960px',
-          margin: '0 auto',
-        }}
-      >
-        <div
-          className="eyebrow"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: 'var(--accent-soft)',
-            color: 'var(--accent-text-dark)',
-            padding: '6px 14px',
-            borderRadius: '9999px',
-            marginBottom: '20px',
-            border: '1px solid var(--border-subtle)',
-          }}
-        >
-          <Sparkles size={14} color="var(--primary)" />
-          <span>NỀN TẢNG MÔ PHỎNG VẬT LÝ SỐ THẾ HỆ MỚI • CAPSTONE FA26</span>
-        </div>
-
-        <h1
-          style={{
-            margin: '0 0 18px',
-            fontSize: 'clamp(32px, 4.5vw, 54px)',
-            fontWeight: 800,
-            lineHeight: 1.15,
-            letterSpacing: '-0.04em',
-            color: 'var(--text-primary)',
-          }}
-        >
-          Mô phỏng Vật lý Trực quan, <br />
-          <span style={{ color: 'var(--primary)' }}>Chuẩn hóa & Sinh động</span>
-        </h1>
-
-        <p
-          style={{
-            fontSize: '17px',
-            lineHeight: 1.6,
-            color: 'var(--text-secondary)',
-            maxWidth: '720px',
-            margin: '0 0 32px',
-          }}
-        >
-          PhysLive giúp giáo viên và học sinh chuyển hóa các bài toán giải tích trừu tượng
-          thành thí nghiệm ảo tương tác cao, kết hợp đồ thị SVG thời gian thực và công nghệ
-          tinh gọn thông tin theo chuẩn thiết kế hiện đại.
-        </p>
-
-        <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <button
-            onClick={() => navigate('/player')}
-            style={{
-              padding: '12px 26px',
-              backgroundColor: 'var(--primary)',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '15px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 14px rgba(26, 115, 232, 0.35)',
-              transition: 'transform 0.15s ease, background-color 0.15s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-hover)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
-          >
-            <FlaskConical size={18} />
-            <span>Vào phòng thí nghiệm</span>
-            <ArrowRight size={16} />
-          </button>
-
-          <button
-            onClick={() => navigate('/library')}
-            style={{
-              padding: '12px 22px',
-              backgroundColor: 'var(--accent-soft)',
-              color: 'var(--accent-text-dark)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '8px',
-              fontSize: '15px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            <BookOpen size={18} />
-            <span>Thư viện chuyên đề</span>
-          </button>
-
-          <button
-            onClick={() => navigate('/student/assignments')}
-            style={{
-              padding: '12px 20px',
-              backgroundColor: 'var(--bg-card)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-card)',
-              borderRadius: '8px',
-              fontSize: '15px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-            }}
-          >
-            <span>Thử thách dự đoán</span>
-          </button>
-        </div>
-      </section>
-
-      {/* 2. SHOWCASE MODELS GRID (MÔ HÌNH NỔI BẬT) */}
-      <section style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <div>
-            <div className="eyebrow" style={{ color: 'var(--accent-text-dark)', marginBottom: '6px' }}>CHỦ ĐỀ TIÊU BIỂU</div>
-            <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              Mô hình Vật lý Sẵn sàng Tương tác
-            </h2>
+    <div className="home-page">
+      {/* Simple Top Navigation */}
+      <nav className="home-navbar">
+        <div className="home-nav-container">
+          <div className="home-nav-brand">
+            <img className="home-nav-icon" src="/favicon.ico" alt="" />
+            <span className="home-nav-title">PhysLive</span>
           </div>
-          <button
-            onClick={() => navigate('/library')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--primary)',
-              fontWeight: 700,
-              fontSize: '14px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <span>Xem tất cả {MOCK_SIMULATIONS.length} mô hình</span>
-            <ArrowRight size={14} />
-          </button>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
-          {MOCK_SIMULATIONS.slice(0, 3).map((sim) => (
-            <div
-              key={sim.id}
-              className="card"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                padding: '24px',
-                borderRadius: '16px',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                cursor: 'pointer',
-              }}
-              onClick={() => navigate(`/player?id=${sim.id}`)}
-            >
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      backgroundColor: 'var(--accent-soft)',
-                      color: 'var(--accent-text-dark)',
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                    }}
-                  >
-                    {sim.spec_json.topic}
+          <div className="home-nav-links">
+            <button onClick={() => navigate("/workspace")} className="home-nav-link">
+              Workspace
+            </button>
+            {token ? (
+              <>
+                <button onClick={() => navigate("/library")} className="home-nav-link">
+                  Thư viện
+                </button>
+                <div className="home-nav-user">
+                  <span className="home-nav-avatar">
+                    {user?.fullName.charAt(0).toUpperCase() || "U"}
                   </span>
-                  <span style={{ fontSize: '12px', color: 'var(--status-success-text)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircle2 size={13} color="var(--status-success-text)" />
-                    <span>Dual-Valid</span>
-                  </span>
+                  <span className="home-nav-name">{user?.fullName}</span>
                 </div>
-
-                <h3 style={{ margin: '0 0 8px', fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  {sim.title}
-                </h3>
-                <p style={{ margin: '0 0 16px', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  {sim.description}
-                </p>
-              </div>
-
-              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--primary)', fontWeight: 700 }}>
-                  {sim.id === 'sim-car-brake-003'
-                    ? 'v(t) = v₀ - a·t'
-                    : sim.id === 'sim-proj-001'
-                    ? 'y(t) = h + v₀y·t - ½gt²'
-                    : 'a = g(sinα - μ·cosα)'}
-                </span>
-
-                <span
-                  style={{
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    color: 'var(--primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}
+              </>
+            ) : (
+              <>
+                <button onClick={() => navigate("/login")} className="home-nav-link">
+                  Đăng nhập
+                </button>
+                <button onClick={() => navigate("/signup")} className="home-nav-btn-primary">
+                  Đăng ký
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+      
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-container">
+          <div className="hero-content">
+            <div className="hero-badge">
+              <span className="hero-badge-icon">⚛️</span>
+              <span>PhysLive Studio</span>
+            </div>
+            <h1 className="hero-title">
+              Mô phỏng vật lý <br />
+              <span className="hero-highlight">Trực quan & Tương tác</span>
+            </h1>
+            <p className="hero-description">
+              Nền tảng mô phỏng vật lý chuyên nghiệp dành cho giáo viên. 
+              Tạo bài giảng sinh động với đồ thị, công thức và chuyển động thực tế.
+            </p>
+            
+            <div className="hero-actions">
+              <button 
+                className="btn btn-primary"
+                onClick={() => navigate("/workspace")}
+              >
+                <span className="btn-icon">▶</span>
+                Bắt đầu mô phỏng
+              </button>
+              {!token && (
+                <button 
+                  className="btn btn-secondary"
+                  onClick={() => navigate("/login")}
                 >
-                  <span>Chạy thử</span>
-                  <ArrowRight size={14} />
-                </span>
+                  Đăng nhập
+                </button>
+              )}
+            </div>
+
+            {token && user && (
+              <div className="hero-user-info">
+                <div className="user-avatar">
+                  {user.fullName.charAt(0).toUpperCase()}
+                </div>
+                <div className="user-details">
+                  <strong>{user.fullName}</strong>
+                  <span className="user-role-badge">{user.role}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="hero-visual">
+            <div className="visual-card">
+              <div className="visual-formula">
+                <span className="formula-label">Phương trình chuyển động</span>
+                <div className="formula-equation">
+                  x(t) = x₀ + v₀t + ½at²
+                </div>
+              </div>
+              <div className="visual-graph">
+                <svg viewBox="0 0 200 120" className="mini-graph">
+                  <defs>
+                    <linearGradient id="graphGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#2563eb" stopOpacity="0.3"/>
+                      <stop offset="100%" stopColor="#2563eb" stopOpacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  {/* Grid */}
+                  <line x1="20" y1="20" x2="20" y2="100" stroke="#e5e7eb" strokeWidth="1"/>
+                  <line x1="20" y1="100" x2="180" y2="100" stroke="#e5e7eb" strokeWidth="1"/>
+                  {/* Curve */}
+                  <path 
+                    d="M 20 100 Q 60 80, 100 50 T 180 20" 
+                    fill="url(#graphGradient)" 
+                    stroke="#2563eb" 
+                    strokeWidth="2"
+                  />
+                  {/* Points */}
+                  <circle cx="20" cy="100" r="3" fill="#2563eb"/>
+                  <circle cx="100" cy="50" r="3" fill="#2563eb"/>
+                  <circle cx="180" cy="20" r="3" fill="#2563eb"/>
+                </svg>
+              </div>
+              <div className="visual-metrics">
+                <div className="metric">
+                  <span className="metric-label">Vận tốc</span>
+                  <span className="metric-value">12.5 m/s</span>
+                </div>
+                <div className="metric">
+                  <span className="metric-label">Gia tốc</span>
+                  <span className="metric-value">2.0 m/s²</span>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 3. FOUR CORE ADVANTAGES (TÍNH NĂNG ĐẮT GIÁ) */}
-      <section style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <div className="eyebrow" style={{ color: 'var(--accent-text-dark)', marginBottom: '6px' }}>CÔNG NGHỆ & ĐỔI MỚI</div>
-          <h2 style={{ margin: 0, fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)' }}>
-            Trực quan hóa Đột phá cho Giảng dạy Vật lý
-          </h2>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
-          <div className="card" style={{ padding: '24px', borderRadius: '16px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: 'var(--primary)' }}>
-              <FlaskConical size={22} />
-            </div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              Mô phỏng Canvas Tinh Gọn
-            </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-              Khử nhiễu số học đè lên vật thể, chuyển đổi linh hoạt giữa chế độ Tối giản (Clean) và Chi tiết (Detailed) theo đúng mục tiêu bài giảng.
-            </p>
-          </div>
-
-          <div className="card" style={{ padding: '24px', borderRadius: '16px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'var(--status-success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: 'var(--status-success-text)' }}>
-              <LineChart size={22} />
-            </div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              Đồ thị SVG Thời gian thực
-            </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-              Vẽ đồng thời đồ thị v(t), s(t), a(t) bằng vector SVG sắc nét; học sinh có thể bấm kéo trên đồ thị để tua con trỏ thời gian mô phỏng.
-            </p>
-          </div>
-
-          <div className="card" style={{ padding: '24px', borderRadius: '16px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'var(--status-warn-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: 'var(--status-warn-text)' }}>
-              <BrainCircuit size={22} />
-            </div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              Trích xuất Bài toán AI OCR
-            </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-              Nhập đề bài bằng văn bản hoặc ảnh chụp SGK; hệ thống tự động bóc tách tham số và làm rõ các giả thiết vật lý cần thiết.
-            </p>
-          </div>
-
-          <div className="card" style={{ padding: '24px', borderRadius: '16px' }}>
-            <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: 'var(--status-danger-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', color: 'var(--status-danger-text)' }}>
-              <ShieldCheck size={22} />
-            </div>
-            <h3 style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)' }}>
-              Thẩm định Kép (Dual-Validation)
-            </h3>
-            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
-              So sánh sai số giữa phương trình giải tích lý thuyết và tích phân số học Euler/Verlet, đảm bảo tính chuẩn xác khoa học tuyệt đối.
-            </p>
           </div>
         </div>
       </section>
 
-      {/* 4. ROLE ENTRY POINTS (DÀNH CHO GIÁO VIÊN & HỌC SINH) */}
-      <section style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', border: '1px solid var(--border-card)', padding: '36px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <GraduationCap size={22} color="var(--primary)" />
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>Dành cho Giáo viên</h3>
-            </div>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '16px' }}>
-              Tạo bài giảng sinh động, quản lý kho chuyên đề bài tập, nhúng trực tiếp thí nghiệm ảo vào hệ thống LMS (Moodle, Canvas) của trường.
-            </p>
-            <button
-              onClick={() => navigate('/teacher/submit')}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'var(--accent-soft)',
-                color: 'var(--accent-text-dark)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              Nộp đề bài mới →
-            </button>
+      {/* Features Section */}
+      <section className="features-section">
+        <div className="features-container">
+          <div className="section-header">
+            <h2>Tính năng nổi bật</h2>
+            <p>Công cụ hoàn chỉnh cho giảng dạy vật lý hiện đại</p>
           </div>
 
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <BookOpen size={22} color="var(--status-success-text)" />
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>Dành cho Học sinh</h3>
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon">📊</div>
+              <h3>Workspace 3D</h3>
+              <p>Giao diện 3 panel chuyên nghiệp với canvas mô phỏng, thư viện và bảng điều khiển tham số.</p>
+              <button 
+                className="feature-link"
+                onClick={() => navigate("/workspace")}
+              >
+                Khám phá →
+              </button>
             </div>
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '16px' }}>
-              Tham gia thử thách dự đoán vận tốc, khoảng cách dừng và tầm xa trước khi chạy mô phỏng, ghi nhận điểm rèn luyện tư duy thực nghiệm.
-            </p>
-            <button
-              onClick={() => navigate('/student/assignments')}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'var(--status-success-bg)',
-                color: 'var(--status-success-text)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              Vào làm bài tập →
-            </button>
+
+            <div className="feature-card">
+              <div className="feature-icon">⚡</div>
+              <h3>Real-time Simulation</h3>
+              <p>Mô phỏng chuyển động thời gian thực với điều chỉnh tham số tức thì, tốc độ phát linh hoạt.</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">📐</div>
+              <h3>Công thức & Đồ thị</h3>
+              <p>Hiển thị phương trình toán học, vẽ đồ thị tự động và đối chiếu kết quả giải tích.</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">🎯</div>
+              <h3>Thư viện Mô phỏng</h3>
+              <p>Quản lý bài giảng theo folder, lưu trữ và tái sử dụng các mô phỏng đã tạo.</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">🔧</div>
+              <h3>Tùy chỉnh Tham số</h3>
+              <p>Slider trực quan cho vận tốc, gia tốc, khối lượng, lực... Thay đổi và quan sát ngay.</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">📱</div>
+              <h3>Responsive Design</h3>
+              <p>Giao diện tối ưu cho desktop, tablet và mobile. Giảng dạy linh hoạt mọi lúc mọi nơi.</p>
+            </div>
           </div>
         </div>
       </section>
+
+      {/* Simulation Types Section */}
+      <section className="simulations-section">
+        <div className="simulations-container">
+          <div className="section-header">
+            <h2>Các dạng mô phỏng</h2>
+            <p>Hỗ trợ đa dạng chủ đề vật lý từ cơ bản đến nâng cao</p>
+          </div>
+
+          <div className="simulations-grid">
+            <div className="simulation-card">
+              <div className="simulation-preview">
+                <span className="simulation-icon">→</span>
+              </div>
+              <h3>Chuyển động thẳng</h3>
+              <p>Chuyển động đều, biến đổi đều, phương trình động học cơ bản.</p>
+              <ul className="simulation-tags">
+                <li>x = x₀ + v₀t + ½at²</li>
+                <li>v = v₀ + at</li>
+              </ul>
+            </div>
+
+            <div className="simulation-card">
+              <div className="simulation-preview">
+                <span className="simulation-icon">↗</span>
+              </div>
+              <h3>Ném xiên</h3>
+              <p>Chuyển động parabol, phạm vi xa, thời gian bay, độ cao cực đại.</p>
+              <ul className="simulation-tags">
+                <li>Quỹ đạo 2D</li>
+                <li>Góc ném tối ưu</li>
+              </ul>
+            </div>
+
+            <div className="simulation-card">
+              <div className="simulation-preview">
+                <span className="simulation-icon">⚛</span>
+              </div>
+              <h3>Va chạm</h3>
+              <p>Va chạm đàn hồi, không đàn hồi, bảo toàn động lượng và năng lượng.</p>
+              <ul className="simulation-tags">
+                <li>m₁v₁ + m₂v₂</li>
+                <li>Hệ số phục hồi</li>
+              </ul>
+            </div>
+
+            <div className="simulation-card">
+              <div className="simulation-preview">
+                <span className="simulation-icon">⚡</span>
+              </div>
+              <h3>Mạch điện</h3>
+              <p>Mạch RC, RL, RLC, sạc và xả tụ điện, định luật Ohm.</p>
+              <ul className="simulation-tags">
+                <li>V = IR</li>
+                <li>τ = RC</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="cta-section">
+        <div className="cta-container">
+          <div className="cta-content">
+            <h2>Sẵn sàng nâng tầm bài giảng?</h2>
+            <p>
+              Tham gia cùng hàng trăm giáo viên đang sử dụng PhysLive để tạo ra 
+              những bài học sinh động và dễ hiểu hơn cho học sinh.
+            </p>
+            <div className="cta-actions">
+              {!token ? (
+                <>
+                  <button 
+                    className="btn btn-primary btn-large"
+                    onClick={() => navigate("/signup")}
+                  >
+                    Đăng ký miễn phí
+                  </button>
+                  <button 
+                    className="btn btn-secondary btn-large"
+                    onClick={() => navigate("/login")}
+                  >
+                    Đăng nhập
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    className="btn btn-primary btn-large"
+                    onClick={() => navigate("/workspace")}
+                  >
+                    <span className="btn-icon">▶</span>
+                    Mở Workspace
+                  </button>
+                  {user?.role === "ADMIN" && (
+                    <button 
+                      className="btn btn-secondary btn-large"
+                      onClick={() => navigate("/admin")}
+                    >
+                      Quản trị hệ thống
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="cta-stats">
+            <div className="stat-card">
+              <div className="stat-value">500+</div>
+              <div className="stat-label">Giáo viên</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">2,000+</div>
+              <div className="stat-label">Mô phỏng</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">10,000+</div>
+              <div className="stat-label">Học sinh</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="home-footer">
+        <div className="footer-container">
+          <div className="footer-brand">
+            <div className="footer-logo">
+              <span className="footer-logo-icon">⚛️</span>
+              <span>PhysLive</span>
+            </div>
+            <p>Nền tảng mô phỏng vật lý cho giáo viên</p>
+          </div>
+
+          <div className="footer-links">
+            <div className="footer-column">
+              <h4>Sản phẩm</h4>
+              <a href="#" onClick={(e) => { e.preventDefault(); navigate("/workspace"); }}>Workspace</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); }}>Thư viện</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); }}>Tài liệu</a>
+            </div>
+
+            <div className="footer-column">
+              <h4>Hỗ trợ</h4>
+              <a href="#" onClick={(e) => e.preventDefault()}>Hướng dẫn</a>
+              <a href="#" onClick={(e) => e.preventDefault()}>FAQ</a>
+              <a href="#" onClick={(e) => e.preventDefault()}>Liên hệ</a>
+            </div>
+
+            <div className="footer-column">
+              <h4>Pháp lý</h4>
+              <a href="#" onClick={(e) => e.preventDefault()}>Điều khoản</a>
+              <a href="#" onClick={(e) => e.preventDefault()}>Bảo mật</a>
+              <a href="#" onClick={(e) => e.preventDefault()}>Cookie</a>
+            </div>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>© 2026 PhysLive Studio. All rights reserved.</p>
+          <p>Built with ❤️ for Physics Education</p>
+        </div>
+      </footer>
+
+      {error && (
+        <div className="error-toast">
+          <span className="error-icon">⚠️</span>
+          <span>{error}</span>
+          <button onClick={() => setError("")}>✕</button>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default Home;

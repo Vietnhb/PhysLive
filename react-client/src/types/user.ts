@@ -1,1 +1,6 @@
-export type { User, RoleType } from "./database";
+export interface User {
+    id: number;
+    email: string;
+    fullName: string;
+    role: string;
+}
