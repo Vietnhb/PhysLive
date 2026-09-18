@@ -194,6 +194,7 @@ public class ProblemService {
         specification.setObjects(objectMapper.valueToTree(document.objects()));
         specification.setQuantities(objectMapper.valueToTree(document.quantities()));
         specification.setRelations(objectMapper.valueToTree(document.relations()));
+        specification.setEndCondition(document.endCondition());
         specification.setAmbiguity(objectMapper.valueToTree(document.ambiguities()));
         specification.setConfirmationState(document.ambiguities().isEmpty()
                 ? ConfirmationState.NO_AMBIGUITY

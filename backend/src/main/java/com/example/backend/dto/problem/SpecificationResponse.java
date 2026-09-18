@@ -16,6 +16,7 @@ public record SpecificationResponse(
         JsonNode objects,
         JsonNode quantities,
         JsonNode relations,
+        JsonNode endCondition,
         JsonNode ambiguity,
         ConfirmationState confirmationState,
         List<AmbiguityResponse> ambiguityCases,

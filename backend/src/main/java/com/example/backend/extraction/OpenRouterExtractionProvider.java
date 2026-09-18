@@ -25,6 +25,9 @@ public class OpenRouterExtractionProvider implements ExtractionProvider {
             "quantities":[{"name":"string","symbol":"string|null","value":0,"originalUnit":"string",
             "normalizedValue":0,"normalizedUnit":"string","confidence":0.0,"sourceText":"string"}],
             "relations":[{"type":"string","subject":"string","object":"string|null","value":null,"unit":null,"sourceText":"string"}],
+            "endCondition":{"type":"time_limit|threshold|event|cycle_count","duration":0,"maxTime":0,
+            "quantity":"string","operator":">=|<=|>|<|=","value":0,
+            "event":{"type":"contact|collision","entities":["string"]},"count":0}|null,
             "confidence":0.0,
             "ambiguities":[{"code":"string","fieldPath":"string","question":"string","options":["string"]}]}.
             Use null when unknown. Do not invent missing values. Return JSON only.
@@ -122,7 +125,8 @@ public class OpenRouterExtractionProvider implements ExtractionProvider {
                 quantities,
                 document.relations(),
                 clamp(document.confidence()),
-                ambiguities);
+                ambiguities,
+                document.endCondition());
     }
 
     private String normalizeTopic(String topic) {
