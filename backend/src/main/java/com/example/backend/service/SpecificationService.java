@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import com.example.backend.dto.problem.ResolveAmbiguityRequest;
 import com.example.backend.dto.problem.SpecificationResponse;
 import com.example.backend.dto.problem.ValidationReadinessResponse;
+import com.example.backend.dto.problem.UpdateEndConditionRequest;
 import com.example.backend.entity.AmbiguityCase;
 import com.example.backend.entity.AmbiguityStatus;
 import com.example.backend.entity.ConfirmationState;
@@ -20,6 +21,8 @@ import com.example.backend.entity.Specification;
 import com.example.backend.entity.SubmissionStatus;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ApiException;
+import com.example.backend.exception.InvalidPhysicsInputException;
+import com.example.backend.physics.simulation.EndConditionResolver;
 import com.example.backend.repository.AmbiguityCaseRepository;
 import com.example.backend.repository.ReviewerDecisionRepository;
 import com.example.backend.repository.SpecificationRepository;
@@ -36,6 +39,7 @@ public class SpecificationService {
     private final CurrentUserService currentUserService;
     private final ProblemResponseMapper mapper;
     private final SpecificationReadinessChecker readinessChecker;
+    private final EndConditionResolver endConditionResolver;
 
     @Transactional(readOnly = true)
     public SpecificationResponse get(UUID id) {
@@ -86,6 +90,21 @@ public class SpecificationService {
         Specification specification = requireOwnedSpecification(id);
         List<String> blockers = readinessChecker.blockers(specification);
         return new ValidationReadinessResponse(specification.getId(), blockers.isEmpty(), List.copyOf(blockers));
+    }
+
+    @Transactional
+    public SpecificationResponse updateEndCondition(UUID id, UpdateEndConditionRequest request) {
+        if (request == null || request.endCondition() == null || request.endCondition().isNull()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "End condition is required");
+        }
+        Specification specification = requireOwnedSpecification(id);
+        try {
+            endConditionResolver.requestedHorizon(request.endCondition(), java.math.BigDecimal.ONE);
+        } catch (InvalidPhysicsInputException exception) {
+            throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY, exception.getMessage());
+        }
+        specification.setEndCondition(request.endCondition().deepCopy());
+        return mapper.toSpecification(specificationRepository.save(specification));
     }
 
     private Specification requireOwnedSpecification(UUID id) {
