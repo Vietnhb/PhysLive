@@ -20,6 +20,7 @@ import com.example.backend.physics.model.SolverInput;
 public class ArchetypeInputValidator {
 
     private static final BigDecimal HALF_PI = new BigDecimal("1.5707963267948966");
+    private static final BigDecimal PI = new BigDecimal("3.1415926535897932");
 
     private final ArchetypeCatalog catalog;
 
@@ -96,12 +97,20 @@ public class ArchetypeInputValidator {
         nonNegative(input, "duration", blockers);
         positive(input, "deltaTime", blockers);
         positive(input, "mass", blockers);
+        positive(input, "mass1", blockers);
+        positive(input, "mass2", blockers);
+        positive(input, "amplitude", blockers);
+        positive(input, "springConstant", blockers);
+        positive(input, "resistance", blockers);
+        positive(input, "capacitance", blockers);
         nonNegative(input, "frictionCoefficient", blockers);
         positive(input, "gravity", blockers);
 
         BigDecimal angle = input.values().get("angle");
-        if (angle != null && (angle.compareTo(BigDecimal.ZERO) < 0 || angle.compareTo(HALF_PI) >= 0)) {
-            blockers.add("Input 'angle' must be in radians and satisfy 0 <= angle < pi/2");
+        BigDecimal maximumAngle = input.archetype() == PhysicsArchetype.PROJECTILE_MOTION ? PI : HALF_PI;
+        if (angle != null && (angle.compareTo(BigDecimal.ZERO) < 0 || angle.compareTo(maximumAngle) >= 0)) {
+            blockers.add("Input 'angle' must be in radians and satisfy 0 <= angle < "
+                    + (input.archetype() == PhysicsArchetype.PROJECTILE_MOTION ? "pi" : "pi/2"));
         }
 
         if (input.archetype() == PhysicsArchetype.SERIES_CIRCUIT
