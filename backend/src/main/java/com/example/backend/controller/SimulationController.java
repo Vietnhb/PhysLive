@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import java.util.UUID;
+import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,18 @@ public class SimulationController {
 
     private final PhysicsSimulationService physicsSimulationService;
     private final PhysicsSimulationRunService simulationRunService;
+
+    @Operation(summary = "List owned simulations newest first")
+    @GetMapping
+    public List<SimulationResponse> history() {
+        return physicsSimulationService.history();
+    }
+
+    @Operation(summary = "List the ten most recent owned simulations")
+    @GetMapping("/recent")
+    public List<SimulationResponse> recent() {
+        return physicsSimulationService.recent();
+    }
 
     @Operation(summary = "Get an owned simulation")
     @ApiResponses({
