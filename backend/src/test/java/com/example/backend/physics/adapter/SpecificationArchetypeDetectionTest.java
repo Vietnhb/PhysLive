@@ -79,14 +79,29 @@ class SpecificationArchetypeDetectionTest {
                     Arguments.of(specification("KINEMATICS", List.of(
                             quantity("acceleration", "2", "m/s2"), quantity("time", "5", "s")), List.of()),
                             PhysicsArchetype.CONSTANT_ACCELERATION),
+                    Arguments.of(specification("KINEMATICS", List.of(
+                            quantity("initial height", "2", "m"), quantity("initial velocity", "10", "m/s"),
+                            quantity("angle", "0.5", "rad"), quantity("time", "3", "s")), List.of()),
+                            PhysicsArchetype.PROJECTILE_MOTION),
                     Arguments.of(specification("DYNAMICS", List.of(
                             quantity("mass", "2", "kg"), quantity("force", "10", "N"),
                             quantity("time", "3", "s")), List.of()), PhysicsArchetype.HORIZONTAL_FORCE),
                     Arguments.of(specification("DYNAMICS", List.of(
                             quantity("mass", "2", "kg"), quantity("angle", "0.5", "rad"),
                             quantity("time", "3", "s")), List.of()), PhysicsArchetype.INCLINED_PLANE),
+                    Arguments.of(specification("DYNAMICS", List.of(
+                            quantity("mass1", "2", "kg"), quantity("mass2", "3", "kg"),
+                            quantity("position1", "0", "m"), quantity("position2", "6", "m"),
+                            quantity("velocity1", "3", "m/s"), quantity("velocity2", "1", "m/s"),
+                            quantity("time", "4", "s")), List.of()), PhysicsArchetype.ELASTIC_COLLISION),
+                    Arguments.of(specification("DYNAMICS", List.of(
+                            quantity("amplitude", "1", "m"), quantity("mass", "2", "kg"),
+                            quantity("spring constant", "8", "N/m"), quantity("time", "2", "s")), List.of()),
+                            PhysicsArchetype.SPRING_OSCILLATION),
                     Arguments.of(circuit("SERIES"), PhysicsArchetype.SERIES_CIRCUIT),
-                    Arguments.of(circuit("PARALLEL"), PhysicsArchetype.PARALLEL_CIRCUIT));
+                    Arguments.of(circuit("PARALLEL"), PhysicsArchetype.PARALLEL_CIRCUIT),
+                    Arguments.of(rcCircuit("charging"), PhysicsArchetype.RC_CHARGING),
+                    Arguments.of(rcCircuit("discharging"), PhysicsArchetype.RC_DISCHARGING));
         }
 
         java.util.stream.Stream<Arguments> ambiguous() {
@@ -105,6 +120,13 @@ class SpecificationArchetypeDetectionTest {
                 quantity("voltage", "12", "V"),
                 quantity("resistance", "10", "ohm"),
                 quantity("resistance", "20", "ohm")), relations);
+    }
+
+    private Specification rcCircuit(String mode) {
+        return specification("CIRCUITS", List.of(
+                quantity("voltage", "12", "V"), quantity("resistance", "10", "ohm"),
+                quantity("capacitance", "0.1", "F"), quantity("time", "2", "s")),
+                List.of(new PhysicalRelation(mode, "capacitor", null, null, null, mode)));
     }
 
     private Specification specification(
