@@ -36,7 +36,9 @@ backend/.github/java-upgrade/
 Thumbs.db
 
 # Documentation files
+overview.html
 report.md
 REQUIREMENTS.md
 topic.md
 UI_DESIGN_GUIDE.md
+

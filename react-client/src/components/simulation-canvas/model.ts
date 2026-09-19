@@ -34,6 +34,21 @@ export type SceneFrame = {
   overlays: OverlayState;
   presentation: VisualizationPresentation;
   palette: CanvasPalette;
+  cache?: SceneCache;
+};
+
+export type TrajectoryCache = {
+  path: Path2D;
+  builtIndex: number;
+};
+
+export type SceneCache = {
+  background: { key: string; canvas: HTMLCanvasElement } | null;
+  grids: Map<string, HTMLCanvasElement>;
+  environments: Map<string, HTMLCanvasElement>;
+  rulers: Map<string, HTMLCanvasElement>;
+  ranges: Map<string, [number, number]>;
+  trajectories: Map<string, TrajectoryCache>;
 };
 
 export type ActorFrame = {
@@ -47,6 +62,8 @@ export type ActorFrame = {
   label?: string;
 };
 
+// Kept for historical simulations whose saved schema response predates
+// presentation metadata. Current schema releases define these visuals in the catalog.
 const DEFAULT_PRESENTATIONS: Record<string, VisualizationPresentation> = {
   motion_1d: {
     theme: "lab-night",
@@ -59,7 +76,7 @@ const DEFAULT_PRESENTATIONS: Record<string, VisualizationPresentation> = {
     environment: "range.projectile",
     actors: [{ id: "projectile", asset: "projectile.energy", x: "positions.x", y: "positions.y", vx: "velocities.x", vy: "velocities.y" }],
     props: ["structure.launch-tower", "launcher.cannon"],
-    effects: ["projectile.glow"],
+    effects: ["motion.trail", "projectile.glow"],
   },
   collision_1d: {
     theme: "lab-night",
@@ -128,15 +145,28 @@ export function sample(values: number[] | undefined, times: number[], time: numb
   return start + ((values[cursor + 1] ?? start) - start) * ratio;
 }
 
+const seriesCache = new WeakMap<Simulation, Map<string, number[]>>();
+
 export function readSeries(simulation: Simulation, source: string | undefined): number[] {
   if (!source) return [];
+  const cached = seriesCache.get(simulation)?.get(source);
+  if (cached) return cached;
   const [group, key] = source.split(".");
-  const record = group === "positions" ? simulation.positions
-    : group === "velocities" ? simulation.velocities
-      : group === "accelerations" ? simulation.accelerations
-        : group === "values" ? simulation.values
-          : undefined;
-  return record?.[key] ?? [];
+  const records: Record<string, Record<string, number[]>> = {
+    positions: simulation.positions,
+    velocities: simulation.velocities,
+    accelerations: simulation.accelerations,
+    values: simulation.values,
+  };
+  const record = records[group];
+  const values = record?.[key] ?? [];
+  let simulationCache = seriesCache.get(simulation);
+  if (!simulationCache) {
+    simulationCache = new Map();
+    seriesCache.set(simulation, simulationCache);
+  }
+  simulationCache.set(source, values);
+  return values;
 }
 
 export function actorState(frame: SceneFrame, config: VisualizationActor): Omit<ActorFrame, "position"> & { world: Point } {
@@ -163,10 +193,14 @@ export function actorState(frame: SceneFrame, config: VisualizationActor): Omit<
 }
 
 export function extent(values: number[], fallback: [number, number] = [-1, 1]): [number, number] {
-  const finite = values.filter(Number.isFinite);
-  if (!finite.length) return fallback;
-  const min = Math.min(...finite);
-  const max = Math.max(...finite);
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  for (const value of values) {
+    if (!Number.isFinite(value)) continue;
+    min = Math.min(min, value);
+    max = Math.max(max, value);
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return fallback;
   if (Math.abs(max - min) < Number.EPSILON) return [min - 1, max + 1];
   const padding = (max - min) * 0.12;
   return [min - padding, max + padding];
