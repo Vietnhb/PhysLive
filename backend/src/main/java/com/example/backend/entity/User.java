@@ -1,7 +1,5 @@
 package com.example.backend.entity;
 
-import java.time.OffsetDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,93 +8,40 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
+import java.time.LocalDate;
 import lombok.Data;
 
 @Entity
 @Table(name = "users")
 @Data
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     @Column(nullable = false, unique = true)
     private String email;
-
     @Column(nullable = false)
     private String password;
-
     @Column(name = "full_name", nullable = false)
     private String fullName;
-
-    /**
-     * Primary account-state flag (ADMIN-managed).
-     * true = account active, false = account disabled.
-     * columnDefinition keeps DEFAULT TRUE so ALTER TABLE works on existing rows.
-     */
-    @Column(nullable = false, columnDefinition = "boolean NOT NULL DEFAULT TRUE")
-    private boolean enabled = true;
-
-    /**
-     * Legacy soft-delete / visibility flag (nullable).
-     * Defaults to TRUE so newly registered users are active by default.
-     */
-    @Column
-    private Boolean active = true;
-
-    /**
-     * School / institution the user belongs to (nullable).
-     * Used by ADMIN when assigning teachers to organisations.
-     */
-    @Column(name = "institution_id")
-    private String institutionId;
-
-    /**
-     * UTC timestamp of the most recent successful login.
-     * Updated by AuthService on every successful authentication.
-     */
-    @Column(name = "last_login")
-    private OffsetDateTime lastLogin;
-
-    /**
-     * URL of the user's avatar image (nullable).
-     */
-    @Column(name = "avatar_url")
-    private String avatarUrl;
-
-    /**
-     * Creation timestamp (auto-set on insert).
-     */
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    /**
-     * Last modification timestamp (auto-updated on modification).
-     */
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "role_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "role_id")
     private Role role;
 
-    @jakarta.persistence.PrePersist
-    protected void onCreate() {
-        OffsetDateTime now = OffsetDateTime.now();
-        if (createdAt == null) {
-            createdAt = now;
-        }
-        if (updatedAt == null) {
-            updatedAt = now;
-        }
-        if (active == null) {
-            active = true;
-        }
-    }
+    // Nullable keeps existing rows compatible during the first schema upgrade.
+    @Column(nullable = true)
+    private Boolean active = true;
 
-    @jakarta.persistence.PreUpdate
-    protected void onUpdate() {
-        updatedAt = OffsetDateTime.now();
-    }
+    @Column(name = "institution_id", length = 120)
+    private String institutionId;
+
+    @Column(name = "last_login")
+    private Instant lastLogin;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
+    private String avatarUrl;
 }

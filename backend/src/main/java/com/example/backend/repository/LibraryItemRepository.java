@@ -1,27 +1,42 @@
 package com.example.backend.repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.backend.entity.LibraryItem;
+import com.example.backend.entity.Visibility;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.backend.entity.LibraryItem;
+import java.util.UUID;
+import java.util.List;
+import java.util.Optional;
 
-@Repository
 public interface LibraryItemRepository extends JpaRepository<LibraryItem, UUID> {
+    Page<LibraryItem> findByActiveTrueAndOwnerIdOrActiveTrueAndVisibility(
+            Integer ownerId, Visibility visibility, Pageable pageable);
 
-    List<LibraryItem> findByVisibilityAndActiveOrderByCreatedAtDesc(String visibility, boolean active);
+    Optional<LibraryItem> findBySimulationIdAndOwnerId(UUID simulationId, Integer ownerId);
 
-    List<LibraryItem> findByOwnerIdAndActiveOrderByCreatedAtDesc(Integer ownerId, boolean active);
+    Optional<LibraryItem> findByIdAndOwnerIdAndActiveTrue(UUID id, Integer ownerId);
 
-    @Query("SELECT l FROM LibraryItem l WHERE l.active = true AND (l.visibility = 'SHARED' OR l.ownerId = :userId) " +
-           "AND (:title IS NULL OR LOWER(l.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
-           "ORDER BY l.createdAt DESC")
-    List<LibraryItem> searchAccessibleItems(@Param("userId") Integer userId, @Param("title") String title);
+    Optional<LibraryItem> findBySimulationIdAndActiveTrueAndVisibility(UUID simulationId, Visibility visibility);
 
-    Optional<LibraryItem> findByIdAndActive(UUID id, boolean active);
+    @Query("""
+            select i from LibraryItem i
+            where i.simulation.id = :simulationId
+              and i.active = true
+              and i.visibility = :visibility
+              and (i.sharedInstitutionId is null or i.sharedInstitutionId = ''
+                   or i.sharedInstitutionId = :institutionId)
+            """)
+    Optional<LibraryItem> findVisibleSharedSimulation(@Param("simulationId") UUID simulationId,
+                                                       @Param("visibility") Visibility visibility,
+                                                       @Param("institutionId") String institutionId);
+
+    List<LibraryItem> findByOwnerIdAndActiveTrueOrderByCreatedAtDesc(Integer ownerId);
+
+    boolean existsByFolderIdAndActiveTrue(UUID folderId);
+
+    long countByFolderIdAndActiveTrue(UUID folderId);
 }
