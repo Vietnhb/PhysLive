@@ -1,6 +1,6 @@
 package com.example.backend.entity;
 
-public enum ModuleReleaseStatus {
+public enum LifecycleStatus {
     DRAFT,
     APPROVED,
     RETIRED

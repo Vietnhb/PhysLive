@@ -13,17 +13,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "content_modules", uniqueConstraints = @UniqueConstraint(name = "uk_modules_topic_slug", columnNames = { "topic_id", "slug" }))
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class ContentModule extends AuditedEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -37,10 +33,10 @@ public class ContentModule extends AuditedEntity {
     private String slug;
 
     @Column(nullable = false)
-    private int sortOrder = 0;
+    private int sortOrder;
 
     @Column(nullable = false)
-    private boolean active = true;
+    private boolean active;
 
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")

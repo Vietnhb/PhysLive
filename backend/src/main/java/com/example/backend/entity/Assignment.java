@@ -1,93 +1,69 @@
 package com.example.backend.entity;
 
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
-@Table(name = "assignments", schema = "public")
+@Table(name = "assignments")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class Assignment {
+public class Assignment extends AuditedEntity {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "library_item_id")
+    private LibraryItem libraryItem;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
-
-    @Column(name = "title", nullable = false)
-    private String title;
-
-    @Column(name = "description", columnDefinition = "text")
-    private String description;
-
-    @Column(name = "status", nullable = false)
-    private String status = "ACTIVE"; // ACTIVE, CLOSED
-
-    @Column(name = "assigned_at", nullable = false)
-    private OffsetDateTime assignedAt;
-
-    @Column(name = "due_at")
-    private OffsetDateTime dueAt;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "questions", columnDefinition = "jsonb", nullable = false)
-    private java.util.Map<String, Object> questions;
-
-    @Column(name = "teacher_id", nullable = false)
-    private Integer teacherId;
-
-    @ManyToOne
-    @JoinColumn(name = "teacher_id", insertable = false, updatable = false)
-    private User teacher;
-
-    @Column(name = "specification_id", nullable = false)
-    private UUID specificationId;
-
-    @ManyToOne
-    @JoinColumn(name = "specification_id", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "specification_id", nullable = false)
     private Specification specification;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "teacher_id", nullable = false)
+    private User teacher;
 
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
+    /** The exact validated teacher run visible to students after the prediction gate. */
+    @Column(name = "assigned_simulation_run_id")
+    private UUID assignedSimulationRunId;
 
-    @PrePersist
-    public void prePersist() {
-        OffsetDateTime now = OffsetDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-        if (this.assignedAt == null) {
-            this.assignedAt = now;
-        }
-        if (this.status == null) {
-            this.status = "ACTIVE";
-        }
-    }
+    @Column(nullable = false, length = 160)
+    private String title;
 
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = OffsetDateTime.now();
-    }
+    @Column(columnDefinition = "text")
+    private String description;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private JsonNode questions;
+
+    @ElementCollection
+    @CollectionTable(name = "assignment_students", joinColumns = @JoinColumn(name = "assignment_id"))
+    @Column(name = "student_id", nullable = false)
+    private Set<Integer> assignedStudentIds = new LinkedHashSet<>();
+
+    @Column(nullable = false)
+    private Instant assignedAt;
+
+    @Column
+    private Instant dueAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private AssignmentStatus status = AssignmentStatus.ACTIVE;
 }
