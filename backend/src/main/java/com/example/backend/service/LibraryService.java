@@ -1,177 +1,133 @@
 package com.example.backend.service;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+import com.example.backend.dto.library.LibraryItemResponse;
+import com.example.backend.dto.library.LibrarySaveRequest;
+import com.example.backend.entity.LibraryItem;
+import com.example.backend.entity.LibraryFolder;
+import com.example.backend.entity.Specification;
+import com.example.backend.entity.Simulation;
+import com.example.backend.entity.SimulationStatus;
+import com.example.backend.entity.Lesson;
+import com.example.backend.entity.User;
+import com.example.backend.entity.Visibility;
+import com.example.backend.exception.ApiException;
+import com.example.backend.repository.LibraryItemRepository;
+import com.example.backend.repository.LibraryFolderRepository;
+import com.example.backend.repository.SimulationRepository;
+import com.example.backend.repository.LessonRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.backend.dto.CreateLibraryItemRequest;
-import com.example.backend.dto.LibraryItemResponse;
-import com.example.backend.dto.UpdateLibraryItemRequest;
-import com.example.backend.entity.LibraryItem;
-import com.example.backend.entity.Specification;
-import com.example.backend.entity.User;
-import com.example.backend.exception.ApiException;
-import com.example.backend.repository.LibraryItemRepository;
-import com.example.backend.repository.SpecificationRepository;
-import com.example.backend.repository.UserRepository;
-
-import lombok.AllArgsConstructor;
+import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LibraryService {
-
-    private final LibraryItemRepository libraryItemRepository;
-    private final SpecificationRepository specificationRepository;
-    private final UserRepository userRepository;
-
-    @Transactional(readOnly = true)
-    public List<LibraryItemResponse> getLibraryItems(String userEmail, String visibility, String search) {
-        User user = getUserByEmail(userEmail);
-
-        List<LibraryItem> items;
-        if ("PERSONAL".equalsIgnoreCase(visibility)) {
-            items = libraryItemRepository.findByOwnerIdAndActiveOrderByCreatedAtDesc(user.getId(), true);
-            if (search != null && !search.trim().isEmpty()) {
-                String keyword = search.trim().toLowerCase();
-                items = items.stream()
-                        .filter(i -> i.getTitle().toLowerCase().contains(keyword))
-                        .collect(Collectors.toList());
-            }
-        } else if ("SHARED".equalsIgnoreCase(visibility)) {
-            items = libraryItemRepository.findByVisibilityAndActiveOrderByCreatedAtDesc("SHARED", true);
-            if (search != null && !search.trim().isEmpty()) {
-                String keyword = search.trim().toLowerCase();
-                items = items.stream()
-                        .filter(i -> i.getTitle().toLowerCase().contains(keyword))
-                        .collect(Collectors.toList());
-            }
-        } else {
-            items = libraryItemRepository.searchAccessibleItems(user.getId(), search);
-        }
-
-        return items.stream().map(this::toResponse).collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public LibraryItemResponse getLibraryItemById(UUID id, String userEmail) {
-        User user = getUserByEmail(userEmail);
-        LibraryItem item = libraryItemRepository.findByIdAndActive(id, true)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
-
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
-        if ("PERSONAL".equalsIgnoreCase(item.getVisibility()) && !item.getOwnerId().equals(user.getId()) && !isAdmin) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền xem mục thư viện cá nhân này");
-        }
-
-        return toResponse(item);
-    }
+    private static final String LIBRARY_ITEM_NOT_FOUND = "Library item not found";
+    private final LibraryItemRepository libraryRepository;
+    private final LibraryFolderRepository folderRepository;
+    private final SimulationRepository simulationRepository;
+    private final LessonRepository lessonRepository;
+    private final CurrentUserService currentUserService;
 
     @Transactional
-    public LibraryItemResponse createLibraryItem(CreateLibraryItemRequest request, String userEmail) {
-        User user = getUserByEmail(userEmail);
-        Specification spec = specificationRepository.findById(request.getSpecificationId())
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy đặc tả mô phỏng (Specification) với ID: " + request.getSpecificationId()));
-
-        LibraryItem item = new LibraryItem();
-        item.setTitle(request.getTitle().trim());
-        item.setVisibility(request.getVisibility() != null ? request.getVisibility().toUpperCase() : "SHARED");
-        item.setActive(true);
-        item.setOwnerId(user.getId());
+    public LibraryItemResponse save(LibrarySaveRequest request) {
+        User user = currentUserService.requireCurrentUser();
+        Simulation simulation = simulationRepository.findByIdAndOwnerId(request.simulationId(), user.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Simulation not found"));
+        Specification specification = simulation.getSpecification();
+        if (simulation.getStatus() != SimulationStatus.READY || !"PASSED".equals(specification.getValidationStatus())) {
+            throw new ApiException(HttpStatus.CONFLICT, "Only validated simulations can be saved");
+        }
+        LibraryFolder folder = folderRepository.findByIdAndOwnerIdAndActiveTrue(request.folderId(), user.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Library folder not found"));
+        Lesson lesson = lessonRepository.findById(request.lessonId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Lesson not found"));
+        String curriculumTopic = lesson.getLevel().getModule().getTopic().getName();
+        if (specification.getTopic() == null || !specification.getTopic().equalsIgnoreCase(curriculumTopic)) {
+            throw new ApiException(HttpStatus.CONFLICT, "Lesson topic does not match the validated simulation topic");
+        }
+        LibraryItem item = libraryRepository.findBySimulationIdAndOwnerId(simulation.getId(), user.getId())
+                .orElseGet(LibraryItem::new);
+        item.setSimulation(simulation);
+        item.setFolder(folder);
+        item.setLesson(lesson);
+        item.setSpecification(specification);
         item.setOwner(user);
-        item.setSpecificationId(spec.getId());
-        item.setSpecification(spec);
+        item.setTitle(request.title().trim());
+        item.setVisibility(request.visibility() == null ? Visibility.PERSONAL : request.visibility());
+        item.setSharedInstitutionId(item.getVisibility() == Visibility.SHARED ? user.getInstitutionId() : null);
+        item.setActive(true);
+        return toResponse(libraryRepository.save(item));
+    }
 
-        LibraryItem saved = libraryItemRepository.save(item);
-        return toResponse(saved);
+    @Transactional(readOnly = true)
+    public List<LibraryItemResponse> search(String topic) {
+        User user = currentUserService.requireCurrentUser();
+        return libraryRepository.findAll().stream()
+                .filter(item -> item.isActive() && (item.getOwner().getId().equals(user.getId())
+                        || (item.getVisibility() == Visibility.SHARED && visibleTo(user, item))))
+                .filter(item -> topic == null || topic.isBlank() || (item.getSpecification().getTopic() != null
+                        && item.getSpecification().getTopic().equalsIgnoreCase(topic)))
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<LibraryItemResponse> mine() {
+        User user = currentUserService.requireCurrentUser();
+        return libraryRepository.findByOwnerIdAndActiveTrueOrderByCreatedAtDesc(user.getId()).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Transactional
-    public LibraryItemResponse updateLibraryItem(UUID id, UpdateLibraryItemRequest request, String userEmail) {
-        User user = getUserByEmail(userEmail);
-        LibraryItem item = libraryItemRepository.findByIdAndActive(id, true)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
-
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
-        if (!item.getOwnerId().equals(user.getId()) && !isAdmin) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền chỉnh sửa mục thư viện này");
+    public void remove(java.util.UUID id) {
+        User user = currentUserService.requireCurrentUser();
+        LibraryItem item = libraryRepository.findById(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, LIBRARY_ITEM_NOT_FOUND));
+        if (!item.getOwner().getId().equals(user.getId())) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Only the owner can remove this item");
         }
-
-        if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) {
-            item.setTitle(request.getTitle().trim());
-        }
-        if (request.getVisibility() != null) {
-            item.setVisibility(request.getVisibility().toUpperCase());
-        }
-        if (request.getActive() != null) {
-            item.setActive(request.getActive());
-        }
-
-        LibraryItem updated = libraryItemRepository.save(item);
-        return toResponse(updated);
-    }
-
-    @Transactional
-    public void deleteLibraryItem(UUID id, String userEmail) {
-        User user = getUserByEmail(userEmail);
-        LibraryItem item = libraryItemRepository.findByIdAndActive(id, true)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
-
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
-        if (!item.getOwnerId().equals(user.getId()) && !isAdmin) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền xoá mục thư viện này");
-        }
-
         item.setActive(false);
-        libraryItemRepository.save(item);
+        libraryRepository.save(item);
     }
 
     @Transactional
-    public LibraryItemResponse cloneLibraryItem(UUID id, String userEmail) {
-        User user = getUserByEmail(userEmail);
-        LibraryItem source = libraryItemRepository.findByIdAndActive(id, true)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
-
-        LibraryItem clone = new LibraryItem();
-        clone.setTitle(source.getTitle() + " (Bản sao)");
-        clone.setVisibility("PERSONAL");
-        clone.setActive(true);
-        clone.setOwnerId(user.getId());
-        clone.setOwner(user);
-        clone.setSpecificationId(source.getSpecificationId());
-        clone.setSpecification(source.getSpecification());
-
-        LibraryItem saved = libraryItemRepository.save(clone);
-        return toResponse(saved);
+    public LibraryItemResponse rename(java.util.UUID id, String title) {
+        User user = currentUserService.requireCurrentUser();
+        LibraryItem item = libraryRepository.findById(id)
+                .filter(value -> value.isActive() && value.getOwner().getId().equals(user.getId()))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, LIBRARY_ITEM_NOT_FOUND));
+        item.setTitle(title.trim());
+        return toResponse(libraryRepository.save(item));
     }
 
-    private User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại"));
+    @Transactional
+    public LibraryItemResponse move(java.util.UUID id, java.util.UUID folderId) {
+        User user = currentUserService.requireCurrentUser();
+        LibraryItem item = libraryRepository.findById(id)
+                .filter(value -> value.isActive() && value.getOwner().getId().equals(user.getId()))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, LIBRARY_ITEM_NOT_FOUND));
+        LibraryFolder folder = folderRepository.findByIdAndOwnerIdAndActiveTrue(folderId, user.getId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Library folder not found"));
+        item.setFolder(folder);
+        return toResponse(libraryRepository.save(item));
     }
 
     private LibraryItemResponse toResponse(LibraryItem item) {
-        Specification spec = item.getSpecification();
-        String topic = spec != null ? spec.getTopic() : null;
-        Object details = spec != null ? spec.getObjects() : null;
+        return new LibraryItemResponse(item.getId(), item.getSimulation() == null ? null : item.getSimulation().getId(),
+                item.getFolder() == null ? null : item.getFolder().getId(),
+                item.getLesson() == null ? null : item.getLesson().getId(),
+                item.getSpecification().getId(), item.getTitle(),
+                item.getSpecification().getTopic(), item.getSpecification().getValidationStatus(),
+                item.getVisibility(), item.getCreatedAt());
+    }
 
-        return LibraryItemResponse.builder()
-                .id(item.getId())
-                .title(item.getTitle())
-                .visibility(item.getVisibility())
-                .active(item.isActive())
-                .ownerId(item.getOwnerId())
-                .ownerName(item.getOwner() != null ? item.getOwner().getFullName() : null)
-                .ownerEmail(item.getOwner() != null ? item.getOwner().getEmail() : null)
-                .specificationId(item.getSpecificationId())
-                .topic(topic)
-                .specificationDetails(details)
-                .createdAt(item.getCreatedAt())
-                .updatedAt(item.getUpdatedAt())
-                .build();
+    private boolean visibleTo(User user, LibraryItem item) {
+        String scope = item.getSharedInstitutionId();
+        return scope == null || scope.isBlank() || scope.equals(user.getInstitutionId());
     }
 }

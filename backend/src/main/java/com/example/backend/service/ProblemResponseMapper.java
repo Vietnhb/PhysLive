@@ -47,16 +47,20 @@ public class ProblemResponseMapper {
 
     public SpecificationResponse toSpecification(Specification specification) {
         return new SpecificationResponse(
-                specification.getId(),
+                specification.getId(), specification.getContractVersion(),
                 specification.getSchemaVersion(),
                 specification.getTopic(),
                 specification.getConfidence(),
                 specification.getObjects(),
                 specification.getQuantities(),
                 specification.getRelations(),
+                specification.getEndCondition(),
                 specification.getAmbiguity(),
                 specification.getConfirmationState(),
                 specification.getAmbiguityCases().stream().map(this::toAmbiguity).toList(),
+                specification.getSchemaId(),
+                specification.getValidationStatus(),
+                specification.getValidationResult(),
                 specification.getCreatedAt());
     }
 
