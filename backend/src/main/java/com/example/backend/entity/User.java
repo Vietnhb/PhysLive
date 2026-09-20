@@ -17,6 +17,14 @@ import lombok.Data;
 @Data
 public class User {
 
+    @ManyToOne
+    @JoinColumn(name = "school_id")
+    private com.example.backend.entity.school.School school;
+
+    private java.time.Instant deactivatedAt;
+    private Integer deactivatedBy;
+    private String deactivationReason;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
