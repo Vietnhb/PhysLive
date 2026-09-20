@@ -172,6 +172,7 @@ public class ProblemService {
             run.setOutcome(ExtractionOutcome.FAILED);
             run.setErrorMessage("Extraction failed");
             problem.setStatus(SubmissionStatus.FAILED);
+            if (exception instanceof ApiException api) throw api;
             throw new ApiException(HttpStatus.BAD_GATEWAY, "Problem extraction failed");
         }
     }

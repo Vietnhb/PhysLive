@@ -38,7 +38,7 @@ public class ClassSessionService {
             list = classSessionRepository.findByTeacherIdOrderByCreatedAtDesc(user.getId());
         } else {
             // Students and Admin can view all recorded classroom sessions
-            list = classSessionRepository.findAll();
+            list = classSessionRepository.findAll().stream().filter(session -> canView(user, session)).toList();
         }
 
         return list.stream().map(this::toResponse).collect(Collectors.toList());
@@ -46,8 +46,10 @@ public class ClassSessionService {
 
     @Transactional(readOnly = true)
     public ClassSessionResponse getSessionById(UUID id, String userEmail) {
+        User user = getUserByEmail(userEmail);
         ClassSession session = classSessionRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy phiên tương tác / buổi học với ID: " + id));
+        if (!canView(user, session)) throw new ApiException(HttpStatus.NOT_FOUND, "Session not found");
         return toResponse(session);
     }
 
@@ -57,6 +59,8 @@ public class ClassSessionService {
         Specification spec = specificationRepository.findById(request.getSpecificationId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy đặc tả mô phỏng (Specification) với ID: " + request.getSpecificationId()));
 
+        if (!isAdmin(teacher) && (spec.getSubmission() == null || !teacher.getId().equals(spec.getSubmission().getOwner().getId())))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Specification belongs to another teacher");
         ClassSession session = new ClassSession();
         session.setTitle(request.getTitle().trim());
         session.setDurationSeconds(request.getDurationSeconds() != null ? request.getDurationSeconds() : 0.0);
@@ -84,6 +88,16 @@ public class ClassSessionService {
         }
 
         classSessionRepository.delete(session);
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+    }
+
+    private boolean canView(User user, ClassSession session) {
+        if (isAdmin(user) || user.getId().equals(session.getTeacherId())) return true;
+        return user.getSchool() != null && session.getTeacher() != null && session.getTeacher().getSchool() != null
+                && user.getSchool().getId().equals(session.getTeacher().getSchool().getId());
     }
 
     private User getUserByEmail(String email) {

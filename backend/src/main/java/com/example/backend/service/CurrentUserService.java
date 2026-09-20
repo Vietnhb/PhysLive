@@ -25,6 +25,8 @@ public class CurrentUserService {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Authentication is required");
         }
         return userRepository.findByEmail(authentication.getName())
+                .filter(user -> user.isEnabled() && Boolean.TRUE.equals(user.getActive()))
+                .filter(user -> user.getSchool() == null || user.getSchool().isActive())
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Authenticated user no longer exists"));
     }
 
@@ -32,7 +34,9 @@ public class CurrentUserService {
         User user = requireCurrentUser();
         String role = user.getRole() == null ? null : user.getRole().getName();
         boolean allowed = role != null && Arrays.stream(allowedRoles)
-                .anyMatch(candidate -> candidate.equalsIgnoreCase(role));
+                .anyMatch(candidate -> candidate.equalsIgnoreCase(role)
+                        || (com.example.backend.entity.enums.RoleName.CONTENT_REVIEWER.matches(candidate)
+                        && com.example.backend.entity.enums.RoleName.CONTENT_REVIEWER.matches(role)));
         if (!allowed) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Required role: " + String.join(" or ", allowedRoles));
         }

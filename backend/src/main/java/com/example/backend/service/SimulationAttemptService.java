@@ -26,12 +26,17 @@ public class SimulationAttemptService {
 
     private final SimulationRepository simulationRepository;
     private final SimulationRunRepository simulationRunRepository;
+    private final CurrentUserService currentUserService;
+    private final com.example.backend.service.school.LicenseCheckService licenses;
 
     @Transactional
     public SimulationRunResponse recordSimulationRun(CreateSimulationRunRequest request) {
+        var actor = currentUserService.requireAnyRole("TEACHER", "ADMIN");
+        licenses.requireWriteAccess(actor);
         Simulation simulation = simulationRepository.findById(request.getSimulationId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mô phỏng với ID: " + request.getSimulationId()));
 
+        requireOwner(simulation, actor);
         SimulationRun run = new SimulationRun();
         run.setSimulationId(simulation.getId());
         run.setSimulation(simulation);
@@ -50,12 +55,20 @@ public class SimulationAttemptService {
 
     @Transactional(readOnly = true)
     public List<SimulationRunResponse> getSimulationRuns(UUID simulationId) {
-        if (!simulationRepository.existsById(simulationId)) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mô phỏng với ID: " + simulationId);
-        }
+        var actor = currentUserService.requireCurrentUser();
+        Simulation simulation = simulationRepository.findById(simulationId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Simulation not found"));
+        requireOwner(simulation, actor);
         return simulationRunRepository.findBySimulationIdOrderByCreatedAtDesc(simulationId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    private void requireOwner(Simulation simulation, com.example.backend.entity.User actor) {
+        if (actor.getRole() != null && "ADMIN".equalsIgnoreCase(actor.getRole().getName())) return;
+        Integer ownerId = simulation.getValidationRun() != null
+                ? simulation.getValidationRun().getSpecification().getSubmission().getOwner().getId() : simulation.getOwnerId();
+        if (!actor.getId().equals(ownerId)) throw new ApiException(HttpStatus.NOT_FOUND, "Simulation not found");
     }
 
     private SimulationRunResponse toResponse(SimulationRun run) {

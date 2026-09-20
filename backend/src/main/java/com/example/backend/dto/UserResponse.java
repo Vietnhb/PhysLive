@@ -10,33 +10,35 @@ import lombok.Getter;
  * Password hash is never exposed. Includes all profile and account-state fields.
  */
 @Getter
-@AllArgsConstructor
+@lombok.RequiredArgsConstructor
 public class UserResponse {
 
-    private Integer id;
-    private String email;
-    private String fullName;
-    private Integer roleId;
-    private String role;
+    private final Integer id;
+    private final String email;
+    private final String fullName;
+    private final Integer roleId;
+    private final String role;
 
     /** {@code true} = account is active; {@code false} = disabled by ADMIN. */
-    private boolean enabled;
+    private final boolean enabled;
 
     /** Legacy / soft-delete flag in DB schema. */
-    private Boolean active;
+    private final Boolean active;
 
     /** School / institution this user belongs to. May be {@code null}. */
-    private String institutionId;
+    private final String institutionId;
 
     /** UTC timestamp of the most recent successful login. {@code null} if never logged in. */
-    private OffsetDateTime lastLogin;
+    private final OffsetDateTime lastLogin;
 
     /** URL of the user's avatar image. */
-    private String avatarUrl;
+    private final String avatarUrl;
 
     /** Timestamp when the account was created. */
-    private OffsetDateTime createdAt;
+    private final OffsetDateTime createdAt;
 
     /** Timestamp when the account was last updated. */
-    private OffsetDateTime updatedAt;
+    private final OffsetDateTime updatedAt;
+    @lombok.Setter
+    private java.util.UUID schoolId;
 }

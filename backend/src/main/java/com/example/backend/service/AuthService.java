@@ -53,7 +53,8 @@ public class AuthService {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng");
         }
 
-        if (!user.isEnabled()) {
+        if (!user.isEnabled() || !Boolean.TRUE.equals(user.getActive())
+                || (user.getSchool() != null && !user.getSchool().isActive())) {
             throw new ApiException(
                     HttpStatus.FORBIDDEN,
                     "Tài khoản đã bị vô hiệu hoá. Vui lòng liên hệ quản trị viên.");
@@ -79,6 +80,7 @@ public class AuthService {
                 user.getCreatedAt(),
                 user.getUpdatedAt());
 
+        userInfo.setSchoolId(user.getSchool() == null ? null : user.getSchool().getId());
         return new LoginResponse(token, userInfo);
     }
 
@@ -93,25 +95,7 @@ public class AuthService {
      * @throws ApiException 500 if the GUEST role is missing from the database
      */
     public void signup(SignupRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Email đã tồn tại");
-        }
-
-        Role guestRole = roleRepository.findByName("GUEST")
-                .orElseThrow(() -> new ApiException(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Lỗi cấu hình server: role GUEST chưa được khởi tạo"));
-
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setFullName(request.getFullName());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(guestRole);
-        user.setEnabled(true);
-        user.setActive(true);
-        user.setLastLogin(OffsetDateTime.now()); // Auto-set initial timestamp on signup
-        // institutionId → null (set later by ADMIN)
-
-        userRepository.save(user);
+        throw new ApiException(HttpStatus.FORBIDDEN,
+                "Personal signup is disabled. Register a school or contact your school manager.");
     }
 }
