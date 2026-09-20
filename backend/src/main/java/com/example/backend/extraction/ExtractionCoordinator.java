@@ -27,6 +27,9 @@ public class ExtractionCoordinator {
                         result.rawResponse(),
                         null);
             } catch (RuntimeException exception) {
+                if (exception instanceof com.example.backend.exception.ApiException api
+                        && (api.getStatus() == org.springframework.http.HttpStatus.FORBIDDEN
+                            || api.getStatus() == org.springframework.http.HttpStatus.UNAUTHORIZED)) throw api;
                 return fallback(text, "OpenRouter extraction failed; rule-based fallback was used.");
             }
         }

@@ -77,6 +77,8 @@ public class LibraryService {
         Specification spec = specificationRepository.findById(request.getSpecificationId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy đặc tả mô phỏng (Specification) với ID: " + request.getSpecificationId()));
 
+        if (!isAdmin(user) && (spec.getSubmission() == null || !user.getId().equals(spec.getSubmission().getOwner().getId())))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Specification belongs to another teacher");
         LibraryItem item = new LibraryItem();
         item.setTitle(request.getTitle().trim());
         item.setVisibility(request.getVisibility() != null ? request.getVisibility().toUpperCase() : "SHARED");
@@ -136,6 +138,8 @@ public class LibraryService {
         LibraryItem source = libraryItemRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
 
+        if (!"SHARED".equalsIgnoreCase(source.getVisibility()) && !user.getId().equals(source.getOwnerId()) && !isAdmin(user))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Private library item is not accessible");
         LibraryItem clone = new LibraryItem();
         clone.setTitle(source.getTitle() + " (Bản sao)");
         clone.setVisibility("PERSONAL");
@@ -147,6 +151,10 @@ public class LibraryService {
 
         LibraryItem saved = libraryItemRepository.save(clone);
         return toResponse(saved);
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
     }
 
     private User getUserByEmail(String email) {

@@ -41,6 +41,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
 
     private final JwtUtil jwtUtil;
+    private final com.example.backend.repository.UserRepository users;
+    private final com.example.backend.service.school.LicenseCheckService licenses;
 
     @Override
     protected void doFilterInternal(
@@ -61,14 +63,33 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             Claims claims = jwtUtil.extractClaims(token);
             String email = claims.getSubject();
-            String role  = claims.get("role", String.class);
-
-            log.debug("JWT validated – email: {}, role: {}", email, role);
-
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    email,
-                    null,
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
+            var user = users.findByEmail(email).filter(u -> u.isEnabled() && Boolean.TRUE.equals(u.getActive()))
+                    .filter(u -> u.getSchool() == null || u.getSchool().isActive()).orElse(null);
+            if (user == null || user.getRole() == null) {
+                SecurityContextHolder.clearContext();
+                sendUnauthorized(response, "Account or school is disabled");
+                return;
+            }
+            var role = com.example.backend.entity.enums.RoleName.from(user.getRole().getName()).orElse(null);
+            String path = request.getRequestURI().substring(request.getContextPath().length());
+            boolean write = !java.util.List.of("GET", "HEAD", "OPTIONS").contains(request.getMethod());
+            boolean profile = "/api/user/me".equals(path) || path.startsWith("/api/user/me/");
+            boolean renewal = role == com.example.backend.entity.enums.RoleName.SCHOOL_MANAGER
+                    && "POST".equals(request.getMethod())
+                    && java.util.List.of("/api/school/billing/quote", "/api/school/billing/checkout").contains(path);
+            if (write && path.startsWith("/api/") && !path.startsWith("/api/auth/")
+                    && !profile && !renewal && !licenses.canPerformWriteOperations(user)) {
+                response.setStatus(403);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.getWriter().write("{\"status\":403,\"message\":\"School license does not allow writes\"}");
+                return;
+            }
+            var authorities = new java.util.ArrayList<SimpleGrantedAuthority>();
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + (role == null ? user.getRole().getName() : role.name())));
+            if (role == com.example.backend.entity.enums.RoleName.CONTENT_REVIEWER)
+                authorities.add(new SimpleGrantedAuthority("ROLE_REVIEWER"));
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(email, null, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 

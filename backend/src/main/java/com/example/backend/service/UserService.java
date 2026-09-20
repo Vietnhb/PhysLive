@@ -32,6 +32,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.example.backend.service.admin.AdminService managedAccounts;
 
     // ------------------------------------------------------------------ //
     // Read operations
@@ -64,7 +65,8 @@ public class UserService {
         }
 
         if (request.getInstitutionId() != null) {
-            user.setInstitutionId(request.getInstitutionId().trim());
+            if (!java.util.Objects.equals(request.getInstitutionId().trim(), user.getInstitutionId()))
+                throw new ApiException(HttpStatus.FORBIDDEN, "Only an administrator can change school membership");
         }
 
         if (request.getAvatarUrl() != null) {
@@ -125,26 +127,14 @@ public class UserService {
      */
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Email đã tồn tại trong hệ thống: " + request.getEmail());
-        }
-
-        Integer roleId = request.getRoleId() != null ? request.getRoleId() : 5; // Default 5 = GUEST
-        Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role ID không hợp lệ: " + roleId));
-
-        User user = new User();
-        user.setEmail(request.getEmail().trim());
-        user.setFullName(request.getFullName().trim());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(role);
-        user.setEnabled(request.getEnabled() != null ? request.getEnabled() : true);
-        user.setActive(true);
-        user.setInstitutionId(request.getInstitutionId() != null ? request.getInstitutionId().trim() : null);
-        user.setAvatarUrl(request.getAvatarUrl() != null ? request.getAvatarUrl().trim() : null);
-        user.setLastLogin(OffsetDateTime.now());
-
-        userRepository.save(user);
+        if (request.getRoleId() == null) throw new ApiException(HttpStatus.BAD_REQUEST, "Role is required");
+        Role role = roleRepository.findById(request.getRoleId())
+                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Invalid role"));
+        var created = managedAccounts.createUser(new com.example.backend.dto.admin.CreateManagedUserRequest(
+                request.getEmail(), request.getPassword(), request.getFullName(), role.getName(), request.getInstitutionId()));
+        if (Boolean.FALSE.equals(request.getEnabled())) managedAccounts.setActive(created.id(), false);
+        User user = userRepository.findById(created.id()).orElseThrow();
+        user.setAvatarUrl(request.getAvatarUrl());
         return toResponse(user);
     }
 
@@ -172,8 +162,15 @@ public class UserService {
             user.setFullName(request.getFullName().trim());
         }
 
-        if (request.getInstitutionId() != null) {
-            user.setInstitutionId(request.getInstitutionId().trim());
+        if (!isAdmin && request.getInstitutionId() != null
+                && !java.util.Objects.equals(request.getInstitutionId().trim(), user.getInstitutionId()))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Only an administrator can change school membership");
+        if (isAdmin && (request.getRoleId() != null || request.getInstitutionId() != null)) {
+            Role role = request.getRoleId() == null ? user.getRole() : roleRepository.findById(request.getRoleId())
+                    .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Invalid role"));
+            managedAccounts.updateUser(id, new com.example.backend.service.admin.AdminService.UpdateUserRequest(
+                    user.getFullName(), role.getName(), request.getInstitutionId() == null
+                    ? user.getInstitutionId() : request.getInstitutionId()));
         }
 
         if (request.getAvatarUrl() != null) {
@@ -191,7 +188,7 @@ public class UserService {
             }
             Role role = roleRepository.findById(request.getRoleId())
                     .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role ID không hợp lệ: " + request.getRoleId()));
-            user.setRole(role);
+            // Role and school invariants are enforced by managedAccounts above.
         }
 
         // Account state update - ADMIN only with self-disable protection
@@ -202,8 +199,7 @@ public class UserService {
             if (user.getEmail().equalsIgnoreCase(currentEmail) && !request.getEnabled()) {
                 throw new ApiException(HttpStatus.BAD_REQUEST, "ADMIN không thể tự vô hiệu hoá tài khoản của chính mình");
             }
-            user.setEnabled(request.getEnabled());
-            user.setActive(request.getEnabled());
+            managedAccounts.setActive(id, request.getEnabled());
         }
 
         userRepository.save(user);
@@ -224,15 +220,7 @@ public class UserService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "ADMIN không thể tự xoá tài khoản của chính mình");
         }
 
-        try {
-            userRepository.delete(user);
-            userRepository.flush();
-        } catch (DataIntegrityViolationException ex) {
-            // User owns simulations or library_items; perform soft-delete / deactivation instead
-            user.setEnabled(false);
-            user.setActive(false);
-            userRepository.save(user);
-        }
+        managedAccounts.setActive(id, false);
     }
 
     /**
@@ -247,9 +235,7 @@ public class UserService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "ADMIN không thể tự vô hiệu hoá tài khoản của chính mình");
         }
 
-        user.setEnabled(enabled);
-        user.setActive(enabled);
-        userRepository.save(user);
+        managedAccounts.setActive(id, enabled);
         return toResponse(user);
     }
 
@@ -258,7 +244,7 @@ public class UserService {
     // ------------------------------------------------------------------ //
 
     public UserResponse toResponse(User user) {
-        return new UserResponse(
+        UserResponse response = new UserResponse(
                 user.getId(),
                 user.getEmail(),
                 user.getFullName(),
@@ -271,5 +257,7 @@ public class UserService {
                 user.getAvatarUrl(),
                 user.getCreatedAt(),
                 user.getUpdatedAt());
+        response.setSchoolId(user.getSchool() == null ? null : user.getSchool().getId());
+        return response;
     }
 }
