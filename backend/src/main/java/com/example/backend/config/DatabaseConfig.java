@@ -17,12 +17,19 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
+        name = "physlive.database.external-enabled", havingValue = "true", matchIfMissing = true)
 public class DatabaseConfig {
 
     private static final int SUPABASE_TRANSACTION_POOLER_PORT = 6543;
 
     @Bean
     public DataSource dataSource(Environment environment) {
+        String schemaAction = environment.getProperty("spring.jpa.hibernate.ddl-auto", "validate");
+        if (java.util.Set.of("create", "create-drop").contains(schemaAction.toLowerCase(java.util.Locale.ROOT))) {
+            throw new IllegalStateException("Destructive Hibernate schema actions are forbidden for the external database. "
+                    + "Use an isolated test datasource or an explicit SQL migration.");
+        }
         String configuredUrl = firstNonBlank(
                 environment.getProperty("SUPABASE_DB_URL"),
                 environment.getProperty("DATABASE_URL"),
