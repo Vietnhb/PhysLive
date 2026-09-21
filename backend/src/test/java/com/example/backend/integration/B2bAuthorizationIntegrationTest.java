@@ -158,6 +158,51 @@ class B2bAuthorizationIntegrationTest {
                 .singleElement().satisfies(e -> assertThat(e.getSchoolClass().getId().toString()).isEqualTo(second));
     }
 
+    @Test void classOverviewsAreRoleAndSchoolScoped() throws Exception {
+        String root = "/api/schools/" + school.getId() + "/classes";
+        String id = createClass(root, "10A1");
+        User teacher = user("TEACHER", school);
+        User student = user("STUDENT", school);
+        http.perform(post(root + "/" + id + "/teachers").header("Authorization", token(manager))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"teacherId\":" + teacher.getId() + "}"))
+                .andExpect(status().isOk());
+        http.perform(post(root + "/" + id + "/students").header("Authorization", token(manager))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"studentId\":" + student.getId() + "}"))
+                .andExpect(status().isOk());
+        http.perform(get("/api/student/classes").header("Authorization", token(student)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$[0].teachers[0].id").value(teacher.getId()))
+                .andExpect(jsonPath("$[0].classmateCount").value(0));
+        http.perform(get("/api/assignments/mine/teacher/classes").header("Authorization", token(teacher)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].students[0].id").value(student.getId()));
+        http.perform(get("/api/student/classes").header("Authorization", token(manager)))
+                .andExpect(status().isForbidden());
+        http.perform(get("/api/assignments/mine/teacher/classes").header("Authorization", token(student)))
+                .andExpect(status().isForbidden());
+        http.perform(get("/api/student/classes").header("Authorization", token(user("STUDENT", school("B")))))
+                .andExpect(status().isOk()).andExpect(content().json("[]"));
+        school.setLicenseEnd(LocalDate.now().minusDays(1)); schools.saveAndFlush(school);
+        http.perform(get("/api/student/classes").header("Authorization", token(student))).andExpect(status().isOk());
+    }
+
+    @Autowired com.example.backend.repository.school.SchoolPaymentRepository payments;
+
+    @Test void revenueQueryHandlesEmptyAndMixedStatuses() throws Exception {
+        assertThat(payments.summarizeRevenue().getGrossPaidVnd()).isZero();
+        for (String state : java.util.List.of("PAID", "PAID", "PENDING", "REQUIRES_REVIEW", "FAILED")) {
+            var payment = new com.example.backend.entity.school.SchoolPayment();
+            payment.setSchool(school); payment.setManager(manager); payment.setPlanCode("TEST");
+            payment.setStatus(state); payment.setAmountVnd(100L); payments.saveAndFlush(payment);
+        }
+        var totals = payments.summarizeRevenue();
+        assertThat(totals.getPaidTransactions()).isEqualTo(2L);
+        assertThat(totals.getPendingTransactions()).isEqualTo(1L);
+        assertThat(totals.getReviewTransactions()).isEqualTo(1L);
+        assertThat(totals.getGrossPaidVnd()).isEqualTo(200L);
+        http.perform(get("/api/admin/payment-report").header("Authorization", token(user("ADMIN", null))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.grossPaidVnd").value(200));
+    }
+
     private String createClass(String path, String name) throws Exception {
         String body = http.perform(post(path).header("Authorization", token(manager)).contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"" + name + "\",\"gradeLevel\":10,\"schoolYear\":\"2026-2027\"}"))
