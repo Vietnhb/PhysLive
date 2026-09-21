@@ -12,6 +12,10 @@ import lombok.Data;
 @Builder
 public class AssignmentResponse {
 
+    private UUID classId;
+    private String className;
+    private Integer classGradeLevel;
+
     @Schema(description = "ID bài tập")
     private UUID id;
 

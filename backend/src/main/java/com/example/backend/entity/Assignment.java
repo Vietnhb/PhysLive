@@ -29,6 +29,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Assignment {
 
+    @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @JoinColumn(name = "school_class_id")
+    private com.example.backend.entity.school.SchoolClass schoolClass;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", updatable = false, nullable = false)

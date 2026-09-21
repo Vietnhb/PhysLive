@@ -265,8 +265,9 @@ public class SchoolPaymentService {
 
     @Transactional(readOnly = true)
     public RevenueSummary revenueSummary() {
-        var rows = payments.findAll();
-        return new RevenueSummary(rows.stream().filter(p -> "PAID".equals(p.getStatus())).count(), rows.stream().filter(p -> "PENDING".equals(p.getStatus())).count(), rows.stream().filter(p -> "REQUIRES_REVIEW".equals(p.getStatus())).count(), rows.stream().filter(p -> "PAID".equals(p.getStatus())).mapToLong(SchoolPayment::getAmountVnd).sum());
+        var totals = payments.summarizeRevenue();
+        return new RevenueSummary(totals.getPaidTransactions(), totals.getPendingTransactions(),
+                totals.getReviewTransactions(), totals.getGrossPaidVnd());
     }
 
     @Transactional(readOnly=true)
