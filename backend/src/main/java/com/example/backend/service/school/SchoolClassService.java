@@ -55,6 +55,49 @@ public class SchoolClassService {
     public record TeacherAssignment(UUID id, Integer teacherId, String teacherName, boolean active) { }
     public record Enrollment(UUID id, Integer studentId, String studentName, String schoolYear, String status) { }
 
+    public record ClassMember(Integer id, String fullName) { }
+    public record StudentClassSummary(UUID id, String name, Integer gradeLevel, String schoolYear, String subject,
+                                      UUID schoolId, String schoolName, List<ClassMember> teachers, long classmateCount) { }
+    public record TeacherClassOption(UUID id, String name, Integer gradeLevel, String schoolYear, String subject,
+                                     List<ClassMember> students) { }
+
+    @Transactional(readOnly = true)
+    public List<StudentClassSummary> mineForStudent() {
+        User actor = currentUser.requireAnyRole("STUDENT");
+        return enrollments.findActiveEnrollmentsByStudentId(actor.getId()).stream()
+                .map(ClassEnrollment::getSchoolClass).filter(c -> visibleClass(actor, c)).distinct()
+                .map(c -> new StudentClassSummary(c.getId(), c.getName(), c.getGradeLevel(), c.getSchoolYear(),
+                        c.getSubject(), c.getSchool().getId(), c.getSchool().getName(),
+                        teacherAssignments.findByClassIdAndIsActiveTrue(c.getId()).stream()
+                                .map(ClassTeacherAssignment::getTeacher).filter(u -> activeMember(u, c, "TEACHER"))
+                                .map(u -> new ClassMember(u.getId(), u.getFullName())).toList(),
+                        enrollments.findActiveStudentsByClassId(c.getId()).stream().map(ClassEnrollment::getStudent)
+                                .filter(u -> activeMember(u, c, "STUDENT") && !u.getId().equals(actor.getId()))
+                                .map(User::getId).distinct().count())).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TeacherClassOption> classesForTeacher() {
+        User actor = currentUser.requireAnyRole("TEACHER", "ADMIN");
+        return teacherAssignments.findActiveClassesByTeacherId(actor.getId()).stream()
+                .map(ClassTeacherAssignment::getSchoolClass).filter(c -> visibleClass(actor, c)).distinct()
+                .map(c -> new TeacherClassOption(c.getId(), c.getName(), c.getGradeLevel(), c.getSchoolYear(), c.getSubject(),
+                        enrollments.findActiveStudentsByClassId(c.getId()).stream().map(ClassEnrollment::getStudent)
+                                .filter(u -> activeMember(u, c, "STUDENT"))
+                                .map(u -> new ClassMember(u.getId(), u.getFullName())).toList())).toList();
+    }
+
+    private boolean visibleClass(User actor, SchoolClass c) {
+        return c != null && Boolean.TRUE.equals(c.getIsActive()) && c.getSchool() != null && c.getSchool().isActive()
+                && actor.getSchool() != null && actor.getSchool().getId().equals(c.getSchool().getId());
+    }
+
+    private boolean activeMember(User user, SchoolClass c, String role) {
+        return user != null && user.isEnabled() && Boolean.TRUE.equals(user.getActive())
+                && user.getRole() != null && role.equals(user.getRole().getName())
+                && user.getSchool() != null && c.getSchool().getId().equals(user.getSchool().getId());
+    }
+
     @Transactional(readOnly = true)
     public List<ClassSummary> list(UUID schoolId) {
         requireSchoolAccess(schoolId);

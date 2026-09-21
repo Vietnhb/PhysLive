@@ -42,6 +42,7 @@ public class AssignmentService {
     private final com.example.backend.repository.school.ClassEnrollmentRepository enrollments;
     private final com.example.backend.repository.school.ClassTeacherAssignmentRepository teacherAssignments;
     private final com.example.backend.service.school.LicenseCheckService licenses;
+    private final com.example.backend.repository.school.SchoolClassRepository schoolClasses;
 
     @Transactional(readOnly = true)
     public List<AssignmentResponse> getAssignments(String userEmail) {
@@ -78,6 +79,11 @@ public class AssignmentService {
         requireTeacher(teacher);
         licenses.requireWriteAccess(teacher);
         validateStudents(teacher, request.getStudentIds());
+        if (request.getClassId() == null)
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Select a class before assigning this activity");
+        var targetClass = schoolClasses.findById(request.getClassId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Class not found"));
+        validateClass(teacher, targetClass, request.getStudentIds());
         Specification spec = specificationRepository.findById(request.getSpecificationId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy đặc tả mô phỏng (Specification) với ID: " + request.getSpecificationId()));
 
@@ -85,6 +91,7 @@ public class AssignmentService {
                 || !teacher.getId().equals(spec.getSubmission().getOwner().getId())))
             throw new ApiException(HttpStatus.FORBIDDEN, "Specification belongs to another teacher");
         Assignment assignment = new Assignment();
+        assignment.setSchoolClass(targetClass);
         assignment.setTitle(request.getTitle().trim());
         assignment.setDescription(request.getDescription());
         assignment.setStatus("ACTIVE");
@@ -139,6 +146,7 @@ public class AssignmentService {
 
         if (request.getStudentIds() != null) {
             validateStudents(assignment.getTeacher(), request.getStudentIds());
+            validateClass(assignment.getTeacher(), assignment.getSchoolClass(), request.getStudentIds());
             assignmentStudentRepository.deleteByIdAssignmentId(id);
             List<AssignmentStudent> students = request.getStudentIds().stream()
                     .map(sId -> new AssignmentStudent(id, sId))
@@ -178,6 +186,7 @@ public class AssignmentService {
                 || !assignmentStudentRepository.existsByIdAssignmentIdAndIdStudentId(assignmentId, student.getId()))
             throw new ApiException(HttpStatus.FORBIDDEN, "Assignment is not assigned to this student");
         validateStudents(assignment.getTeacher(), List.of(student.getId()));
+        validateClass(assignment.getTeacher(), assignment.getSchoolClass(), List.of(student.getId()));
         if ("CLOSED".equalsIgnoreCase(assignment.getStatus())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Bài tập đã đóng, không thể nộp thêm");
         }
@@ -266,12 +275,34 @@ public class AssignmentService {
         }
     }
 
+    private void validateClass(User teacher, com.example.backend.entity.school.SchoolClass target, List<Integer> ids) {
+        // Existing assignments have no class link; retain their legacy access checks.
+        if (target == null) return;
+        if (!Boolean.TRUE.equals(target.getIsActive()) || target.getSchool() == null || !target.getSchool().isActive())
+            throw new ApiException(HttpStatus.FORBIDDEN, "Class is not active");
+        if (!isAdmin(teacher) && (teacher.getSchool() == null
+                || !teacher.getSchool().getId().equals(target.getSchool().getId())
+                || !teacherAssignments.existsBySchoolClassIdAndTeacherIdAndIsActiveTrue(target.getId(), teacher.getId())))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Teacher is not assigned to the selected class");
+        if (ids == null || ids.isEmpty())
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Select at least one student");
+        var members = enrollments.findActiveStudentsByClassId(target.getId()).stream()
+                .filter(e -> e.getStudent().getSchool() != null
+                        && target.getSchool().getId().equals(e.getStudent().getSchool().getId()))
+                .map(e -> e.getStudent().getId()).collect(Collectors.toSet());
+        if (!members.containsAll(ids))
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Every selected student must belong to the selected class");
+    }
+
     private AssignmentResponse toResponse(Assignment assignment) {
         List<AssignmentStudent> assigned = assignmentStudentRepository.findByIdAssignmentId(assignment.getId());
         List<Integer> studentIds = assigned.stream().map(as -> as.getId().getStudentId()).collect(Collectors.toList());
         List<AssignmentSubmission> submissions = assignmentSubmissionRepository.findByAssignmentIdOrderBySubmittedAtDesc(assignment.getId());
 
         return AssignmentResponse.builder()
+                .classId(assignment.getSchoolClass() == null ? null : assignment.getSchoolClass().getId())
+                .className(assignment.getSchoolClass() == null ? null : assignment.getSchoolClass().getName())
+                .classGradeLevel(assignment.getSchoolClass() == null ? null : assignment.getSchoolClass().getGradeLevel())
                 .id(assignment.getId())
                 .title(assignment.getTitle())
                 .description(assignment.getDescription())
