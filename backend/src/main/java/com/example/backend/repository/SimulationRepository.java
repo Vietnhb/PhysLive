@@ -24,6 +24,16 @@ public interface SimulationRepository extends JpaRepository<Simulation, UUID> {
     @Query("select s from Simulation s where s.owner.id = :ownerId order by s.createdAt desc")
     List<Simulation> findByOwnerIdOrderByCreatedAtDesc(@Param("ownerId") Integer ownerId);
 
+    @Query("""
+            select simulation from Simulation simulation
+            join simulation.validationRun validation
+            join validation.specification specification
+            join specification.submission submission
+            where submission.owner = :owner
+            order by simulation.createdAt desc
+            """)
+    List<Simulation> findOwnedOrderByCreatedAtDesc(@Param("owner") User owner);
+
     @Query("select s from Simulation s where s.specification.id = :specificationId")
     Optional<Simulation> findBySpecificationId(@Param("specificationId") UUID specificationId);
 

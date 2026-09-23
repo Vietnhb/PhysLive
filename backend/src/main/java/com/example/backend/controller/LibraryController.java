@@ -1,64 +1,100 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.library.LibraryItemResponse;
-import com.example.backend.dto.library.LibrarySaveRequest;
-import com.example.backend.service.LibraryService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.access.prepost.PreAuthorize;
 
-import java.util.List;
-import java.util.UUID;
+import com.example.backend.annotation.StandardApiResponses;
+import com.example.backend.dto.CreateLibraryItemRequest;
+import com.example.backend.dto.LibraryItemResponse;
+import com.example.backend.dto.UpdateLibraryItemRequest;
+import com.example.backend.service.LibraryService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+
+@Tag(name = "Library - Simulation Repository", description = "Quản lý kho thư viện mô phỏng vật lý cá nhân và dùng chung (Dành cho Giáo viên & Học sinh)")
+@SecurityRequirement(name = "bearerAuth")
+@StandardApiResponses
 @RestController
 @RequestMapping("/api/library")
-@RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
+@AllArgsConstructor
 public class LibraryController {
+
     private final LibraryService libraryService;
 
-    public record MoveRequest(@jakarta.validation.constraints.NotNull UUID folderId) {}
-    public record RenameRequest(@jakarta.validation.constraints.NotBlank @jakarta.validation.constraints.Size(max = 160) String title) {}
-
-    @org.springframework.web.bind.annotation.PatchMapping("/{id}")
-    @PreAuthorize("hasRole('TEACHER')")
-    public LibraryItemResponse rename(@PathVariable UUID id, @Valid @RequestBody RenameRequest request) {
-        return libraryService.rename(id, request.title());
-    }
-
-    @org.springframework.web.bind.annotation.PatchMapping("/{id}/folder")
-    @PreAuthorize("hasRole('TEACHER')")
-    public LibraryItemResponse move(@PathVariable UUID id, @Valid @RequestBody MoveRequest request) {
-        return libraryService.move(id, request.folderId());
-    }
-
-    @PostMapping
-    @PreAuthorize("hasRole('TEACHER')")
-    public LibraryItemResponse save(@Valid @RequestBody LibrarySaveRequest request) {
-        return libraryService.save(request);
-    }
-
+    @Operation(summary = "Tìm kiếm và xem danh sách mô phỏng trong thư viện", description = "Lấy danh sách các mô phỏng được chia sẻ (SHARED) hoặc mô phỏng cá nhân (PERSONAL) có hỗ trợ tìm kiếm theo từ khoá tiêu đề.")
     @GetMapping
-    public List<LibraryItemResponse> search(@RequestParam(required = false) String topic) {
-        return libraryService.search(topic);
+    public ResponseEntity<List<LibraryItemResponse>> getLibraryItems(
+            @Parameter(description = "Chế độ hiển thị: SHARED hoặc PERSONAL (để trống để lấy cả hai)")
+            @RequestParam(required = false) String visibility,
+            @Parameter(description = "Từ khoá tìm kiếm theo tiêu đề mô phỏng")
+            @RequestParam(required = false) String search,
+            Authentication authentication) {
+        return ResponseEntity.ok(libraryService.getLibraryItems(authentication.getName(), visibility, search));
     }
 
-    @GetMapping("/mine")
-    @PreAuthorize("hasRole('TEACHER')")
-    public List<LibraryItemResponse> mine() {
-        return libraryService.mine();
+    @Operation(summary = "Xem chi tiết một mô phỏng trong thư viện theo ID")
+    @GetMapping("/{id}")
+    public ResponseEntity<LibraryItemResponse> getLibraryItemById(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        return ResponseEntity.ok(libraryService.getLibraryItemById(id, authentication.getName()));
     }
 
+    @Operation(summary = "Lưu một mô phỏng mới vào thư viện", description = "Dành cho Giáo viên hoặc Admin lưu một đặc tả mô phỏng (Specification) vào kho tài nguyên.")
+    @PostMapping
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<LibraryItemResponse> createLibraryItem(
+            @Valid @RequestBody CreateLibraryItemRequest request,
+            Authentication authentication) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(libraryService.createLibraryItem(request, authentication.getName()));
+    }
+
+    @Operation(summary = "Cập nhật thông tin mô phỏng trong thư viện", description = "Chủ sở hữu hoặc Admin có thể đổi tiêu đề, quyền riêng tư (SHARED/PERSONAL) hoặc ẩn mô phỏng.")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<LibraryItemResponse> updateLibraryItem(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateLibraryItemRequest request,
+            Authentication authentication) {
+        return ResponseEntity.ok(libraryService.updateLibraryItem(id, request, authentication.getName()));
+    }
+
+    @Operation(summary = "Xoá mô phỏng khỏi thư viện (Soft Delete)", description = "Ẩn mô phỏng khỏi thư viện hiển thị.")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('TEACHER')")
-    public void remove(@PathVariable UUID id) {
-        libraryService.remove(id);
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<Void> deleteLibraryItem(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        libraryService.deleteLibraryItem(id, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Nhân bản (Clone) mô phỏng vào kho cá nhân", description = "Giáo viên sao chép một mô phỏng dùng chung vào kho cá nhân của mình để tuỳ biến.")
+    @PostMapping("/{id}/clone")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<LibraryItemResponse> cloneLibraryItem(
+            @PathVariable UUID id,
+            Authentication authentication) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(libraryService.cloneLibraryItem(id, authentication.getName()));
     }
 }

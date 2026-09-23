@@ -46,6 +46,7 @@ import com.example.backend.physics.model.ArchetypeCatalog;
 import com.example.backend.physics.model.PhysicsArchetype;
 import com.example.backend.physics.simulation.SimulationParameterPolicy;
 import com.example.backend.physics.simulation.SimulationPayloadBuilder;
+import com.example.backend.physics.simulation.EndConditionResolver;
 import com.example.backend.physics.solver.NumericalSolverLimits;
 import com.example.backend.physics.solver.NumericalSolverRegistry;
 import com.example.backend.physics.solver.ReferenceSolverRegistry;
@@ -145,7 +146,7 @@ class PhysicsWorkflowPersistenceIntegrationTest {
         runService = new PhysicsSimulationRunService(
                 simulationRepository, runRepository, snapshotRepository, currentUserService,
                 numericalRegistry, new SimulationParameterPolicy(catalog, validator, limits),
-                new SimulationPayloadBuilder(objectMapper), objectMapper);
+                new SimulationPayloadBuilder(objectMapper), new EndConditionResolver(), objectMapper);
 
         owner = persistOwner();
         SecurityContextHolder.getContext().setAuthentication(

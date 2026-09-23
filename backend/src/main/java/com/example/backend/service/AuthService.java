@@ -1,64 +1,101 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.LoginResponse;
-import com.example.backend.dto.SignupRequest;
-import com.example.backend.dto.UserResponse;
-import com.example.backend.entity.User;
-import com.example.backend.exception.ApiException;
-import com.example.backend.repository.UserRepository;
-import com.example.backend.security.JwtUtil;
-import lombok.RequiredArgsConstructor;
+import java.time.OffsetDateTime;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Locale;
+import com.example.backend.dto.LoginResponse;
+import com.example.backend.dto.SignupRequest;
+import com.example.backend.dto.UserResponse;
+import com.example.backend.entity.Role;
+import com.example.backend.entity.User;
+import com.example.backend.exception.ApiException;
+import com.example.backend.repository.RoleRepository;
+import com.example.backend.repository.UserRepository;
+import com.example.backend.security.JwtUtil;
 
+import lombok.AllArgsConstructor;
+
+/**
+ * Authentication service handling login and registration.
+ *
+ * <p>Passwords are always stored as BCrypt hashes; plain-text is never persisted.
+ * Account state ({@code enabled}) is checked on every login attempt.
+ * {@code lastLogin} is stamped with current UTC time on every successful login.
+ */
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class AuthService {
+
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
 
+    // ------------------------------------------------------------------ //
+    // Login
+    // ------------------------------------------------------------------ //
+
+    /**
+     * Validates credentials and returns a signed JWT together with user info.
+     *
+     * @throws ApiException 401 if email not found or password mismatch
+     * @throws ApiException 403 if account is disabled
+     */
     public LoginResponse login(String email, String password) {
-        String normalizedEmail = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
-        User user = userRepository.findByEmail(normalizedEmail)
-                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Email or password is incorrect"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(
+                        HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng"));
 
-        // Check if user is deactivated (soft delete)
-        if (Boolean.FALSE.equals(user.getActive())) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "Account is deactivated");
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng");
         }
 
-        // Check if school is deactivated
-        if (user.getSchool() != null && Boolean.FALSE.equals(user.getSchool().isActive())) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "School account is deactivated. Please contact administrator.");
+        if (!user.isEnabled() || !Boolean.TRUE.equals(user.getActive())
+                || (user.getSchool() != null && !user.getSchool().isActive())) {
+            throw new ApiException(
+                    HttpStatus.FORBIDDEN,
+                    "Tài khoản đã bị vô hiệu hoá. Vui lòng liên hệ quản trị viên.");
         }
 
-        // Note: License expiry does NOT block login (grace mode allows read-only access)
-
-        if (!matchesPassword(password, user.getPassword())) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "Email or password is incorrect");
-        }
-
-        user.setLastLogin(java.time.Instant.now());
+        // Stamp last login time
+        user.setLastLogin(OffsetDateTime.now());
         userRepository.save(user);
 
-        String role = user.getRole() == null ? "TEACHER" : user.getRole().getName();
-        return new LoginResponse(jwtUtil.generateToken(user.getEmail(), role),
-                new UserResponse(user.getId(), user.getEmail(), user.getFullName(), role, user.getDateOfBirth(), user.getAvatarUrl(), user.getSchool() == null ? null : user.getSchool().getId()));
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().getName());
+
+        UserResponse userInfo = new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getRole().getId(),
+                user.getRole().getName(),
+                user.isEnabled(),
+                user.getActive(),
+                user.getInstitutionId(),
+                user.getLastLogin(),
+                user.getAvatarUrl(),
+                user.getCreatedAt(),
+                user.getUpdatedAt());
+
+        userInfo.setSchoolId(user.getSchool() == null ? null : user.getSchool().getId());
+        return new LoginResponse(token, userInfo);
     }
 
+    // ------------------------------------------------------------------ //
+    // Sign-up
+    // ------------------------------------------------------------------ //
+
+    /**
+     * Registers a new user with role {@code GUEST} and a BCrypt-hashed password.
+     *
+     * @throws ApiException 400 if email is already in use
+     * @throws ApiException 500 if the GUEST role is missing from the database
+     */
     public void signup(SignupRequest request) {
         throw new ApiException(HttpStatus.FORBIDDEN,
-                "Self-registration is disabled. Contact your school manager for an account.");
-    }
-
-    private boolean matchesPassword(String rawPassword, String storedPassword) {
-        if (rawPassword == null || storedPassword == null) return false;
-        return storedPassword.startsWith("$2")
-                ? passwordEncoder.matches(rawPassword, storedPassword)
-                : rawPassword.equals(storedPassword);
+                "Personal signup is disabled. Register a school or contact your school manager.");
     }
 }

@@ -1,72 +1,194 @@
 package com.example.backend.exception;
 
-import org.springframework.http.ResponseEntity;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.example.backend.dto.ErrorResponse;
-import lombok.extern.slf4j.Slf4j;
-import jakarta.servlet.http.HttpServletRequest;
 
-@Slf4j
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+
+/**
+ * Xử lý ngoại lệ tập trung toàn hệ thống (Centralized Exception Handler).
+ * Bắt toàn bộ lỗi từ Controller layer, chuyển đổi thành ErrorResponse chuẩn.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ErrorResponse> handleApiException(ApiException ex) {
-        ErrorResponse error = new ErrorResponse(ex.getStatus().value(), ex.getMessage());
-        return ResponseEntity.status(ex.getStatus()).body(error);
-    }
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .findFirst()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .orElse("Request validation failed");
-        return ResponseEntity.badRequest().body(new ErrorResponse(400, message));
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            fieldErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
+        String summaryMessage = fieldErrors.values().stream().findFirst().orElse("Dữ liệu gửi lên không hợp lệ");
+        log.debug("Validation error on {}: {}", request.getRequestURI(), fieldErrors);
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                summaryMessage,
+                request.getRequestURI(),
+                fieldErrors
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException ex, HttpServletRequest request) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        ex.getConstraintViolations().forEach(violation -> {
+            String property = violation.getPropertyPath().toString();
+            fieldErrors.put(property, violation.getMessage());
+        });
+
+        log.debug("Constraint violation on {}: {}", request.getRequestURI(), fieldErrors);
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Dữ liệu vi phạm ràng buộc kiểm tra",
+                request.getRequestURI(),
+                fieldErrors
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleMalformedJson(HttpMessageNotReadableException ex) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(400, "Request body is invalid"));
+    public ResponseEntity<ErrorResponse> handleMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+        log.debug("Malformed JSON request on {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Dữ liệu JSON gửi lên không đúng định dạng",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class})
+    public ResponseEntity<ErrorResponse> handleParameterException(
+            Exception ex, HttpServletRequest request) {
+        log.debug("Invalid/missing parameter on {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Tham số truy vấn (parameter) không hợp lệ hoặc bị thiếu",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponse> handleApiException(ApiException ex, HttpServletRequest request) {
+        log.debug("Business exception on {}: {} - {}", request.getRequestURI(), ex.getStatus(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                ex.getStatus().value(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(ex.getStatus()).body(response);
+    }
+
+    @ExceptionHandler(InvalidPhysicsInputException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPhysicsInput(
+            InvalidPhysicsInputException ex, HttpServletRequest request) {
+        log.debug("Invalid physics input on {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+            AccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Access denied on {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                "Bạn không có quyền thực hiện thao tác này",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(
+            AuthenticationException ex, HttpServletRequest request) {
+        log.warn("Authentication failure on {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Thông tin xác thực không hợp lệ hoặc đã hết hạn",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler({NoResourceFoundException.class, NoSuchElementException.class})
+    public ResponseEntity<ErrorResponse> handleNotFound(
+            Exception ex, HttpServletRequest request) {
+        log.debug("Resource not found on {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage() != null && !ex.getMessage().isBlank() ? ex.getMessage() : "Không tìm thấy tài nguyên yêu cầu",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+        log.debug("Method not supported on {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.METHOD_NOT_ALLOWED.value(),
+                "Phương thức HTTP " + ex.getMethod() + " không được hỗ trợ cho endpoint này",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(DataIntegrityViolationException ex) {
-        String detail = ex.getMostSpecificCause() == null ? "" : ex.getMostSpecificCause().getMessage();
-        String message = conflictMessage(detail);
-        log.warn("Data integrity conflict: {}", detail);
-        return ResponseEntity.status(409).body(new ErrorResponse(409, message));
-    }
-
-    private String conflictMessage(String detail) {
-        String normalized = detail == null ? "" : detail.toLowerCase(java.util.Locale.ROOT);
-        if (normalized.contains("users_email_key")) return "Email đã tồn tại";
-        if (normalized.contains("schools_code_key")) return "Mã trường đã tồn tại";
-        if (normalized.contains("schools_name_key")) return "Tên trường đã tồn tại";
-        if (normalized.contains("idx_one_school_manager_per_school"))
-            return "Trường này đã có quản lý trường đang hoạt động";
-        if (normalized.contains("idx_active_enrollment_per_year"))
-            return "Học sinh đã thuộc một lớp đang hoạt động trong năm học này";
-        if (normalized.contains("unique_active_enrollment_per_year"))
-            return "Học sinh đã thuộc một lớp trong năm học này";
-        if (normalized.contains("check_role_school_consistency") || normalized.contains("user role and school"))
-            return "Vai trò và trường của tài khoản không hợp lệ";
-        return "Dữ liệu đã tồn tại hoặc đang được sử dụng";
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+        log.warn("Database constraint violation on {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Dữ liệu vi phạm ràng buộc toàn vẹn cơ sở dữ liệu hoặc đã tồn tại",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllException(Exception ex, HttpServletRequest request) {
-        log.error("Unhandled error for {} {}", request.getMethod(), request.getRequestURI(), ex);
-        ErrorResponse error = new ErrorResponse(500, "Internal server error");
-        return ResponseEntity.status(500).body(error);
-    }
-
-    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleForbidden(org.springframework.security.access.AccessDeniedException ex) {
-        return ResponseEntity.status(403).body(new ErrorResponse(403, "You do not have permission for this action"));
+        log.error("Unhandled internal error on {}", request.getRequestURI(), ex);
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Lỗi hệ thống nội bộ, vui lòng thử lại sau",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

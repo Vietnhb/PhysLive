@@ -12,6 +12,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.example.backend.exception.InvalidPhysicsInputException;
+import com.example.backend.dto.simulation.ResolvedEnd;
 import com.example.backend.physics.model.PhysicsArchetype;
 import com.example.backend.physics.model.SimulationFrame;
 import com.example.backend.physics.model.SolverInput;
@@ -30,7 +31,8 @@ public class SimulationPayloadBuilder {
     public static final int MAX_TOTAL_PAYLOAD_BYTES = 8 * 1024 * 1024;
 
     private static final Set<String> VECTOR_KEYS = Set.of(
-            "velocity", "acceleration", "normalForce", "frictionForce", "netForce");
+            "velocity", "acceleration", "velocityX", "velocityY", "accelerationX", "accelerationY",
+            "velocity1", "velocity2", "normalForce", "frictionForce", "netForce");
 
     private final ObjectMapper objectMapper;
 
@@ -39,6 +41,12 @@ public class SimulationPayloadBuilder {
     }
 
     public RunArtifacts build(SolverInput input, SolverResult result) {
+        BigDecimal endTime = result.frames().isEmpty() ? BigDecimal.ZERO
+                : result.frames().get(result.frames().size() - 1).time();
+        return build(input, result, new ResolvedEnd(endTime, "time_limit", true));
+    }
+
+    public RunArtifacts build(SolverInput input, SolverResult result, ResolvedEnd resolvedEnd) {
         List<SimulationFrame> frames = replayFrames(result);
         if (frames.size() > NumericalSolverLimits.MAX_FRAMES) {
             throw new InvalidPhysicsInputException(
@@ -52,6 +60,7 @@ public class SimulationPayloadBuilder {
         output.set("summary", summary(result));
         output.set("graph", graph(frames));
         output.set("table", table(frames));
+        output.set("resolvedEnd", objectMapper.valueToTree(resolvedEnd));
 
         List<SnapshotPayload> snapshots = new ArrayList<>(frames.size());
         long totalBytes = jsonBytes(output) + jsonBytes(sceneDefinition);
@@ -85,8 +94,15 @@ public class SimulationPayloadBuilder {
         ObjectNode scene = objectMapper.createObjectNode();
         scene.put("payloadVersion", PAYLOAD_VERSION);
         scene.put("archetype", archetype.name());
-        scene.put("coordinateSystem", isCircuit(archetype) ? "SCHEMATIC" : "CARTESIAN_1D");
-        scene.put("positionKey", isCircuit(archetype) ? null : "position");
+        scene.put("coordinateSystem", isCircuit(archetype) ? "SCHEMATIC"
+                : archetype == PhysicsArchetype.PROJECTILE_MOTION ? "CARTESIAN_2D" : "CARTESIAN_1D");
+        if (archetype == PhysicsArchetype.PROJECTILE_MOTION) {
+            scene.putArray("positionKeys").add("positionX").add("positionY");
+        } else if (archetype == PhysicsArchetype.ELASTIC_COLLISION) {
+            scene.putArray("positionKeys").add("position1").add("position2");
+        } else {
+            scene.put("positionKey", isCircuit(archetype) ? null : "position");
+        }
         return scene;
     }
 
@@ -158,6 +174,10 @@ public class SimulationPayloadBuilder {
             scene.put("position", position);
             scene.put("positionUnit", "m");
         }
+        copySceneValue(frame, scene, "positionX", "m");
+        copySceneValue(frame, scene, "positionY", "m");
+        copySceneValue(frame, scene, "position1", "m");
+        copySceneValue(frame, scene, "position2", "m");
         ObjectNode vectors = root.putObject("vectors");
         frame.state().forEach((key, value) -> {
             if (VECTOR_KEYS.contains(key)) {
@@ -181,17 +201,29 @@ public class SimulationPayloadBuilder {
 
     private boolean isCircuit(PhysicsArchetype archetype) {
         return archetype == PhysicsArchetype.SERIES_CIRCUIT
-                || archetype == PhysicsArchetype.PARALLEL_CIRCUIT;
+                || archetype == PhysicsArchetype.PARALLEL_CIRCUIT
+                || archetype == PhysicsArchetype.RC_CHARGING
+                || archetype == PhysicsArchetype.RC_DISCHARGING;
+    }
+
+    private void copySceneValue(SimulationFrame frame, ObjectNode scene, String key, String unit) {
+        BigDecimal value = frame.state().get(key);
+        if (value != null) {
+            scene.put(key, value);
+            scene.put(key + "Unit", unit);
+        }
     }
 
     private String unitFor(String key) {
         return switch (key) {
-            case "position", "finalPosition" -> "m";
-            case "velocity", "finalVelocity" -> "m/s";
-            case "acceleration" -> "m/s2";
+            case "position", "positionX", "positionY", "position1", "position2", "finalPosition" -> "m";
+            case "velocity", "velocityX", "velocityY", "velocity1", "velocity2", "finalVelocity" -> "m/s";
+            case "acceleration", "accelerationX", "accelerationY" -> "m/s2";
             case "normalForce", "frictionForce", "netForce" -> "N";
             case "equivalentResistance" -> "ohm";
             case "totalCurrent" -> "A";
+            case "voltage" -> "V";
+            case "current" -> "A";
             default -> "1";
         };
     }

@@ -3,6 +3,9 @@ package com.example.backend.service;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.math.BigDecimal;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.backend.dto.simulation.CreateSimulationRunRequest;
 import com.example.backend.dto.simulation.SimulationRunResponse;
 import com.example.backend.dto.simulation.SnapshotResponse;
+import com.example.backend.dto.simulation.ResolvedEnd;
 import com.example.backend.entity.Simulation;
 import com.example.backend.entity.SimulationRun;
 import com.example.backend.entity.SimulationRunStatus;
@@ -27,6 +31,7 @@ import com.example.backend.physics.model.SolverInput;
 import com.example.backend.physics.model.SolverResult;
 import com.example.backend.physics.simulation.SimulationParameterPolicy;
 import com.example.backend.physics.simulation.SimulationPayloadBuilder;
+import com.example.backend.physics.simulation.EndConditionResolver;
 import com.example.backend.physics.simulation.SimulationPayloadBuilder.RunArtifacts;
 import com.example.backend.physics.simulation.SimulationPayloadBuilder.SnapshotPayload;
 import com.example.backend.physics.solver.NumericalSolver;
@@ -50,6 +55,7 @@ public class PhysicsSimulationRunService {
     private final NumericalSolverRegistry numericalRegistry;
     private final SimulationParameterPolicy parameterPolicy;
     private final SimulationPayloadBuilder payloadBuilder;
+    private final EndConditionResolver endConditionResolver;
     private final ObjectMapper objectMapper;
 
     @Transactional
@@ -63,6 +69,8 @@ public class PhysicsSimulationRunService {
 
         SolverInput baseInput = readBaseInput(simulation);
         SolverInput input = parameterPolicy.apply(baseInput, request);
+        input = withDuration(input, endConditionResolver.requestedHorizon(
+                input.endCondition(), input.values().get("duration")));
         NumericalSolver solver = numericalRegistry.require(input.archetype());
         SolverVersion solverVersion = requireApprovedSolverVersion(simulation, solver);
         SimulationRun run = startRun(simulation, solverVersion, input);
@@ -72,7 +80,24 @@ public class PhysicsSimulationRunService {
         RunArtifacts artifacts;
         try {
             result = solver.solve(input);
-            artifacts = payloadBuilder.build(input, result);
+            if (input.endCondition() == null) {
+                artifacts = payloadBuilder.build(input, result);
+            } else {
+                ResolvedEnd resolvedEnd = endConditionResolver.resolve(input.endCondition(), result);
+                BigDecimal horizon = input.values().get("duration");
+                while (endConditionResolver.expandable(input.endCondition(), resolvedEnd, horizon)) {
+                    BigDecimal maximum = maximumHorizon(input);
+                    BigDecimal next = horizon.multiply(BigDecimal.TWO).min(maximum);
+                    if (next.compareTo(horizon) <= 0) break;
+                    input = withDuration(input, next);
+                    result = solver.solve(input);
+                    horizon = next;
+                    resolvedEnd = endConditionResolver.resolve(input.endCondition(), result);
+                }
+                result = endConditionResolver.trim(result, resolvedEnd.time());
+                run.setInputParameters(objectMapper.valueToTree(input));
+                artifacts = payloadBuilder.build(input, result, resolvedEnd);
+            }
         } catch (RuntimeException exception) {
             completeFailedRun(run, exception, startedNanos);
             return toResponse(runRepository.save(run));
@@ -90,6 +115,20 @@ public class PhysicsSimulationRunService {
             simulationRepository.save(simulation);
         }
         return toResponse(run);
+    }
+
+    private SolverInput withDuration(SolverInput input, BigDecimal duration) {
+        if (duration == null || duration.equals(input.values().get("duration"))) return input;
+        Map<String, BigDecimal> values = new LinkedHashMap<>(input.values());
+        values.put("duration", duration);
+        return new SolverInput(input.specificationId(), input.schemaVersion(), input.archetype(),
+                values, input.seriesValues(), input.units(), input.endCondition());
+    }
+
+    private BigDecimal maximumHorizon(SolverInput input) {
+        BigDecimal step = input.values().getOrDefault("deltaTime", new BigDecimal("0.01"));
+        return EndConditionResolver.MAX_DYNAMIC_SECONDS.min(
+                step.multiply(BigDecimal.valueOf(10_000L)));
     }
 
     @Transactional(readOnly = true)

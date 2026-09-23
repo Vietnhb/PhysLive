@@ -10,13 +10,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "benchmark_problems")
 @Getter
 @Setter
+@NoArgsConstructor
 public class BenchmarkProblem extends AuditedEntity {
 
     @Column(nullable = false, columnDefinition = "text")
@@ -32,15 +33,13 @@ public class BenchmarkProblem extends AuditedEntity {
     private String sourceCategory;
 
     @Column(nullable = false)
-    private boolean active;
+    private boolean active = true;
 
     @OneToMany(mappedBy = "benchmarkProblem", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
     @OrderBy("createdAt ASC")
     private List<GoldAnnotation> annotations = new ArrayList<>();
 
     @OneToMany(mappedBy = "benchmarkProblem", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 50)
     @OrderBy("createdAt ASC")
     private List<Adjudication> adjudications = new ArrayList<>();
 

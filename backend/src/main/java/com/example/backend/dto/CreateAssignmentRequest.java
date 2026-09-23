@@ -12,6 +12,9 @@ import lombok.Data;
 @Data
 public class CreateAssignmentRequest {
 
+    @NotNull
+    private UUID classId;
+
     @Schema(description = "Tiêu đề bài tập", example = "Dự đoán vận tốc chạm đất và quỹ đạo ném ngang")
     @NotBlank(message = "Tiêu đề không được để trống")
     private String title;

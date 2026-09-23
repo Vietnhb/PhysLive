@@ -63,7 +63,7 @@ public class SimulationParameterPolicy {
         });
 
         SolverInput merged = new SolverInput(base.specificationId(), base.schemaVersion(), base.archetype(),
-                values, seriesValues, units);
+                values, seriesValues, units, base.endCondition());
         validator.validateOrThrow(merged);
         if (merged.values().containsKey("duration")) {
             numericalLimits.stepSizes(merged);

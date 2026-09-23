@@ -12,13 +12,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "grade_levels")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class GradeLevel extends AuditedEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -29,10 +33,10 @@ public class GradeLevel extends AuditedEntity {
     private String name;
 
     @Column(nullable = false)
-    private int sortOrder;
+    private int sortOrder = 0;
 
     @Column(nullable = false)
-    private boolean active;
+    private boolean active = true;
 
     @OneToMany(mappedBy = "level", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")

@@ -9,17 +9,17 @@ class ArchetypeCatalogTest {
     private final ArchetypeCatalog catalog = new ArchetypeCatalog();
 
     @Test
-    void definesExactlyTwoArchetypesForEachSupportedTopic() {
-        assertThat(catalog.all()).hasSize(6);
+    void definesAtLeastTwoArchetypesForEachSupportedTopic() {
+        assertThat(catalog.all()).hasSize(PhysicsArchetype.values().length);
         assertThat(catalog.all().keySet())
                 .filteredOn(archetype -> archetype.belongsTo("KINEMATICS"))
-                .hasSize(2);
+                .hasSizeGreaterThanOrEqualTo(2);
         assertThat(catalog.all().keySet())
                 .filteredOn(archetype -> archetype.belongsTo("DYNAMICS"))
-                .hasSize(2);
+                .hasSizeGreaterThanOrEqualTo(2);
         assertThat(catalog.all().keySet())
                 .filteredOn(archetype -> archetype.belongsTo("CIRCUITS"))
-                .hasSize(2);
+                .hasSizeGreaterThanOrEqualTo(2);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -45,6 +46,13 @@ public class PhysicsSimulationService {
         simulation.setValidationRun(validation);
         simulation.setStatus(SimulationStatus.READY);
         simulation.setInitialParameters(validation.getInputPayload().deepCopy());
+        simulation.setOwner(owner);
+        simulation.setSpecification(validation.getSpecification());
+        simulation.setSchemaId(validation.getSchemaVersion() == null
+                ? validation.getSpecification().getSchemaId()
+                : validation.getSchemaVersion().getVersion());
+        simulation.setSolverVersion(validation.getNumericalSolverVersion() == null
+                ? null : validation.getNumericalSolverVersion().getVersion());
         return new CreationResult(toResponse(simulationRepository.save(simulation)), true);
     }
 
@@ -55,6 +63,19 @@ public class PhysicsSimulationService {
                 .findByIdAndValidationRunSpecificationSubmissionOwner(simulationId, owner)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Simulation not found"));
         return toResponse(simulation);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SimulationResponse> history() {
+        User owner = currentUserService.requireCurrentUser();
+        return simulationRepository.findOwnedOrderByCreatedAtDesc(owner).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SimulationResponse> recent() {
+        return history().stream().limit(10).toList();
     }
 
     private void requirePassed(ValidationRun validation) {
