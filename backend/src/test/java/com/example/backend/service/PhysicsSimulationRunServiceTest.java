@@ -41,6 +41,7 @@ import com.example.backend.physics.model.SolverMethod;
 import com.example.backend.physics.model.SolverResult;
 import com.example.backend.physics.simulation.SimulationParameterPolicy;
 import com.example.backend.physics.simulation.SimulationPayloadBuilder;
+import com.example.backend.physics.simulation.EndConditionResolver;
 import com.example.backend.physics.simulation.SimulationPayloadBuilder.RunArtifacts;
 import com.example.backend.physics.simulation.SimulationPayloadBuilder.SnapshotPayload;
 import com.example.backend.physics.solver.NumericalSolver;
@@ -60,6 +61,7 @@ class PhysicsSimulationRunServiceTest {
     @Mock private NumericalSolverRegistry numericalRegistry;
     @Mock private SimulationParameterPolicy parameterPolicy;
     @Mock private SimulationPayloadBuilder payloadBuilder;
+    @Mock private EndConditionResolver endConditionResolver;
     @Mock private NumericalSolver solver;
 
     private ObjectMapper objectMapper;
@@ -73,7 +75,7 @@ class PhysicsSimulationRunServiceTest {
         objectMapper = new ObjectMapper();
         service = new PhysicsSimulationRunService(simulationRepository, runRepository, snapshotRepository,
                 currentUserService, numericalRegistry, parameterPolicy,
-                payloadBuilder, objectMapper);
+                payloadBuilder, endConditionResolver, objectMapper);
         owner = new User();
         owner.setId(5);
         baseInput = new SolverInput(UUID.randomUUID(), "1.0", PhysicsArchetype.UNIFORM_MOTION,

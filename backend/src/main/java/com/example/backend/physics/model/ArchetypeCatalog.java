@@ -38,6 +38,22 @@ public class ArchetypeCatalog {
                 List.of(
                         required("finalPosition", "m", "Position at the end of the interval"),
                         required("finalVelocity", "m/s", "Velocity at the end of the interval"))));
+        configured.put(PhysicsArchetype.PROJECTILE_MOTION, definition(
+                PhysicsArchetype.PROJECTILE_MOTION,
+                "Two-dimensional projectile motion under constant gravity",
+                List.of(
+                        optional("initialPosition", "m", ZERO, "Initial horizontal position"),
+                        optional("initialHeight", "m", ZERO, "Initial vertical position"),
+                        required("initialVelocity", "m/s", "Launch speed"),
+                        required("angle", "rad", "Launch angle"),
+                        optional("gravity", "m/s2", STANDARD_GRAVITY, "Gravitational acceleration"),
+                        required("duration", "s", "Elapsed time"),
+                        optional("deltaTime", "s", new BigDecimal("0.01"), "Numerical integration step")),
+                List.of(
+                        required("finalPositionX", "m", "Final horizontal position"),
+                        required("finalPositionY", "m", "Final vertical position"),
+                        required("finalVelocityX", "m/s", "Final horizontal velocity"),
+                        required("finalVelocityY", "m/s", "Final vertical velocity"))));
         configured.put(PhysicsArchetype.HORIZONTAL_FORCE, definition(
                 PhysicsArchetype.HORIZONTAL_FORCE,
                 "Horizontal force with optional kinetic friction",
@@ -74,6 +90,38 @@ public class ArchetypeCatalog {
                         required("acceleration", "m/s2", "Acceleration along the plane"),
                         required("finalVelocity", "m/s", "Final velocity"),
                         required("finalPosition", "m", "Final position"))));
+        configured.put(PhysicsArchetype.ELASTIC_COLLISION, definition(
+                PhysicsArchetype.ELASTIC_COLLISION,
+                "One-dimensional perfectly elastic collision",
+                List.of(
+                        required("mass1", "kg", "First object mass"),
+                        required("mass2", "kg", "Second object mass"),
+                        required("initialPosition1", "m", "First object position"),
+                        required("initialPosition2", "m", "Second object position"),
+                        required("velocity1", "m/s", "First object velocity"),
+                        required("velocity2", "m/s", "Second object velocity"),
+                        required("duration", "s", "Elapsed time"),
+                        optional("deltaTime", "s", new BigDecimal("0.01"), "Numerical integration step")),
+                List.of(
+                        required("finalPosition1", "m", "First object final position"),
+                        required("finalPosition2", "m", "Second object final position"),
+                        required("finalVelocity1", "m/s", "First object final velocity"),
+                        required("finalVelocity2", "m/s", "Second object final velocity"),
+                        required("collisionTime", "s", "Collision time or -1 when no collision occurs"))));
+        configured.put(PhysicsArchetype.SPRING_OSCILLATION, definition(
+                PhysicsArchetype.SPRING_OSCILLATION,
+                "Ideal mass-spring harmonic oscillator",
+                List.of(
+                        required("amplitude", "m", "Oscillation amplitude"),
+                        required("mass", "kg", "Oscillating mass"),
+                        required("springConstant", "N/m", "Spring stiffness"),
+                        optional("phase", "rad", ZERO, "Initial phase"),
+                        required("duration", "s", "Elapsed time"),
+                        optional("deltaTime", "s", new BigDecimal("0.01"), "Numerical integration step")),
+                List.of(
+                        required("finalPosition", "m", "Final displacement"),
+                        required("finalVelocity", "m/s", "Final velocity"),
+                        required("angularFrequency", "rad/s", "Angular frequency"))));
         configured.put(PhysicsArchetype.SERIES_CIRCUIT, circuitDefinition(
                 PhysicsArchetype.SERIES_CIRCUIT,
                 "Series resistor circuit",
@@ -88,6 +136,10 @@ public class ArchetypeCatalog {
                         required("equivalentResistance", "ohm", "Equivalent resistance"),
                         required("totalCurrent", "A", "Total source current"),
                         requiredSeries("branchCurrents", "A", "Current through each branch"))));
+        configured.put(PhysicsArchetype.RC_CHARGING, rcDefinition(
+                PhysicsArchetype.RC_CHARGING, "RC capacitor charging"));
+        configured.put(PhysicsArchetype.RC_DISCHARGING, rcDefinition(
+                PhysicsArchetype.RC_DISCHARGING, "RC capacitor discharging"));
         definitions = Map.copyOf(configured);
     }
 
@@ -114,6 +166,21 @@ public class ArchetypeCatalog {
                         required("voltage", "V", "Source voltage"),
                         requiredSeries("resistances", "ohm", "At least two positive resistances")),
                 outputs);
+    }
+
+    private ArchetypeDefinition rcDefinition(PhysicsArchetype archetype, String description) {
+        return definition(
+                archetype,
+                description,
+                List.of(
+                        required("voltage", "V", "Source or initial capacitor voltage"),
+                        required("resistance", "ohm", "Resistance"),
+                        required("capacitance", "F", "Capacitance"),
+                        required("duration", "s", "Elapsed time"),
+                        optional("deltaTime", "s", new BigDecimal("0.01"), "Numerical integration step")),
+                List.of(
+                        required("finalVoltage", "V", "Final capacitor voltage"),
+                        required("finalCurrent", "A", "Final circuit current")));
     }
 
     private ArchetypeDefinition definition(

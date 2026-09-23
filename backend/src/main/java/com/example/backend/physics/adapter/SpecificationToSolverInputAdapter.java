@@ -80,7 +80,8 @@ public class SpecificationToSolverInputAdapter {
                 archetype,
                 immutableCopy(values),
                 immutableSeriesCopy(seriesValues),
-                immutableCopy(units));
+                immutableCopy(units),
+                specification.getEndCondition());
         inputValidator.validateOrThrow(input);
         return input;
     }
@@ -122,16 +123,37 @@ public class SpecificationToSolverInputAdapter {
     private PhysicsArchetype inferArchetype(
             Specification specification,
             List<PhysicalQuantity> quantities) {
+        PhysicsArchetype schemaArchetype = inferFromSchemaId(specification.getSchemaId());
+        if (schemaArchetype != null) {
+            return schemaArchetype;
+        }
         String topic = specification.getTopic().trim().toUpperCase(Locale.ROOT);
         return switch (topic) {
             case "KINEMATICS" -> inferKinematics(quantities);
             case "DYNAMICS" -> inferDynamics(quantities);
-            case "CIRCUITS" -> inferCircuit(specification.getRelations());
+            case "CIRCUITS" -> inferCircuit(quantities, specification.getRelations());
             default -> throw new InvalidPhysicsInputException("Unsupported physics topic: " + topic);
         };
     }
 
+    private PhysicsArchetype inferFromSchemaId(String schemaId) {
+        String normalized = normalizeIdentifier(schemaId);
+        if (normalized.contains("projectile")) return PhysicsArchetype.PROJECTILE_MOTION;
+        if (normalized.contains("collision")) return PhysicsArchetype.ELASTIC_COLLISION;
+        if (normalized.contains("spring") || normalized.contains("oscillation")) {
+            return PhysicsArchetype.SPRING_OSCILLATION;
+        }
+        if (normalized.contains("rccharging")) return PhysicsArchetype.RC_CHARGING;
+        if (normalized.contains("rcdischarging")) return PhysicsArchetype.RC_DISCHARGING;
+        return null;
+    }
+
     private PhysicsArchetype inferKinematics(List<PhysicalQuantity> quantities) {
+        if (hasIdentifier(quantities, "height", "initialheight", "y0")
+                && hasIdentifier(quantities, "angle", "theta")
+                && hasIdentifier(quantities, "velocity", "initialvelocity", "v0")) {
+            return PhysicsArchetype.PROJECTILE_MOTION;
+        }
         if (hasIdentifier(quantities, "acceleration", "a")) {
             return PhysicsArchetype.CONSTANT_ACCELERATION;
         }
@@ -143,6 +165,16 @@ public class SpecificationToSolverInputAdapter {
     }
 
     private PhysicsArchetype inferDynamics(List<PhysicalQuantity> quantities) {
+        if (hasIdentifier(quantities, "mass1", "m1")
+                && hasIdentifier(quantities, "mass2", "m2")
+                && hasIdentifier(quantities, "velocity1", "v1")
+                && hasIdentifier(quantities, "velocity2", "v2")) {
+            return PhysicsArchetype.ELASTIC_COLLISION;
+        }
+        if (hasIdentifier(quantities, "amplitude")
+                && hasIdentifier(quantities, "springconstant", "stiffness", "k")) {
+            return PhysicsArchetype.SPRING_OSCILLATION;
+        }
         if (hasIdentifier(quantities, "angle", "theta")) {
             return PhysicsArchetype.INCLINED_PLANE;
         }
@@ -154,9 +186,10 @@ public class SpecificationToSolverInputAdapter {
                 "Cannot identify a DYNAMICS archetype from the available quantities");
     }
 
-    private PhysicsArchetype inferCircuit(JsonNode relationNodes) {
+    private PhysicsArchetype inferCircuit(List<PhysicalQuantity> quantities, JsonNode relationNodes) {
         boolean series = false;
         boolean parallel = false;
+        boolean discharging = false;
         if (relationNodes != null && relationNodes.isArray()) {
             for (JsonNode node : relationNodes) {
                 PhysicalRelation relation = readRelation(node);
@@ -164,7 +197,11 @@ public class SpecificationToSolverInputAdapter {
                         safe(relation.type()), safe(relation.sourceText())).toLowerCase(Locale.ROOT);
                 series |= evidence.contains("series") || evidence.contains("nối tiếp");
                 parallel |= evidence.contains("parallel") || evidence.contains("song song");
+                discharging |= evidence.contains("discharg") || evidence.contains("phÃ³ng");
             }
+        }
+        if (hasIdentifier(quantities, "capacitance", "c")) {
+            return discharging ? PhysicsArchetype.RC_DISCHARGING : PhysicsArchetype.RC_CHARGING;
         }
         if (series == parallel) {
             throw new InvalidPhysicsInputException(
@@ -195,15 +232,20 @@ public class SpecificationToSolverInputAdapter {
     }
 
     private String canonicalKey(PhysicalQuantity quantity, PhysicsArchetype archetype) {
-        String candidate = StringUtils.hasText(quantity.name()) ? quantity.name() : quantity.symbol();
+        String candidate = archetype == PhysicsArchetype.ELASTIC_COLLISION
+                && StringUtils.hasText(quantity.symbol())
+                        ? quantity.symbol()
+                        : StringUtils.hasText(quantity.name()) ? quantity.name() : quantity.symbol();
         if (!StringUtils.hasText(candidate)) {
             throw new InvalidPhysicsInputException("Physical quantity must have a symbol or name");
         }
         String normalized = normalizeIdentifier(candidate);
         return switch (normalized) {
             case "x0", "s0", "initialposition", "position" -> "initialPosition";
+            case "y0", "initialheight", "height" -> "initialHeight";
             case "v0", "initialvelocity" -> "initialVelocity";
             case "velocity", "speed", "v" -> archetype == PhysicsArchetype.CONSTANT_ACCELERATION
+                    || archetype == PhysicsArchetype.PROJECTILE_MOTION
                     || archetype == PhysicsArchetype.HORIZONTAL_FORCE
                     || archetype == PhysicsArchetype.INCLINED_PLANE
                             ? "initialVelocity"
@@ -215,12 +257,24 @@ public class SpecificationToSolverInputAdapter {
             case "deltatime", "timestep", "dt" -> "deltaTime";
             case "acceleration", "a" -> "acceleration";
             case "mass", "m" -> "mass";
+            case "mass1", "m1" -> "mass1";
+            case "mass2", "m2" -> "mass2";
+            case "position1", "initialposition1", "x1" -> "initialPosition1";
+            case "position2", "initialposition2", "x2" -> "initialPosition2";
+            case "velocity1", "v1" -> "velocity1";
+            case "velocity2", "v2" -> "velocity2";
             case "force", "appliedforce", "f" -> "appliedForce";
             case "frictioncoefficient", "coefficientoffriction", "mu" -> "frictionCoefficient";
             case "gravity", "g" -> "gravity";
             case "angle", "theta" -> "angle";
+            case "amplitude" -> "amplitude";
+            case "springconstant", "stiffness", "k" -> "springConstant";
+            case "phase", "phi" -> "phase";
             case "voltage", "u" -> "voltage";
-            case "resistance", "resistances", "r" -> "resistances";
+            case "resistance", "r" -> archetype == PhysicsArchetype.RC_CHARGING
+                    || archetype == PhysicsArchetype.RC_DISCHARGING ? "resistance" : "resistances";
+            case "capacitance", "c" -> "capacitance";
+            case "resistances" -> "resistances";
             default -> candidate.trim();
         };
     }

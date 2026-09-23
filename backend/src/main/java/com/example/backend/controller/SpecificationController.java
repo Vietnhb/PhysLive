@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.backend.dto.problem.ResolveAmbiguityRequest;
 import com.example.backend.dto.problem.SpecificationResponse;
 import com.example.backend.dto.problem.ValidationReadinessResponse;
+import com.example.backend.dto.problem.UpdateEndConditionRequest;
 import com.example.backend.dto.validation.ValidationRunResponse;
 import com.example.backend.service.PhysicsValidationService;
 import com.example.backend.service.SpecificationService;
@@ -47,6 +49,13 @@ public class SpecificationController {
     @GetMapping("/{id}/validation-readiness")
     public ValidationReadinessResponse readiness(@PathVariable UUID id) {
         return specificationService.readiness(id);
+    }
+
+    @PutMapping("/{id}/end-condition")
+    public SpecificationResponse updateEndCondition(
+            @PathVariable UUID id,
+            @RequestBody UpdateEndConditionRequest request) {
+        return specificationService.updateEndCondition(id, request);
     }
 
     @Operation(summary = "Run numerical/reference validation for an owned specification")

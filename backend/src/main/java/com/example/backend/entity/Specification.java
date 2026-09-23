@@ -65,6 +65,10 @@ public class Specification extends AuditedEntity {
     private JsonNode relations;
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "end_condition", columnDefinition = "jsonb")
+    private JsonNode endCondition;
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "jsonb")
     private JsonNode ambiguity;
 

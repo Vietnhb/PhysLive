@@ -9,6 +9,8 @@ INSERT INTO public.roles (name) VALUES
     ('ADMIN'),
     ('TEACHER'),
     ('REVIEWER'),
+    ('CONTENT_REVIEWER'),
+    ('SCHOOL_MANAGER'),
     ('STUDENT'),
     ('GUEST')
 ON CONFLICT (name) DO NOTHING;

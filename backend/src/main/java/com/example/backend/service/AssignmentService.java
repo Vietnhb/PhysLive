@@ -39,6 +39,10 @@ public class AssignmentService {
     private final AssignmentSubmissionRepository assignmentSubmissionRepository;
     private final SpecificationRepository specificationRepository;
     private final UserRepository userRepository;
+    private final com.example.backend.repository.school.ClassEnrollmentRepository enrollments;
+    private final com.example.backend.repository.school.ClassTeacherAssignmentRepository teacherAssignments;
+    private final com.example.backend.service.school.LicenseCheckService licenses;
+    private final com.example.backend.repository.school.SchoolClassRepository schoolClasses;
 
     @Transactional(readOnly = true)
     public List<AssignmentResponse> getAssignments(String userEmail) {
@@ -50,9 +54,10 @@ public class AssignmentService {
             list = assignmentRepository.findAssignmentsForStudent(user.getId());
         } else if ("TEACHER".equalsIgnoreCase(roleName)) {
             list = assignmentRepository.findByTeacherIdOrderByCreatedAtDesc(user.getId());
-        } else {
-            // ADMIN sees all
+        } else if ("ADMIN".equalsIgnoreCase(roleName)) {
             list = assignmentRepository.findAll();
+        } else {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Teaching role is required");
         }
 
         return list.stream().map(this::toResponse).collect(Collectors.toList());
@@ -64,16 +69,29 @@ public class AssignmentService {
         Assignment assignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy bài tập với ID: " + id));
 
+        requireReadAccess(user, assignment);
         return toResponse(assignment);
     }
 
     @Transactional
     public AssignmentResponse createAssignment(CreateAssignmentRequest request, String userEmail) {
         User teacher = getUserByEmail(userEmail);
+        requireTeacher(teacher);
+        licenses.requireWriteAccess(teacher);
+        validateStudents(teacher, request.getStudentIds());
+        if (request.getClassId() == null)
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Select a class before assigning this activity");
+        var targetClass = schoolClasses.findById(request.getClassId())
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Class not found"));
+        validateClass(teacher, targetClass, request.getStudentIds());
         Specification spec = specificationRepository.findById(request.getSpecificationId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy đặc tả mô phỏng (Specification) với ID: " + request.getSpecificationId()));
 
+        if (!isAdmin(teacher) && (spec.getSubmission() == null
+                || !teacher.getId().equals(spec.getSubmission().getOwner().getId())))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Specification belongs to another teacher");
         Assignment assignment = new Assignment();
+        assignment.setSchoolClass(targetClass);
         assignment.setTitle(request.getTitle().trim());
         assignment.setDescription(request.getDescription());
         assignment.setStatus("ACTIVE");
@@ -109,6 +127,7 @@ public class AssignmentService {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền cập nhật bài tập này");
         }
 
+        licenses.requireWriteAccess(user);
         if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) {
             assignment.setTitle(request.getTitle().trim());
         }
@@ -126,6 +145,8 @@ public class AssignmentService {
         }
 
         if (request.getStudentIds() != null) {
+            validateStudents(assignment.getTeacher(), request.getStudentIds());
+            validateClass(assignment.getTeacher(), assignment.getSchoolClass(), request.getStudentIds());
             assignmentStudentRepository.deleteByIdAssignmentId(id);
             List<AssignmentStudent> students = request.getStudentIds().stream()
                     .map(sId -> new AssignmentStudent(id, sId))
@@ -148,6 +169,7 @@ public class AssignmentService {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền thay đổi trạng thái bài tập này");
         }
 
+        licenses.requireWriteAccess(user);
         assignment.setStatus(status.toUpperCase());
         Assignment updated = assignmentRepository.save(assignment);
         return toResponse(updated);
@@ -159,6 +181,12 @@ public class AssignmentService {
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy bài tập với ID: " + assignmentId));
 
+        licenses.requireWriteAccess(student);
+        if (student.getRole() == null || !"STUDENT".equalsIgnoreCase(student.getRole().getName())
+                || !assignmentStudentRepository.existsByIdAssignmentIdAndIdStudentId(assignmentId, student.getId()))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Assignment is not assigned to this student");
+        validateStudents(assignment.getTeacher(), List.of(student.getId()));
+        validateClass(assignment.getTeacher(), assignment.getSchoolClass(), List.of(student.getId()));
         if ("CLOSED".equalsIgnoreCase(assignment.getStatus())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Bài tập đã đóng, không thể nộp thêm");
         }
@@ -204,7 +232,66 @@ public class AssignmentService {
 
     private User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
+                .filter(u -> u.isEnabled() && Boolean.TRUE.equals(u.getActive()))
+                .filter(u -> u.getSchool() == null || u.getSchool().isActive())
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Người dùng không tồn tại"));
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+    }
+
+    private void requireTeacher(User user) {
+        if (!isAdmin(user) && (user.getRole() == null || !"TEACHER".equalsIgnoreCase(user.getRole().getName())))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Teacher role is required");
+    }
+
+    private void requireReadAccess(User user, Assignment assignment) {
+        if (isAdmin(user) || user.getId().equals(assignment.getTeacherId())) return;
+        if (user.getRole() != null && "STUDENT".equalsIgnoreCase(user.getRole().getName())
+                && assignmentStudentRepository.existsByIdAssignmentIdAndIdStudentId(assignment.getId(), user.getId())) {
+            validateStudents(assignment.getTeacher(), List.of(user.getId()));
+            return;
+        }
+        throw new ApiException(HttpStatus.FORBIDDEN, "Assignment access denied");
+    }
+
+    private void validateStudents(User teacher, List<Integer> ids) {
+        if (ids == null) return;
+        for (Integer id : ids.stream().distinct().toList()) {
+            User student = userRepository.findById(id).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Student not found"));
+            if (!student.isEnabled() || !Boolean.TRUE.equals(student.getActive())
+                    || student.getRole() == null || !"STUDENT".equalsIgnoreCase(student.getRole().getName())
+                    || student.getSchool() == null || !student.getSchool().isActive())
+                throw new ApiException(HttpStatus.BAD_REQUEST, "Student is not active in a school");
+            if (isAdmin(teacher)) continue;
+            if (teacher.getSchool() == null || !teacher.getSchool().getId().equals(student.getSchool().getId()))
+                throw new ApiException(HttpStatus.FORBIDDEN, "Teacher and student must belong to the same school");
+            boolean assigned = enrollments.findActiveEnrollmentsByStudentId(id).stream()
+                    .filter(e -> Boolean.TRUE.equals(e.getSchoolClass().getIsActive()))
+                    .filter(e -> teacher.getSchool().getId().equals(e.getSchoolClass().getSchool().getId()))
+                    .anyMatch(e -> teacherAssignments.existsBySchoolClassIdAndTeacherIdAndIsActiveTrue(e.getSchoolClass().getId(), teacher.getId()));
+            if (!assigned) throw new ApiException(HttpStatus.FORBIDDEN, "Teacher is not assigned to the student's class");
+        }
+    }
+
+    private void validateClass(User teacher, com.example.backend.entity.school.SchoolClass target, List<Integer> ids) {
+        // Existing assignments have no class link; retain their legacy access checks.
+        if (target == null) return;
+        if (!Boolean.TRUE.equals(target.getIsActive()) || target.getSchool() == null || !target.getSchool().isActive())
+            throw new ApiException(HttpStatus.FORBIDDEN, "Class is not active");
+        if (!isAdmin(teacher) && (teacher.getSchool() == null
+                || !teacher.getSchool().getId().equals(target.getSchool().getId())
+                || !teacherAssignments.existsBySchoolClassIdAndTeacherIdAndIsActiveTrue(target.getId(), teacher.getId())))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Teacher is not assigned to the selected class");
+        if (ids == null || ids.isEmpty())
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Select at least one student");
+        var members = enrollments.findActiveStudentsByClassId(target.getId()).stream()
+                .filter(e -> e.getStudent().getSchool() != null
+                        && target.getSchool().getId().equals(e.getStudent().getSchool().getId()))
+                .map(e -> e.getStudent().getId()).collect(Collectors.toSet());
+        if (!members.containsAll(ids))
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Every selected student must belong to the selected class");
     }
 
     private AssignmentResponse toResponse(Assignment assignment) {
@@ -213,6 +300,9 @@ public class AssignmentService {
         List<AssignmentSubmission> submissions = assignmentSubmissionRepository.findByAssignmentIdOrderBySubmittedAtDesc(assignment.getId());
 
         return AssignmentResponse.builder()
+                .classId(assignment.getSchoolClass() == null ? null : assignment.getSchoolClass().getId())
+                .className(assignment.getSchoolClass() == null ? null : assignment.getSchoolClass().getName())
+                .classGradeLevel(assignment.getSchoolClass() == null ? null : assignment.getSchoolClass().getGradeLevel())
                 .id(assignment.getId())
                 .title(assignment.getTitle())
                 .description(assignment.getDescription())

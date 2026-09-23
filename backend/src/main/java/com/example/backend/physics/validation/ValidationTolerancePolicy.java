@@ -27,8 +27,23 @@ public class ValidationTolerancePolicy {
         policies.put(PhysicsArchetype.CONSTANT_ACCELERATION, Map.of(
                 "finalPosition", KINEMATICS,
                 "finalVelocity", KINEMATICS));
+        policies.put(PhysicsArchetype.PROJECTILE_MOTION, Map.of(
+                "finalPositionX", DYNAMICS_POSITION,
+                "finalPositionY", DYNAMICS_POSITION,
+                "finalVelocityX", DYNAMICS,
+                "finalVelocityY", DYNAMICS));
         policies.put(PhysicsArchetype.HORIZONTAL_FORCE, dynamicsPolicy());
         policies.put(PhysicsArchetype.INCLINED_PLANE, dynamicsPolicy());
+        policies.put(PhysicsArchetype.ELASTIC_COLLISION, Map.of(
+                "finalPosition1", DYNAMICS_POSITION,
+                "finalPosition2", DYNAMICS_POSITION,
+                "finalVelocity1", DYNAMICS,
+                "finalVelocity2", DYNAMICS,
+                "collisionTime", DYNAMICS_POSITION));
+        policies.put(PhysicsArchetype.SPRING_OSCILLATION, Map.of(
+                "finalPosition", DYNAMICS_POSITION,
+                "finalVelocity", DYNAMICS_POSITION,
+                "angularFrequency", DYNAMICS));
         policies.put(PhysicsArchetype.SERIES_CIRCUIT, Map.of(
                 "equivalentResistance", CIRCUITS,
                 "totalCurrent", CIRCUITS,
@@ -37,6 +52,11 @@ public class ValidationTolerancePolicy {
                 "equivalentResistance", CIRCUITS,
                 "totalCurrent", CIRCUITS,
                 "branchCurrents", CIRCUITS));
+        ComparisonTolerance rcTolerance = tolerance("1E-4", "1E-3");
+        policies.put(PhysicsArchetype.RC_CHARGING, Map.of(
+                "finalVoltage", rcTolerance, "finalCurrent", rcTolerance));
+        policies.put(PhysicsArchetype.RC_DISCHARGING, Map.of(
+                "finalVoltage", rcTolerance, "finalCurrent", rcTolerance));
         configured = Map.copyOf(policies);
     }
 
