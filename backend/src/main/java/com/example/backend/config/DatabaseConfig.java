@@ -1,31 +1,26 @@
 package com.example.backend.config;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.sql.DataSource;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
 @Configuration
 public class DatabaseConfig {
-
-    private static final int SUPABASE_TRANSACTION_POOLER_PORT = 6543;
 
     @Bean
     public DataSource dataSource(Environment environment) {
         String configuredUrl = firstNonBlank(
-                environment.getProperty("SUPABASE_DB_URL"),
                 environment.getProperty("DATABASE_URL"),
+                environment.getProperty("SUPABASE_DB_URL"),
                 environment.getProperty("DIRECT_URL"));
 
         if (!StringUtils.hasText(configuredUrl)) {
@@ -36,7 +31,8 @@ public class DatabaseConfig {
         DatabaseConnection connection = DatabaseConnection.parse(
                 configuredUrl,
                 environment.getProperty("SUPABASE_DB_USERNAME"),
-                environment.getProperty("SUPABASE_DB_PASSWORD"));
+                environment.getProperty("SUPABASE_DB_PASSWORD"),
+                requiredPositiveInt(environment, "SUPABASE_TRANSACTION_POOLER_PORT"));
 
         HikariConfig hikari = new HikariConfig();
         hikari.setPoolName("physlive-db-pool");
@@ -44,10 +40,30 @@ public class DatabaseConfig {
         hikari.setJdbcUrl(connection.jdbcUrl());
         hikari.setUsername(connection.username());
         hikari.setPassword(connection.password());
-        hikari.setMaximumPoolSize(10);
-        hikari.setMinimumIdle(1);
-        hikari.setConnectionTimeout(15_000);
+        hikari.setMaximumPoolSize(requiredPositiveInt(environment, "DB_POOL_MAX_SIZE"));
+        hikari.setMinimumIdle(requiredNonNegativeInt(environment, "DB_POOL_MIN_IDLE"));
+        hikari.setConnectionTimeout(requiredPositiveLong(environment, "DB_CONNECTION_TIMEOUT_MS"));
+        hikari.setIdleTimeout(requiredPositiveLong(environment, "DB_POOL_IDLE_TIMEOUT_MS"));
+        hikari.setMaxLifetime(requiredPositiveLong(environment, "DB_POOL_MAX_LIFETIME_MS"));
         return new HikariDataSource(hikari);
+    }
+
+    private int requiredPositiveInt(Environment environment, String key) {
+        Integer value = environment.getProperty(key, Integer.class);
+        if (value == null || value <= 0) throw new IllegalStateException(key + " must be a positive integer");
+        return value;
+    }
+
+    private int requiredNonNegativeInt(Environment environment, String key) {
+        Integer value = environment.getProperty(key, Integer.class);
+        if (value == null || value < 0) throw new IllegalStateException(key + " must be a non-negative integer");
+        return value;
+    }
+
+    private long requiredPositiveLong(Environment environment, String key) {
+        Long value = environment.getProperty(key, Long.class);
+        if (value == null || value <= 0) throw new IllegalStateException(key + " must be a positive integer");
+        return value;
     }
 
     private String firstNonBlank(String... values) {
@@ -60,7 +76,7 @@ public class DatabaseConfig {
     private record DatabaseConnection(String jdbcUrl, String username, String password) {
 
         private static DatabaseConnection parse(String configuredUrl, String explicitUsername,
-                String explicitPassword) {
+                String explicitPassword, int transactionPoolerPort) {
             String normalizedUrl = stripOptionalQuotes(configuredUrl.trim());
             if (normalizedUrl.startsWith("jdbc:postgresql:")) {
                 return new DatabaseConnection(
@@ -85,7 +101,7 @@ public class DatabaseConfig {
 
             List<String> queryParameters = sanitizeQuery(parsedUrl.rawQuery());
             addIfMissing(queryParameters, "sslmode", "sslmode=require");
-            if (parsedUrl.port() == SUPABASE_TRANSACTION_POOLER_PORT) {
+            if (parsedUrl.port() == transactionPoolerPort) {
                 addIfMissing(queryParameters, "prepareThreshold", "prepareThreshold=0");
             }
 
