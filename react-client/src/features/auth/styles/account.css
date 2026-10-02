@@ -1,0 +1,171 @@
+.account-auth-page { position: relative; isolation: isolate; overflow: hidden; height: calc(100dvh - 1px); min-height: 600px; margin-top: calc(-1 * var(--header-h)); background: radial-gradient(120% 70% at 30% 0%, var(--stage-top) 0%, var(--stage) 60%); color: var(--stage-ink); }
+.account-auth-page > .aurora { position: absolute; inset: 0 0 auto; z-index: -2; width: 100%; height: 78%; opacity: var(--stage-aurora-opacity); }
+.account-auth-page > .dot-field { z-index: -1; mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, #000 30%, transparent 100%); }
+/* Split screen: the live demo fills the left half, the form panel the right half. */
+.account-auth-inner { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); height: 100%; min-height: 0; }
+.account-auth-form { display: flex; flex-direction: column; justify-content: center; min-width: 0; min-height: 0; padding: calc(var(--header-h) + 16px) max(28px, calc((100% - 400px) / 2)) 32px; border-left: 1px solid var(--stage-line); background: var(--stage-2); color: var(--ink); }
+.account-heading h1 { margin: 0; color: var(--ink); font-size: 28px; font-weight: 700; line-height: 1.25; letter-spacing: -.025em; }
+.account-heading p { margin: 8px 0 0; color: var(--muted); font-size: 14.5px; line-height: 1.55; }
+.account-form { display: grid; gap: 16px; margin-top: clamp(18px, 3vh, 28px); }
+.account-form label { display: grid; gap: 7px; color: var(--ink-2); font-size: 14px; font-weight: 600; }
+.account-field { position: relative; display: block; }
+.account-field__icon { position: absolute; top: 50%; left: 14px; width: 18px; height: 18px; transform: translateY(-50%); fill: none; stroke: var(--subtle); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; transition: stroke .15s ease; }
+.account-field:focus-within .account-field__icon { stroke: var(--accent); }
+.account-form input { width: 100%; height: 48px; padding: 0 14px 0 42px; border-radius: 12px; font-size: 15px; font-weight: 400; }
+.account-form input::placeholder { color: var(--subtle); }
+.account-password input { padding-right: 52px; }
+.account-form button.account-password-toggle,
+.account-form button.account-password-toggle:hover:not(:disabled) { position: absolute; top: 6px; right: 6px; display: grid; place-items: center; width: 36px; height: 36px; min-height: 0; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--muted); box-shadow: none; }
+.account-form button.account-password-toggle:hover:not(:disabled) { background: var(--surface-3); color: var(--ink); }
+.account-password-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.account-caps { color: var(--warning, #b45309); font-size: 12.5px; font-weight: 500; }
+.account-form button.account-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; margin-top: 6px; border-radius: 12px; font-size: 15px; font-weight: 600; }
+.account-submit svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .18s ease; }
+.account-submit:hover:not(:disabled) svg { transform: translateX(3px); }
+.account-error { display: flex; align-items: flex-start; gap: 8px; padding: 11px 12px; border: 1px solid var(--danger-line); border-radius: 12px; background: var(--danger-soft); color: var(--danger); font-size: 14px; font-weight: 500; line-height: 1.45; }
+.account-error .learn-icon { width: 16px; height: 16px; flex: 0 0 auto; margin-top: 2px; }
+.account-hint { display: flex; align-items: flex-start; gap: 10px; margin: 22px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); color: var(--muted); font-size: 13px; line-height: 1.55; }
+.account-hint svg { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 2px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.account-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; color: var(--muted); font-size: 14px; }
+.account-links a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.account-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.account-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgb(255 255 255 / 45%); border-top-color: #fff; border-radius: 50%; animation: account-spin .7s linear infinite; }
+@keyframes account-spin { to { transform: rotate(360deg); } }
+.account-auth-aside { display: flex; flex-direction: column; justify-content: center; width: min(100%, 640px); min-width: 0; min-height: 0; margin: 0 auto; padding: calc(var(--header-h) + 16px) 40px 32px; color: var(--stage-ink); }
+.account-auth-aside h2 { margin: 0 0 clamp(12px, 2.4vh, 28px); font-size: clamp(28px, 2.8vw, 40px); font-weight: 700; line-height: 1.22; letter-spacing: -.03em; }
+.account-auth-aside h2 > span { display: block; }
+/* The plot height follows the viewport so the page never scrolls. */
+.auth-figure { margin: 0; }
+.auth-figure svg { display: block; width: 100%; height: auto; max-height: max(150px, calc(100dvh - 440px)); }
+.auth-figure__grid { stroke: var(--stage-line); stroke-width: 1; }
+.auth-figure__axis { stroke: var(--stage-muted); stroke-width: 1.5; }
+.auth-figure path { fill: none; stroke-width: 2; stroke-linecap: round; }
+.auth-figure__other path { stroke: var(--stage-muted); stroke-dasharray: 5 5; opacity: .6; }
+.auth-figure__other circle { fill: var(--stage-muted); opacity: .7; }
+.auth-figure__best path { stroke: var(--stage-glow-1); stroke-width: 3; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--stage-glow-1) 45%, transparent)); }
+.auth-figure__best circle { fill: var(--stage-glow-2); }
+.auth-figure__drop { stroke: var(--stage-glow-1); stroke-width: 1; stroke-dasharray: 3 4; opacity: .5; }
+.auth-figure__label { fill: var(--stage-glow-1); font: 600 13px var(--font-sans); }
+.auth-figure__tick { fill: var(--stage-muted); font: 11px var(--font-mono); }
+.auth-figure__control { display: grid; grid-template-columns: auto minmax(0, 1fr) 40px; align-items: center; gap: 14px; margin-top: 14px; color: var(--stage-ink); font-size: 14px; font-weight: 500; }
+.auth-figure__control output { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.auth-figure__control input[type="range"] { --fill: 50%; width: 100%; height: 24px; min-height: 0; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer; appearance: none; -webkit-appearance: none; }
+.auth-figure__control input::-webkit-slider-runnable-track { height: 4px; border-radius: 999px; background: linear-gradient(to right, var(--stage-glow-1) var(--fill), var(--stage-line) var(--fill)); }
+.auth-figure__control input::-moz-range-track { height: 4px; border-radius: 999px; background: var(--stage-line); }
+.auth-figure__control input::-moz-range-progress { height: 4px; border-radius: 999px; background: var(--stage-glow-1); }
+.auth-figure__control input::-webkit-slider-thumb { width: 18px; height: 18px; margin-top: -7px; border-radius: 50%; background: var(--stage-2); border: 2px solid var(--stage-glow-1); box-shadow: 0 0 0 4px color-mix(in srgb, var(--stage-glow-1) 22%, transparent); transition: transform .12s ease; -webkit-appearance: none; }
+.auth-figure__control input::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: var(--stage-2); border: 2px solid var(--stage-glow-1); }
+.auth-figure__control input:hover::-webkit-slider-thumb, .auth-figure__control input:active::-webkit-slider-thumb { transform: scale(1.12); }
+.auth-figure__control input:focus-visible { outline: 2px solid var(--stage-glow-1); outline-offset: 4px; border-radius: 999px; }
+.auth-figure__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 18px 0 0; }
+.auth-figure__stats > div { padding: 12px 14px; border: 1px solid var(--stage-line); border-radius: 14px; background: var(--stage-card); box-shadow: var(--stage-card-shadow); backdrop-filter: blur(6px); }
+.auth-figure__stats dt { color: var(--stage-muted); font-size: 12px; line-height: 1.4; }
+.auth-figure__stats dd { margin: 4px 0 0; color: var(--stage-ink); font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.01em; white-space: nowrap; }
+.auth-figure figcaption { margin-top: 14px; color: var(--stage-muted); font-size: 13px; line-height: 1.6; }
+@media (max-height: 720px) { .auth-figure figcaption { display: none; } .account-hint { margin-top: 14px; } .account-links { margin-top: 14px; } }
+@media (max-width: 960px), (max-height: 640px) { .account-auth-page { height: auto; min-height: 100dvh; overflow: visible; } .account-auth-inner { min-height: 100dvh; } }
+@media (max-width: 960px) { .account-auth-inner { grid-template-columns: minmax(0, 1fr); } .account-auth-form { border-left: 0; background: transparent; } .account-auth-aside { display: none; } }
+
+/* School subscription onboarding. Scoped away from personal account forms. */
+.school-signup { min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; }
+.school-signup * { box-sizing: border-box; }
+.school-signup a { text-decoration: none; }
+.school-signup button, .school-signup input { font: inherit; }
+.school-signup button { cursor: pointer; box-shadow: none; transform: none; }
+.school-signup button:hover:not(:disabled), .school-signup button:active:not(:disabled) { box-shadow: none; transform: none; }
+.school-signup button:disabled { opacity: .45; cursor: not-allowed; }
+.school-signup :is(button, a, input):focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.school-signup-header { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px max(24px, calc((100vw - 1120px) / 2)); border-bottom: 1px solid var(--line); background: var(--surface); }
+.school-signup-header > span { color: var(--muted); }
+.school-signup-header > span a { margin-left: 8px; color: var(--accent); font-weight: 600; }
+.school-signup-brand { display: flex; align-items: center; color: var(--ink); }
+.school-signup-body { max-width: 1120px; margin: auto; padding: 48px 24px 24px; }
+.school-signup-intro { text-align: left; }
+.school-signup-eyebrow { margin: 0 0 10px; color: var(--accent); font-size: 14px; font-weight: 600; letter-spacing: 0; }
+.school-signup h1 { margin: 0; font-size: clamp(30px, 3.4vw, 42px); font-weight: 700; letter-spacing: -.03em; line-height: 1.15; }
+.school-signup-intro > p:last-child { margin: 14px 0 0; color: var(--muted); }
+.school-signup h2 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -.4px; }
+.school-signup h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.school-signup-steps { display: flex; justify-content: flex-start; gap: 36px; margin: 32px 0 48px; padding: 0; list-style: none; }
+.school-signup-steps li { display: flex; align-items: center; gap: 9px; color: var(--subtle); font-size: 13px; }
+.school-signup-steps li > span { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--line-strong); border-radius: 50%; font-size: 12px; }
+.school-signup-steps .is-current { color: var(--ink); font-weight: 500; }
+.school-signup-steps .is-current > span { background: var(--accent); border-color: var(--accent); color: #fff; }
+.school-signup-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.school-signup-section-heading p { color: var(--muted); margin: 6px 0 0; font-size: 13px; }
+.school-signup-billing { padding: 4px 10px; background: var(--accent-soft); border: 0; border-radius: 999px; color: var(--accent-strong); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.school-signup-plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+
+.school-signup input[type="radio"], .school-signup input[type="checkbox"] { width: 16px; height: 16px; min-height: 0; padding: 0; accent-color: var(--accent); flex-shrink: 0; }
+
+.school-signup-price { font-size: 27px; font-weight: 650; letter-spacing: -.8px; line-height: 1.2; }
+.school-signup-price > span { display: block; font-size: 12px; color: var(--muted); font-weight: 400; letter-spacing: 0; margin-top: 8px; }
+
+.school-signup-bottom { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 28px; }
+.school-signup-bottom p { color: var(--muted); font-size: 12px; }
+.school-signup .school-signup-primary, .school-signup .school-signup-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 14px; min-height: 40px; padding: 9px 18px; border: 1px solid var(--accent); border-radius: var(--radius-sm); color: #fff; background: var(--accent); font-weight: 500; }
+.school-signup .school-signup-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+.school-signup .school-signup-secondary { color: var(--ink); background: var(--surface); border-color: var(--line-strong); }
+.school-signup .school-signup-secondary:hover:not(:disabled) { color: var(--ink); background: var(--bg); }
+.school-signup-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; max-width: 940px; margin: auto; }
+.school-signup-card, .school-signup-summary { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 28px; }
+.school-signup-muted { color: var(--muted); font-size: 13px; margin: 8px 0 24px; }
+.school-signup fieldset { border: 0; padding: 0; margin: 28px 0; min-width: 0; }
+.school-signup legend { padding: 0; margin-bottom: 16px; font-weight: 600; }
+.school-signup-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 16px; }
+.school-signup-fields label { display: flex; flex-direction: column; gap: 7px; font-size: 13px; font-weight: 500; }
+.school-signup-wide { grid-column: 1 / -1; }
+.school-signup-fields input { width: 100%; min-width: 0; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); padding: 10px 12px; background: var(--surface); color: var(--ink); font-weight: 400; }
+.school-signup-fields input::placeholder { color: var(--subtle); }
+.school-signup-fields small { font-size: 11px; font-weight: 400; color: var(--muted); }
+.school-signup-form-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 22px; margin-top: 28px; }
+.school-signup-summary { position: sticky; top: 24px; padding: 24px; }
+.school-signup-summary h2 { margin-bottom: 22px; }
+.school-signup-summary hr { border: 0; border-top: 1px solid var(--line-strong); margin: 24px 0; }
+.school-signup-summary > p:not(.school-signup-eyebrow) { font-size: 13px; color: var(--ink-2); }
+.school-signup-summary > button, .school-signup-review-heading button { background: none; border: 0; padding: 0; color: var(--accent); font-size: 13px; font-weight: 500; }
+.school-signup-summary > button:hover:not(:disabled), .school-signup-review-heading button:hover:not(:disabled), .school-signup-error button:hover:not(:disabled) { background: transparent; }
+.school-signup-note { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 24px; color: var(--ink); font-size: 12px; line-height: 1.7; }
+.school-signup-note strong { color: var(--ink-2); }
+.school-signup-note p { margin: 6px 0 0; }
+.school-signup-review-heading { display: flex; justify-content: space-between; gap: 12px; margin: 28px 0 16px; }
+.school-signup-review > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 12px; padding: 9px 0; font-size: 13px; }
+.school-signup-review dt { color: var(--muted); }
+.school-signup-review dd { margin: 0; overflow-wrap: anywhere; }
+.school-signup-total { display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--line-strong); padding-top: 24px; margin-top: 24px; }
+.school-signup-total strong { font-size: 20px; }
+.school-signup-consent { display: flex; align-items: start; gap: 10px; margin-top: 24px; color: var(--ink-2); font-size: 12px; }
+.school-signup-consent input { margin: 2px 0 0; }
+.school-signup-consent a { color: var(--ink); font-weight: 500; }
+.school-signup-help { text-align: center; color: var(--subtle); font-size: 12px; padding: 36px 0 0; }
+.school-signup-error { display: flex; justify-content: space-between; gap: 16px; border: 1px solid var(--danger-line); background: var(--danger-soft); border-radius: 8px; color: var(--danger); padding: 14px 16px; margin-bottom: 24px; }
+.school-signup-error button { border: 0; background: none; color: inherit; font-weight: 600; }
+.school-signup-payment-result { max-width: 620px; margin: 64px auto; padding: 32px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+.school-signup-payment-result > p:not(.school-signup-eyebrow) { color: var(--muted); margin-top: 20px; }
+.school-signup-payment-result small { overflow-wrap: anywhere; color: var(--muted); }
+.school-signup-payment-result p { color: var(--muted); }
+.school-signup-recovery { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line-strong); }
+.school-signup-recovery form > button { margin-top: 20px; }
+@media (max-width: 850px) { .school-signup-plans { grid-template-columns: 1fr; }  .school-signup-layout { grid-template-columns: minmax(0, 1fr); } .school-signup-summary { position: static; grid-row: 1; } }
+@media (max-width: 540px) { .school-signup-header { padding: 16px; } .school-signup-brand small { display: none; } .school-signup-header > span { font-size: 11px; } .school-signup-body { padding: 32px 16px 20px; } .school-signup-steps { gap: 14px; margin-bottom: 32px; } .school-signup-steps li { gap: 6px; font-size: 11px; } .school-signup-steps li > span { width: 22px; height: 22px; } .school-signup-card { padding: 20px; } .school-signup-fields { grid-template-columns: 1fr; } .school-signup-bottom { align-items: stretch; flex-direction: column; } .school-signup-review > div { grid-template-columns: 100px minmax(0, 1fr); } .school-signup-form-footer { flex-wrap: wrap; } }
+
+/* Signup hero band (night). */
+.school-signup-hero { position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(45% 70% at 80% 20%, rgb(37 99 235 / 32%), transparent 70%), radial-gradient(30% 50% at 10% 90%, rgb(34 211 238 / 12%), transparent 70%), var(--night); color: var(--night-ink); }
+.school-signup-hero .dot-field { z-index: -1; mask-image: radial-gradient(ellipse 80% 90% at 60% 40%, #000 30%, transparent 100%); }
+.school-signup-hero .school-signup-header { border-bottom-color: var(--night-line); background: transparent; }
+.school-signup-hero .school-signup-brand, .school-signup-hero .brand-mark { color: var(--night-ink); }
+.school-signup-hero .brand-mark__text small { border-left-color: var(--night-line); color: var(--night-muted); }
+.school-signup-hero .school-signup-header > span { color: var(--night-muted); }
+.school-signup-hero .school-signup-header > span a { color: #fff; }
+.school-signup-hero-inner { max-width: 1120px; margin: auto; padding: 56px 24px 40px; }
+.school-signup-hero .school-signup-eyebrow { display: inline-block; padding: 5px 12px; border: 1px solid var(--night-line); border-radius: 999px; color: var(--night-ink); font-size: 13px; font-weight: 500; }
+.school-signup-hero h1 { font-size: clamp(36px, 4.6vw, 60px); letter-spacing: -.035em; }
+.school-signup-hero .school-signup-intro > p:last-child { color: var(--night-muted); font-size: 17px; }
+.school-signup-hero .school-signup-steps { margin: 36px 0 0; }
+.school-signup-hero .school-signup-steps li { color: var(--night-muted); }
+.school-signup-hero .school-signup-steps li > span { border-color: var(--night-line); }
+.school-signup-hero .school-signup-steps .is-current { color: var(--night-ink); }
+.school-signup-hero .school-signup-steps .is-current > span { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 0 4px rgb(37 99 235 / 25%); }
+.school-signup-body { padding-top: 40px; }
+.account-auth-aside .aurora, .school-signup-hero .aurora { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; }
+.account-auth-aside .aurora { transform: scaleY(-1); }

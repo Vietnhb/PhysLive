@@ -1,0 +1,72 @@
+.learning-app .learn-library-item { position: relative; min-width: 0; margin-bottom: 4px; }
+.learning-app .learn-library-item > button:first-child { padding-right: 42px; border-radius: 10px; }
+.learning-app .learn-library-items .learn-library-item > .library-more { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 32px; height: 32px; min-height: 32px; padding: 4px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); }
+.learning-app .learn-library-items .learn-library-item > .library-more:hover,
+.learning-app .learn-library-items .learn-library-item > .library-more[aria-expanded="true"] { background: var(--line-strong); color: var(--ink-2); }
+.library-action-popover { position: fixed; z-index: 10000; width: 232px; max-width: calc(100vw - 16px); max-height: min(304px, calc(100dvh - 16px)); overflow: auto; margin: 0; padding: 6px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); box-shadow: 0 8px 28px rgb(30 64 175 / 15%); font: 14px/1.4 system-ui, sans-serif; box-sizing: border-box; }
+.library-action-popover button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.library-action-popover button:hover:not(:disabled) { background: var(--bg); }
+.library-action-popover button:focus-visible, .library-more:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.library-action-popover button:disabled { opacity: .5; cursor: wait; }
+.library-action-popover button svg { flex: 0 0 18px; width: 18px; height: 18px; }
+.library-action-popover button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.library-menu-divider { height: 1px; margin: 4px 2px; background: var(--surface-3); }
+.library-menu-label { margin: 8px 10px 4px; color: var(--muted); font-size: 12px; }
+.library-menu-folders { max-height: 196px; overflow: auto; overscroll-behavior: contain; }
+.library-action-popover .library-menu-chevron { flex: 0 0 16px; width: 16px; height: 16px; margin-left: auto; color: var(--muted); }
+.library-action-popover button.library-menu-back { margin-bottom: 2px; color: var(--muted); font-size: 13px; font-weight: 600; }
+.library-action-popover input.library-menu-search { margin: 2px 0 6px; padding: 7px 9px; font-size: 13px; }
+.library-menu-folders button small { flex: 0 0 auto; margin-left: auto; color: var(--muted); font-size: 11px; }
+.library-menu-folders button[aria-current="true"]:disabled { opacity: 1; cursor: default; color: var(--muted); }
+.library-action-popover .library-menu-danger, .library-menu-error { color: var(--danger); }
+.library-menu-error, .library-delete-copy { margin: 8px 10px; overflow-wrap: anywhere; }
+.library-action-popover label { display: block; margin: 8px 6px; font-weight: 600; }
+.library-action-popover input { box-sizing: border-box; width: 100%; padding: 9px; border: 1px solid var(--line-strong); border-radius: 8px; background: transparent; color: inherit; font: inherit; }
+.library-menu-footer { display: flex; justify-content: flex-end; margin-top: 8px; }
+.library-menu-footer button { width: auto; }
+:root[data-theme-effective="dark"] .library-action-popover { background: #202733; border-color: #465466; color: #e7edf5; }
+:root[data-theme-effective="dark"] .library-action-popover button:hover:not(:disabled) { background: #303c4d; }
+:root[data-theme-effective="dark"] .library-menu-divider { background: #394453; }
+:root[data-theme-effective="dark"] .learning-app .learn-library-items .learn-library-item > .library-more { background: transparent; color: #b8c5d7; }
+:root[data-theme-effective="dark"] .learning-app .learn-library-items .learn-library-item > .library-more:hover,
+:root[data-theme-effective="dark"] .learning-app .learn-library-items .learn-library-item > .library-more[aria-expanded="true"] { background: #38475c; }
+
+/* Drag a library row onto a folder to move it. */
+.learning-app .learn-library-item[draggable="true"] { cursor: grab; }
+.learning-app .learn-library-item[draggable="true"]:active { cursor: grabbing; }
+.learning-app .learn-library-folder[data-drop="over"] { border-radius: 12px; background: var(--accent-soft); outline: 2px dashed var(--accent); outline-offset: 2px; }
+.learning-app .learn-library-folder[data-drop="saving"] { opacity: .7; }
+.learning-app .learn-library-items .library-drop-error { color: var(--danger); }
+
+/* Share menu: three audiences, each with who approves it. */
+.library-action-popover button.library-share-option { align-items: flex-start; }
+.library-share-option > span { display: grid; gap: 2px; min-width: 0; white-space: normal !important; }
+.library-share-option strong { font-weight: 600; }
+.library-share-option small { color: var(--muted); font-size: 12px; line-height: 1.4; white-space: normal; }
+.library-share-option em { flex: 0 0 auto; margin-left: auto; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-style: normal; font-weight: 600; }
+.library-action-popover button.library-share-option[aria-current="true"]:disabled { opacity: 1; cursor: default; }
+.library-share-tag { font-weight: 600; color: var(--accent); }
+.library-share-tag[data-state="PENDING"] { color: var(--warning, #b25e09); }
+.library-share-tag[data-state="REJECTED"] { color: var(--danger); }
+
+/* "Thông tin" view of a library item */
+.library-info { display: grid; gap: 8px; margin: 4px 0 6px; padding: 0 10px; }
+.library-info > div { display: grid; gap: 1px; }
+.library-info dt { color: var(--muted); font-size: 11.5px; }
+.library-info dd { margin: 0; color: inherit; font-size: 13.5px; line-height: 1.4; overflow-wrap: anywhere; }
+
+/* Menu rows: everything starts at the left edge; the global button style centres content otherwise. */
+.library-action-popover button,
+.library-action-popover button:hover:not(:disabled) { justify-content: flex-start; min-height: 36px; padding: 0 10px; color: var(--ink-2); font-size: 13.5px; font-weight: 500; line-height: 1.3; }
+.library-action-popover button:hover:not(:disabled) { color: var(--ink); }
+.library-action-popover button:not(.library-share-option) > span { flex: 1; min-width: 0; }
+.library-action-popover button svg { flex: 0 0 16px; width: 16px; height: 16px; color: var(--muted); }
+.library-action-popover button.library-menu-danger,
+.library-action-popover button.library-menu-danger:hover:not(:disabled) { color: var(--danger); }
+.library-action-popover button.library-menu-danger svg { color: currentColor; }
+.library-action-popover button.library-menu-danger:hover:not(:disabled) { background: var(--danger-soft); }
+.library-action-popover button.library-share-option,
+.library-action-popover button.library-share-option:hover:not(:disabled) { min-height: 0; padding: 8px 10px; }
+.library-action-popover .library-menu-footer button,
+.library-action-popover .library-menu-footer button:hover:not(:disabled) { justify-content: center; }
+.library-action-popover { width: 240px; border-radius: 14px; font-family: inherit; }

@@ -1,0 +1,902 @@
+/* ==========================================================================
+   PhysLive Modern Minimalist Design System (Multi-Role)
+   ========================================================================== */
+
+:root {
+  /* Legacy aliases kept for existing selectors; values come from tokens.css. */
+  --bg-canvas: var(--bg);
+  --bg-surface: var(--surface);
+  --bg-surface-subtle: var(--surface-3);
+  --bg-surface-elevated: var(--surface);
+  --border-subtle: var(--line);
+  --border-strong: var(--line-strong);
+  --border-focus: var(--accent);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-2);
+  --text-muted: var(--muted);
+  --text-inverse: #fff;
+  --role-teacher: var(--accent);
+  --role-teacher-subtle: var(--accent-soft);
+  --role-student: var(--accent);
+  --role-student-subtle: var(--accent-soft);
+  --role-reviewer: var(--accent);
+  --role-reviewer-subtle: var(--accent-soft);
+  --role-admin: var(--ink);
+  --role-admin-subtle: var(--surface-2);
+  --status-pass-bg: var(--success-soft);
+  --status-pass-text: var(--success);
+  --status-pass-border: var(--success-line);
+  --status-fail-bg: var(--danger-soft);
+  --status-fail-text: var(--danger);
+  --status-fail-border: var(--danger-line);
+  --status-warn-bg: var(--warning-soft);
+  --status-warn-text: var(--warning);
+  --status-warn-border: var(--warning-line);
+  --status-info-bg: var(--accent-soft);
+  --status-info-text: var(--accent-strong);
+  --status-info-border: var(--accent-line);
+  --radius-md: var(--radius);
+  --radius-full: 9999px;
+}
+
+/* Modern Page Shell & Layout */
+.main {
+  min-height: calc(100vh - 64px);
+  background: var(--bg-canvas);
+}
+
+.modern-container {
+  width: 100%;
+  max-width: calc(var(--page-max) + 64px);
+  margin: 0 auto;
+  padding: 32px 32px 64px;
+}
+
+/* Assignment workspace: the assignment studio uses the same three-pane shell as /workspace. */
+.assignment-workspace-main {
+  display: grid !important;
+  grid-template-columns: 260px minmax(360px, 1fr) minmax(370px, 440px);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  height: calc(100dvh - 56px);
+  min-height: 0;
+  padding: 12px 20px 16px;
+  overflow: hidden;
+}
+
+.assignment-workspace-main > .learn-library-pane {
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 0;
+  border: 1px solid var(--learn-line);
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.assignment-workspace-content {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.assignment-workspace-content-standard { display: contents; }
+
+.assignment-workspace-main > .assignment-workspace-container {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.assignment-inspector-content { min-width: 0; }
+.assignment-inspector-content .modern-modal-header { align-items: flex-start; }
+.assignment-inspector-content .modern-modal-header h3 { overflow-wrap: anywhere; }
+.assignment-inspector-content .modern-table-wrapper { overflow-x: auto; }
+.assignment-inspector-content table { min-width: 520px; }
+.assignment-history-card.selected { border-color: var(--role-teacher); box-shadow: 0 0 0 2px color-mix(in srgb, var(--role-teacher) 12%, transparent); }
+.assignment-workspace-content .assignment-flow-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.assignment-history-rail {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px;
+  border-left: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+.assignment-history-rail > .assignment-history-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.assignment-history-rail .assignment-history-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+/* Keep pane scrollbars quiet and remove Chromium's legacy arrow buttons. */
+.assignment-workspace-main,
+.assignment-workspace-main * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--subtle) transparent;
+}
+.assignment-workspace-main *::-webkit-scrollbar { width: 8px; height: 8px; }
+.assignment-workspace-main *::-webkit-scrollbar-track { background: transparent; }
+.assignment-workspace-main *::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--subtle);
+  background-clip: padding-box;
+}
+.assignment-workspace-main *::-webkit-scrollbar-thumb:hover { background-color: var(--muted); }
+.assignment-workspace-main *::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+
+.assignment-workspace-container {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+}
+
+.assignment-workspace-container > .status-pill {
+  flex: 0 0 auto;
+}
+
+/* Modern Navigation Tabs */
+.modern-tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--surface-3);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+}
+
+.modern-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.modern-tab-btn:hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+.modern-tab-btn.active {
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Modern Cards */
+.modern-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.modern-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modern-card-header h2,
+.modern-card-header h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modern-card-header p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 2px 0 0 0;
+}
+
+/* Assignment history: keep card information legible in the narrow workspace pane. */
+.assignment-history-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.assignment-history-panel > .assignment-history-header {
+  align-items: flex-start;
+  gap: 16px;
+  margin: 0;
+}
+
+.assignment-history-header > div {
+  min-width: 0;
+}
+
+.assignment-history-header h2 {
+  line-height: 1.35;
+}
+
+.assignment-history-header p {
+  line-height: 1.5;
+}
+
+.assignment-history-header .modern-tab-btn {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding-inline: 14px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.assignment-history-list {
+  display: grid;
+  gap: 12px;
+}
+
+.assignment-history-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.assignment-history-card-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+}
+
+.assignment-history-card-heading h3 {
+  min-width: 0;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.assignment-history-card-heading .status-pill {
+  white-space: nowrap;
+  text-transform: none;
+}
+
+.assignment-history-prompt {
+  margin: 8px 0 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.assignment-history-card-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.assignment-history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 8px;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.assignment-history-meta svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+}
+
+.assignment-history-meta > span:last-child:not(:first-of-type) {
+  flex-basis: 100%;
+  margin-left: 25px;
+}
+
+.assignment-history-open-btn {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--role-teacher);
+  border-radius: var(--radius-md);
+  background: var(--role-teacher);
+  color: var(--text-inverse);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.assignment-history-open-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.assignment-history-open-btn:focus-visible,
+.assignment-history-header .modern-tab-btn:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--role-teacher) 30%, transparent);
+  outline-offset: 2px;
+}
+
+.assignment-history-open-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.assignment-history-message,
+.assignment-history-empty {
+  margin: 0;
+  padding: 24px 12px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+:root[data-theme-effective="dark"] .assignment-history-card {
+  background: var(--bg-surface-elevated);
+}
+
+@media (max-width: 600px) {
+  .assignment-history-card {
+    padding: 14px;
+  }
+
+  .assignment-history-card-heading {
+    gap: 8px;
+  }
+
+  .assignment-history-card-heading h3 {
+    font-size: 15px;
+  }
+
+  .assignment-history-card-footer {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .assignment-history-open-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .assignment-history-panel > .assignment-history-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .assignment-history-header .modern-tab-btn {
+    align-self: flex-start;
+  }
+}
+
+/* Reviewer page: a stable left review navigation and a full-width content area. */
+
+.reviewer-resolution-form {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  padding: 22px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--bg-surface);
+}
+
+.reviewer-extraction-details {
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.reviewer-extraction-details summary {
+  cursor: pointer;
+  color: var(--role-reviewer);
+  font-weight: 600;
+}
+
+.reviewer-extraction-details pre {
+  max-width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: var(--code-bg);
+  color: var(--code-ink);
+  font-size: 12px;
+  white-space: pre;
+}
+
+.reviewer-suggestions {
+  margin-bottom: 14px;
+}
+
+.reviewer-resolution-form > form > button[type="submit"] {
+  background: var(--role-reviewer);
+}
+
+@media (max-width: 700px) {
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  .reviewer-resolution-form {
+    padding: 16px;
+  }
+}
+
+/* Modern KPI Metrics */
+
+/* Prediction Gate Box (Student Feature FR-STU-02) */
+
+.prediction-submit-btn {
+  align-self: flex-start;
+  background: var(--success);
+  color: var(--surface);
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 10px 22px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.prediction-submit-btn:hover:not(:disabled) {
+  background: var(--success);
+}
+
+.prediction-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Unlocked Simulation Banner */
+
+/* Modern Tables */
+.modern-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  text-align: left;
+}
+
+.modern-table th {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modern-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.modern-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.modern-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+/* Status Badges */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.status-pill.pass,
+.status-pill.approved,
+.status-pill.active,
+.status-pill.completed {
+  background: var(--status-pass-bg);
+  color: var(--status-pass-text);
+  border: 1px solid var(--status-pass-border);
+}
+
+.status-pill.fail,
+.status-pill.rejected{
+  background: var(--status-fail-bg);
+  color: var(--status-fail-text);
+  border: 1px solid var(--status-fail-border);
+}
+
+.status-pill.draft,
+.status-pill.pending,
+.status-pill.open {
+  background: var(--status-warn-bg);
+  color: var(--status-warn-text);
+  border: 1px solid var(--status-warn-border);
+}
+
+.status-pill.closed {
+  background: var(--bg-surface-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.status-pill.info {
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
+  border: 1px solid var(--status-info-border);
+}
+
+/* Modern Form Controls */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  background: var(--surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--border-focus);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 15%);
+}
+
+/* Quick Role Switcher Bar */
+
+.role-switch-pill {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.role-switch-pill:hover {
+  background: var(--bg-surface-subtle);
+  color: var(--text-primary);
+}
+
+.role-switch-pill.active {
+  background: var(--text-primary);
+  color: var(--surface);
+}
+
+/* Modern Modal */
+.modern-modal-overlay {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  overflow-y: auto;
+  background: var(--scrim);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  color: var(--text-primary);
+  animation: fadeIn 0.15s ease;
+}
+
+.modern-modal-content {
+  box-sizing: border-box;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 760px;
+  max-height: calc(100dvh - 40px);
+  margin: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  border: 1px solid var(--border-subtle);
+  animation: slideUp 0.18s ease;
+}
+
+.modern-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modern-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.modern-modal-close {
+  background: transparent;
+  border: 0;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.modern-modal-close:hover {
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ==========================================================================
+   Admin Dashboard Styles
+   ========================================================================== */
+
+.admin-content {
+  min-height: 400px;
+}
+
+/* Overview Stats Grid */
+
+/* Color variants */
+
+/* Activity Section */
+
+/* Student learning area: assignments and shared resources, without teacher workspace chrome. */
+.main.student-main {
+  margin-left: 0;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  min-height: calc(100vh - 64px);
+}
+
+.main.student-main.student-layout-assigned,
+.main.student-main.student-layout-library {
+  background: var(--bg-canvas);
+}
+
+.student-main .modern-container {
+  width: min(100%, 1180px);
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-top: 40px;
+}
+
+/* The assignment workbench needs room for the simulation and its inspector. */
+.main.student-main.student-layout-assigned > .modern-container,
+.main.student-main.student-layout-library > .modern-container {
+  width: min(calc(100% - 48px), 1600px);
+  max-width: 1600px;
+}
+
+.student-layout-assigned .modern-card,
+.student-layout-library .modern-card {
+  width: 100%;
+}
+
+.student-layout-library .modern-card > .modern-card-header {
+  align-items: flex-start;
+}
+
+.student-layout-library .modern-card > .modern-card-header > div:last-child {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.student-empty-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--role-student-subtle);
+  color: var(--role-student);
+}
+
+.student-empty-icon .learn-icon {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 768px) {
+  .student-main .modern-container {
+    width: 100%;
+    max-width: none;
+    padding: 24px 14px 48px;
+  }
+
+  
+
+  
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modern-modal-overlay {
+    padding: 12px;
+  }
+
+  .modern-modal-content {
+    max-height: calc(100dvh - 24px);
+    padding: 18px;
+  }
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+}
+
+@media (max-width: 1100px) and (min-width: 769px) {
+  .assignment-workspace-main { grid-template-columns: 200px minmax(300px, 1fr) 330px; }
+  
+}
+
+@media (max-width: 768px) {
+  .assignment-workspace-main {
+    height: calc(100dvh - 54px);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(240px, 32vh) minmax(420px, 1fr);
+    padding: 10px 12px 12px;
+    overflow-y: auto;
+  }
+
+  .assignment-workspace-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(240px, 32vh) minmax(420px, 1fr) minmax(420px, 60vh); }
+
+  .assignment-workspace-main > .learn-library-pane { grid-column: 1; grid-row: 1; }
+  .assignment-workspace-main > .assignment-workspace-container { grid-column: 1; grid-row: 2; }
+  .assignment-history-rail { grid-column: 1; grid-row: 3; border: 1px solid var(--border-subtle); }
+  .assignment-history-rail { min-height: 60vh; }
+  .assignment-workspace-content { grid-column: 1; grid-row: 2; overflow: visible; }
+
+  .assignment-workspace-container {
+    min-height: 0;
+  }
+
+  
+
+  
+
+  
+
+  
+}
