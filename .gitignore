@@ -8,6 +8,7 @@
 **/.vite/
 **/coverage/
 *.class
+tmp/
 
 # Local IDE files
 **/.idea/
@@ -20,7 +21,6 @@
 *.userosscache
 
 # Local secrets and config
-backend/src/main/resources/application.properties
 **/.env
 **/.env.*
 !**/.env.example
@@ -32,5 +32,13 @@ backend/.github/java-upgrade/
 # Temporary files
 **/*.log
 **/~$*
+**/.cache/
 .DS_Store
 Thumbs.db
+
+# Local generated outputs and AI training experiments
+/output/
+
+# Local Claude outputs and frontend tests/previews
+/Claude outputs/
+/react-client/tests/
