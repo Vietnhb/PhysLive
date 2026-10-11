@@ -41,5 +41,8 @@
       "name": "Suy giảm tín hiệu",
       "summary": "dB, dB/đơn vị độ dài."
     }
+  ],
+  "lawCatalogues": [
+    "oscillations_waves"
   ]
 }

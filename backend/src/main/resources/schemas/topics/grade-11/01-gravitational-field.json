@@ -35,5 +35,9 @@
       "name": "Thế hấp dẫn và thế năng hấp dẫn",
       "summary": "φ = −GM/r; vệ tinh địa tĩnh; tốc độ vũ trụ cấp 1."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "mechanics_more"
   ]
 }

@@ -48,5 +48,10 @@
       "name": "Từ thông; Cảm ứng điện từ",
       "summary": "Faraday, Lenz; tạo dòng điện xoay chiều."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "electricity",
+    "magnetism_ac"
   ]
 }

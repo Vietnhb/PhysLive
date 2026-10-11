@@ -1,0 +1,309 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Khi thả nhẹ từ vị trí lò xo chưa dãn, trọng lực kéo quả nặng đi xuống còn lực đàn hồi của lò xo kéo nó lên, càng dãn càng mạnh (định luật Hooke). Ở vị trí cân bằng hai lực bằng nhau, lò xo dãn một đoạn bằng trọng lượng chia cho độ cứng, khoảng 4,9 cm. Quả nặng đi qua vị trí đó với tốc độ lớn nhất rồi xuống tiếp tới khi lò xo dãn gấp đôi, khoảng 9,8 cm, sau đó quay lên và cứ thế dao động quanh vị trí cân bằng. Vì bỏ qua lực cản nên cơ năng được bảo toàn: động năng, thế năng trọng trường và thế năng đàn hồi chuyển hoá qua lại. Em có thể đổi khối lượng quả nặng và độ cứng lò xo để xem độ dãn và chu kì dao động thay đổi thế nào.",
+ "defaults": [
+  "Lấy gia tốc rơi tự do bằng 9,8 m/s².",
+  "Cho mô phỏng chạy trong 2 giây, khoảng bốn dao động rưỡi."
+ ],
+ "simulationSpec": {
+  "durationSeconds": 2,
+  "parameters": [
+   {
+    "name": "m",
+    "label": "Khối lượng quả nặng",
+    "value": 200,
+    "unit": "g",
+    "min": 50,
+    "max": 1000,
+    "step": 10,
+    "role": "mass",
+    "of": "qua"
+   },
+   {
+    "name": "k",
+    "label": "Độ cứng của lò xo",
+    "value": 40,
+    "unit": "N/m",
+    "min": 10,
+    "max": 200,
+    "step": 1,
+    "role": "stiffness",
+    "of": "qua"
+   }
+  ],
+  "objects": [
+   {
+    "id": "qua",
+    "label": "Quả nặng",
+    "count": 1
+   },
+   {
+    "id": "loxo",
+    "label": "Lò xo",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "dan",
+    "label": "Độ dãn của lò xo"
+   },
+   {
+    "quantity": "dan0",
+    "label": "Độ dãn của lò xo ở vị trí cân bằng"
+   },
+   {
+    "quantity": "li",
+    "label": "Độ lệch của quả nặng so với vị trí cân bằng"
+   },
+   {
+    "quantity": "v",
+    "label": "Vận tốc của quả nặng"
+   },
+   {
+    "quantity": "T",
+    "label": "Chu kì dao động"
+   },
+   {
+    "quantity": "Fdh",
+    "label": "Lực đàn hồi của lò xo"
+   },
+   {
+    "quantity": "W",
+    "label": "Cơ năng"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "y",
+     "label": "Tọa độ của quả nặng",
+     "unit": "m",
+     "role": "position",
+     "of": "qua",
+     "axis": "y",
+     "initial": 0,
+     "rate": "v"
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc của quả nặng",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "qua",
+     "axis": "y",
+     "initial": 0,
+     "rate": "a"
+    },
+    {
+     "id": "a",
+     "label": "Gia tốc của quả nặng",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "qua",
+     "axis": "y",
+     "value": [
+      "div",
+      [
+       "add",
+       "P",
+       "Fdh"
+      ],
+      "m"
+     ]
+    },
+    {
+     "id": "dl",
+     "label": "Độ biến dạng của lò xo theo trục thẳng đứng",
+     "unit": "m",
+     "role": "deformation",
+     "of": "qua",
+     "axis": "y",
+     "value": "y"
+    },
+    {
+     "id": "P",
+     "label": "Trọng lực",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "qua",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "Fdh",
+     "label": "Lực đàn hồi của lò xo",
+     "unit": "N",
+     "role": "force",
+     "kind": "spring",
+     "of": "qua",
+     "axis": "y",
+     "by": "loxo",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "k",
+       "dl"
+      ]
+     ]
+    },
+    {
+     "id": "dan",
+     "label": "Độ dãn của lò xo",
+     "unit": "m",
+     "role": "other",
+     "value": [
+      "neg",
+      "dl"
+     ]
+    },
+    {
+     "id": "dan0",
+     "label": "Độ dãn của lò xo ở vị trí cân bằng",
+     "unit": "m",
+     "role": "other",
+     "value": [
+      "div",
+      [
+       "mul",
+       "m",
+       "g"
+      ],
+      "k"
+     ]
+    },
+    {
+     "id": "li",
+     "label": "Độ lệch so với vị trí cân bằng",
+     "unit": "m",
+     "role": "other",
+     "value": [
+      "add",
+      "y",
+      "dan0"
+     ]
+    },
+    {
+     "id": "T",
+     "label": "Chu kì dao động",
+     "unit": "s",
+     "role": "period",
+     "of": "qua",
+     "value": [
+      "mul",
+      6.283185307179586,
+      [
+       "sqrt",
+       [
+        "div",
+        "m",
+        "k"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "qua",
+     "value": [
+      "mul",
+      0.5,
+      [
+       "mul",
+       "m",
+       [
+        "pow",
+        "v",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Wtg",
+     "label": "Thế năng trọng trường",
+     "unit": "J",
+     "role": "potential_energy",
+     "kind": "gravity",
+     "of": "qua",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "m",
+       "g"
+      ],
+      "y"
+     ]
+    },
+    {
+     "id": "Wtdh",
+     "label": "Thế năng đàn hồi",
+     "unit": "J",
+     "role": "potential_energy",
+     "kind": "spring",
+     "of": "qua",
+     "value": [
+      "mul",
+      0.5,
+      [
+       "mul",
+       "k",
+       [
+        "pow",
+        "dl",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "W",
+     "label": "Cơ năng",
+     "unit": "J",
+     "role": "mechanical_energy",
+     "of": "qua",
+     "value": [
+      "add",
+      "Wd",
+      [
+       "add",
+       "Wtg",
+       "Wtdh"
+      ]
+     ]
+    }
+   ],
+   "assumptions": [
+    "Quả nặng được coi là chất điểm, chỉ chuyển động theo phương thẳng đứng.",
+    "Trục thẳng đứng hướng lên, gốc tọa độ ở vị trí quả nặng lúc lò xo chưa dãn, nên tọa độ âm nghĩa là lò xo đang dãn.",
+    "Bỏ qua khối lượng của lò xo, lực cản của không khí và mọi ma sát, nên dao động không tắt dần.",
+    "Lò xo luôn tuân theo định luật Hooke trong suốt quá trình dao động.",
+    "Mốc thế năng trọng trường đặt tại vị trí lò xo chưa dãn."
+   ]
+  }
+ }
+}

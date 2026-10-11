@@ -1,0 +1,340 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Khung dây quay đều trong từ trường đều: từ thông biến thiên điều hoà nên xuất hiện suất điện động xoay chiều.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1,
+  "parameters": [
+   {
+    "name": "N",
+    "label": "Số vòng dây",
+    "value": 100,
+    "unit": "1",
+    "min": 10,
+    "max": 500,
+    "step": 10,
+    "role": "turns",
+    "of": "khung"
+   },
+   {
+    "name": "B",
+    "label": "Cảm ứng từ",
+    "value": 0.2,
+    "unit": "T",
+    "min": 0.05,
+    "max": 1,
+    "step": 0.05,
+    "role": "magnetic_field_magnitude",
+    "of": "khung"
+   },
+   {
+    "name": "S",
+    "label": "Diện tích khung",
+    "value": 50,
+    "unit": "cm2",
+    "min": 10,
+    "max": 200,
+    "step": 10,
+    "role": "area",
+    "of": "khung"
+   },
+   {
+    "name": "f",
+    "label": "Tần số quay",
+    "value": 50,
+    "unit": "Hz",
+    "min": 10,
+    "max": 100,
+    "step": 5,
+    "role": "frequency",
+    "of": "khung"
+   },
+   {
+    "name": "R",
+    "label": "Điện trở mạch ngoài",
+    "value": 10,
+    "unit": "ohm",
+    "min": 1,
+    "max": 100,
+    "step": 1,
+    "role": "resistance",
+    "of": "tai"
+   }
+  ],
+  "objects": [
+   {
+    "id": "khung",
+    "label": "Khung dây",
+    "count": 1
+   },
+   {
+    "id": "tai",
+    "label": "Điện trở",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "e",
+    "label": "e"
+   },
+   {
+    "quantity": "Phi",
+    "label": "Phi"
+   },
+   {
+    "quantity": "i",
+    "label": "i"
+   },
+   {
+    "quantity": "E",
+    "label": "E"
+   },
+   {
+    "quantity": "Ptb",
+    "label": "Ptb"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "w",
+     "label": "Tần số góc",
+     "unit": "rad/s",
+     "role": "angular_frequency",
+     "of": "khung",
+     "value": [
+      "mul",
+      6.283185307179586,
+      "f"
+     ]
+    },
+    {
+     "id": "T",
+     "label": "Chu kì",
+     "unit": "s",
+     "role": "period",
+     "of": "khung",
+     "value": [
+      "div",
+      1,
+      "f"
+     ]
+    },
+    {
+     "id": "al",
+     "label": "Góc giữa pháp tuyến và cảm ứng từ",
+     "unit": "rad",
+     "role": "flux_angle",
+     "of": "khung",
+     "initial": 0,
+     "rate": "w"
+    },
+    {
+     "id": "Phi",
+     "label": "Từ thông qua một vòng",
+     "unit": "Wb",
+     "role": "magnetic_flux",
+     "of": "khung",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "B",
+       "S"
+      ],
+      [
+       "cos",
+       "al"
+      ]
+     ]
+    },
+    {
+     "id": "e",
+     "label": "Suất điện động cảm ứng",
+     "unit": "V",
+     "role": "induced_emf",
+     "of": "khung",
+     "value": [
+      "mul",
+      [
+       "mul",
+       [
+        "mul",
+        [
+         "mul",
+         "N",
+         "B"
+        ],
+        "S"
+       ],
+       "w"
+      ],
+      [
+       "sin",
+       "al"
+      ]
+     ]
+    },
+    {
+     "id": "E0",
+     "label": "Suất điện động cực đại",
+     "unit": "V",
+     "role": "emf_amplitude",
+     "of": "khung",
+     "value": [
+      "mul",
+      [
+       "mul",
+       [
+        "mul",
+        "N",
+        "B"
+       ],
+       "S"
+      ],
+      "w"
+     ]
+    },
+    {
+     "id": "E",
+     "label": "Suất điện động hiệu dụng",
+     "unit": "V",
+     "role": "emf_rms",
+     "of": "khung",
+     "value": [
+      "div",
+      "E0",
+      1.4142135623730951
+     ]
+    },
+    {
+     "id": "uk",
+     "label": "Điện áp hai đầu khung dây",
+     "unit": "V",
+     "role": "voltage",
+     "of": "khung",
+     "in_series": "mach",
+     "in_series_total": "mach",
+     "value": "e"
+    },
+    {
+     "id": "u",
+     "label": "Điện áp trên điện trở",
+     "unit": "V",
+     "role": "voltage",
+     "of": "tai",
+     "in_series": "mach",
+     "value": "uk"
+    },
+    {
+     "id": "i",
+     "label": "Cường độ dòng điện",
+     "unit": "A",
+     "role": "current",
+     "of": "tai",
+     "value": [
+      "div",
+      "u",
+      "R"
+     ]
+    },
+    {
+     "id": "wt",
+     "label": "Tần số góc của dòng điện",
+     "unit": "rad/s",
+     "role": "angular_frequency",
+     "of": "tai",
+     "value": "w"
+    },
+    {
+     "id": "U0",
+     "label": "Điện áp cực đại",
+     "unit": "V",
+     "role": "voltage_amplitude",
+     "of": "tai",
+     "value": "E0"
+    },
+    {
+     "id": "I0",
+     "label": "Cường độ cực đại",
+     "unit": "A",
+     "role": "current_amplitude",
+     "of": "tai",
+     "value": [
+      "div",
+      "U0",
+      "R"
+     ]
+    },
+    {
+     "id": "U",
+     "label": "Điện áp hiệu dụng",
+     "unit": "V",
+     "role": "voltage_rms",
+     "of": "tai",
+     "value": [
+      "div",
+      "U0",
+      1.4142135623730951
+     ]
+    },
+    {
+     "id": "I",
+     "label": "Cường độ hiệu dụng",
+     "unit": "A",
+     "role": "current_rms",
+     "of": "tai",
+     "value": [
+      "div",
+      "I0",
+      1.4142135623730951
+     ]
+    },
+    {
+     "id": "Ptb",
+     "label": "Công suất toả nhiệt trung bình",
+     "unit": "W",
+     "role": "average_power",
+     "of": "tai",
+     "value": [
+      "mul",
+      [
+       "pow",
+       "I",
+       2
+      ],
+      "R"
+     ]
+    },
+    {
+     "id": "Pmax",
+     "label": "Công suất toả nhiệt cực đại",
+     "unit": "W",
+     "role": "peak_power",
+     "of": "tai",
+     "value": [
+      "mul",
+      [
+       "pow",
+       "I0",
+       2
+      ],
+      "R"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Bỏ qua điện trở của khung dây; lúc đầu pháp tuyến của khung cùng hướng với cảm ứng từ."
+   ],
+   "duration": [
+    "mul",
+    2,
+    "T"
+   ]
+  }
+ }
+}

@@ -1,0 +1,215 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "boiling",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 600,
+  "parameters": [
+   {
+    "name": "m0",
+    "label": "Khối lượng nước ban đầu",
+    "value": 0.5,
+    "unit": "kg",
+    "min": 0.2,
+    "max": 2,
+    "step": 0.1
+   },
+   {
+    "name": "Pn",
+    "label": "Công suất ấm",
+    "value": 1000,
+    "unit": "W",
+    "min": 500,
+    "max": 2000,
+    "step": 100,
+    "role": "power",
+    "kind": "heat",
+    "of": "nuoc"
+   },
+   {
+    "name": "t0",
+    "label": "Nhiệt độ ban đầu",
+    "value": 25,
+    "unit": "degC",
+    "min": 5,
+    "max": 90,
+    "step": 1
+   }
+  ],
+  "objects": [
+   {
+    "id": "nuoc",
+    "label": "Nước trong ấm",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "tc",
+    "label": "Nhiệt độ nước"
+   },
+   {
+    "quantity": "T",
+    "label": "Nhiệt độ tuyệt đối"
+   },
+   {
+    "quantity": "mv",
+    "label": "Khối lượng nước đã hoá hơi"
+   },
+   {
+    "quantity": "m",
+    "label": "Khối lượng nước còn lại"
+   },
+   {
+    "quantity": "Q",
+    "label": "Nhiệt lượng nước nhận"
+   },
+   {
+    "quantity": "U",
+    "label": "Độ tăng nội năng của nước và hơi"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "c",
+     "label": "Nhiệt dung riêng của nước",
+     "value": 4200,
+     "unit": "J/(kg*K)",
+     "role": "specific_heat_capacity",
+     "of": "nuoc"
+    },
+    {
+     "id": "L",
+     "label": "Nhiệt hoá hơi riêng của nước",
+     "value": 2260000,
+     "unit": "J/kg",
+     "role": "specific_latent_heat",
+     "kind": "vaporization",
+     "of": "nuoc"
+    },
+    {
+     "id": "ts",
+     "label": "Nhiệt độ sôi",
+     "value": 100,
+     "unit": "degC",
+     "role": "other"
+    },
+    {
+     "id": "T0",
+     "label": "273,15 K",
+     "value": 273.15,
+     "unit": "K",
+     "role": "other"
+    },
+    {
+     "id": "mmin",
+     "label": "Lượng nước còn lại khi tắt ấm",
+     "value": 0.05,
+     "unit": "kg",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "tc",
+     "label": "Nhiệt độ nước",
+     "unit": "degC",
+     "role": "celsius_temperature",
+     "initial": "t0",
+     "rate": [
+      "if",
+      [
+       "sub",
+       "ts",
+       "tc"
+      ],
+      [
+       "div",
+       "Pn",
+       [
+        "mul",
+        "m",
+        "c"
+       ]
+      ],
+      0
+     ],
+     "of": "nuoc"
+    },
+    {
+     "id": "T",
+     "label": "Nhiệt độ tuyệt đối",
+     "unit": "K",
+     "role": "temperature",
+     "value": [
+      "add",
+      "tc",
+      "T0"
+     ],
+     "of": "nuoc"
+    },
+    {
+     "id": "mv",
+     "label": "Khối lượng nước đã hoá hơi",
+     "unit": "kg",
+     "role": "transformed_mass",
+     "kind": "vaporization",
+     "initial": 0,
+     "rate": [
+      "if",
+      [
+       "sub",
+       "ts",
+       "tc"
+      ],
+      0,
+      [
+       "div",
+       "Pn",
+       "L"
+      ]
+     ],
+     "of": "nuoc"
+    },
+    {
+     "id": "m",
+     "label": "Khối lượng nước còn lại",
+     "unit": "kg",
+     "role": "mass",
+     "value": [
+      "sub",
+      "m0",
+      "mv"
+     ],
+     "of": "nuoc"
+    },
+    {
+     "id": "Q",
+     "label": "Nhiệt lượng nước nhận",
+     "unit": "J",
+     "role": "heat",
+     "initial": 0,
+     "rate": "Pn",
+     "of": "nuoc"
+    },
+    {
+     "id": "U",
+     "label": "Độ tăng nội năng của nước và hơi",
+     "unit": "J",
+     "role": "internal_energy",
+     "value": "Q",
+     "of": "nuoc"
+    }
+   ],
+   "assumptions": [],
+   "until": {
+    "quantity": "m",
+    "direction": "falling",
+    "value": "mmin"
+   }
+  }
+ }
+}

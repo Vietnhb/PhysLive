@@ -1,0 +1,188 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Phản ứng tổng hợp hạt nhân đơteri và triti tạo thành heli 4 và một neutron. Tính năng lượng toả ra.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1,
+  "parameters": [],
+  "objects": [
+   {
+    "id": "D",
+    "label": "D",
+    "count": 1
+   },
+   {
+    "id": "T",
+    "label": "T",
+    "count": 1
+   },
+   {
+    "id": "He",
+    "label": "He",
+    "count": 1
+   },
+   {
+    "id": "n",
+    "label": "n",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "W",
+    "label": "W"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "c",
+     "label": "Tốc độ ánh sáng",
+     "value": 299800000.0,
+     "unit": "m/s",
+     "role": "other"
+    },
+    {
+     "id": "AD",
+     "label": "Số nucleon của D",
+     "value": 2,
+     "unit": "1",
+     "role": "nucleon_number",
+     "of": "D",
+     "kind": "reactant"
+    },
+    {
+     "id": "ZD",
+     "label": "Số proton của D",
+     "value": 1,
+     "unit": "1",
+     "role": "proton_number",
+     "of": "D",
+     "kind": "reactant"
+    },
+    {
+     "id": "mD",
+     "label": "Khối lượng D",
+     "value": 3.343584e-27,
+     "unit": "kg",
+     "role": "mass",
+     "of": "D",
+     "kind": "reactant"
+    },
+    {
+     "id": "AT",
+     "label": "Số nucleon của T",
+     "value": 3,
+     "unit": "1",
+     "role": "nucleon_number",
+     "of": "T",
+     "kind": "reactant"
+    },
+    {
+     "id": "ZT",
+     "label": "Số proton của T",
+     "value": 1,
+     "unit": "1",
+     "role": "proton_number",
+     "of": "T",
+     "kind": "reactant"
+    },
+    {
+     "id": "mT",
+     "label": "Khối lượng T",
+     "value": 5.007357e-27,
+     "unit": "kg",
+     "role": "mass",
+     "of": "T",
+     "kind": "reactant"
+    },
+    {
+     "id": "AHe",
+     "label": "Số nucleon của He",
+     "value": 4,
+     "unit": "1",
+     "role": "nucleon_number",
+     "of": "He",
+     "kind": "product"
+    },
+    {
+     "id": "ZHe",
+     "label": "Số proton của He",
+     "value": 2,
+     "unit": "1",
+     "role": "proton_number",
+     "of": "He",
+     "kind": "product"
+    },
+    {
+     "id": "mHe",
+     "label": "Khối lượng He",
+     "value": 6.644657e-27,
+     "unit": "kg",
+     "role": "mass",
+     "of": "He",
+     "kind": "product"
+    },
+    {
+     "id": "Ant",
+     "label": "Số nucleon của nt",
+     "value": 1,
+     "unit": "1",
+     "role": "nucleon_number",
+     "of": "nt",
+     "kind": "product"
+    },
+    {
+     "id": "Znt",
+     "label": "Số proton của nt",
+     "value": 0,
+     "unit": "1",
+     "role": "proton_number",
+     "of": "nt",
+     "kind": "product"
+    },
+    {
+     "id": "mnt",
+     "label": "Khối lượng nt",
+     "value": 1.674927e-27,
+     "unit": "kg",
+     "role": "mass",
+     "of": "nt",
+     "kind": "product"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "W",
+     "label": "Năng lượng toả ra của một phản ứng",
+     "unit": "J",
+     "role": "reaction_energy",
+     "value": [
+      "mul",
+      [
+       "sub",
+       [
+        "add",
+        "mD",
+        "mT"
+       ],
+       [
+        "add",
+        "mHe",
+        "mnt"
+       ]
+      ],
+      [
+       "pow",
+       "c",
+       2
+      ]
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

@@ -1,0 +1,3047 @@
+{
+  "id": "magnetism_ac",
+  "title": "Trường từ và dòng điện xoay chiều (Vật lí 12)",
+  "source": "Chương trình giáo dục phổ thông môn Vật lí 2018, mục V.2, lớp 12: Trường từ (Từ trường); Chuyên đề 12.1 Dòng điện xoay chiều",
+  "contents": [
+    {
+      "name": "Khái niệm từ trường",
+      "level": "qualitative",
+      "requirement": "Thực hiện thí nghiệm tạo ra được các đường sức từ; nêu được từ trường là trường lực gây ra bởi dòng điện hoặc nam châm."
+    },
+    {
+      "name": "Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "level": "quantitative",
+      "requirement": "Xác định được độ lớn và hướng của lực từ tác dụng lên đoạn dây dẫn mang dòng điện đặt trong từ trường; định nghĩa được cảm ứng từ B và đơn vị tesla; vận dụng được biểu thức tính lực F = BILsinθ."
+    },
+    {
+      "name": "Đo cảm ứng từ bằng cân “dòng điện”",
+      "level": "quantitative",
+      "requirement": "Thảo luận để thiết kế phương án, đo được (hoặc mô tả được phương pháp đo) cảm ứng từ bằng cân “dòng điện” (kiểm bằng F = BILsinθ và cân bằng lực)."
+    },
+    {
+      "name": "Từ thông",
+      "level": "quantitative",
+      "requirement": "Định nghĩa được từ thông và đơn vị weber."
+    },
+    {
+      "name": "Cảm ứng điện từ: định luật Faraday và định luật Lenz",
+      "level": "quantitative",
+      "requirement": "Vận dụng được định luật Faraday và định luật Lenz về cảm ứng điện từ."
+    },
+    {
+      "name": "Thí nghiệm và ứng dụng của hiện tượng cảm ứng điện từ",
+      "level": "qualitative",
+      "requirement": "Tiến hành các thí nghiệm đơn giản minh hoạ được hiện tượng cảm ứng điện từ; giải thích được một số ứng dụng đơn giản của hiện tượng cảm ứng điện từ."
+    },
+    {
+      "name": "Mô hình sóng điện từ",
+      "level": "qualitative",
+      "requirement": "Mô tả được mô hình sóng điện từ và ứng dụng để giải thích sự tạo thành và lan truyền của các sóng điện từ trong thang sóng điện từ."
+    },
+    {
+      "name": "Tạo ra dòng điện xoay chiều",
+      "level": "qualitative",
+      "requirement": "Thảo luận để thiết kế phương án (hoặc mô tả được phương pháp) tạo ra dòng điện xoay chiều (mô phỏng khung dây quay vẫn được kiểm bằng định luật Faraday và công thức từ thông)."
+    },
+    {
+      "name": "Chu kì, tần số, giá trị cực đại, giá trị hiệu dụng của dòng điện và điện áp xoay chiều",
+      "level": "quantitative",
+      "requirement": "Nêu được: chu kì, tần số, giá trị cực đại, giá trị hiệu dụng của cường độ dòng điện và điện áp xoay chiều; mô tả được bằng biểu thức đại số hoặc đồ thị cường độ dòng điện, điện áp xoay chiều; so sánh được giá trị hiệu dụng và giá trị cực đại."
+    },
+    {
+      "name": "Ứng dụng và an toàn khi sử dụng dòng điện xoay chiều",
+      "level": "qualitative",
+      "requirement": "Thảo luận để nêu được một số ứng dụng của dòng điện xoay chiều trong cuộc sống, tầm quan trọng của việc tuân thủ quy tắc an toàn."
+    },
+    {
+      "name": "Đo tần số, điện áp xoay chiều",
+      "level": "qualitative",
+      "requirement": "Thảo luận để thiết kế phương án, đo được (hoặc mô tả được phương pháp đo) tần số, điện áp xoay chiều bằng dụng cụ thực hành."
+    },
+    {
+      "name": "Công suất toả nhiệt trung bình trên điện trở thuần",
+      "level": "quantitative",
+      "requirement": "Nêu được: công suất toả nhiệt trung bình trên điện trở thuần bằng một nửa công suất cực đại của dòng điện xoay chiều hình sin chạy qua điện trở thuần này."
+    },
+    {
+      "name": "Đoạn mạch xoay chiều RLC mắc nối tiếp",
+      "level": "qualitative",
+      "requirement": "Thảo luận để thiết kế phương án và thực hiện phương án, khảo sát được đoạn mạch xoay chiều RLC mắc nối tiếp bằng dụng cụ thực hành (chương trình không yêu cầu vận dụng biểu thức; các định luật về cuộn dây, cảm kháng, dung kháng, tổng trở trong danh mục vẫn kiểm mô phỏng của nội dung này)."
+    },
+    {
+      "name": "Máy biến áp",
+      "level": "qualitative",
+      "requirement": "Nêu được nguyên tắc hoạt động của máy biến áp (hệ thức U₁/U₂ = N₁/N₂ của máy lí tưởng vẫn được kiểm khi mô hình khai báo)."
+    },
+    {
+      "name": "Truyền tải năng lượng điện",
+      "level": "qualitative",
+      "requirement": "Nêu được ưu điểm của dòng điện và điện áp xoay chiều trong truyền tải năng lượng điện; đánh giá được vai trò của máy biến áp trong việc giảm hao phí năng lượng điện khi truyền dòng điện đi xa (hao phí I²R và P = UIcosφ vẫn được kiểm)."
+    },
+    {
+      "name": "Chỉnh lưu dòng điện xoay chiều",
+      "level": "qualitative",
+      "requirement": "Vẽ được đồ thị quan hệ giữa dòng điện qua diode bán dẫn và điện áp giữa hai cực của nó; vẽ được mạch chỉnh lưu nửa chu kì dùng diode và cả chu kì dùng cầu chỉnh lưu; so sánh được đồ thị chỉnh lưu nửa chu kì và cả chu kì (kiểm chiều dẫn điện của diode và các định luật mạch nối tiếp)."
+    }
+  ],
+  "roles": {
+    "magnetic_field": "thành phần của cảm ứng từ B tại nơi đặt vật trên một trục (of, axis); từ trường đều dùng chung cho mọi vật thì không ghi of",
+    "magnetic_field_magnitude": "độ lớn cảm ứng từ B tại nơi đặt vật (of)",
+    "conductor_length": "chiều dài đoạn dây dẫn nằm trong từ trường (of)",
+    "conductor_vector": "thành phần trên một trục của vectơ đoạn dây: dài bằng đoạn dây, hướng theo chiều dương đã chọn của dòng điện trong dây (of, axis)",
+    "current_field_angle": "góc θ giữa chiều dòng điện trong đoạn dây và cảm ứng từ (of)",
+    "velocity_field_angle": "góc giữa vận tốc của điện tích và cảm ứng từ (of)",
+    "magnetic_flux": "từ thông qua MỘT vòng của khung dây hay mạch kín, tính theo pháp tuyến dương đã chọn (of)",
+    "area": "diện tích của một mặt: mặt giới hạn bởi một vòng dây, hoặc mặt vuông góc với phương truyền mà sóng hay bức xạ đi qua (of)",
+    "turns": "số vòng dây của khung dây hay cuộn dây (of); với máy biến áp of = máy biến áp và kind = primary (cuộn sơ cấp) hoặc secondary (cuộn thứ cấp)",
+    "flux_angle": "góc α giữa pháp tuyến dương của mặt khung dây và cảm ứng từ (of)",
+    "induced_emf": "suất điện động cảm ứng trong khung dây hay mạch kín, dương khi thuận chiều quay quanh pháp tuyến dương theo quy tắc nắm tay phải (of)",
+    "induced_current": "cường độ dòng điện cảm ứng trong mạch kín chỉ có suất điện động cảm ứng, cùng quy ước dấu với suất điện động cảm ứng (of); khi mô hình còn khai báo dòng điện (current) qua từng đoạn của mạch đó thì ghi in_series = tên mạch trên các dòng điện ấy và in_series kèm in_series_total trên đại lượng này",
+    "frequency": "tần số: của dao động hay đại lượng xoay chiều của một vật, linh kiện (of); của sóng trong một môi trường (in); của một bức xạ (of = bức xạ đó)",
+    "angular_frequency": "tần số góc ω: của dao động hay đại lượng xoay chiều hình sin của một vật, linh kiện (of), hoặc của sóng (in)",
+    "voltage_amplitude": "giá trị cực đại U₀ của điện áp xoay chiều hình sin (of); không dùng cho điện áp đã chỉnh lưu",
+    "current_amplitude": "giá trị cực đại I₀ của cường độ dòng điện xoay chiều hình sin (of); không dùng cho dòng điện đã chỉnh lưu",
+    "emf_amplitude": "giá trị cực đại E₀ của suất điện động xoay chiều hình sin (of)",
+    "voltage_rms": "giá trị hiệu dụng U của điện áp xoay chiều hình sin (of); với máy biến áp of = máy biến áp và kind = primary hoặc secondary",
+    "current_rms": "giá trị hiệu dụng I của cường độ dòng điện xoay chiều hình sin (of); với máy biến áp of = máy biến áp và kind = primary hoặc secondary; các phần tử nối tiếp ghi in_series, giá trị của cả đoạn mạch ghi thêm in_series_total",
+    "emf_rms": "giá trị hiệu dụng E của suất điện động xoay chiều hình sin (of)",
+    "average_power": "công suất trung bình: của một lực tính từ lúc bắt đầu (of, kind của lực đó), hoặc trong một chu kì của linh kiện hay đoạn mạch xoay chiều (of; với máy biến áp kind = primary là công suất đưa vào cuộn sơ cấp, kind = secondary là công suất lấy ra ở cuộn thứ cấp)",
+    "peak_power": "công suất toả nhiệt tức thời cực đại trên điện trở thuần có dòng điện xoay chiều hình sin (of)",
+    "power_factor": "hệ số công suất cosφ của đoạn mạch (of)",
+    "phase_difference": "độ lệch pha: của điện áp so với cường độ dòng điện của một đoạn mạch, dương khi điện áp sớm pha (of); hoặc giữa hai dao động — hai điểm trên phương truyền sóng, hai sóng tới cùng một điểm (of, in)",
+    "inductance": "độ tự cảm L của cuộn dây (of)",
+    "inductive_reactance": "cảm kháng Z_L của cuộn dây, hoặc của đoạn mạch nối tiếp chứa nó (of)",
+    "capacitive_reactance": "dung kháng Z_C của tụ điện, hoặc của đoạn mạch nối tiếp chứa nó (of)",
+    "impedance": "tổng trở Z của linh kiện hoặc đoạn mạch NỐI TIẾP; điện trở, cảm kháng, dung kháng ghi cùng of là của các phần tử nối tiếp trong đoạn mạch đó; đoạn mạch thiếu cuộn dây hoặc tụ điện thì khai báo cảm kháng hoặc dung kháng bằng 0 để được kiểm (of)"
+  },
+  "forceKinds": {
+    "magnetic": "lực từ (lên đoạn dây mang dòng điện hoặc lên điện tích chuyển động)"
+  },
+  "constants": {},
+  "laws": [
+    {
+      "id": "wire_force_x",
+      "title": "Lực từ lên đoạn dây F = I·(L × B), thành phần trục x (quy tắc bàn tay trái)",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "magnetic",
+            "axis": "x"
+          }
+        },
+        "I": {
+          "role": "current"
+        },
+        "Lany": {
+          "role": "conductor_vector",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bany": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Lb": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        },
+        "Lc": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        },
+        "Bb": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        },
+        "Bc": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "mul",
+          "I",
+          [
+            "sub",
+            [
+              "mul",
+              "Lb",
+              "Bc"
+            ],
+            [
+              "mul",
+              "Lc",
+              "Bb"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "charge_force_x",
+      "title": "Lực từ lên điện tích chuyển động F = q·(v × B), thành phần trục x",
+      "curriculum": "Trường từ – Lực từ (mở rộng cho điện tích chuyển động: I·L = q·v; chương trình không có yêu cầu cần đạt riêng)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "magnetic",
+            "axis": "x"
+          }
+        },
+        "q": {
+          "role": "charge"
+        },
+        "vany": {
+          "role": "velocity",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bany": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "vb": {
+          "role": "velocity",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        },
+        "vc": {
+          "role": "velocity",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        },
+        "Bb": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        },
+        "Bc": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "mul",
+          "q",
+          [
+            "sub",
+            [
+              "mul",
+              "vb",
+              "Bc"
+            ],
+            [
+              "mul",
+              "vc",
+              "Bb"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "wire_force_y",
+      "title": "Lực từ lên đoạn dây F = I·(L × B), thành phần trục y (quy tắc bàn tay trái)",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "magnetic",
+            "axis": "y"
+          }
+        },
+        "I": {
+          "role": "current"
+        },
+        "Lany": {
+          "role": "conductor_vector",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bany": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Lb": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        },
+        "Lc": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        },
+        "Bb": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        },
+        "Bc": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "mul",
+          "I",
+          [
+            "sub",
+            [
+              "mul",
+              "Lb",
+              "Bc"
+            ],
+            [
+              "mul",
+              "Lc",
+              "Bb"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "charge_force_y",
+      "title": "Lực từ lên điện tích chuyển động F = q·(v × B), thành phần trục y",
+      "curriculum": "Trường từ – Lực từ (mở rộng cho điện tích chuyển động: I·L = q·v; chương trình không có yêu cầu cần đạt riêng)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "magnetic",
+            "axis": "y"
+          }
+        },
+        "q": {
+          "role": "charge"
+        },
+        "vany": {
+          "role": "velocity",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bany": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "vb": {
+          "role": "velocity",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        },
+        "vc": {
+          "role": "velocity",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        },
+        "Bb": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        },
+        "Bc": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "mul",
+          "q",
+          [
+            "sub",
+            [
+              "mul",
+              "vb",
+              "Bc"
+            ],
+            [
+              "mul",
+              "vc",
+              "Bb"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "wire_force_z",
+      "title": "Lực từ lên đoạn dây F = I·(L × B), thành phần trục z (quy tắc bàn tay trái)",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "magnetic",
+            "axis": "z"
+          }
+        },
+        "I": {
+          "role": "current"
+        },
+        "Lany": {
+          "role": "conductor_vector",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bany": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Lb": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        },
+        "Lc": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        },
+        "Bb": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        },
+        "Bc": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "mul",
+          "I",
+          [
+            "sub",
+            [
+              "mul",
+              "Lb",
+              "Bc"
+            ],
+            [
+              "mul",
+              "Lc",
+              "Bb"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "charge_force_z",
+      "title": "Lực từ lên điện tích chuyển động F = q·(v × B), thành phần trục z",
+      "curriculum": "Trường từ – Lực từ (mở rộng cho điện tích chuyển động: I·L = q·v; chương trình không có yêu cầu cần đạt riêng)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "magnetic",
+            "axis": "z"
+          }
+        },
+        "q": {
+          "role": "charge"
+        },
+        "vany": {
+          "role": "velocity",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bany": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "vb": {
+          "role": "velocity",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        },
+        "vc": {
+          "role": "velocity",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        },
+        "Bb": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        },
+        "Bc": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "mul",
+          "q",
+          [
+            "sub",
+            [
+              "mul",
+              "vb",
+              "Bc"
+            ],
+            [
+              "mul",
+              "vc",
+              "Bb"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "wire_force_size",
+      "title": "Độ lớn lực từ lên đoạn dây: F = B·I·L·sinθ",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "M": {
+          "role": "force_magnitude",
+          "where": {
+            "kind": "magnetic"
+          }
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "I": {
+          "role": "current"
+        },
+        "L": {
+          "role": "conductor_length"
+        },
+        "th": {
+          "role": "current_field_angle"
+        }
+      },
+      "equal": [
+        "M",
+        [
+          "mul",
+          [
+            "mul",
+            [
+              "mul",
+              "B",
+              [
+                "abs",
+                "I"
+              ]
+            ],
+            "L"
+          ],
+          [
+            "abs",
+            [
+              "sin",
+              "th"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "wire_force_components_size",
+      "title": "Các thành phần của lực từ lên đoạn dây có độ lớn B·I·L·sinθ",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "magnetic"
+          }
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "I": {
+          "role": "current"
+        },
+        "L": {
+          "role": "conductor_length"
+        },
+        "th": {
+          "role": "current_field_angle"
+        }
+      },
+      "equal": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "F",
+              2
+            ]
+          ]
+        ],
+        [
+          "mul",
+          [
+            "mul",
+            [
+              "mul",
+              "B",
+              [
+                "abs",
+                "I"
+              ]
+            ],
+            "L"
+          ],
+          [
+            "abs",
+            [
+              "sin",
+              "th"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "wire_force_limit",
+      "title": "Lực từ lên đoạn dây không lớn hơn B·I·L",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "M": {
+          "role": "force_magnitude",
+          "where": {
+            "kind": "magnetic"
+          }
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "I": {
+          "role": "current"
+        },
+        "L": {
+          "role": "conductor_length"
+        }
+      },
+      "atMost": [
+        "M",
+        [
+          "mul",
+          [
+            "mul",
+            "B",
+            [
+              "abs",
+              "I"
+            ]
+          ],
+          "L"
+        ]
+      ]
+    },
+    {
+      "id": "wire_force_components_limit",
+      "title": "Các thành phần của lực từ lên đoạn dây không vượt quá B·I·L",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "magnetic"
+          }
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "I": {
+          "role": "current"
+        },
+        "L": {
+          "role": "conductor_length"
+        }
+      },
+      "atMost": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "F",
+              2
+            ]
+          ]
+        ],
+        [
+          "mul",
+          [
+            "mul",
+            "B",
+            [
+              "abs",
+              "I"
+            ]
+          ],
+          "L"
+        ]
+      ]
+    },
+    {
+      "id": "charge_force_size",
+      "title": "Độ lớn lực từ lên điện tích chuyển động: F = |q|·v·B·sinθ",
+      "curriculum": "Trường từ – Lực từ (mở rộng cho điện tích chuyển động: I·L = q·v; chương trình không có yêu cầu cần đạt riêng)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "magnetic"
+          }
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "q": {
+          "role": "charge"
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        },
+        "th": {
+          "role": "velocity_field_angle"
+        }
+      },
+      "equal": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "F",
+              2
+            ]
+          ]
+        ],
+        [
+          "mul",
+          [
+            "mul",
+            [
+              "mul",
+              [
+                "abs",
+                "q"
+              ],
+              [
+                "sqrt",
+                [
+                  "sum",
+                  [
+                    "pow",
+                    "v",
+                    2
+                  ]
+                ]
+              ]
+            ],
+            "B"
+          ],
+          [
+            "abs",
+            [
+              "sin",
+              "th"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "charge_force_limit",
+      "title": "Lực từ lên điện tích chuyển động không lớn hơn |q|·v·B",
+      "curriculum": "Trường từ – Lực từ (mở rộng cho điện tích chuyển động: I·L = q·v; chương trình không có yêu cầu cần đạt riêng)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "magnetic"
+          }
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "q": {
+          "role": "charge"
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "atMost": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "F",
+              2
+            ]
+          ]
+        ],
+        [
+          "mul",
+          [
+            "mul",
+            [
+              "abs",
+              "q"
+            ],
+            [
+              "sqrt",
+              [
+                "sum",
+                [
+                  "pow",
+                  "v",
+                  2
+                ]
+              ]
+            ]
+          ],
+          "B"
+        ]
+      ]
+    },
+    {
+      "id": "magnetic_field_magnitude",
+      "title": "Độ lớn cảm ứng từ bằng căn tổng bình phương các thành phần",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "M": {
+          "role": "magnetic_field_magnitude"
+        },
+        "B": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        }
+      },
+      "equal": [
+        "M",
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "B",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "conductor_length",
+      "title": "Chiều dài đoạn dây bằng độ lớn của vectơ đoạn dây",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "L": {
+          "role": "conductor_length"
+        },
+        "V": {
+          "role": "conductor_vector",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        }
+      },
+      "equal": [
+        "L",
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "V",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "magnetic_flux",
+      "title": "Từ thông qua một vòng dây: Φ = B·S·cosα",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "magnetic_flux"
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "S": {
+          "role": "area"
+        },
+        "al": {
+          "role": "flux_angle"
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "mul",
+          [
+            "mul",
+            "B",
+            "S"
+          ],
+          [
+            "cos",
+            "al"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "magnetic_flux_limit",
+      "title": "Từ thông qua một vòng dây không lớn hơn B·S",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "magnetic_flux"
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "S": {
+          "role": "area"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "P"
+        ],
+        [
+          "mul",
+          "B",
+          "S"
+        ]
+      ]
+    },
+    {
+      "id": "faraday",
+      "title": "Định luật Faraday: e = −N·ΔΦ/Δt",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "e": {
+          "role": "induced_emf"
+        },
+        "N": {
+          "role": "turns"
+        },
+        "P": {
+          "role": "magnetic_flux"
+        }
+      },
+      "equal": [
+        "e",
+        [
+          "neg",
+          [
+            "mul",
+            "N",
+            [
+              "ddt",
+              "P"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "faraday_single_loop",
+      "title": "Định luật Faraday cho một vòng dây: e = −ΔΦ/Δt",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "e": {
+          "role": "induced_emf"
+        },
+        "P": {
+          "role": "magnetic_flux"
+        }
+      },
+      "unless": {
+        "role": "turns"
+      },
+      "equal": [
+        "e",
+        [
+          "neg",
+          [
+            "ddt",
+            "P"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "lenz_emf",
+      "title": "Định luật Lenz: suất điện động cảm ứng chống lại sự biến thiên từ thông",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "e": {
+          "role": "induced_emf"
+        },
+        "P": {
+          "role": "magnetic_flux"
+        }
+      },
+      "atMost": [
+        [
+          "mul",
+          "e",
+          [
+            "ddt",
+            "P"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "lenz_current",
+      "title": "Định luật Lenz: dòng điện cảm ứng có chiều chống lại sự biến thiên từ thông",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "i": {
+          "role": "induced_current"
+        },
+        "P": {
+          "role": "magnetic_flux"
+        }
+      },
+      "unless": {
+        "role": "inductance"
+      },
+      "atMost": [
+        [
+          "mul",
+          "i",
+          [
+            "ddt",
+            "P"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "induced_current_follows_emf",
+      "title": "Dòng điện cảm ứng cùng chiều với suất điện động cảm ứng",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "i": {
+          "role": "induced_current"
+        },
+        "e": {
+          "role": "induced_emf"
+        }
+      },
+      "unless": {
+        "role": "inductance"
+      },
+      "atMost": [
+        [
+          "neg",
+          [
+            "mul",
+            "i",
+            "e"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "frequency_period",
+      "title": "Tần số f = 1/T",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "f": {
+          "role": "frequency"
+        },
+        "T": {
+          "role": "period"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "f",
+          "T"
+        ],
+        1
+      ]
+    },
+    {
+      "id": "angular_frequency",
+      "title": "Tần số góc ω = 2π·f",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "w": {
+          "role": "angular_frequency"
+        },
+        "f": {
+          "role": "frequency"
+        }
+      },
+      "equal": [
+        "w",
+        [
+          "mul",
+          6.283185307179586,
+          "f"
+        ]
+      ]
+    },
+    {
+      "id": "voltage_rms",
+      "title": "Giá trị hiệu dụng của điện áp xoay chiều hình sin bằng giá trị cực đại chia √2",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "voltage_rms"
+        },
+        "A": {
+          "role": "voltage_amplitude"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "E",
+          1.4142135623730951
+        ],
+        "A"
+      ]
+    },
+    {
+      "id": "voltage_peak",
+      "title": "Giá trị tức thời của điện áp không vượt quá giá trị cực đại",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "voltage"
+        },
+        "A": {
+          "role": "voltage_amplitude"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "x"
+        ],
+        "A"
+      ]
+    },
+    {
+      "id": "voltage_sinusoid",
+      "title": "Điện áp xoay chiều hình sin: x² + (Δx/Δt)²/ω² = (giá trị cực đại)²",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "voltage"
+        },
+        "A": {
+          "role": "voltage_amplitude"
+        },
+        "w": {
+          "role": "angular_frequency"
+        }
+      },
+      "equal": [
+        [
+          "add",
+          [
+            "pow",
+            "x",
+            2
+          ],
+          [
+            "pow",
+            [
+              "div",
+              [
+                "ddt",
+                "x"
+              ],
+              "w"
+            ],
+            2
+          ]
+        ],
+        [
+          "pow",
+          "A",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "current_rms",
+      "title": "Giá trị hiệu dụng của cường độ dòng điện xoay chiều hình sin bằng giá trị cực đại chia √2",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "current_rms"
+        },
+        "A": {
+          "role": "current_amplitude"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "E",
+          1.4142135623730951
+        ],
+        "A"
+      ]
+    },
+    {
+      "id": "current_peak",
+      "title": "Giá trị tức thời của cường độ dòng điện không vượt quá giá trị cực đại",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "current"
+        },
+        "A": {
+          "role": "current_amplitude"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "x"
+        ],
+        "A"
+      ]
+    },
+    {
+      "id": "current_sinusoid",
+      "title": "Cường độ dòng điện xoay chiều hình sin: x² + (Δx/Δt)²/ω² = (giá trị cực đại)²",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "current"
+        },
+        "A": {
+          "role": "current_amplitude"
+        },
+        "w": {
+          "role": "angular_frequency"
+        }
+      },
+      "equal": [
+        [
+          "add",
+          [
+            "pow",
+            "x",
+            2
+          ],
+          [
+            "pow",
+            [
+              "div",
+              [
+                "ddt",
+                "x"
+              ],
+              "w"
+            ],
+            2
+          ]
+        ],
+        [
+          "pow",
+          "A",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "emf_rms",
+      "title": "Giá trị hiệu dụng của suất điện động xoay chiều hình sin bằng giá trị cực đại chia √2",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "emf_rms"
+        },
+        "A": {
+          "role": "emf_amplitude"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "E",
+          1.4142135623730951
+        ],
+        "A"
+      ]
+    },
+    {
+      "id": "emf_peak",
+      "title": "Giá trị tức thời của suất điện động không vượt quá giá trị cực đại",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "induced_emf"
+        },
+        "A": {
+          "role": "emf_amplitude"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "x"
+        ],
+        "A"
+      ]
+    },
+    {
+      "id": "emf_sinusoid",
+      "title": "Suất điện động xoay chiều hình sin: x² + (Δx/Δt)²/ω² = (giá trị cực đại)²",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "induced_emf"
+        },
+        "A": {
+          "role": "emf_amplitude"
+        },
+        "w": {
+          "role": "angular_frequency"
+        }
+      },
+      "equal": [
+        [
+          "add",
+          [
+            "pow",
+            "x",
+            2
+          ],
+          [
+            "pow",
+            [
+              "div",
+              [
+                "ddt",
+                "x"
+              ],
+              "w"
+            ],
+            2
+          ]
+        ],
+        [
+          "pow",
+          "A",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "ac_average_power_resistance",
+      "title": "Công suất toả nhiệt trung bình trên điện trở: P = I²·R (I hiệu dụng)",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "average_power"
+        },
+        "I": {
+          "role": "current_rms"
+        },
+        "R": {
+          "role": "resistance"
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "mul",
+          [
+            "pow",
+            "I",
+            2
+          ],
+          "R"
+        ]
+      ]
+    },
+    {
+      "id": "ac_average_power_half_peak",
+      "title": "Công suất toả nhiệt trung bình trên điện trở bằng một nửa công suất cực đại: P = ½·I₀²·R",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "average_power"
+        },
+        "I": {
+          "role": "current_amplitude"
+        },
+        "R": {
+          "role": "resistance"
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "mul",
+          [
+            "mul",
+            0.5,
+            [
+              "pow",
+              "I",
+              2
+            ]
+          ],
+          "R"
+        ]
+      ]
+    },
+    {
+      "id": "ac_peak_power",
+      "title": "Công suất toả nhiệt cực đại gấp đôi công suất trung bình",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "average_power"
+        },
+        "M": {
+          "role": "peak_power"
+        }
+      },
+      "unless": {
+        "role": "power_factor"
+      },
+      "equal": [
+        "M",
+        [
+          "mul",
+          2,
+          "P"
+        ]
+      ]
+    },
+    {
+      "id": "ac_average_power",
+      "title": "Công suất trung bình của đoạn mạch xoay chiều: P = U·I·cosφ",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "average_power"
+        },
+        "U": {
+          "role": "voltage_rms"
+        },
+        "I": {
+          "role": "current_rms"
+        },
+        "k": {
+          "role": "power_factor"
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "mul",
+          [
+            "mul",
+            "U",
+            "I"
+          ],
+          "k"
+        ]
+      ]
+    },
+    {
+      "id": "ac_average_power_limit",
+      "title": "Công suất trung bình không vượt quá U·I",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "average_power"
+        },
+        "U": {
+          "role": "voltage_rms"
+        },
+        "I": {
+          "role": "current_rms"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "P"
+        ],
+        [
+          "mul",
+          "U",
+          "I"
+        ]
+      ]
+    },
+    {
+      "id": "power_factor",
+      "title": "Hệ số công suất bằng cosφ",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "k": {
+          "role": "power_factor"
+        },
+        "p": {
+          "role": "phase_difference"
+        }
+      },
+      "equal": [
+        "k",
+        [
+          "cos",
+          "p"
+        ]
+      ]
+    },
+    {
+      "id": "power_factor_limit",
+      "title": "Hệ số công suất nằm giữa 0 và 1",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "k": {
+          "role": "power_factor"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          [
+            "sub",
+            "k",
+            0.5
+          ]
+        ],
+        0.5
+      ]
+    },
+    {
+      "id": "inductor_voltage",
+      "title": "Cuộn dây: u = L·Δi/Δt + r·i",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "u": {
+          "role": "voltage"
+        },
+        "i": {
+          "role": "current"
+        },
+        "L": {
+          "role": "inductance"
+        },
+        "r": {
+          "role": "resistance",
+          "many": true
+        }
+      },
+      "unless": {
+        "role": "capacitance"
+      },
+      "equal": [
+        "u",
+        [
+          "add",
+          [
+            "mul",
+            "L",
+            [
+              "ddt",
+              "i"
+            ]
+          ],
+          [
+            "mul",
+            "r",
+            "i"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "inductive_reactance",
+      "title": "Cảm kháng Z_L = ω·L",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Z": {
+          "role": "inductive_reactance"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "L": {
+          "role": "inductance"
+        }
+      },
+      "equal": [
+        "Z",
+        [
+          "mul",
+          "w",
+          "L"
+        ]
+      ]
+    },
+    {
+      "id": "capacitive_reactance",
+      "title": "Dung kháng Z_C = 1/(ω·C)",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Z": {
+          "role": "capacitive_reactance"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "C": {
+          "role": "capacitance"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          [
+            "mul",
+            "Z",
+            "w"
+          ],
+          "C"
+        ],
+        1
+      ]
+    },
+    {
+      "id": "impedance_rms",
+      "title": "Tổng trở: U = I·Z (giá trị hiệu dụng)",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "voltage_rms"
+        },
+        "I": {
+          "role": "current_rms"
+        },
+        "Z": {
+          "role": "impedance"
+        }
+      },
+      "equal": [
+        "U",
+        [
+          "mul",
+          "I",
+          "Z"
+        ]
+      ]
+    },
+    {
+      "id": "impedance_peak",
+      "title": "Tổng trở: U₀ = I₀·Z (giá trị cực đại)",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "voltage_amplitude"
+        },
+        "I": {
+          "role": "current_amplitude"
+        },
+        "Z": {
+          "role": "impedance"
+        }
+      },
+      "equal": [
+        "U",
+        [
+          "mul",
+          "I",
+          "Z"
+        ]
+      ]
+    },
+    {
+      "id": "series_impedance",
+      "title": "Đoạn mạch RLC nối tiếp: Z² = R² + (Z_L − Z_C)²",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Z": {
+          "role": "impedance"
+        },
+        "R": {
+          "role": "resistance"
+        },
+        "ZL": {
+          "role": "inductive_reactance"
+        },
+        "ZC": {
+          "role": "capacitive_reactance"
+        }
+      },
+      "equal": [
+        [
+          "pow",
+          "Z",
+          2
+        ],
+        [
+          "add",
+          [
+            "pow",
+            "R",
+            2
+          ],
+          [
+            "pow",
+            [
+              "sub",
+              "ZL",
+              "ZC"
+            ],
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "series_phase",
+      "title": "Đoạn mạch RLC nối tiếp: Z·sinφ = Z_L − Z_C (điện áp sớm pha φ so với dòng điện)",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Z": {
+          "role": "impedance"
+        },
+        "p": {
+          "role": "phase_difference"
+        },
+        "ZL": {
+          "role": "inductive_reactance"
+        },
+        "ZC": {
+          "role": "capacitive_reactance"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "Z",
+          [
+            "sin",
+            "p"
+          ]
+        ],
+        [
+          "sub",
+          "ZL",
+          "ZC"
+        ]
+      ]
+    },
+    {
+      "id": "series_power_factor",
+      "title": "Đoạn mạch nối tiếp: cosφ = R/Z",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều (đoạn mạch RLC mắc nối tiếp)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Z": {
+          "role": "impedance"
+        },
+        "R": {
+          "role": "resistance"
+        },
+        "k": {
+          "role": "power_factor"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "k",
+          "Z"
+        ],
+        "R"
+      ]
+    },
+    {
+      "id": "transformer_voltage",
+      "title": "Máy biến áp: U₁/U₂ = N₁/N₂",
+      "curriculum": "Chuyên đề 12.1 – Máy biến áp",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U1": {
+          "role": "voltage_rms",
+          "where": {
+            "kind": "primary"
+          }
+        },
+        "U2": {
+          "role": "voltage_rms",
+          "where": {
+            "kind": "secondary"
+          }
+        },
+        "N1": {
+          "role": "turns",
+          "where": {
+            "kind": "primary"
+          }
+        },
+        "N2": {
+          "role": "turns",
+          "where": {
+            "kind": "secondary"
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            "U1",
+            "N2"
+          ],
+          [
+            "mul",
+            "U2",
+            "N1"
+          ]
+        ],
+        1
+      ]
+    },
+    {
+      "id": "transformer_power_limit",
+      "title": "Máy biến áp: công suất lấy ra ở cuộn thứ cấp không lớn hơn công suất đưa vào cuộn sơ cấp",
+      "curriculum": "Chuyên đề 12.1 – Máy biến áp",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U1": {
+          "role": "voltage_rms",
+          "where": {
+            "kind": "primary"
+          }
+        },
+        "U2": {
+          "role": "voltage_rms",
+          "where": {
+            "kind": "secondary"
+          }
+        },
+        "I1": {
+          "role": "current_rms",
+          "where": {
+            "kind": "primary"
+          }
+        },
+        "I2": {
+          "role": "current_rms",
+          "where": {
+            "kind": "secondary"
+          }
+        }
+      },
+      "atMost": [
+        [
+          "div",
+          [
+            "mul",
+            "U2",
+            "I2"
+          ],
+          [
+            "mul",
+            "U1",
+            "I1"
+          ]
+        ],
+        1
+      ]
+    },
+    {
+      "id": "transformer_power",
+      "title": "Máy biến áp: U₂·I₂ = H·U₁·I₁ (máy lí tưởng H = 1)",
+      "curriculum": "Chuyên đề 12.1 – Máy biến áp",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U1": {
+          "role": "voltage_rms",
+          "where": {
+            "kind": "primary"
+          }
+        },
+        "U2": {
+          "role": "voltage_rms",
+          "where": {
+            "kind": "secondary"
+          }
+        },
+        "I1": {
+          "role": "current_rms",
+          "where": {
+            "kind": "primary"
+          }
+        },
+        "I2": {
+          "role": "current_rms",
+          "where": {
+            "kind": "secondary"
+          }
+        },
+        "H": {
+          "role": "efficiency"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            "U2",
+            "I2"
+          ],
+          [
+            "mul",
+            [
+              "mul",
+              "H",
+              "U1"
+            ],
+            "I1"
+          ]
+        ],
+        1
+      ]
+    },
+    {
+      "id": "transformer_primary_power",
+      "title": "Máy biến áp: công suất đưa vào cuộn sơ cấp P = U·I (khi không khai báo hệ số công suất)",
+      "curriculum": "Chuyên đề 12.1 – Máy biến áp",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "average_power",
+          "where": {
+            "kind": "primary"
+          }
+        },
+        "U": {
+          "role": "voltage_rms",
+          "where": {
+            "kind": "primary"
+          }
+        },
+        "I": {
+          "role": "current_rms",
+          "where": {
+            "kind": "primary"
+          }
+        }
+      },
+      "unless": {
+        "role": "power_factor"
+      },
+      "equal": [
+        [
+          "div",
+          "P",
+          [
+            "mul",
+            "U",
+            "I"
+          ]
+        ],
+        1
+      ]
+    },
+    {
+      "id": "transformer_secondary_power",
+      "title": "Máy biến áp: công suất lấy ra ở cuộn thứ cấp P = U·I (khi không khai báo hệ số công suất)",
+      "curriculum": "Chuyên đề 12.1 – Máy biến áp",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "average_power",
+          "where": {
+            "kind": "secondary"
+          }
+        },
+        "U": {
+          "role": "voltage_rms",
+          "where": {
+            "kind": "secondary"
+          }
+        },
+        "I": {
+          "role": "current_rms",
+          "where": {
+            "kind": "secondary"
+          }
+        }
+      },
+      "unless": {
+        "role": "power_factor"
+      },
+      "equal": [
+        [
+          "div",
+          "P",
+          [
+            "mul",
+            "U",
+            "I"
+          ]
+        ],
+        1
+      ]
+    },
+    {
+      "id": "efficiency_limit",
+      "title": "Hiệu suất nằm giữa 0 và 1",
+      "curriculum": "Chuyên đề 12.1 – Máy biến áp",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "H": {
+          "role": "efficiency"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          [
+            "sub",
+            "H",
+            0.5
+          ]
+        ],
+        0.5
+      ]
+    },
+    {
+      "id": "diode_one_way",
+      "title": "Diode chỉ cho dòng điện đi theo một chiều (chiều thuận)",
+      "curriculum": "Chuyên đề 12.1 – Chỉnh lưu dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "i": {
+          "role": "current",
+          "where": {
+            "kind": "diode"
+          }
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "i"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "diode_forward",
+      "title": "Diode chỉ dẫn điện khi được phân cực thuận",
+      "curriculum": "Chuyên đề 12.1 – Chỉnh lưu dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "i": {
+          "role": "current",
+          "where": {
+            "kind": "diode"
+          }
+        },
+        "u": {
+          "role": "voltage",
+          "where": {
+            "kind": "diode"
+          }
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          [
+            "mul",
+            "i",
+            "u"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "diode_blocks_reverse",
+      "title": "Diode không dẫn điện khi bị phân cực ngược",
+      "curriculum": "Chuyên đề 12.1 – Chỉnh lưu dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "i": {
+          "role": "current",
+          "where": {
+            "kind": "diode"
+          }
+        },
+        "u": {
+          "role": "voltage",
+          "where": {
+            "kind": "diode"
+          }
+        }
+      },
+      "when": [
+        "min",
+        "u",
+        0
+      ],
+      "equal": [
+        "i",
+        0
+      ]
+    },
+    {
+      "id": "wire_force_direction_x",
+      "title": "Chiều lực từ lên đoạn dây theo quy tắc bàn tay trái (cùng dấu với I·(L × B)), trục x",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "magnetic",
+            "axis": "x"
+          }
+        },
+        "I": {
+          "role": "current"
+        },
+        "Lany": {
+          "role": "conductor_vector",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bany": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Lb": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        },
+        "Lc": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        },
+        "Bb": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        },
+        "Bc": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        }
+      },
+      "when": "F",
+      "atMost": [
+        [
+          "neg",
+          [
+            "div",
+            "F",
+            [
+              "mul",
+              "I",
+              [
+                "sub",
+                [
+                  "mul",
+                  "Lb",
+                  "Bc"
+                ],
+                [
+                  "mul",
+                  "Lc",
+                  "Bb"
+                ]
+              ]
+            ]
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "wire_force_direction_y",
+      "title": "Chiều lực từ lên đoạn dây theo quy tắc bàn tay trái (cùng dấu với I·(L × B)), trục y",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "magnetic",
+            "axis": "y"
+          }
+        },
+        "I": {
+          "role": "current"
+        },
+        "Lany": {
+          "role": "conductor_vector",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bany": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Lb": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        },
+        "Lc": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        },
+        "Bb": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "z"
+          }
+        },
+        "Bc": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        }
+      },
+      "when": "F",
+      "atMost": [
+        [
+          "neg",
+          [
+            "div",
+            "F",
+            [
+              "mul",
+              "I",
+              [
+                "sub",
+                [
+                  "mul",
+                  "Lb",
+                  "Bc"
+                ],
+                [
+                  "mul",
+                  "Lc",
+                  "Bb"
+                ]
+              ]
+            ]
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "wire_force_direction_z",
+      "title": "Chiều lực từ lên đoạn dây theo quy tắc bàn tay trái (cùng dấu với I·(L × B)), trục z",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "magnetic",
+            "axis": "z"
+          }
+        },
+        "I": {
+          "role": "current"
+        },
+        "Lany": {
+          "role": "conductor_vector",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bany": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Lb": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        },
+        "Lc": {
+          "role": "conductor_vector",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        },
+        "Bb": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "x"
+          }
+        },
+        "Bc": {
+          "role": "magnetic_field",
+          "many": true,
+          "where": {
+            "axis": "y"
+          }
+        }
+      },
+      "when": "F",
+      "atMost": [
+        [
+          "neg",
+          [
+            "div",
+            "F",
+            [
+              "mul",
+              "I",
+              [
+                "sub",
+                [
+                  "mul",
+                  "Lb",
+                  "Bc"
+                ],
+                [
+                  "mul",
+                  "Lc",
+                  "Bb"
+                ]
+              ]
+            ]
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "current_field_angle",
+      "title": "Góc θ giữa đoạn dây và cảm ứng từ: L·B·cosθ = tổng các tích thành phần L và B",
+      "curriculum": "Trường từ – Lực từ tác dụng lên đoạn dây dẫn mang dòng điện; Cảm ứng từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "th": {
+          "role": "current_field_angle"
+        },
+        "L": {
+          "role": "conductor_length"
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "Lv": {
+          "role": "conductor_vector",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bv": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          [
+            "mul",
+            "L",
+            "B"
+          ],
+          [
+            "cos",
+            "th"
+          ]
+        ],
+        [
+          "sum",
+          [
+            "mul",
+            "Lv",
+            "Bv"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "velocity_field_angle",
+      "title": "Góc θ giữa vận tốc và cảm ứng từ: v·B·cosθ = tổng các tích thành phần v và B",
+      "curriculum": "Trường từ – Lực từ (mở rộng cho điện tích chuyển động: I·L = q·v; chương trình không có yêu cầu cần đạt riêng)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "th": {
+          "role": "velocity_field_angle"
+        },
+        "B": {
+          "role": "magnetic_field_magnitude"
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        },
+        "Bv": {
+          "role": "magnetic_field",
+          "many": true,
+          "min": 1,
+          "where": {
+            "axis": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          [
+            "mul",
+            [
+              "sqrt",
+              [
+                "sum",
+                [
+                  "pow",
+                  "v",
+                  2
+                ]
+              ]
+            ],
+            "B"
+          ],
+          [
+            "cos",
+            "th"
+          ]
+        ],
+        [
+          "sum",
+          [
+            "mul",
+            "v",
+            "Bv"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "induced_current_ohm",
+      "title": "Mạch kín chỉ có suất điện động cảm ứng: e = i·R (R là điện trở toàn mạch)",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "e": {
+          "role": "induced_emf"
+        },
+        "i": {
+          "role": "induced_current"
+        },
+        "R": {
+          "role": "resistance"
+        }
+      },
+      "unless": {
+        "role": "inductance"
+      },
+      "equal": [
+        "e",
+        [
+          "mul",
+          "i",
+          "R"
+        ]
+      ]
+    },
+    {
+      "id": "induced_source_voltage",
+      "title": "Hiệu điện thế hai đầu khung dây (cuộn dây) phát điện: u = e − i·r",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "u": {
+          "role": "voltage"
+        },
+        "e": {
+          "role": "induced_emf"
+        },
+        "i": {
+          "role": "current",
+          "many": true
+        },
+        "r": {
+          "role": "internal_resistance",
+          "many": true
+        }
+      },
+      "unless": {
+        "role": "inductance"
+      },
+      "equal": [
+        "u",
+        [
+          "sub",
+          "e",
+          [
+            "mul",
+            "i",
+            "r"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "series_induced_current",
+      "title": "Mạch kín không phân nhánh: dòng điện qua mọi phần tử bằng dòng điện cảm ứng của mạch",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "I": {
+          "role": "current",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "induced_current",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          [
+            "pow",
+            [
+              "sub",
+              "I",
+              "T"
+            ],
+            2
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "frequency_positive",
+      "title": "Tần số là số dương",
+      "curriculum": "Trường từ – Từ thông; Cảm ứng điện từ (chu kì, tần số, giá trị cực đại, giá trị hiệu dụng); Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "f": {
+          "role": "frequency"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "f"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "ohm_rms",
+      "title": "Điện trở thuần trong mạch xoay chiều: U = I·R (giá trị hiệu dụng)",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "voltage_rms"
+        },
+        "I": {
+          "role": "current_rms"
+        },
+        "R": {
+          "role": "resistance"
+        }
+      },
+      "unless": {
+        "role": "impedance"
+      },
+      "equal": [
+        "U",
+        [
+          "mul",
+          "I",
+          "R"
+        ]
+      ]
+    },
+    {
+      "id": "series_current_rms",
+      "title": "Đoạn mạch nối tiếp: cường độ hiệu dụng qua mọi phần tử bằng nhau và bằng của đoạn mạch",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "I": {
+          "role": "current_rms",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "current_rms",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          [
+            "abs",
+            [
+              "sub",
+              [
+                "div",
+                "I",
+                "T"
+              ],
+              1
+            ]
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "series_average_power",
+      "title": "Bảo toàn năng lượng: công suất trung bình của đoạn mạch nối tiếp bằng tổng công suất trung bình của các phần tử",
+      "curriculum": "Chuyên đề 12.1 – Các đặc trưng của dòng điện xoay chiều",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "P": {
+          "role": "average_power",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "average_power",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "P"
+        ]
+      ]
+    }
+  ]
+}

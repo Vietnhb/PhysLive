@@ -1,0 +1,2353 @@
+{
+  "id": "electricity",
+  "title": "Điện trường, dòng điện và mạch điện (Vật lí 11)",
+  "source": "Chương trình giáo dục phổ thông môn Vật lí 2018, mục V.2, lớp 11: Trường điện (Điện trường); Dòng điện, mạch điện; Chuyên đề 11.3 Mở đầu về điện tử học",
+  "attributes": [
+    "by: vật gây ra tương tác hoặc gây ra điện trường. Đại lượng của riêng vật nguồn mà định luật cần (source_charge) chỉ mang by, không mang of.",
+    "Mỗi phần tử mạch (điện trở, tụ điện, nguồn, bóng đèn, cả một đoạn mạch) là một vật riêng: mọi đại lượng của nó mang of = tên phần tử. Hai phần tử khác nhau không dùng chung of.",
+    "in: vùng điện trường đều (hai bản phẳng). Đại lượng của chính vùng đó (voltage, plate_distance, electric_field_strength) mang in = tên vùng; điện trường đều dùng chung cho mọi điện tích trong mô hình thì không ghi of.",
+    "in_series / in_parallel: tên đoạn mạch nối tiếp / song song mà phần tử là một thành viên. Đại lượng của CẢ đoạn mạch (dòng điện mạch chính, hiệu điện thế hai đầu, điện trở hoặc điện dung tương đương, điện tích của bộ tụ, công suất) mang cùng in_series (in_parallel) = tên đoạn mạch và thêm in_series_total (in_parallel_total) = tên đoạn mạch. Một đoạn mạch con nằm trong đoạn mạch lớn hơn: đại lượng của cả đoạn con mang thêm in_… của đoạn lớn. Thuộc tính ghi trên từng đại lượng: một phần tử vừa nằm trong đoạn nối tiếp vừa là cả một cụm song song thì đại lượng của nó mang cả hai.",
+    "in_loop: tên một mạch kín (vòng). Hiệu điện thế hai cực của mỗi nguồn trong vòng (terminal_voltage, dương khi nguồn đẩy dòng theo chiều đi vòng) và hiệu điện thế trên mỗi phần tử hoặc đoạn mạch còn lại của vòng (voltage, tính theo cùng chiều đi vòng) mang in_loop = tên vòng; mỗi phần của vòng chỉ tính một lần. Dòng điện qua nguồn mắc nối tiếp với mạch ngoài mang in_series của đoạn mạch đó.",
+    "in_node: tên nút mạch; MỌI dòng điện tại nút đều phải khai báo, mỗi dòng mang in_node = tên nút và kind = into (chiều dương đi vào nút) hoặc out (chiều dương đi ra khỏi nút). Một dòng điện nối hai nút thì khai báo thêm một đại lượng bằng nó cho nút thứ hai."
+  ],
+  "contents": [
+    {
+      "name": "Trường điện (Điện trường) – Lực điện tương tác giữa các điện tích",
+      "level": "quantitative",
+      "requirement": "Sử dụng biểu thức F = q₁q₂/4πε₀r², tính và mô tả được lực tương tác giữa hai điện tích điểm đặt trong chân không (hoặc trong không khí)."
+    },
+    {
+      "name": "Trường điện (Điện trường) – Khái niệm điện trường",
+      "level": "quantitative",
+      "requirement": "Vận dụng được biểu thức E = Q/4πε₀r²; cường độ điện trường đo bằng tỉ số giữa lực tác dụng lên điện tích dương đặt tại điểm đó và độ lớn của điện tích đó. (Điện phổ: chỉ minh hoạ.)"
+    },
+    {
+      "name": "Trường điện (Điện trường) – Điện trường đều",
+      "level": "quantitative",
+      "requirement": "Sử dụng biểu thức E = U/d, tính được cường độ của điện trường đều giữa hai bản phẳng, xác định được lực tác dụng lên điện tích đặt trong điện trường đều; mô tả chuyển động của điện tích bay vào điện trường đều theo phương vuông góc với đường sức."
+    },
+    {
+      "name": "Trường điện (Điện trường) – Điện thế và thế năng điện",
+      "level": "quantitative",
+      "requirement": "Vận dụng được mối liên hệ thế năng điện với điện thế, V = A/q; mối liên hệ cường độ điện trường với điện thế."
+    },
+    {
+      "name": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "level": "quantitative",
+      "requirement": "Định nghĩa được điện dung; vận dụng được công thức điện dung của bộ tụ điện ghép nối tiếp, ghép song song; xây dựng được biểu thức tính năng lượng tụ điện. (Ứng dụng của tụ điện: chỉ minh hoạ.)"
+    },
+    {
+      "name": "Dòng điện, mạch điện – Cường độ dòng điện",
+      "level": "quantitative",
+      "requirement": "Cường độ dòng điện được xác định bằng điện lượng chuyển qua tiết diện thẳng của vật dẫn trong một đơn vị thời gian; vận dụng được biểu thức I = Snve."
+    },
+    {
+      "name": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "level": "quantitative",
+      "requirement": "Định nghĩa được điện trở; phát biểu được định luật Ohm cho vật dẫn kim loại; định nghĩa được suất điện động; mô tả được ảnh hưởng của điện trở trong của nguồn điện lên hiệu điện thế giữa hai cực của nguồn."
+    },
+    {
+      "name": "Dòng điện, mạch điện – Đường đặc trưng I – U; ảnh hưởng của nhiệt độ lên điện trở của đèn sợi đốt, điện trở nhiệt",
+      "level": "qualitative",
+      "requirement": "Vẽ phác và thảo luận được về đường đặc trưng I – U của vật dẫn kim loại ở nhiệt độ xác định; mô tả được sơ lược ảnh hưởng của nhiệt độ lên điện trở của đèn sợi đốt, điện trở nhiệt (thermistor)."
+    },
+    {
+      "name": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "level": "quantitative",
+      "requirement": "Tính được năng lượng điện và công suất tiêu thụ năng lượng điện của đoạn mạch."
+    },
+    {
+      "name": "Chuyên đề 11.3 Mở đầu về điện tử học – Khuếch đại thuật toán",
+      "level": "qualitative",
+      "requirement": "Dự án tìm hiểu: phân loại cảm biến; nguyên tắc hoạt động của điện trở phụ thuộc ánh sáng (LDR), điện trở nhiệt và sensor dùng chúng; tính chất cơ bản của bộ khuếch đại thuật toán (op-amp) lí tưởng. (Mạch chia thế của cảm biến được kiểm bằng định luật Ohm và các định luật đoạn mạch nối tiếp; lối ra của op-amp lí tưởng được kiểm về dấu và mức bão hoà.)"
+    },
+    {
+      "name": "Chuyên đề 11.3 Mở đầu về điện tử học – Thiết bị đầu ra",
+      "level": "qualitative",
+      "requirement": "Dự án tìm hiểu nguyên tắc hoạt động của mạch op-amp – relays, op-amp – LEDs, op-amp – CMs; thiết kế được một số mạch điện ứng dụng đơn giản có sử dụng thiết bị đầu ra."
+    },
+    {
+      "name": "Chuyên đề 11.3 Mở đầu về điện tử học – Thiết bị cảm biến",
+      "level": "qualitative",
+      "requirement": "Nêu được một số ứng dụng chính của thiết bị cảm biến và nguyên tắc hoạt động của thiết bị cảm biến."
+    }
+  ],
+  "roles": {
+    "charge": "điện tích của một vật hoặc điện tích của tụ điện, có dấu (of)",
+    "source_charge": "điện tích của vật gây ra lực điện hoặc điện trường, có dấu; bằng đúng điện tích (charge) của vật đó (by = vật mang điện tích này; không có of)",
+    "distance": "khoảng cách giữa vật đang xét và vật gây ra tương tác, luôn dương (of, by)",
+    "separation": "thành phần trên một trục của độ dời từ vật gây ra tương tác đến vật đang xét: tọa độ của vật of trừ tọa độ của vật by; phải khai báo trên mọi trục mà độ dời khác không (of, by, axis)",
+    "electric_field": "thành phần trên một trục của vectơ cường độ điện trường tại nơi đặt vật hoặc tại điểm đang xét (of, axis; có by = phần do riêng một nguồn gây ra, không có by = điện trường tổng hợp; in = vùng điện trường đều chứa vật)",
+    "electric_field_strength": "cường độ điện trường (độ lớn, không âm) tại một điểm (of; by nếu là của riêng một nguồn) hoặc của một vùng điện trường đều (in, không có of)",
+    "electric_potential": "điện thế tại nơi đặt vật hoặc tại điểm đang xét, mốc ở vô cực hoặc do mô hình nói rõ (of; có by = phần do riêng một nguồn gây ra)",
+    "voltage": "hiệu điện thế giữa hai đầu một phần tử mạch, hai bản tụ (of), giữa hai bản phẳng của vùng điện trường đều (in), hoặc của cả một đoạn mạch (in_series/in_parallel kèm in_…_total)",
+    "plate_distance": "khoảng cách giữa hai bản phẳng tạo ra điện trường đều (of hoặc in)",
+    "capacitance": "điện dung của tụ điện (of) hoặc điện dung tương đương của bộ tụ (in_series/in_parallel kèm in_…_total)",
+    "capacitor_energy": "năng lượng điện trường dự trữ trong tụ điện hoặc bộ tụ (of)",
+    "current": "cường độ dòng điện qua một phần tử mạch, qua nguồn, qua dây dẫn (of) hoặc dòng điện của cả đoạn mạch, có dấu theo chiều dương đã chọn: với phần tử tiêu thụ là chiều từ đầu điện thế cao sang đầu điện thế thấp của hiệu điện thế đã khai báo; tại một nút mạch thêm in_node và kind = into hoặc out",
+    "charge_transferred": "điện lượng đã chuyển qua tiết diện thẳng của vật dẫn hoặc qua phần tử mạch tính từ lúc bắt đầu (of)",
+    "cross_section_area": "tiết diện thẳng của dây dẫn (of)",
+    "carrier_density": "mật độ hạt mang điện tự do trong dây dẫn (of)",
+    "drift_speed": "tốc độ dịch chuyển có hướng của hạt mang điện trong dây dẫn (of)",
+    "carrier_charge": "độ lớn điện tích của một hạt mang điện (thường là e = 1,6·10⁻¹⁹ C)",
+    "resistance": "điện trở của một phần tử mạch (of); cùng of với voltage và current thì ba đại lượng phải thoả U = I·R hoặc điện trở tương đương của đoạn mạch (in_series/in_parallel kèm in_…_total); cuộn dây có điện trở và độ tự cảm: u = i·R + L·Δi/Δt",
+    "emf": "suất điện động của nguồn điện (of)",
+    "terminal_voltage": "hiệu điện thế giữa hai cực của nguồn điện, cũng là hiệu điện thế mạch ngoài của nguồn (of = nguồn; in_loop = mạch kín chứa nguồn)",
+    "output_voltage": "điện áp ở lối ra của bộ khuếch đại thuật toán so với điểm 0 V (of)",
+    "noninverting_input_voltage": "điện áp ở lối vào không đảo (+) của op-amp (of)",
+    "inverting_input_voltage": "điện áp ở lối vào đảo (−) của op-amp (of)",
+    "supply_voltage": "độ lớn điện áp nguồn nuôi ±Vs của op-amp, cũng là mức bão hoà của lối ra (of)",
+    "feedback_resistance": "điện trở hồi tiếp nối lối ra với lối vào đảo của op-amp; có nó thì op-amp không làm việc ở chế độ so sánh (of)",
+    "internal_resistance": "điện trở trong của nguồn điện (of)",
+    "electric_power": "công suất tiêu thụ năng lượng điện của một phần tử hoặc đoạn mạch; với nguồn điện là công suất nguồn cung cấp cho mạch ngoài (of) — giá trị tức thời p = u·i; công suất trung bình của mạch xoay chiều dùng average_power",
+    "electric_energy": "năng lượng điện mà một phần tử hoặc đoạn mạch đã tiêu thụ tính từ lúc bắt đầu (of)",
+    "source_power": "công suất toàn phần của nguồn điện ℰ·I (of)",
+    "source_energy": "công của nguồn điện (công của lực lạ) tính từ lúc bắt đầu (of)"
+  },
+  "forceKinds": {
+    "electric": "lực điện (lực Coulomb của điện tích khác: thêm by; hoặc lực của điện trường tác dụng lên điện tích)"
+  },
+  "kinds": {
+    "into": "dòng điện đi vào nút mạch",
+    "out": "dòng điện đi ra khỏi nút mạch"
+  },
+  "constants": {
+    "k_coulomb": {
+      "value": 8987551792.3,
+      "unit": "N*m2/C2",
+      "label": "hằng số Coulomb k = 1/(4πε₀)"
+    }
+  },
+  "laws": [
+    {
+      "id": "coulomb_force",
+      "title": "Định luật Coulomb theo thành phần: F = k·q₁·q₂·d/r³ (cùng dấu đẩy, trái dấu hút)",
+      "curriculum": "Trường điện (Điện trường) – Lực điện tương tác giữa các điện tích",
+      "scope": [
+        "of",
+        "by",
+        "axis"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "electric",
+            "by": "*"
+          }
+        },
+        "q": {
+          "role": "charge"
+        },
+        "Q": {
+          "role": "source_charge"
+        },
+        "d": {
+          "role": "separation"
+        },
+        "r": {
+          "role": "distance"
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "div",
+          [
+            "mul",
+            [
+              "mul",
+              "k_coulomb",
+              [
+                "mul",
+                "q",
+                "Q"
+              ]
+            ],
+            "d"
+          ],
+          [
+            "pow",
+            "r",
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "coulomb_force_size",
+      "title": "Định luật Coulomb: độ lớn lực F = k·|q₁·q₂|/r²",
+      "curriculum": "Trường điện (Điện trường) – Lực điện tương tác giữa các điện tích",
+      "scope": [
+        "of",
+        "by"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "electric",
+            "by": "*"
+          },
+          "many": true,
+          "min": 1
+        },
+        "q": {
+          "role": "charge"
+        },
+        "Q": {
+          "role": "source_charge"
+        },
+        "r": {
+          "role": "distance"
+        }
+      },
+      "equal": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "F",
+              2
+            ]
+          ]
+        ],
+        [
+          "div",
+          [
+            "abs",
+            [
+              "mul",
+              "k_coulomb",
+              [
+                "mul",
+                "q",
+                "Q"
+              ]
+            ]
+          ],
+          [
+            "pow",
+            "r",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "coulomb_force_magnitude",
+      "title": "Định luật Coulomb: F = k·|q₁·q₂|/r²",
+      "curriculum": "Trường điện (Điện trường) – Lực điện tương tác giữa các điện tích",
+      "scope": [
+        "of",
+        "by"
+      ],
+      "bind": {
+        "M": {
+          "role": "force_magnitude",
+          "where": {
+            "kind": "electric",
+            "by": "*"
+          }
+        },
+        "q": {
+          "role": "charge"
+        },
+        "Q": {
+          "role": "source_charge"
+        },
+        "r": {
+          "role": "distance"
+        }
+      },
+      "equal": [
+        "M",
+        [
+          "div",
+          [
+            "abs",
+            [
+              "mul",
+              "k_coulomb",
+              [
+                "mul",
+                "q",
+                "Q"
+              ]
+            ]
+          ],
+          [
+            "pow",
+            "r",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "coulomb_direction",
+      "title": "Hai điện tích cùng dấu đẩy nhau, trái dấu hút nhau",
+      "curriculum": "Trường điện (Điện trường) – Lực điện tương tác giữa các điện tích",
+      "scope": [
+        "of",
+        "by",
+        "axis"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "electric",
+            "by": "*"
+          }
+        },
+        "q": {
+          "role": "charge"
+        },
+        "Q": {
+          "role": "source_charge"
+        },
+        "d": {
+          "role": "separation"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          [
+            "mul",
+            [
+              "mul",
+              "F",
+              "d"
+            ],
+            [
+              "mul",
+              "q",
+              "Q"
+            ]
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "distance_from_separation",
+      "title": "Khoảng cách bằng căn tổng bình phương các thành phần độ dời",
+      "curriculum": "Trường điện (Điện trường) – Lực điện tương tác giữa các điện tích",
+      "scope": [
+        "of",
+        "by"
+      ],
+      "bind": {
+        "r": {
+          "role": "distance"
+        },
+        "d": {
+          "role": "separation",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        "r",
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "d",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "point_charge_field",
+      "title": "Điện trường của điện tích điểm theo thành phần: E = k·Q·d/r³ (hướng ra xa điện tích dương)",
+      "curriculum": "Trường điện (Điện trường) – Khái niệm điện trường",
+      "scope": [
+        "of",
+        "by",
+        "axis"
+      ],
+      "bind": {
+        "E": {
+          "role": "electric_field",
+          "where": {
+            "by": "*"
+          }
+        },
+        "Q": {
+          "role": "source_charge"
+        },
+        "d": {
+          "role": "separation"
+        },
+        "r": {
+          "role": "distance"
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "div",
+          [
+            "mul",
+            [
+              "mul",
+              "k_coulomb",
+              "Q"
+            ],
+            "d"
+          ],
+          [
+            "pow",
+            "r",
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "point_charge_field_strength",
+      "title": "Cường độ điện trường của điện tích điểm: E = k·|Q|/r²",
+      "curriculum": "Trường điện (Điện trường) – Khái niệm điện trường",
+      "scope": [
+        "of",
+        "by"
+      ],
+      "bind": {
+        "E": {
+          "role": "electric_field_strength",
+          "where": {
+            "by": "*"
+          }
+        },
+        "Q": {
+          "role": "source_charge"
+        },
+        "r": {
+          "role": "distance"
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "div",
+          [
+            "mul",
+            "k_coulomb",
+            [
+              "abs",
+              "Q"
+            ]
+          ],
+          [
+            "pow",
+            "r",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "point_charge_field_size",
+      "title": "Điện trường của điện tích điểm có độ lớn k·|Q|/r²",
+      "curriculum": "Trường điện (Điện trường) – Khái niệm điện trường",
+      "scope": [
+        "of",
+        "by"
+      ],
+      "bind": {
+        "E": {
+          "role": "electric_field",
+          "where": {
+            "by": "*"
+          },
+          "many": true,
+          "min": 1
+        },
+        "Q": {
+          "role": "source_charge"
+        },
+        "r": {
+          "role": "distance"
+        }
+      },
+      "equal": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "E",
+              2
+            ]
+          ]
+        ],
+        [
+          "div",
+          [
+            "mul",
+            "k_coulomb",
+            [
+              "abs",
+              "Q"
+            ]
+          ],
+          [
+            "pow",
+            "r",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "field_superposition",
+      "title": "Nguyên lí chồng chất: điện trường tổng hợp bằng tổng điện trường của từng nguồn",
+      "curriculum": "Trường điện (Điện trường) – Khái niệm điện trường",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "E": {
+          "role": "electric_field",
+          "where": {
+            "by": null
+          }
+        },
+        "Ei": {
+          "role": "electric_field",
+          "where": {
+            "by": "*"
+          },
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "sum",
+          "Ei"
+        ]
+      ]
+    },
+    {
+      "id": "field_strength",
+      "title": "Cường độ điện trường là độ lớn của vectơ điện trường",
+      "curriculum": "Trường điện (Điện trường) – Khái niệm điện trường",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "S": {
+          "role": "electric_field_strength",
+          "where": {
+            "by": null
+          }
+        },
+        "E": {
+          "role": "electric_field",
+          "where": {
+            "by": null
+          },
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        "S",
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "E",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "field_strength_of_source",
+      "title": "Cường độ điện trường của một nguồn là độ lớn vectơ điện trường của nguồn đó",
+      "curriculum": "Trường điện (Điện trường) – Khái niệm điện trường",
+      "scope": [
+        "of",
+        "by"
+      ],
+      "bind": {
+        "S": {
+          "role": "electric_field_strength",
+          "where": {
+            "by": "*"
+          }
+        },
+        "E": {
+          "role": "electric_field",
+          "where": {
+            "by": "*"
+          },
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        "S",
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "E",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "electric_force",
+      "title": "Lực điện tác dụng lên điện tích: F = q·E (cùng chiều E nếu q > 0, ngược chiều nếu q < 0)",
+      "curriculum": "Trường điện (Điện trường) – Khái niệm điện trường",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "electric"
+          },
+          "many": true,
+          "min": 1
+        },
+        "q": {
+          "role": "charge"
+        },
+        "E": {
+          "role": "electric_field",
+          "where": {
+            "by": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          "F"
+        ],
+        [
+          "mul",
+          "q",
+          "E"
+        ]
+      ]
+    },
+    {
+      "id": "electric_force_magnitude",
+      "title": "Độ lớn lực điện: F = |q|·E",
+      "curriculum": "Trường điện (Điện trường) – Khái niệm điện trường",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "M": {
+          "role": "force_magnitude",
+          "where": {
+            "kind": "electric",
+            "by": null
+          }
+        },
+        "q": {
+          "role": "charge"
+        },
+        "E": {
+          "role": "electric_field_strength",
+          "where": {
+            "by": null
+          }
+        }
+      },
+      "equal": [
+        "M",
+        [
+          "mul",
+          [
+            "abs",
+            "q"
+          ],
+          "E"
+        ]
+      ]
+    },
+    {
+      "id": "uniform_field",
+      "title": "Điện trường đều giữa hai bản phẳng: E = U/d",
+      "curriculum": "Trường điện (Điện trường) – Điện trường đều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "electric_field_strength",
+          "where": {
+            "by": null
+          }
+        },
+        "U": {
+          "role": "voltage"
+        },
+        "d": {
+          "role": "plate_distance"
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "div",
+          [
+            "abs",
+            "U"
+          ],
+          "d"
+        ]
+      ]
+    },
+    {
+      "id": "uniform_field_region",
+      "title": "Điện trường đều giữa hai bản phẳng: E = U/d",
+      "curriculum": "Trường điện (Điện trường) – Điện trường đều",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "E": {
+          "role": "electric_field_strength",
+          "where": {
+            "in": "*"
+          }
+        },
+        "U": {
+          "role": "voltage",
+          "where": {
+            "in": "*"
+          }
+        },
+        "d": {
+          "role": "plate_distance",
+          "where": {
+            "in": "*"
+          }
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "div",
+          [
+            "abs",
+            "U"
+          ],
+          "d"
+        ]
+      ]
+    },
+    {
+      "id": "electric_potential_energy",
+      "title": "Thế năng điện của điện tích: W = q·V",
+      "curriculum": "Trường điện (Điện trường) – Điện thế và thế năng điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "W": {
+          "role": "potential_energy",
+          "where": {
+            "kind": "electric"
+          }
+        },
+        "q": {
+          "role": "charge"
+        },
+        "V": {
+          "role": "electric_potential",
+          "where": {
+            "by": null
+          }
+        }
+      },
+      "equal": [
+        "W",
+        [
+          "mul",
+          "q",
+          "V"
+        ]
+      ]
+    },
+    {
+      "id": "electric_potential_energy_change",
+      "title": "Thế năng điện giảm đúng bằng công của lực điện",
+      "curriculum": "Trường điện (Điện trường) – Điện thế và thế năng điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "W": {
+          "role": "potential_energy",
+          "where": {
+            "kind": "electric"
+          }
+        },
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "electric"
+          },
+          "many": true,
+          "min": 1
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "W"
+        ],
+        [
+          "neg",
+          [
+            "sum",
+            [
+              "mul",
+              "F",
+              "v"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "field_potential",
+      "title": "Liên hệ cường độ điện trường và điện thế: dọc đường đi điện thế giảm theo chiều điện trường (dV = −E·ds)",
+      "curriculum": "Trường điện (Điện trường) – Điện thế và thế năng điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "V": {
+          "role": "electric_potential",
+          "where": {
+            "by": null
+          }
+        },
+        "E": {
+          "role": "electric_field",
+          "where": {
+            "by": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "V"
+        ],
+        [
+          "neg",
+          [
+            "sum",
+            [
+              "mul",
+              "E",
+              "v"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "electric_work_potential",
+      "title": "Công của lực điện bằng điện tích nhân độ giảm điện thế: A = q·(V₁ − V₂), tức V = A/q",
+      "curriculum": "Trường điện (Điện trường) – Điện thế và thế năng điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "work",
+          "where": {
+            "kind": "electric"
+          }
+        },
+        "q": {
+          "role": "charge"
+        },
+        "V": {
+          "role": "electric_potential",
+          "where": {
+            "by": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "A"
+        ],
+        [
+          "neg",
+          [
+            "mul",
+            "q",
+            [
+              "ddt",
+              "V"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "point_charge_potential",
+      "title": "Điện thế của điện tích điểm (mốc ở vô cực): V = k·Q/r",
+      "curriculum": "Trường điện (Điện trường) – Điện thế và thế năng điện",
+      "scope": [
+        "of",
+        "by"
+      ],
+      "bind": {
+        "V": {
+          "role": "electric_potential",
+          "where": {
+            "by": "*"
+          }
+        },
+        "Q": {
+          "role": "source_charge"
+        },
+        "r": {
+          "role": "distance"
+        }
+      },
+      "equal": [
+        "V",
+        [
+          "div",
+          [
+            "mul",
+            "k_coulomb",
+            "Q"
+          ],
+          "r"
+        ]
+      ]
+    },
+    {
+      "id": "potential_superposition",
+      "title": "Điện thế tổng hợp bằng tổng điện thế của từng nguồn",
+      "curriculum": "Trường điện (Điện trường) – Điện thế và thế năng điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "V": {
+          "role": "electric_potential",
+          "where": {
+            "by": null
+          }
+        },
+        "Vi": {
+          "role": "electric_potential",
+          "where": {
+            "by": "*"
+          },
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        "V",
+        [
+          "sum",
+          "Vi"
+        ]
+      ]
+    },
+    {
+      "id": "capacitance",
+      "title": "Điện dung: Q = C·U",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Q": {
+          "role": "charge"
+        },
+        "C": {
+          "role": "capacitance"
+        },
+        "U": {
+          "role": "voltage"
+        }
+      },
+      "equal": [
+        "Q",
+        [
+          "mul",
+          "C",
+          "U"
+        ]
+      ]
+    },
+    {
+      "id": "capacitor_energy",
+      "title": "Năng lượng tụ điện: W = ½·C·U²",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "W": {
+          "role": "capacitor_energy"
+        },
+        "C": {
+          "role": "capacitance"
+        },
+        "U": {
+          "role": "voltage"
+        }
+      },
+      "equal": [
+        "W",
+        [
+          "mul",
+          [
+            "mul",
+            0.5,
+            "C"
+          ],
+          [
+            "pow",
+            "U",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "capacitor_energy_charge",
+      "title": "Năng lượng tụ điện: W = ½·Q·U",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "W": {
+          "role": "capacitor_energy"
+        },
+        "Q": {
+          "role": "charge"
+        },
+        "U": {
+          "role": "voltage"
+        }
+      },
+      "equal": [
+        "W",
+        [
+          "mul",
+          [
+            "mul",
+            0.5,
+            "Q"
+          ],
+          "U"
+        ]
+      ]
+    },
+    {
+      "id": "capacitor_energy_from_charge",
+      "title": "Năng lượng tụ điện: W = Q²/(2·C)",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "W": {
+          "role": "capacitor_energy"
+        },
+        "Q": {
+          "role": "charge"
+        },
+        "C": {
+          "role": "capacitance"
+        }
+      },
+      "unless": {
+        "role": "voltage"
+      },
+      "equal": [
+        "W",
+        [
+          "div",
+          [
+            "pow",
+            "Q",
+            2
+          ],
+          [
+            "mul",
+            2,
+            "C"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "capacitor_energy_positive",
+      "title": "Năng lượng tụ điện không âm",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "W": {
+          "role": "capacitor_energy"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "W"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "capacitor_current",
+      "title": "Dòng điện qua tụ (chiều dương là chiều đi vào bản dương, cùng chiều với hiệu điện thế đã khai báo của tụ) bằng tốc độ tăng điện tích của tụ: I = dQ/dt; khi tụ phóng điện dòng này âm",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Q": {
+          "role": "charge"
+        },
+        "C": {
+          "role": "capacitance"
+        },
+        "I": {
+          "role": "current"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "Q"
+        ],
+        "I"
+      ]
+    },
+    {
+      "id": "series_capacitance",
+      "title": "Bộ tụ ghép nối tiếp: 1/C = 1/C₁ + 1/C₂ + …",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "C": {
+          "role": "capacitance",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "capacitance",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          1,
+          "T"
+        ],
+        [
+          "sum",
+          [
+            "div",
+            1,
+            "C"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "parallel_capacitance",
+      "title": "Bộ tụ ghép song song: C = C₁ + C₂ + …",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "in_parallel"
+      ],
+      "bind": {
+        "C": {
+          "role": "capacitance",
+          "where": {
+            "in_parallel": "*",
+            "in_parallel_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "capacitance",
+          "where": {
+            "in_parallel_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "C"
+        ]
+      ]
+    },
+    {
+      "id": "series_charge",
+      "title": "Các tụ ghép nối tiếp tích điện tích bằng nhau và bằng điện tích của bộ",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "Q": {
+          "role": "charge",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "charge",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          [
+            "pow",
+            [
+              "sub",
+              "Q",
+              "T"
+            ],
+            2
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "parallel_charge",
+      "title": "Điện tích của bộ tụ ghép song song bằng tổng điện tích các tụ",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "in_parallel"
+      ],
+      "bind": {
+        "Q": {
+          "role": "charge",
+          "where": {
+            "in_parallel": "*",
+            "in_parallel_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "charge",
+          "where": {
+            "in_parallel_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "Q"
+        ]
+      ]
+    },
+    {
+      "id": "series_capacitor_energy",
+      "title": "Năng lượng của bộ tụ bằng tổng năng lượng các tụ (nối tiếp)",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "W": {
+          "role": "capacitor_energy",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "capacitor_energy",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "W"
+        ]
+      ]
+    },
+    {
+      "id": "parallel_capacitor_energy",
+      "title": "Năng lượng của bộ tụ bằng tổng năng lượng các tụ (song song)",
+      "curriculum": "Trường điện (Điện trường) – Tụ điện và điện dung",
+      "scope": [
+        "in_parallel"
+      ],
+      "bind": {
+        "W": {
+          "role": "capacitor_energy",
+          "where": {
+            "in_parallel": "*",
+            "in_parallel_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "capacitor_energy",
+          "where": {
+            "in_parallel_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "W"
+        ]
+      ]
+    },
+    {
+      "id": "current_definition",
+      "title": "Cường độ dòng điện là điện lượng chuyển qua tiết diện thẳng trong một đơn vị thời gian: I = Δq/Δt",
+      "curriculum": "Dòng điện, mạch điện – Cường độ dòng điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "q": {
+          "role": "charge_transferred"
+        },
+        "I": {
+          "role": "current"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "q"
+        ],
+        "I"
+      ]
+    },
+    {
+      "id": "drift_current",
+      "title": "Dòng điện trong dây dẫn: I = S·n·v·e, tức tốc độ dịch chuyển có hướng v = I/(S·n·e)",
+      "curriculum": "Dòng điện, mạch điện – Cường độ dòng điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "I": {
+          "role": "current"
+        },
+        "S": {
+          "role": "cross_section_area"
+        },
+        "n": {
+          "role": "carrier_density"
+        },
+        "v": {
+          "role": "drift_speed"
+        },
+        "e": {
+          "role": "carrier_charge"
+        }
+      },
+      "equal": [
+        "v",
+        [
+          "div",
+          [
+            "abs",
+            "I"
+          ],
+          [
+            "mul",
+            [
+              "mul",
+              "S",
+              "n"
+            ],
+            [
+              "abs",
+              "e"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ohm",
+      "title": "Định luật Ohm (định nghĩa điện trở): U = I·R; phần tử có thêm độ tự cảm thì U = I·R + L·dI/dt",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "voltage"
+        },
+        "I": {
+          "role": "current"
+        },
+        "R": {
+          "role": "resistance"
+        },
+        "L": {
+          "role": "inductance",
+          "many": true
+        }
+      },
+      "unless": {
+        "role": "impedance"
+      },
+      "equal": [
+        "U",
+        [
+          "add",
+          [
+            "mul",
+            "I",
+            "R"
+          ],
+          [
+            "sum",
+            [
+              "mul",
+              "L",
+              [
+                "ddt",
+                "I"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "resistance_positive",
+      "title": "Điện trở không âm",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "R": {
+          "role": "resistance"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "R"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "source_terminal_voltage",
+      "title": "Hiệu điện thế giữa hai cực của nguồn: U = ℰ − I·r",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "terminal_voltage"
+        },
+        "E": {
+          "role": "emf"
+        },
+        "I": {
+          "role": "current"
+        },
+        "ri": {
+          "role": "internal_resistance"
+        }
+      },
+      "equal": [
+        "U",
+        [
+          "sub",
+          "E",
+          [
+            "mul",
+            "I",
+            "ri"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "ideal_source_voltage",
+      "title": "Nguồn không có điện trở trong: hiệu điện thế hai cực bằng suất điện động",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "terminal_voltage"
+        },
+        "E": {
+          "role": "emf"
+        }
+      },
+      "unless": {
+        "role": "internal_resistance"
+      },
+      "equal": [
+        "U",
+        "E"
+      ]
+    },
+    {
+      "id": "loop_voltage",
+      "title": "Trong một mạch kín, tổng hiệu điện thế hai cực của các nguồn bằng tổng độ giảm thế trên các phần tử mạch ngoài",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "in_loop"
+      ],
+      "bind": {
+        "S": {
+          "role": "terminal_voltage",
+          "where": {
+            "in_loop": "*"
+          },
+          "many": true,
+          "min": 1
+        },
+        "U": {
+          "role": "voltage",
+          "where": {
+            "in_loop": "*"
+          },
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          "S"
+        ],
+        [
+          "sum",
+          "U"
+        ]
+      ]
+    },
+    {
+      "id": "series_current",
+      "title": "Đoạn mạch nối tiếp: cường độ dòng điện qua mọi phần tử bằng nhau và bằng dòng điện của đoạn mạch",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "I": {
+          "role": "current",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "current",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          [
+            "pow",
+            [
+              "sub",
+              "I",
+              "T"
+            ],
+            2
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "series_voltage",
+      "title": "Đoạn mạch nối tiếp: hiệu điện thế của đoạn mạch bằng tổng hiệu điện thế trên các phần tử",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "U": {
+          "role": "voltage",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "voltage",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "U"
+        ]
+      ]
+    },
+    {
+      "id": "series_resistance",
+      "title": "Điện trở tương đương của đoạn mạch nối tiếp: R = R₁ + R₂ + …",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "R": {
+          "role": "resistance",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "resistance",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "R"
+        ]
+      ]
+    },
+    {
+      "id": "parallel_voltage",
+      "title": "Đoạn mạch song song: hiệu điện thế trên mọi nhánh bằng nhau và bằng hiệu điện thế của đoạn mạch",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "in_parallel"
+      ],
+      "bind": {
+        "U": {
+          "role": "voltage",
+          "where": {
+            "in_parallel": "*",
+            "in_parallel_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "voltage",
+          "where": {
+            "in_parallel_total": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          [
+            "pow",
+            [
+              "sub",
+              "U",
+              "T"
+            ],
+            2
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "parallel_current",
+      "title": "Đoạn mạch song song: dòng điện mạch chính bằng tổng dòng điện các nhánh",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "in_parallel"
+      ],
+      "bind": {
+        "I": {
+          "role": "current",
+          "where": {
+            "in_parallel": "*",
+            "in_parallel_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "current",
+          "where": {
+            "in_parallel_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "I"
+        ]
+      ]
+    },
+    {
+      "id": "parallel_resistance",
+      "title": "Điện trở tương đương của đoạn mạch song song: 1/R = 1/R₁ + 1/R₂ + …",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "in_parallel"
+      ],
+      "bind": {
+        "R": {
+          "role": "resistance",
+          "where": {
+            "in_parallel": "*",
+            "in_parallel_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "resistance",
+          "where": {
+            "in_parallel_total": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          1,
+          "T"
+        ],
+        [
+          "sum",
+          [
+            "div",
+            1,
+            "R"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "node_current",
+      "title": "Tại một nút mạch, tổng dòng điện đi vào bằng tổng dòng điện đi ra (bảo toàn điện tích)",
+      "curriculum": "Dòng điện, mạch điện – Mạch điện và điện trở",
+      "scope": [
+        "in_node"
+      ],
+      "bind": {
+        "A": {
+          "role": "current",
+          "where": {
+            "kind": "into",
+            "in_node": "*"
+          },
+          "many": true
+        },
+        "B": {
+          "role": "current",
+          "where": {
+            "kind": "out",
+            "in_node": "*"
+          },
+          "many": true
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          "A"
+        ],
+        [
+          "sum",
+          "B"
+        ]
+      ]
+    },
+    {
+      "id": "electric_power",
+      "title": "Công suất tiêu thụ điện của đoạn mạch: P = U·I (tức thời)",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "electric_power"
+        },
+        "U": {
+          "role": "voltage"
+        },
+        "I": {
+          "role": "current"
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "mul",
+          "U",
+          "I"
+        ]
+      ]
+    },
+    {
+      "id": "resistor_power",
+      "title": "Công suất toả nhiệt trên điện trở: P = I²·R",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "electric_power"
+        },
+        "I": {
+          "role": "current"
+        },
+        "R": {
+          "role": "resistance"
+        }
+      },
+      "unless": {
+        "role": "voltage"
+      },
+      "equal": [
+        "P",
+        [
+          "mul",
+          [
+            "pow",
+            "I",
+            2
+          ],
+          "R"
+        ]
+      ]
+    },
+    {
+      "id": "resistor_power_voltage",
+      "title": "Công suất tiêu thụ trên điện trở: P = U²/R",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "electric_power"
+        },
+        "U": {
+          "role": "voltage"
+        },
+        "R": {
+          "role": "resistance"
+        }
+      },
+      "unless": {
+        "role": "current"
+      },
+      "equal": [
+        "P",
+        [
+          "div",
+          [
+            "pow",
+            "U",
+            2
+          ],
+          "R"
+        ]
+      ]
+    },
+    {
+      "id": "resistor_consumes",
+      "title": "Điện trở chỉ tiêu thụ năng lượng điện (P ≥ 0)",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "electric_power"
+        },
+        "R": {
+          "role": "resistance"
+        }
+      },
+      "unless": {
+        "role": "inductance"
+      },
+      "atMost": [
+        [
+          "neg",
+          "P"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "electric_energy",
+      "title": "Năng lượng điện tiêu thụ tăng với tốc độ U·I (A = U·I·t)",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "electric_energy"
+        },
+        "U": {
+          "role": "voltage"
+        },
+        "I": {
+          "role": "current"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "A"
+        ],
+        [
+          "mul",
+          "U",
+          "I"
+        ]
+      ]
+    },
+    {
+      "id": "electric_energy_power",
+      "title": "Công suất điện là năng lượng điện tiêu thụ trong một đơn vị thời gian",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "electric_energy"
+        },
+        "P": {
+          "role": "electric_power"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "A"
+        ],
+        "P"
+      ]
+    },
+    {
+      "id": "source_power",
+      "title": "Công suất của nguồn điện: P = ℰ·I",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "source_power"
+        },
+        "E": {
+          "role": "emf"
+        },
+        "I": {
+          "role": "current"
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "mul",
+          "E",
+          "I"
+        ]
+      ]
+    },
+    {
+      "id": "source_energy",
+      "title": "Công của nguồn điện tăng với tốc độ ℰ·I (ℰ = A/q)",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "source_energy"
+        },
+        "E": {
+          "role": "emf"
+        },
+        "I": {
+          "role": "current"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "A"
+        ],
+        [
+          "mul",
+          "E",
+          "I"
+        ]
+      ]
+    },
+    {
+      "id": "source_energy_charge",
+      "title": "Suất điện động là công của nguồn trên một đơn vị điện tích dịch chuyển: A = ℰ·q",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "source_energy"
+        },
+        "E": {
+          "role": "emf"
+        },
+        "q": {
+          "role": "charge_transferred"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "A"
+        ],
+        [
+          "mul",
+          "E",
+          [
+            "ddt",
+            "q"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "source_output_power",
+      "title": "Công suất nguồn cung cấp cho mạch ngoài: P = U·I",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "electric_power"
+        },
+        "U": {
+          "role": "terminal_voltage"
+        },
+        "I": {
+          "role": "current"
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "mul",
+          "U",
+          "I"
+        ]
+      ]
+    },
+    {
+      "id": "source_efficiency",
+      "title": "Hiệu suất của nguồn điện: H = U/ℰ",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "H": {
+          "role": "efficiency"
+        },
+        "U": {
+          "role": "terminal_voltage"
+        },
+        "E": {
+          "role": "emf"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "H",
+          "E"
+        ],
+        "U"
+      ]
+    },
+    {
+      "id": "series_power",
+      "title": "Công suất của đoạn mạch nối tiếp bằng tổng công suất các phần tử",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "in_series"
+      ],
+      "bind": {
+        "P": {
+          "role": "electric_power",
+          "where": {
+            "in_series": "*",
+            "in_series_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "electric_power",
+          "where": {
+            "in_series_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "P"
+        ]
+      ]
+    },
+    {
+      "id": "parallel_power",
+      "title": "Công suất của đoạn mạch song song bằng tổng công suất các nhánh",
+      "curriculum": "Dòng điện, mạch điện – Năng lượng điện, công suất điện",
+      "scope": [
+        "in_parallel"
+      ],
+      "bind": {
+        "P": {
+          "role": "electric_power",
+          "where": {
+            "in_parallel": "*",
+            "in_parallel_total": null
+          },
+          "many": true,
+          "min": 1
+        },
+        "T": {
+          "role": "electric_power",
+          "where": {
+            "in_parallel_total": "*"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "P"
+        ]
+      ]
+    },
+    {
+      "id": "opamp_output_limit",
+      "title": "Điện áp ra của op-amp không vượt quá điện áp nguồn nuôi",
+      "curriculum": "Chuyên đề 11.3 Mở đầu về điện tử học – Khuếch đại thuật toán",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "output_voltage"
+        },
+        "S": {
+          "role": "supply_voltage"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "U"
+        ],
+        [
+          "abs",
+          "S"
+        ]
+      ]
+    },
+    {
+      "id": "opamp_output_sign",
+      "title": "Op-amp lí tưởng: điện áp ra cùng dấu với hiệu điện áp (V₊ − V₋) giữa hai lối vào",
+      "curriculum": "Chuyên đề 11.3 Mở đầu về điện tử học – Khuếch đại thuật toán",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "output_voltage"
+        },
+        "P": {
+          "role": "noninverting_input_voltage"
+        },
+        "N": {
+          "role": "inverting_input_voltage"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          [
+            "mul",
+            "U",
+            [
+              "sub",
+              "P",
+              "N"
+            ]
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "opamp_comparator",
+      "title": "Op-amp lí tưởng không hồi tiếp (so sánh): khi hai lối vào khác nhau, điện áp ra bão hoà ở điện áp nguồn nuôi",
+      "curriculum": "Chuyên đề 11.3 Mở đầu về điện tử học – Khuếch đại thuật toán",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "output_voltage"
+        },
+        "P": {
+          "role": "noninverting_input_voltage"
+        },
+        "N": {
+          "role": "inverting_input_voltage"
+        },
+        "S": {
+          "role": "supply_voltage"
+        }
+      },
+      "unless": {
+        "role": "feedback_resistance"
+      },
+      "when": [
+        "sub",
+        "P",
+        "N"
+      ],
+      "equal": [
+        [
+          "abs",
+          "U"
+        ],
+        [
+          "abs",
+          "S"
+        ]
+      ]
+    }
+  ]
+}

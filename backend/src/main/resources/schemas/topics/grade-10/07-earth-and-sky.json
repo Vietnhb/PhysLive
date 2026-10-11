@@ -35,5 +35,9 @@
       "name": "Một số hiện tượng thiên văn",
       "summary": "Nhật thực, nguyệt thực, thuỷ triều."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "mechanics_more"
   ]
 }

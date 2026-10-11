@@ -1,7 +1,7 @@
 {
   "capabilityId": "fixed_length_gravity_oscillation",
   "title": "Con lắc đơn",
-  "version": "2.0",
+  "version": "2.1",
   "applicability": {
     "objectTypes": [
       "body"
@@ -78,6 +78,11 @@
     {
       "key": "mechanical_energy",
       "unit": "J"
+    },
+    {
+      "key": "period",
+      "unit": "s",
+      "description": "chu kì dao động nhỏ T = 2π√(l/g)"
     }
   ],
   "assumptions": [
@@ -250,6 +255,22 @@
                 "cos",
                 "angle"
               ]
+            ]
+          ]
+        ],
+        "period": [
+          "mul",
+          [
+            "mul",
+            2,
+            3.141592653589793
+          ],
+          [
+            "sqrt",
+            [
+              "div",
+              "length",
+              "gravitational_acceleration"
             ]
           ]
         ]

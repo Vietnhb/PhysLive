@@ -1,7 +1,7 @@
 {
   "capabilityId": "satellite_of_orbiting_body",
   "title": "Vật quay quanh một thiên thể đang quay quanh thiên thể khác",
-  "version": "1.0",
+  "version": "1.1",
   "applicability": {
     "objectTypes": [
       "body"
@@ -44,7 +44,8 @@
     {
       "key": "satellite_initial_angle",
       "unit": "rad",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "góc ban đầu của vệ tinh quanh vật chính, đo từ cùng trục với góc của vật chính; bằng góc của vật chính + 180° thì vệ tinh nằm giữa tâm và vật chính (trăng non)"
     }
   ],
   "outputs": [
@@ -70,14 +71,14 @@
     }
   ],
   "assumptions": [
-    "Quỹ đạo tròn đồng phẳng; tâm hệ (ví dụ Mặt Trời) cố định tại gốc; góc pha đo giữa hướng tâm→vật chính và vật chính→vệ tinh."
+    "Quỹ đạo tròn đồng phẳng; tâm hệ (ví dụ Mặt Trời) cố định tại gốc. Góc pha là góc giữa hướng tâm→vật chính và hướng vật chính→vệ tinh: bằng 0 khi vệ tinh ở phía xa tâm (nhìn từ vật chính thấy sáng toàn bộ – trăng tròn), bằng 180° khi vệ tinh nằm giữa tâm và vật chính (trăng non). Hai góc ban đầu đo từ cùng một trục."
   ],
   "equationSet": {
     "canonical": [
       "vị trí = vị trí vật chính quanh tâm + vị trí vệ tinh quanh vật chính"
     ],
     "derived": [
-      "pha Mặt Trăng: phần được chiếu sáng = (1 - cos(góc))/2",
+      "pha Mặt Trăng: phần được chiếu sáng nhìn từ vật chính = (1 + cos(góc pha))/2",
       "nhật/nguyệt thực khi ba thiên thể thẳng hàng"
     ]
   },
@@ -249,7 +250,7 @@
           "mul",
           0.5,
           [
-            "sub",
+            "add",
             1,
             [
               "cos",
@@ -445,7 +446,7 @@
           "mul",
           0.5,
           [
-            "sub",
+            "add",
             1,
             [
               "cos",

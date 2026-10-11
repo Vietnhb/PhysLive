@@ -1,0 +1,386 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Vật được thả không vận tốc đầu từ đỉnh dốc nên trọng lực kéo vật trượt xuống, còn lực ma sát cản lại; vật đi nhanh dần đều theo định luật II Newton. Hết dốc dài 3 m, vật sang mặt ngang: lúc này chỉ còn lực ma sát cản nên vật đi chậm dần đều cho tới khi dừng. Cơ năng của vật giảm dần, phần giảm đúng bằng công của lực ma sát. Em có thể đổi khối lượng, góc nghiêng, chiều dài dốc và hệ số ma sát để xem vận tốc ở chân dốc, quãng đường trên mặt ngang và thời gian chuyển động thay đổi thế nào.",
+ "defaults": [
+  "Lấy gia tốc rơi tự do bằng 9,8 m/s²."
+ ],
+ "simulationSpec": {
+  "durationSeconds": 30,
+  "parameters": [
+   {
+    "name": "m",
+    "label": "Khối lượng của vật",
+    "value": 2,
+    "unit": "kg",
+    "min": 0.5,
+    "max": 10,
+    "step": 0.5,
+    "role": "mass",
+    "of": "vat"
+   },
+   {
+    "name": "alpha",
+    "label": "Góc nghiêng của dốc",
+    "value": 30,
+    "unit": "độ",
+    "min": 5,
+    "max": 60,
+    "step": 1,
+    "role": "angle"
+   },
+   {
+    "name": "L",
+    "label": "Chiều dài dốc",
+    "value": 3,
+    "unit": "m",
+    "min": 0.5,
+    "max": 10,
+    "step": 0.5,
+    "role": "other"
+   },
+   {
+    "name": "mu",
+    "label": "Hệ số ma sát",
+    "value": 0.2,
+    "unit": "1",
+    "min": 0.05,
+    "max": 0.8,
+    "step": 0.01,
+    "role": "friction_coefficient",
+    "of": "vat"
+   }
+  ],
+  "objects": [
+   {
+    "id": "vat",
+    "label": "Vật",
+    "count": 1
+   },
+   {
+    "id": "doc",
+    "label": "Mặt phẳng nghiêng",
+    "count": 1
+   },
+   {
+    "id": "san",
+    "label": "Mặt ngang",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "v",
+    "label": "Vận tốc của vật"
+   },
+   {
+    "quantity": "s",
+    "label": "Quãng đường đã trượt"
+   },
+   {
+    "quantity": "a",
+    "label": "Gia tốc"
+   },
+   {
+    "quantity": "Fms",
+    "label": "Lực ma sát"
+   },
+   {
+    "quantity": "h",
+    "label": "Độ cao"
+   },
+   {
+    "quantity": "W",
+    "label": "Cơ năng"
+   },
+   {
+    "quantity": "Ams",
+    "label": "Công của lực ma sát"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "s",
+     "label": "Quãng đường vật đã trượt",
+     "unit": "m",
+     "role": "position",
+     "of": "vat",
+     "axis": "s",
+     "initial": 0,
+     "rate": "v"
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc của vật dọc đường trượt",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "vat",
+     "axis": "s",
+     "initial": 0,
+     "rate": "a"
+    },
+    {
+     "id": "th",
+     "label": "Góc nghiêng của mặt đang đỡ vật",
+     "unit": "rad",
+     "role": "angle",
+     "value": [
+      "if",
+      [
+       "sub",
+       "L",
+       "s"
+      ],
+      "alpha",
+      0
+     ]
+    },
+    {
+     "id": "Ps",
+     "label": "Thành phần trọng lực dọc đường trượt",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "vat",
+     "axis": "s",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "m",
+       "g"
+      ],
+      [
+       "sin",
+       "th"
+      ]
+     ]
+    },
+    {
+     "id": "Pn",
+     "label": "Thành phần trọng lực vuông góc với mặt đỡ",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "vat",
+     "axis": "n",
+     "value": [
+      "neg",
+      [
+       "mul",
+       [
+        "mul",
+        "m",
+        "g"
+       ],
+       [
+        "cos",
+        "th"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "N",
+     "label": "Phản lực của mặt đỡ",
+     "unit": "N",
+     "role": "force",
+     "kind": "normal",
+     "of": "vat",
+     "axis": "n",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "m",
+       "g"
+      ],
+      [
+       "cos",
+       "th"
+      ]
+     ]
+    },
+    {
+     "id": "Fms",
+     "label": "Lực ma sát",
+     "unit": "N",
+     "role": "force",
+     "kind": "friction",
+     "of": "vat",
+     "axis": "s",
+     "value": [
+      "if",
+      [
+       "abs",
+       "v"
+      ],
+      [
+       "neg",
+       [
+        "mul",
+        [
+         "mul",
+         "mu",
+         "N"
+        ],
+        [
+         "sign",
+         "v"
+        ]
+       ]
+      ],
+      [
+       "neg",
+       [
+        "mul",
+        [
+         "min",
+         [
+          "mul",
+          "mu",
+          "N"
+         ],
+         [
+          "abs",
+          "Ps"
+         ]
+        ],
+        [
+         "sign",
+         "Ps"
+        ]
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "a",
+     "label": "Gia tốc của vật",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "vat",
+     "axis": "s",
+     "value": [
+      "div",
+      [
+       "add",
+       "Ps",
+       "Fms"
+      ],
+      "m"
+     ]
+    },
+    {
+     "id": "h",
+     "label": "Độ cao của vật so với mặt ngang",
+     "unit": "m",
+     "role": "other",
+     "value": [
+      "mul",
+      [
+       "sub",
+       "L",
+       [
+        "min",
+        "s",
+        "L"
+       ]
+      ],
+      [
+       "sin",
+       "alpha"
+      ]
+     ]
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "vat",
+     "value": [
+      "mul",
+      0.5,
+      [
+       "mul",
+       "m",
+       [
+        "pow",
+        "v",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Wt",
+     "label": "Thế năng trọng trường",
+     "unit": "J",
+     "role": "potential_energy",
+     "kind": "gravity",
+     "of": "vat",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "m",
+       "g"
+      ],
+      "h"
+     ]
+    },
+    {
+     "id": "W",
+     "label": "Cơ năng",
+     "unit": "J",
+     "role": "mechanical_energy",
+     "of": "vat",
+     "value": [
+      "add",
+      "Wd",
+      "Wt"
+     ]
+    },
+    {
+     "id": "Ams",
+     "label": "Công của lực ma sát",
+     "unit": "J",
+     "role": "work",
+     "kind": "friction",
+     "of": "vat",
+     "initial": 0,
+     "rate": [
+      "mul",
+      "Fms",
+      "v"
+     ]
+    }
+   ],
+   "until": {
+    "quantity": "v",
+    "direction": "falling",
+    "value": 0
+   },
+   "assumptions": [
+    "Coi vật là một chất điểm.",
+    "Bỏ qua lực cản của không khí.",
+    "Trục s đi dọc theo đường trượt của vật: xuống dốc rồi tiếp theo mặt ngang, chiều dương là chiều vật trượt; trục n vuông góc với mặt đang đỡ vật, hướng ra khỏi mặt.",
+    "Ở chân dốc vật chuyển sang mặt ngang mà độ lớn vận tốc không đổi.",
+    "Mốc thế năng ở mặt ngang.",
+    "Nếu dốc quá thoải so với ma sát thì vật đứng yên trên đỉnh dốc."
+   ]
+  }
+ }
+}

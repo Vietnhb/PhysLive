@@ -1,0 +1,133 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Một electron chuyển động với tốc độ 2·10^6 m/s. Tính động lượng và bước sóng de Broglie của nó.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1e-09,
+  "parameters": [
+   {
+    "name": "v0",
+    "label": "Tốc độ electron",
+    "value": 2000,
+    "unit": "km/s",
+    "min": 100,
+    "max": 10000,
+    "step": 100,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "electron",
+    "label": "electron",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "x",
+    "label": "x"
+   },
+   {
+    "quantity": "v",
+    "label": "v"
+   },
+   {
+    "quantity": "p",
+    "label": "p"
+   },
+   {
+    "quantity": "K",
+    "label": "K"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "h",
+     "label": "Hằng số Planck",
+     "value": 6.626e-34,
+     "unit": "J*s",
+     "role": "other"
+    },
+    {
+     "id": "me",
+     "label": "Khối lượng electron",
+     "value": 9.109e-31,
+     "unit": "kg",
+     "role": "mass",
+     "of": "electron"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "x",
+     "label": "Tọa độ electron",
+     "unit": "m",
+     "role": "position",
+     "of": "electron",
+     "axis": "x",
+     "initial": 0,
+     "rate": "v"
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc electron",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "electron",
+     "axis": "x",
+     "value": "v0"
+    },
+    {
+     "id": "p",
+     "label": "Động lượng electron",
+     "unit": "kg*m/s",
+     "role": "momentum",
+     "of": "electron",
+     "axis": "x",
+     "value": [
+      "mul",
+      "me",
+      "v"
+     ]
+    },
+    {
+     "id": "K",
+     "label": "Động năng electron",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "electron",
+     "value": [
+      "mul",
+      [
+       "mul",
+       0.5,
+       "me"
+      ],
+      [
+       "pow",
+       "v",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "ldb",
+     "label": "Bước sóng de Broglie",
+     "unit": "m",
+     "role": "de_broglie_wavelength",
+     "of": "electron",
+     "value": [
+      "div",
+      "h",
+      "p"
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

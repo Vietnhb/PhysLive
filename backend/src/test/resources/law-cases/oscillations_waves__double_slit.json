@@ -1,0 +1,283 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Giao thoa ánh sáng đơn sắc qua hai khe hẹp, màn ở xa so với khoảng cách hai khe.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 2,
+  "parameters": [
+   {
+    "name": "lam",
+    "label": "Bước sóng",
+    "value": 600,
+    "unit": "nm",
+    "min": 400,
+    "max": 750,
+    "step": 10,
+    "role": "wavelength",
+    "in": "anhsang"
+   },
+   {
+    "name": "a",
+    "label": "Khoảng cách hai khe",
+    "value": 1,
+    "unit": "mm",
+    "min": 0.2,
+    "max": 2,
+    "step": 0.1,
+    "role": "slit_separation",
+    "in": "anhsang"
+   },
+   {
+    "name": "D",
+    "label": "Khoảng cách tới màn",
+    "value": 2,
+    "unit": "m",
+    "min": 0.5,
+    "max": 3,
+    "step": 0.1,
+    "role": "screen_distance",
+    "in": "anhsang"
+   },
+   {
+    "name": "xM",
+    "label": "Tọa độ điểm M",
+    "value": 1.4,
+    "unit": "mm",
+    "min": 0,
+    "max": 10,
+    "step": 0.1,
+    "role": "screen_position",
+    "of": "M",
+    "in": "anhsang"
+   },
+   {
+    "name": "k",
+    "label": "Bậc vân sáng",
+    "value": 3,
+    "unit": "1",
+    "min": 0,
+    "max": 6,
+    "step": 1,
+    "role": "fringe_order",
+    "of": "vansang",
+    "in": "anhsang"
+   },
+   {
+    "name": "kt",
+    "label": "Số k của vân tối",
+    "value": 2,
+    "unit": "1",
+    "min": 0,
+    "max": 6,
+    "step": 1,
+    "role": "fringe_order",
+    "of": "vantoi",
+    "in": "anhsang"
+   },
+   {
+    "name": "a0",
+    "label": "Biên độ mỗi sóng",
+    "value": 1,
+    "unit": "V/m",
+    "min": 0.5,
+    "max": 2,
+    "step": 0.5,
+    "role": "source_amplitude",
+    "in": "anhsang"
+   }
+  ],
+  "objects": [
+   {
+    "id": "khe",
+    "label": "khe",
+    "count": 1
+   },
+   {
+    "id": "man",
+    "label": "man",
+    "count": 1
+   },
+   {
+    "id": "M",
+    "label": "M",
+    "count": 1
+   },
+   {
+    "id": "vansang",
+    "label": "vansang",
+    "count": 1
+   },
+   {
+    "id": "vantoi",
+    "label": "vantoi",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "i",
+    "label": "Khoảng vân"
+   },
+   {
+    "quantity": "vas",
+    "label": "Tốc độ ánh sáng"
+   },
+   {
+    "quantity": "f",
+    "label": "Tần số ánh sáng"
+   },
+   {
+    "quantity": "dd",
+    "label": "Hiệu đường đi tại M"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "cc",
+     "label": "Tốc độ ánh sáng",
+     "value": 300000000.0,
+     "unit": "m/s",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "i",
+     "label": "Khoảng vân",
+     "unit": "m",
+     "role": "fringe_spacing",
+     "in": "anhsang",
+     "value": [
+      "div",
+      [
+       "mul",
+       "lam",
+       "D"
+      ],
+      "a"
+     ]
+    },
+    {
+     "id": "vas",
+     "label": "Tốc độ ánh sáng",
+     "unit": "m/s",
+     "role": "wave_speed",
+     "kind": "electromagnetic",
+     "in": "anhsang",
+     "value": "cc"
+    },
+    {
+     "id": "f",
+     "label": "Tần số ánh sáng",
+     "unit": "Hz",
+     "role": "frequency",
+     "in": "anhsang",
+     "value": [
+      "div",
+      "vas",
+      "lam"
+     ]
+    },
+    {
+     "id": "dd",
+     "label": "Hiệu đường đi tại M",
+     "unit": "m",
+     "role": "path_difference",
+     "of": "M",
+     "in": "anhsang",
+     "value": [
+      "div",
+      [
+       "mul",
+       "a",
+       "xM"
+      ],
+      "D"
+     ]
+    },
+    {
+     "id": "dph",
+     "label": "Độ lệch pha hai sóng tại M",
+     "unit": "rad",
+     "role": "phase_difference",
+     "of": "M",
+     "in": "anhsang",
+     "value": [
+      "div",
+      [
+       "mul",
+       6.283185307179586,
+       "dd"
+      ],
+      "lam"
+     ]
+    },
+    {
+     "id": "AM",
+     "label": "Biên độ tổng hợp tại M",
+     "unit": "V/m",
+     "role": "amplitude",
+     "of": "M",
+     "in": "anhsang",
+     "value": [
+      "mul",
+      [
+       "mul",
+       2,
+       "a0"
+      ],
+      [
+       "abs",
+       [
+        "cos",
+        [
+         "mul",
+         0.5,
+         "dph"
+        ]
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "xs",
+     "label": "Vị trí vân sáng bậc k",
+     "unit": "m",
+     "role": "screen_position",
+     "kind": "bright",
+     "of": "vansang",
+     "in": "anhsang",
+     "value": [
+      "mul",
+      "k",
+      "i"
+     ]
+    },
+    {
+     "id": "xt",
+     "label": "Vị trí vân tối",
+     "unit": "m",
+     "role": "screen_position",
+     "kind": "dark",
+     "of": "vantoi",
+     "in": "anhsang",
+     "value": [
+      "mul",
+      [
+       "add",
+       "kt",
+       0.5
+      ],
+      "i"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Giao thoa ánh sáng đơn sắc qua hai khe hẹp, màn ở xa so với khoảng cách hai khe."
+   ]
+  }
+ }
+}

@@ -1,0 +1,414 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Vật được kéo lệch 10 cm rồi thả nên lực đàn hồi của lò xo kéo vật dao động quanh vị trí lò xo không biến dạng. Lực ma sát trượt của mặt bàn luôn ngược chiều chuyển động và sinh công âm, nên cơ năng (động năng cộng thế năng đàn hồi) giảm dần đúng bằng công của lực ma sát. Vì vậy sau mỗi nửa chu kì, vật chỉ ra xa được ít hơn lần trước một đoạn bằng 2·μ·m·g/k, tức biên độ giảm đều. Khi vật dừng ở chỗ lực đàn hồi không thắng nổi ma sát thì nó đứng yên hẳn và mô phỏng kết thúc. Em có thể đổi khối lượng, độ cứng, độ lệch ban đầu và hệ số ma sát để xem dao động tắt nhanh hay chậm.",
+ "defaults": [
+  "Lấy gia tốc rơi tự do g = 9,8 m/s².",
+  "Coi hệ số ma sát nghỉ bằng hệ số ma sát trượt 0,05."
+ ],
+ "simulationSpec": {
+  "durationSeconds": 20,
+  "parameters": [
+   {
+    "name": "m",
+    "label": "Khối lượng vật",
+    "value": 0.5,
+    "unit": "kg",
+    "min": 0.1,
+    "max": 2,
+    "step": 0.1,
+    "role": "mass",
+    "of": "vat"
+   },
+   {
+    "name": "k",
+    "label": "Độ cứng lò xo",
+    "value": 50,
+    "unit": "N/m",
+    "min": 10,
+    "max": 200,
+    "step": 5,
+    "role": "stiffness",
+    "of": "vat"
+   },
+   {
+    "name": "x0",
+    "label": "Độ lệch ban đầu",
+    "value": 10,
+    "unit": "cm",
+    "min": 2,
+    "max": 20,
+    "step": 1,
+    "role": "other"
+   },
+   {
+    "name": "mu",
+    "label": "Hệ số ma sát",
+    "value": 0.05,
+    "unit": "1",
+    "min": 0.01,
+    "max": 0.2,
+    "step": 0.01,
+    "role": "friction_coefficient",
+    "of": "vat"
+   }
+  ],
+  "objects": [
+   {
+    "id": "vat",
+    "label": "Vật nặng",
+    "count": 1
+   },
+   {
+    "id": "loxo",
+    "label": "Lò xo",
+    "count": 1
+   },
+   {
+    "id": "ban",
+    "label": "Mặt bàn",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "x",
+    "label": "Li độ của vật"
+   },
+   {
+    "quantity": "W",
+    "label": "Cơ năng"
+   },
+   {
+    "quantity": "Wmat",
+    "label": "Cơ năng đã mất"
+   },
+   {
+    "quantity": "Wd",
+    "label": "Động năng"
+   },
+   {
+    "quantity": "Wt",
+    "label": "Thế năng đàn hồi"
+   },
+   {
+    "quantity": "v",
+    "label": "Vận tốc"
+   },
+   {
+    "quantity": "Fms",
+    "label": "Lực ma sát"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    },
+    {
+     "id": "veps",
+     "label": "Ngưỡng vận tốc coi như đứng yên",
+     "value": 0.002,
+     "unit": "m/s",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "x",
+     "label": "Li độ của vật",
+     "unit": "m",
+     "role": "position",
+     "of": "vat",
+     "axis": "x",
+     "initial": "x0",
+     "rate": "v"
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc của vật",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "vat",
+     "axis": "x",
+     "initial": 0,
+     "rate": "a"
+    },
+    {
+     "id": "dl",
+     "label": "Độ biến dạng của lò xo",
+     "unit": "m",
+     "role": "deformation",
+     "of": "vat",
+     "axis": "x",
+     "value": "x"
+    },
+    {
+     "id": "Fdh",
+     "label": "Lực đàn hồi",
+     "unit": "N",
+     "role": "force",
+     "kind": "spring",
+     "of": "vat",
+     "axis": "x",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "k",
+       "dl"
+      ]
+     ]
+    },
+    {
+     "id": "P",
+     "label": "Trọng lực",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "vat",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "N",
+     "label": "Phản lực của mặt bàn",
+     "unit": "N",
+     "role": "force",
+     "kind": "normal",
+     "of": "vat",
+     "axis": "y",
+     "value": [
+      "mul",
+      "m",
+      "g"
+     ]
+    },
+    {
+     "id": "Fms",
+     "label": "Lực ma sát",
+     "unit": "N",
+     "role": "force",
+     "kind": "friction",
+     "of": "vat",
+     "axis": "x",
+     "value": [
+      "if",
+      [
+       "sub",
+       [
+        "abs",
+        "v"
+       ],
+       "veps"
+      ],
+      [
+       "neg",
+       [
+        "mul",
+        [
+         "mul",
+         "mu",
+         "N"
+        ],
+        [
+         "sign",
+         "v"
+        ]
+       ]
+      ],
+      [
+       "max",
+       [
+        "neg",
+        [
+         "mul",
+         "mu",
+         "N"
+        ]
+       ],
+       [
+        "min",
+        [
+         "mul",
+         "mu",
+         "N"
+        ],
+        [
+         "neg",
+         "Fdh"
+        ]
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "a",
+     "label": "Gia tốc của vật",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "vat",
+     "axis": "x",
+     "value": [
+      "div",
+      [
+       "add",
+       "Fdh",
+       "Fms"
+      ],
+      "m"
+     ]
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "vat",
+     "value": [
+      "mul",
+      0.5,
+      [
+       "mul",
+       "m",
+       [
+        "pow",
+        "v",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Wt",
+     "label": "Thế năng đàn hồi",
+     "unit": "J",
+     "role": "potential_energy",
+     "kind": "spring",
+     "of": "vat",
+     "value": [
+      "mul",
+      0.5,
+      [
+       "mul",
+       "k",
+       [
+        "pow",
+        "dl",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "W",
+     "label": "Cơ năng",
+     "unit": "J",
+     "role": "mechanical_energy",
+     "of": "vat",
+     "value": [
+      "add",
+      "Wd",
+      "Wt"
+     ]
+    },
+    {
+     "id": "Ams",
+     "label": "Công của lực ma sát",
+     "unit": "J",
+     "role": "work",
+     "kind": "friction",
+     "of": "vat",
+     "initial": 0,
+     "rate": [
+      "mul",
+      "Fms",
+      "v"
+     ]
+    },
+    {
+     "id": "Wmat",
+     "label": "Cơ năng đã mất do ma sát",
+     "unit": "J",
+     "role": "other",
+     "value": [
+      "neg",
+      "Ams"
+     ]
+    },
+    {
+     "id": "dung",
+     "label": "Vật đã dừng hẳn (1 là đã dừng)",
+     "unit": "1",
+     "role": "other",
+     "value": [
+      "if",
+      [
+       "sub",
+       "t",
+       [
+        "div",
+        "veps",
+        "g"
+       ]
+      ],
+      [
+       "if",
+       [
+        "sub",
+        "veps",
+        [
+         "abs",
+         "v"
+        ]
+       ],
+       [
+        "if",
+        [
+         "sub",
+         [
+          "mul",
+          "mu",
+          "N"
+         ],
+         [
+          "abs",
+          "Fdh"
+         ]
+        ],
+        1,
+        0
+       ],
+       0
+      ],
+      0
+     ]
+    }
+   ],
+   "until": {
+    "quantity": "dung",
+    "direction": "rising",
+    "value": 0.5
+   },
+   "assumptions": [
+    "Coi vật là chất điểm, lò xo nhẹ và bỏ qua lực cản của không khí.",
+    "Gốc tọa độ đặt tại vị trí lò xo không biến dạng, vật được kéo lệch sang phải.",
+    "Hệ số ma sát nghỉ lấy bằng hệ số ma sát trượt; khi vật gần như đứng yên, lực ma sát chỉ lớn vừa đủ để giữ vật, không vượt quá μ·N.",
+    "Mô phỏng kết thúc khi vật dừng hẳn ở chỗ lực đàn hồi nhỏ hơn lực ma sát cực đại.",
+    "Biên độ không được tính thành một đại lượng riêng; học sinh đọc biên độ ở các đỉnh của đồ thị li độ."
+   ]
+  }
+ }
+}

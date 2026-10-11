@@ -1,7 +1,7 @@
 {
   "capabilityId": "ac_series_rlc",
   "title": "Mạch RLC nối tiếp xoay chiều",
-  "version": "2.0",
+  "version": "2.1",
   "applicability": {
     "objectTypes": [
       "resistor",
@@ -86,6 +86,11 @@
     {
       "key": "average_power",
       "unit": "W"
+    },
+    {
+      "key": "phase_difference",
+      "unit": "rad",
+      "description": "độ lệch pha của điện áp so với dòng điện; dương khi u sớm pha hơn i"
     }
   ],
   "assumptions": [
@@ -535,6 +540,43 @@
             "current_amplitude"
           ],
           "power_factor"
+        ],
+        "phase_difference": [
+          "atan2",
+          [
+            "sub",
+            [
+              "mul",
+              [
+                "mul",
+                [
+                  "mul",
+                  2,
+                  3.141592653589793
+                ],
+                "frequency"
+              ],
+              "inductance"
+            ],
+            [
+              "div",
+              1,
+              [
+                "mul",
+                [
+                  "mul",
+                  [
+                    "mul",
+                    2,
+                    3.141592653589793
+                  ],
+                  "frequency"
+                ],
+                "capacitance"
+              ]
+            ]
+          ],
+          "resistance"
         ]
       },
       "closedForm": {
@@ -1238,6 +1280,43 @@
             "current_amplitude"
           ],
           "power_factor"
+        ],
+        "phase_difference": [
+          "atan2",
+          [
+            "sub",
+            [
+              "mul",
+              [
+                "mul",
+                [
+                  "mul",
+                  2,
+                  3.141592653589793
+                ],
+                "frequency"
+              ],
+              "inductance"
+            ],
+            [
+              "div",
+              1,
+              [
+                "mul",
+                [
+                  "mul",
+                  [
+                    "mul",
+                    2,
+                    3.141592653589793
+                  ],
+                  "frequency"
+                ],
+                "capacitance"
+              ]
+            ]
+          ],
+          "resistance"
         ]
       }
     }

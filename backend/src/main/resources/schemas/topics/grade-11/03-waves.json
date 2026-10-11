@@ -56,5 +56,9 @@
       "name": "Đo tốc độ truyền âm",
       "summary": "Phương án đo."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "oscillations_waves"
   ]
 }

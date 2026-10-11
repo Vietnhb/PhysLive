@@ -41,5 +41,9 @@
       "name": "Sự phóng xạ và chu kì bán rã",
       "summary": "H = λN; x = x₀e^(−λt)."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "modern"
   ]
 }

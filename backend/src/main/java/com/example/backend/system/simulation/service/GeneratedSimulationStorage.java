@@ -59,8 +59,10 @@ public class GeneratedSimulationStorage {
         if (!ownTopic)
             throw ApiException.conflict("Bài học không thuộc chủ đề của mô phỏng");
         String status = computed.path("validation").path("status").asText();
-        if (!status.equals("VERIFIED_ANALYTICAL") && !status.equals("VERIFIED_NUMERICAL"))
-            throw ApiException.conflict("Chỉ lưu mô phỏng đã được kiểm chứng");
+        // A run that breaks a law or that the solver could not settle is not kept; a run no law covers is kept as
+        // what it is — an illustration — and carries that status wherever it is shown.
+        if (!status.startsWith("VERIFIED") && !status.equals("ILLUSTRATIVE"))
+            throw ApiException.conflict("Mô phỏng này vi phạm định luật hoặc chưa tính ổn định nên chưa lưu được. Hãy sửa mô tả rồi phân tích lại");
         ObjectNode snapshot = request.simulation().deepCopy();
         ObjectNode spec = (ObjectNode) snapshot.path("simulationSpec");
         spec.put("topic", schema.getTopic());

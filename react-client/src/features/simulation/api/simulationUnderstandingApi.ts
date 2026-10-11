@@ -1,7 +1,7 @@
 import axiosClient from "../../../shared/api/client";
 import type { SolverTimeline, PixiVisualProgram } from "../model/svgScene";
-import type { LibraryItem } from "../../../shared/types/physlive";
 import type { TeacherPresentation } from "../model/teacherPresentation";
+import type { LibraryItem } from "../../../shared/types/physlive";
 
 export type SimulationSourceMode = "TEXT" | "LATEX" | "IMAGE";
 export type RecognitionResult = {
@@ -26,6 +26,11 @@ export type SimulationFormula = {
 export type SimulationSpec = {
   durationSeconds: number; durationParameter?: string; parameters: SimulationParameter[];
   physicsCoverage: "COMPLETE" | "PARTIAL" | "NONE";
+  /** The physics written for this description: its objects and the quantities the backend computes and checks. */
+  objects?: Array<{ id: string; label?: string; count?: number }>;
+  model?: { constants?: unknown[]; quantities: Array<{ id: string; label?: string; unit?: string; role?: string; of?: string }>;
+    until?: unknown; duration?: unknown; assumptions?: string[] };
+  /** Derived by the backend from the model for the page (one entry per object); plans saved earlier bind library laws here. */
   physicsModels: Array<{ id: string; label?: string; capabilityId: string; inputs: Record<string, string | number>;
     /** Stages: the participant whose end starts this one, and the condition that ends this one. */
     after?: string; until?: { field: string; direction: "rising" | "falling"; value: number | string } }>;
@@ -45,9 +50,13 @@ export type IntentResult = {
 };
 export type SimulationValidation = {
   status: "PENDING" | "FLAGGED" | "PAUSED" | "UNVERIFIED" | "UNDERSTOOD"
-    | "NEEDS_CLARIFICATION" | "VERIFIED_ANALYTICAL" | "VERIFIED_NUMERICAL"
-    | "ASSUMPTION_REVIEW" | "VISUAL_ONLY_UNVERIFIED" | "UNSUPPORTED";
+    | "NEEDS_CLARIFICATION" | "VERIFIED_BY_LAWS" | "VERIFIED_PARTLY" | "ILLUSTRATIVE"
+    | "VERIFIED_ANALYTICAL" | "VERIFIED_NUMERICAL" | "ASSUMPTION_REVIEW" | "VISUAL_ONLY_UNVERIFIED" | "UNSUPPORTED";
   flags: string[]; metrics?: Record<string, number>;
+  /** Every curriculum law that applied to the run, and whether it held. */
+  lawChecks?: Array<{ law: string; title: string; curriculum?: string; status: "PASSED" | "FAILED"; scope?: Record<string, string> }>;
+  /** Ids of the model's quantities that no law checked. */
+  uncheckedQuantities?: string[];
   executionMethod?: string; solverMethod?: string; verificationMethod?: string; verificationScope?: string;
   formulaSource?: string; capabilityId?: string; topicVersion?: string; solverVersion?: string;
   referenceSolverVersion?: string; absoluteError?: number | null; relativeError?: number | null;

@@ -56,5 +56,9 @@
       "name": "Chụp cắt lớp, cộng hưởng từ",
       "summary": "CT, MRI."
     }
+  ],
+  "lawCatalogues": [
+    "modern",
+    "oscillations_waves"
   ]
 }

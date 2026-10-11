@@ -1,0 +1,364 @@
+{
+  "type": "object",
+  "required": [
+    "status",
+    "question",
+    "choices",
+    "explanation",
+    "defaults",
+    "simulationSpec"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "EXPLAIN",
+        "CLARIFY",
+        "UNSUPPORTED"
+      ]
+    },
+    "question": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "choices": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "explanation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "defaults": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "simulationSpec": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "required": [
+        "durationSeconds",
+        "parameters",
+        "objects",
+        "observables",
+        "model"
+      ],
+      "properties": {
+        "durationSeconds": {
+          "type": "number",
+          "description": "Physical time of the run; with until or duration, the longest it may take."
+        },
+        "durationParameter": {
+          "type": "string",
+          "description": "Name of a slider in a unit of time that sets the duration, when the user may change it."
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "label",
+              "value",
+              "unit",
+              "min",
+              "max",
+              "step"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "step": {
+                "type": "number"
+              },
+              "role": {
+                "type": "string"
+              },
+              "of": {
+                "type": "string"
+              },
+              "axis": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "short ascii id"
+              },
+              "label": {
+                "type": "string"
+              },
+              "count": {
+                "type": "integer"
+              },
+              "members": {
+                "type": "integer",
+                "description": "N things of the same kind, each computed (2 to 400)."
+              },
+              "present": {
+                "description": "An equation that is positive while the thing is there."
+              }
+            }
+          }
+        },
+        "observables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "quantity",
+              "label"
+            ],
+            "properties": {
+              "quantity": {
+                "type": "string",
+                "description": "id of a quantity of the model"
+              },
+              "label": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "model": {
+          "type": "object",
+          "required": [
+            "quantities"
+          ],
+          "properties": {
+            "constants": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "label",
+                  "value",
+                  "unit"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "of": {
+                    "type": "string"
+                  },
+                  "axis": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "quantities": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "label",
+                  "unit",
+                  "role"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "unit": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "of": {
+                    "type": "string"
+                  },
+                  "axis": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "by": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                  },
+                  "initial": {
+                    "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                  },
+                  "rate": {
+                    "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                  },
+                  "expected": {
+                    "type": "string",
+                    "description": "For a quantity that depends on random draws: the id of the quantity it fluctuates around."
+                  },
+                  "jumps": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "when",
+                        "to"
+                      ],
+                      "properties": {
+                        "when": {
+                          "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                        },
+                        "to": {
+                          "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                        }
+                      }
+                    }
+                  },
+                  "along": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name",
+                        "unit",
+                        "from",
+                        "to",
+                        "points"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "from": {
+                          "type": [
+                            "number",
+                            "string"
+                          ]
+                        },
+                        "to": {
+                          "type": [
+                            "number",
+                            "string"
+                          ]
+                        },
+                        "points": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "until": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "quantity",
+                  "direction",
+                  "value"
+                ],
+                "properties": {
+                  "quantity": {
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "rising",
+                      "falling"
+                    ]
+                  },
+                  "value": {
+                    "type": [
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "of": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "duration": {
+              "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+            },
+            "assumptions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "seed": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  }
+}

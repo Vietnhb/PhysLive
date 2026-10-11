@@ -49,5 +49,9 @@
       "name": "Công suất và hiệu suất",
       "summary": "P = A/t = Fv; H = A_có ích/A_toàn phần."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "mechanics_more"
   ]
 }

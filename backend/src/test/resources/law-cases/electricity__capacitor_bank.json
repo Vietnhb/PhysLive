@@ -1,0 +1,351 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Tụ C1 mắc nối tiếp với cụm hai tụ C2, C3 mắc song song, cả bộ nối vào hiệu điện thế U.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1,
+  "parameters": [
+   {
+    "name": "C1",
+    "label": "Điện dung C1",
+    "value": 6,
+    "unit": "uF",
+    "min": 1,
+    "max": 20,
+    "step": 1,
+    "role": "capacitance",
+    "of": "tu1",
+    "in_series": "bo"
+   },
+   {
+    "name": "C2",
+    "label": "Điện dung C2",
+    "value": 2,
+    "unit": "uF",
+    "min": 1,
+    "max": 20,
+    "step": 1,
+    "role": "capacitance",
+    "of": "tu2",
+    "in_parallel": "cum"
+   },
+   {
+    "name": "C3",
+    "label": "Điện dung C3",
+    "value": 4,
+    "unit": "uF",
+    "min": 1,
+    "max": 20,
+    "step": 1,
+    "role": "capacitance",
+    "of": "tu3",
+    "in_parallel": "cum"
+   },
+   {
+    "name": "U",
+    "label": "Hiệu điện thế của bộ",
+    "value": 12,
+    "unit": "V",
+    "min": 1,
+    "max": 50,
+    "step": 1,
+    "role": "voltage",
+    "of": "bo",
+    "in_series": "bo",
+    "in_series_total": "bo"
+   }
+  ],
+  "objects": [
+   {
+    "id": "tu1",
+    "label": "Tụ C1",
+    "count": 1
+   },
+   {
+    "id": "tu2",
+    "label": "Tụ C2",
+    "count": 1
+   },
+   {
+    "id": "tu3",
+    "label": "Tụ C3",
+    "count": 1
+   },
+   {
+    "id": "cum",
+    "label": "Cụm song song",
+    "count": 1
+   },
+   {
+    "id": "bo",
+    "label": "Bộ tụ",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "Cp",
+    "label": "Điện dung cụm song song"
+   },
+   {
+    "quantity": "Cb",
+    "label": "Điện dung của bộ"
+   },
+   {
+    "quantity": "Qb",
+    "label": "Điện tích của bộ"
+   },
+   {
+    "quantity": "Q1",
+    "label": "Điện tích tụ C1"
+   },
+   {
+    "quantity": "Qp",
+    "label": "Điện tích cụm song song"
+   },
+   {
+    "quantity": "U1",
+    "label": "Hiệu điện thế tụ C1"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "Cp",
+     "label": "Điện dung cụm song song",
+     "unit": "F",
+     "role": "capacitance",
+     "of": "cum",
+     "in_parallel": "cum",
+     "in_parallel_total": "cum",
+     "in_series": "bo",
+     "value": [
+      "add",
+      "C2",
+      "C3"
+     ]
+    },
+    {
+     "id": "Cb",
+     "label": "Điện dung của bộ",
+     "unit": "F",
+     "role": "capacitance",
+     "of": "bo",
+     "in_series": "bo",
+     "in_series_total": "bo",
+     "value": [
+      "div",
+      [
+       "mul",
+       "C1",
+       "Cp"
+      ],
+      [
+       "add",
+       "C1",
+       "Cp"
+      ]
+     ]
+    },
+    {
+     "id": "Qb",
+     "label": "Điện tích của bộ",
+     "unit": "C",
+     "role": "charge",
+     "of": "bo",
+     "in_series": "bo",
+     "in_series_total": "bo",
+     "value": [
+      "mul",
+      "Cb",
+      "U"
+     ]
+    },
+    {
+     "id": "Q1",
+     "label": "Điện tích tụ C1",
+     "unit": "C",
+     "role": "charge",
+     "of": "tu1",
+     "in_series": "bo",
+     "value": "Qb"
+    },
+    {
+     "id": "Qp",
+     "label": "Điện tích cụm song song",
+     "unit": "C",
+     "role": "charge",
+     "of": "cum",
+     "in_parallel": "cum",
+     "in_parallel_total": "cum",
+     "in_series": "bo",
+     "value": "Qb"
+    },
+    {
+     "id": "U1",
+     "label": "Hiệu điện thế tụ C1",
+     "unit": "V",
+     "role": "voltage",
+     "of": "tu1",
+     "in_series": "bo",
+     "value": [
+      "div",
+      "Q1",
+      "C1"
+     ]
+    },
+    {
+     "id": "Up",
+     "label": "Hiệu điện thế cụm song song",
+     "unit": "V",
+     "role": "voltage",
+     "of": "cum",
+     "in_parallel": "cum",
+     "in_parallel_total": "cum",
+     "in_series": "bo",
+     "value": [
+      "div",
+      "Qp",
+      "Cp"
+     ]
+    },
+    {
+     "id": "U2",
+     "label": "Hiệu điện thế tụ C2",
+     "unit": "V",
+     "role": "voltage",
+     "of": "tu2",
+     "in_parallel": "cum",
+     "value": "Up"
+    },
+    {
+     "id": "U3",
+     "label": "Hiệu điện thế tụ C3",
+     "unit": "V",
+     "role": "voltage",
+     "of": "tu3",
+     "in_parallel": "cum",
+     "value": "Up"
+    },
+    {
+     "id": "Q2",
+     "label": "Điện tích tụ C2",
+     "unit": "C",
+     "role": "charge",
+     "of": "tu2",
+     "in_parallel": "cum",
+     "value": [
+      "mul",
+      "C2",
+      "U2"
+     ]
+    },
+    {
+     "id": "Q3",
+     "label": "Điện tích tụ C3",
+     "unit": "C",
+     "role": "charge",
+     "of": "tu3",
+     "in_parallel": "cum",
+     "value": [
+      "mul",
+      "C3",
+      "U3"
+     ]
+    },
+    {
+     "id": "W1",
+     "label": "Năng lượng tụ C1",
+     "unit": "J",
+     "role": "capacitor_energy",
+     "of": "tu1",
+     "in_series": "bo",
+     "value": [
+      "mul",
+      [
+       "mul",
+       0.5,
+       "C1"
+      ],
+      [
+       "pow",
+       "U1",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "W2",
+     "label": "Năng lượng tụ C2",
+     "unit": "J",
+     "role": "capacitor_energy",
+     "of": "tu2",
+     "in_parallel": "cum",
+     "value": [
+      "mul",
+      [
+       "mul",
+       0.5,
+       "C2"
+      ],
+      [
+       "pow",
+       "U2",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "W3",
+     "label": "Năng lượng tụ C3",
+     "unit": "J",
+     "role": "capacitor_energy",
+     "of": "tu3",
+     "in_parallel": "cum",
+     "value": [
+      "mul",
+      [
+       "mul",
+       0.5,
+       "Q3"
+      ],
+      "U3"
+     ]
+    },
+    {
+     "id": "Wp",
+     "label": "Năng lượng cụm song song",
+     "unit": "J",
+     "role": "capacitor_energy",
+     "of": "cum",
+     "in_parallel": "cum",
+     "in_parallel_total": "cum",
+     "in_series": "bo",
+     "value": [
+      "add",
+      "W2",
+      "W3"
+     ]
+    },
+    {
+     "id": "Wb",
+     "label": "Năng lượng của bộ",
+     "unit": "J",
+     "role": "capacitor_energy",
+     "of": "bo",
+     "in_series": "bo",
+     "in_series_total": "bo",
+     "value": [
+      "add",
+      "W1",
+      "Wp"
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

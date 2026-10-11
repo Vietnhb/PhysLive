@@ -1,0 +1,263 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Chiếu ánh sáng bước sóng 400 nm, công suất 2 mW vào catôt xesi có công thoát 2,1 eV. Khảo sát động năng cực đại, hiệu điện thế hãm và dòng bão hoà.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1,
+  "parameters": [
+   {
+    "name": "lam",
+    "label": "Bước sóng ánh sáng",
+    "value": 400,
+    "unit": "nm",
+    "min": 200,
+    "max": 800,
+    "step": 10,
+    "role": "wavelength",
+    "of": "sang"
+   },
+   {
+    "name": "A",
+    "label": "Công thoát",
+    "value": 2.1,
+    "unit": "eV",
+    "min": 1.5,
+    "max": 5,
+    "step": 0.1,
+    "role": "work_function",
+    "of": "catot"
+   },
+   {
+    "name": "Pw",
+    "label": "Công suất chùm sáng",
+    "value": 2,
+    "unit": "mW",
+    "min": 0.5,
+    "max": 10,
+    "step": 0.5,
+    "role": "radiant_power",
+    "of": "sang"
+   },
+   {
+    "name": "eta",
+    "label": "Hiệu suất lượng tử",
+    "value": 1,
+    "unit": "%",
+    "min": 0.1,
+    "max": 10,
+    "step": 0.1,
+    "role": "quantum_efficiency",
+    "of": "catot"
+   }
+  ],
+  "objects": [
+   {
+    "id": "sang",
+    "label": "sang",
+    "count": 1
+   },
+   {
+    "id": "catot",
+    "label": "catot",
+    "count": 1
+   },
+   {
+    "id": "electron",
+    "label": "electron",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "f",
+    "label": "f"
+   },
+   {
+    "quantity": "eps",
+    "label": "eps"
+   },
+   {
+    "quantity": "f0",
+    "label": "f0"
+   },
+   {
+    "quantity": "lam0",
+    "label": "lam0"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "h",
+     "label": "Hằng số Planck",
+     "value": 6.626e-34,
+     "unit": "J*s",
+     "role": "other"
+    },
+    {
+     "id": "c",
+     "label": "Tốc độ ánh sáng",
+     "value": 299800000.0,
+     "unit": "m/s",
+     "role": "other"
+    },
+    {
+     "id": "qe",
+     "label": "Điện tích nguyên tố",
+     "value": 1.602e-19,
+     "unit": "C",
+     "role": "other"
+    },
+    {
+     "id": "me",
+     "label": "Khối lượng electron",
+     "value": 9.109e-31,
+     "unit": "kg",
+     "role": "mass",
+     "of": "electron"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "f",
+     "label": "Tần số ánh sáng",
+     "unit": "Hz",
+     "role": "frequency",
+     "of": "sang",
+     "value": [
+      "div",
+      "c",
+      "lam"
+     ]
+    },
+    {
+     "id": "eps",
+     "label": "Năng lượng photon",
+     "unit": "J",
+     "role": "photon_energy",
+     "of": "sang",
+     "value": [
+      "mul",
+      "h",
+      "f"
+     ]
+    },
+    {
+     "id": "f0",
+     "label": "Tần số giới hạn",
+     "unit": "Hz",
+     "role": "threshold_frequency",
+     "of": "catot",
+     "value": [
+      "div",
+      "A",
+      "h"
+     ]
+    },
+    {
+     "id": "lam0",
+     "label": "Giới hạn quang điện",
+     "unit": "m",
+     "role": "threshold_wavelength",
+     "of": "catot",
+     "value": [
+      "div",
+      "c",
+      "f0"
+     ]
+    },
+    {
+     "id": "K",
+     "label": "Động năng ban đầu cực đại",
+     "unit": "J",
+     "role": "max_kinetic_energy",
+     "of": "electron",
+     "value": [
+      "max",
+      [
+       "sub",
+       "eps",
+       "A"
+      ],
+      0
+     ]
+    },
+    {
+     "id": "Uh",
+     "label": "Hiệu điện thế hãm",
+     "unit": "V",
+     "role": "stopping_voltage",
+     "of": "electron",
+     "value": [
+      "div",
+      "K",
+      "qe"
+     ]
+    },
+    {
+     "id": "vmax",
+     "label": "Tốc độ ban đầu cực đại",
+     "unit": "m/s",
+     "role": "speed",
+     "of": "electron",
+     "value": [
+      "sqrt",
+      [
+       "div",
+       [
+        "mul",
+        2,
+        "K"
+       ],
+       "me"
+      ]
+     ]
+    },
+    {
+     "id": "nph",
+     "label": "Số photon tới mỗi giây",
+     "unit": "1/s",
+     "role": "photon_rate",
+     "of": "sang",
+     "value": [
+      "div",
+      "Pw",
+      "eps"
+     ]
+    },
+    {
+     "id": "ne",
+     "label": "Số quang điện tử mỗi giây",
+     "unit": "1/s",
+     "role": "photoelectron_rate",
+     "of": "catot",
+     "value": [
+      "if",
+      "K",
+      [
+       "mul",
+       "eta",
+       "nph"
+      ],
+      0
+     ]
+    },
+    {
+     "id": "Ibh",
+     "label": "Dòng quang điện bão hoà",
+     "unit": "A",
+     "role": "saturation_current",
+     "of": "catot",
+     "value": [
+      "mul",
+      "qe",
+      "ne"
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

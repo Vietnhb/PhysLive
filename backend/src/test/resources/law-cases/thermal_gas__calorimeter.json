@@ -1,0 +1,252 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "calorimeter",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 120,
+  "parameters": [
+   {
+    "name": "md",
+    "label": "Khối lượng miếng đồng",
+    "value": 200,
+    "unit": "g",
+    "min": 50,
+    "max": 500,
+    "step": 10,
+    "role": "mass",
+    "of": "dong"
+   },
+   {
+    "name": "mn",
+    "label": "Khối lượng nước",
+    "value": 300,
+    "unit": "g",
+    "min": 100,
+    "max": 1000,
+    "step": 50,
+    "role": "mass",
+    "of": "nuoc"
+   },
+   {
+    "name": "td0",
+    "label": "Nhiệt độ đầu của đồng",
+    "value": 100,
+    "unit": "degC",
+    "min": 30,
+    "max": 200,
+    "step": 5
+   },
+   {
+    "name": "tn0",
+    "label": "Nhiệt độ đầu của nước",
+    "value": 20,
+    "unit": "degC",
+    "min": 5,
+    "max": 40,
+    "step": 1
+   }
+  ],
+  "objects": [
+   {
+    "id": "dong",
+    "label": "Miếng đồng",
+    "count": 1
+   },
+   {
+    "id": "nuoc",
+    "label": "Nước",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "Pt",
+    "label": "Công suất nhiệt nước nhận"
+   },
+   {
+    "quantity": "Pd",
+    "label": "Công suất nhiệt đồng nhận"
+   },
+   {
+    "quantity": "td",
+    "label": "Nhiệt độ đồng"
+   },
+   {
+    "quantity": "tn",
+    "label": "Nhiệt độ nước"
+   },
+   {
+    "quantity": "Qn",
+    "label": "Nhiệt lượng nước thu"
+   },
+   {
+    "quantity": "Qd",
+    "label": "Nhiệt lượng đồng nhận"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "T0",
+     "label": "273,15 K",
+     "value": 273.15,
+     "unit": "K",
+     "role": "other"
+    },
+    {
+     "id": "cd",
+     "label": "Nhiệt dung riêng của đồng",
+     "value": 380,
+     "unit": "J/(kg*K)",
+     "role": "specific_heat_capacity",
+     "of": "dong"
+    },
+    {
+     "id": "cn",
+     "label": "Nhiệt dung riêng của nước",
+     "value": 4200,
+     "unit": "J/(kg*K)",
+     "role": "specific_heat_capacity",
+     "of": "nuoc"
+    },
+    {
+     "id": "h",
+     "label": "Hệ số truyền nhiệt giữa đồng và nước",
+     "value": 8,
+     "unit": "W/K",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "Pt",
+     "label": "Công suất nhiệt nước nhận",
+     "unit": "W",
+     "role": "power",
+     "kind": "heat",
+     "value": [
+      "mul",
+      "h",
+      [
+       "sub",
+       "td",
+       "tn"
+      ]
+     ],
+     "by": "dong",
+     "of": "nuoc"
+    },
+    {
+     "id": "Pd",
+     "label": "Công suất nhiệt đồng nhận",
+     "unit": "W",
+     "role": "power",
+     "kind": "heat",
+     "value": [
+      "neg",
+      "Pt"
+     ],
+     "by": "nuoc",
+     "of": "dong"
+    },
+    {
+     "id": "td",
+     "label": "Nhiệt độ đồng",
+     "unit": "degC",
+     "role": "celsius_temperature",
+     "initial": "td0",
+     "rate": [
+      "div",
+      "Pd",
+      [
+       "mul",
+       "md",
+       "cd"
+      ]
+     ],
+     "of": "dong"
+    },
+    {
+     "id": "tn",
+     "label": "Nhiệt độ nước",
+     "unit": "degC",
+     "role": "celsius_temperature",
+     "initial": "tn0",
+     "rate": [
+      "div",
+      "Pt",
+      [
+       "mul",
+       "mn",
+       "cn"
+      ]
+     ],
+     "of": "nuoc"
+    },
+    {
+     "id": "Qn",
+     "label": "Nhiệt lượng nước thu",
+     "unit": "J",
+     "role": "heat",
+     "by": "dong",
+     "initial": 0,
+     "rate": "Pt",
+     "of": "nuoc",
+     "in": "binh"
+    },
+    {
+     "id": "Qd",
+     "label": "Nhiệt lượng đồng nhận",
+     "unit": "J",
+     "role": "heat",
+     "by": "nuoc",
+     "initial": 0,
+     "rate": "Pd",
+     "of": "dong",
+     "in": "binh"
+    },
+    {
+     "id": "Tsn",
+     "label": "Nhiệt độ của đồng (nguồn nhiệt của nước)",
+     "unit": "K",
+     "role": "source_temperature",
+     "by": "dong",
+     "value": [
+      "add",
+      "td",
+      "T0"
+     ],
+     "of": "nuoc"
+    },
+    {
+     "id": "Tsd",
+     "label": "Nhiệt độ của nước (nguồn nhiệt của đồng)",
+     "unit": "K",
+     "role": "source_temperature",
+     "by": "nuoc",
+     "value": [
+      "add",
+      "tn",
+      "T0"
+     ],
+     "of": "dong"
+    },
+    {
+     "id": "Qtoa",
+     "label": "Nhiệt lượng đồng toả ra",
+     "unit": "J",
+     "role": "other",
+     "value": [
+      "neg",
+      "Qd"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Bỏ qua trao đổi nhiệt với bình và môi trường."
+   ]
+  }
+ }
+}

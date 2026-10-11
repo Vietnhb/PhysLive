@@ -1,0 +1,276 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Sóng hình sin truyền trên dây không tắt dần; coi M đã dao động ngay từ đầu.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 4,
+  "parameters": [
+   {
+    "name": "f",
+    "label": "Tần số nguồn",
+    "value": 2,
+    "unit": "Hz",
+    "min": 0.5,
+    "max": 5,
+    "step": 0.5,
+    "role": "frequency",
+    "in": "song"
+   },
+   {
+    "name": "vs",
+    "label": "Tốc độ truyền sóng",
+    "value": 1.2,
+    "unit": "m/s",
+    "min": 0.5,
+    "max": 3,
+    "step": 0.1,
+    "role": "wave_speed",
+    "in": "song"
+   },
+   {
+    "name": "a0",
+    "label": "Biên độ",
+    "value": 3,
+    "unit": "cm",
+    "min": 1,
+    "max": 5,
+    "step": 1,
+    "role": "other"
+   },
+   {
+    "name": "d",
+    "label": "Khoảng cách từ nguồn tới M",
+    "value": 0.45,
+    "unit": "m",
+    "min": 0.1,
+    "max": 2,
+    "step": 0.05,
+    "role": "source_distance",
+    "of": "M",
+    "in": "song"
+   }
+  ],
+  "objects": [
+   {
+    "id": "nguon",
+    "label": "nguon",
+    "count": 1
+   },
+   {
+    "id": "M",
+    "label": "M",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "lam",
+    "label": "Bước sóng"
+   },
+   {
+    "quantity": "T",
+    "label": "Chu kì"
+   },
+   {
+    "quantity": "w",
+    "label": "Tần số góc"
+   },
+   {
+    "quantity": "phs",
+    "label": "Pha của nguồn"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "lam",
+     "label": "Bước sóng",
+     "unit": "m",
+     "role": "wavelength",
+     "in": "song",
+     "value": [
+      "div",
+      "vs",
+      "f"
+     ]
+    },
+    {
+     "id": "T",
+     "label": "Chu kì",
+     "unit": "s",
+     "role": "period",
+     "in": "song",
+     "value": [
+      "div",
+      1,
+      "f"
+     ]
+    },
+    {
+     "id": "w",
+     "label": "Tần số góc",
+     "unit": "rad/s",
+     "role": "angular_frequency",
+     "in": "song",
+     "value": [
+      "mul",
+      6.283185307179586,
+      "f"
+     ]
+    },
+    {
+     "id": "phs",
+     "label": "Pha của nguồn",
+     "unit": "rad",
+     "role": "source_phase",
+     "in": "song",
+     "initial": 0,
+     "rate": "w"
+    },
+    {
+     "id": "sf",
+     "label": "Quãng đường sóng đã truyền",
+     "unit": "m",
+     "role": "wave_travel_distance",
+     "in": "song",
+     "initial": 0,
+     "rate": "vs"
+    },
+    {
+     "id": "dph",
+     "label": "Độ lệch pha giữa M và nguồn",
+     "unit": "rad",
+     "role": "phase_difference",
+     "of": "M",
+     "in": "song",
+     "value": [
+      "div",
+      [
+       "mul",
+       6.283185307179586,
+       "dM"
+      ],
+      "lam"
+     ]
+    },
+    {
+     "id": "dM",
+     "label": "Khoảng cách M tới nguồn",
+     "unit": "m",
+     "role": "path_difference",
+     "of": "M",
+     "in": "song",
+     "value": "d"
+    },
+    {
+     "id": "phM",
+     "label": "Pha của M",
+     "unit": "rad",
+     "role": "phase",
+     "of": "M",
+     "in": "song",
+     "value": [
+      "sub",
+      "phs",
+      "dph"
+     ]
+    },
+    {
+     "id": "AM",
+     "label": "Biên độ của M",
+     "unit": "m",
+     "role": "amplitude",
+     "of": "M",
+     "in": "song",
+     "value": "a0"
+    },
+    {
+     "id": "uM",
+     "label": "Li độ của M",
+     "unit": "m",
+     "role": "displacement",
+     "of": "M",
+     "axis": "u",
+     "in": "song",
+     "value": [
+      "mul",
+      "AM",
+      [
+       "cos",
+       "phM"
+      ]
+     ]
+    },
+    {
+     "id": "vM",
+     "label": "Vận tốc của M",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "M",
+     "axis": "u",
+     "in": "song",
+     "value": [
+      "neg",
+      [
+       "mul",
+       [
+        "mul",
+        "w",
+        "AM"
+       ],
+       [
+        "sin",
+        "phM"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "aM",
+     "label": "Gia tốc của M",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "M",
+     "axis": "u",
+     "in": "song",
+     "value": [
+      "neg",
+      [
+       "mul",
+       [
+        "pow",
+        "w",
+        2
+       ],
+       "uM"
+      ]
+     ]
+    },
+    {
+     "id": "vMmax",
+     "label": "Tốc độ cực đại của M",
+     "unit": "m/s",
+     "role": "max_speed",
+     "of": "M",
+     "in": "song",
+     "value": [
+      "mul",
+      "w",
+      "AM"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Sóng hình sin truyền trên dây không tắt dần; coi M đã dao động ngay từ đầu."
+   ],
+   "duration": [
+    "mul",
+    4,
+    "T"
+   ]
+  }
+ }
+}

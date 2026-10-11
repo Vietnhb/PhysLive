@@ -1,0 +1,396 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Quả cầu A tích điện bay về phía điện tích B cùng dấu đặt cố định, bị đẩy chậm dần rồi bật ngược lại.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 2,
+  "parameters": [
+   {
+    "name": "q1",
+    "label": "Điện tích quả cầu A",
+    "value": 1,
+    "unit": "uC",
+    "min": 0.1,
+    "max": 5,
+    "step": 0.1,
+    "role": "charge",
+    "of": "A"
+   },
+   {
+    "name": "q2",
+    "label": "Điện tích B",
+    "value": 1,
+    "unit": "uC",
+    "min": 0.1,
+    "max": 5,
+    "step": 0.1,
+    "role": "charge",
+    "of": "B"
+   },
+   {
+    "name": "m",
+    "label": "Khối lượng A",
+    "value": 10,
+    "unit": "g",
+    "min": 1,
+    "max": 50,
+    "step": 1,
+    "role": "mass",
+    "of": "A"
+   },
+   {
+    "name": "x0",
+    "label": "Khoảng cách ban đầu",
+    "value": 0.5,
+    "unit": "m",
+    "min": 0.2,
+    "max": 2,
+    "step": 0.1,
+    "role": "other"
+   },
+   {
+    "name": "v0",
+    "label": "Tốc độ ban đầu",
+    "value": 1,
+    "unit": "m/s",
+    "min": 0,
+    "max": 1.5,
+    "step": 0.1,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "A",
+    "label": "Quả cầu A",
+    "count": 1
+   },
+   {
+    "id": "B",
+    "label": "Điện tích B cố định",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "x",
+    "label": "Tọa độ của A"
+   },
+   {
+    "quantity": "v",
+    "label": "Vận tốc của A"
+   },
+   {
+    "quantity": "dx",
+    "label": "Độ dời từ B đến A"
+   },
+   {
+    "quantity": "r",
+    "label": "Khoảng cách A–B"
+   },
+   {
+    "quantity": "Qs",
+    "label": "Điện tích nguồn B"
+   },
+   {
+    "quantity": "F",
+    "label": "Lực điện B tác dụng lên A"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "k",
+     "label": "Hằng số Coulomb",
+     "value": 8987551792.3,
+     "unit": "N*m2/C2",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "x",
+     "label": "Tọa độ của A",
+     "unit": "m",
+     "role": "position",
+     "of": "A",
+     "axis": "x",
+     "initial": "x0",
+     "rate": "v"
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc của A",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "A",
+     "axis": "x",
+     "initial": [
+      "neg",
+      "v0"
+     ],
+     "rate": "a"
+    },
+    {
+     "id": "dx",
+     "label": "Độ dời từ B đến A",
+     "unit": "m",
+     "role": "separation",
+     "of": "A",
+     "by": "B",
+     "axis": "x",
+     "value": "x"
+    },
+    {
+     "id": "r",
+     "label": "Khoảng cách A–B",
+     "unit": "m",
+     "role": "distance",
+     "of": "A",
+     "by": "B",
+     "value": [
+      "abs",
+      "dx"
+     ]
+    },
+    {
+     "id": "Qs",
+     "label": "Điện tích nguồn B",
+     "unit": "C",
+     "role": "source_charge",
+     "by": "B",
+     "value": "q2"
+    },
+    {
+     "id": "F",
+     "label": "Lực điện B tác dụng lên A",
+     "unit": "N",
+     "role": "force",
+     "kind": "electric",
+     "of": "A",
+     "by": "B",
+     "axis": "x",
+     "value": [
+      "div",
+      [
+       "mul",
+       [
+        "mul",
+        [
+         "mul",
+         "k",
+         "q1"
+        ],
+        "Qs"
+       ],
+       "dx"
+      ],
+      [
+       "pow",
+       "r",
+       3
+      ]
+     ]
+    },
+    {
+     "id": "Fm",
+     "label": "Độ lớn lực điện",
+     "unit": "N",
+     "role": "force_magnitude",
+     "kind": "electric",
+     "of": "A",
+     "by": "B",
+     "value": [
+      "div",
+      [
+       "mul",
+       [
+        "mul",
+        "k",
+        "q1"
+       ],
+       "Qs"
+      ],
+      [
+       "pow",
+       "r",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "a",
+     "label": "Gia tốc của A",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "A",
+     "axis": "x",
+     "value": [
+      "div",
+      "F",
+      "m"
+     ]
+    },
+    {
+     "id": "EB",
+     "label": "Điện trường của B tại A",
+     "unit": "V/m",
+     "role": "electric_field",
+     "of": "A",
+     "by": "B",
+     "axis": "x",
+     "value": [
+      "div",
+      [
+       "mul",
+       [
+        "mul",
+        "k",
+        "Qs"
+       ],
+       "dx"
+      ],
+      [
+       "pow",
+       "r",
+       3
+      ]
+     ]
+    },
+    {
+     "id": "Ex",
+     "label": "Điện trường tại A",
+     "unit": "V/m",
+     "role": "electric_field",
+     "of": "A",
+     "axis": "x",
+     "value": "EB"
+    },
+    {
+     "id": "EBs",
+     "label": "Cường độ điện trường của B tại A",
+     "unit": "V/m",
+     "role": "electric_field_strength",
+     "of": "A",
+     "by": "B",
+     "value": [
+      "div",
+      [
+       "mul",
+       "k",
+       [
+        "abs",
+        "Qs"
+       ]
+      ],
+      [
+       "pow",
+       "r",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "Es",
+     "label": "Cường độ điện trường tại A",
+     "unit": "V/m",
+     "role": "electric_field_strength",
+     "of": "A",
+     "value": [
+      "abs",
+      "Ex"
+     ]
+    },
+    {
+     "id": "VB",
+     "label": "Điện thế của B tại A",
+     "unit": "V",
+     "role": "electric_potential",
+     "of": "A",
+     "by": "B",
+     "value": [
+      "div",
+      [
+       "mul",
+       "k",
+       "Qs"
+      ],
+      "r"
+     ]
+    },
+    {
+     "id": "V",
+     "label": "Điện thế tại A",
+     "unit": "V",
+     "role": "electric_potential",
+     "of": "A",
+     "value": "VB"
+    },
+    {
+     "id": "Wt",
+     "label": "Thế năng điện của A",
+     "unit": "J",
+     "role": "potential_energy",
+     "kind": "electric",
+     "of": "A",
+     "value": [
+      "mul",
+      "q1",
+      "V"
+     ]
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng của A",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "A",
+     "value": [
+      "mul",
+      [
+       "mul",
+       0.5,
+       "m"
+      ],
+      [
+       "pow",
+       "v",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "W",
+     "label": "Cơ năng của A",
+     "unit": "J",
+     "role": "mechanical_energy",
+     "of": "A",
+     "value": [
+      "add",
+      "Wd",
+      "Wt"
+     ]
+    },
+    {
+     "id": "A_d",
+     "label": "Công của lực điện",
+     "unit": "J",
+     "role": "work",
+     "kind": "electric",
+     "of": "A",
+     "initial": 0,
+     "rate": [
+      "mul",
+      "F",
+      "v"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Bỏ qua trọng lực và ma sát; B đặt cố định tại gốc tọa độ."
+   ]
+  }
+ }
+}

@@ -1,3 +1,4 @@
+import { readVerification } from "../model/verification";
 import { useState, type Ref } from "react";
 import Icon from "../../../shared/ui/LearningIcon";
 import SaveSimulationPanel from "../../library/components/SaveSimulationPanel";
@@ -120,26 +121,24 @@ export default function SimulationInspector({ experiment, explanation, save, rea
                 {simulation?.simulationSpec?.runtimeKind === "VISUAL"
                   ? "Trạng thái mô hình: "
                   : "Kiểm tra vật lý: "}
-                {validation?.status === "FLAGGED"
-                  ? "Cần kiểm tra lại"
-                  : validation?.status === "VERIFIED_ANALYTICAL"
-                  ? "Đã xác minh bằng số + công thức chuẩn ✓"
-                  : validation?.status === "VERIFIED_NUMERICAL"
-                  ? "Đã xác minh bằng tính toán số ✓"
-                  : validation?.status === "VISUAL_ONLY_UNVERIFIED"
-                  ? "Chỉ minh họa — chưa xác minh vật lý"
-                  : validation?.status === "UNSUPPORTED"
-                  ? "Chưa mô phỏng chính xác được tình huống này"
-                  : validation?.status === "PENDING"
-                  ? "Đang tính lại và kiểm tra…"
-                  : validation?.status === "PAUSED"
-                  ? "Đã dừng"
-                  : validation?.status === "UNVERIFIED"
-                  ? "Chưa kiểm chứng độc lập"
-                  : "Đang sẵn sàng"}
+                {readVerification(validation?.status).sentence}
               </strong>
 
               {validation?.verificationScope && <p>Phạm vi xác minh: {validation.verificationScope}</p>}
+              {!!validation?.lawChecks?.length && (
+                <details>
+                  <summary>Đã đối chiếu {validation.lawChecks.filter(check => check.status === "PASSED").length}/{validation.lawChecks.length} định luật</summary>
+                  <ul>
+                    {[...new Map(validation.lawChecks.map(check => [check.title, check])).values()].map(check => (
+                      <li key={check.law}>{check.status === "PASSED" ? "✓" : "✗"} {check.title}</li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              {!!validation?.uncheckedQuantities?.length && (
+                <p>Chưa có định luật đối chiếu: {validation.uncheckedQuantities.map(id =>
+                  simulation?.simulationSpec?.model?.quantities.find(quantity => quantity.id === id)?.label || id).join("; ")}</p>
+              )}
               {validation?.verificationMethod && (
                 <p>Phương pháp xác minh: {validation.verificationMethod}</p>
               )}
@@ -230,7 +229,7 @@ export default function SimulationInspector({ experiment, explanation, save, rea
 
       <footer className="learn-inspector-footer">
         <Icon name="atom" />
-        <span>PhysLive</span>
+        <span>PhysLive · Kết quả được kiểm tra bằng hai phương pháp</span>
       </footer>
     </aside>
   );

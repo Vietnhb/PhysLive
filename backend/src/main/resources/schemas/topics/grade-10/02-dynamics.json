@@ -57,5 +57,9 @@
       "name": "Khối lượng riêng, áp suất chất lỏng",
       "summary": "Δp = ρgΔh."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "mechanics_more"
   ]
 }

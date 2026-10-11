@@ -50,5 +50,9 @@
       "name": "Nhiệt dung riêng, nhiệt nóng chảy riêng, nhiệt hoá hơi riêng",
       "summary": "Q = mcΔt; Q = mλ; Q = mL."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "thermal_gas"
   ]
 }

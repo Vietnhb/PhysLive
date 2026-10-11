@@ -1,0 +1,187 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "x",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 8,
+  "parameters": [
+   {
+    "name": "v0",
+    "label": "Tốc độ phóng",
+    "value": 30,
+    "unit": "m/s",
+    "min": 10,
+    "max": 50,
+    "step": 1
+   },
+   {
+    "name": "u",
+    "label": "Tốc độ văng",
+    "value": 8,
+    "unit": "m/s",
+    "min": 1,
+    "max": 20,
+    "step": 1
+   }
+  ],
+  "objects": [
+   {
+    "id": "phao",
+    "label": "viên pháo",
+    "present": "vy"
+   },
+   {
+    "id": "manh",
+    "label": "mảnh",
+    "members": 6,
+    "present": [
+     "neg",
+     "vy"
+    ]
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "y",
+    "label": "Độ cao viên pháo"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g0",
+     "label": "g",
+     "value": 9.8,
+     "unit": "m/s^2"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "vy",
+     "label": "Vận tốc viên pháo",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "phao",
+     "axis": "y",
+     "initial": "v0",
+     "rate": [
+      "neg",
+      "g0"
+     ]
+    },
+    {
+     "id": "y",
+     "label": "Độ cao viên pháo",
+     "unit": "m",
+     "role": "position",
+     "of": "phao",
+     "axis": "y",
+     "initial": 0,
+     "rate": "vy"
+    },
+    {
+     "id": "goc",
+     "label": "Hướng văng",
+     "unit": "rad",
+     "role": "other",
+     "of": "manh",
+     "value": [
+      "div",
+      [
+       "mul",
+       6.283185307179586,
+       "index"
+      ],
+      "members"
+     ]
+    },
+    {
+     "id": "mvx",
+     "label": "Vận tốc ngang của mảnh",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "manh",
+     "axis": "x",
+     "initial": 0,
+     "rate": [
+      "mul",
+      0,
+      "g0"
+     ],
+     "jumps": [
+      {
+       "when": [
+        "neg",
+        "vy"
+       ],
+       "to": [
+        "mul",
+        "u",
+        [
+         "cos",
+         "goc"
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "id": "mvy",
+     "label": "Vận tốc đứng của mảnh",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "manh",
+     "axis": "y",
+     "initial": "v0",
+     "rate": [
+      "neg",
+      "g0"
+     ],
+     "jumps": [
+      {
+       "when": [
+        "neg",
+        "vy"
+       ],
+       "to": [
+        "add",
+        "mvy",
+        [
+         "mul",
+         "u",
+         [
+          "sin",
+          "goc"
+         ]
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "id": "mx",
+     "label": "x của mảnh",
+     "unit": "m",
+     "role": "position",
+     "of": "manh",
+     "axis": "x",
+     "initial": 0,
+     "rate": "mvx"
+    },
+    {
+     "id": "my",
+     "label": "y của mảnh",
+     "unit": "m",
+     "role": "position",
+     "of": "manh",
+     "axis": "y",
+     "initial": 0,
+     "rate": "mvy"
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

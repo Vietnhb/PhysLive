@@ -8,6 +8,7 @@ import { describeScene, formatNumber, formatTime, seriesColor,
 import { PIXI_WORKER, PIXI_BRIDGE } from "../engine/pixiRuntime";
 import SimulationCharts from "./SimulationCharts";
 import { useWorkspaceTheme } from "../hooks/useWorkspaceTheme";
+import { readVerification } from "../model/verification";
 import type { TeacherPresentation } from "../model/teacherPresentation";
 
 const RUNTIME = "const sampleTimeline = (" + sampleTimeline.toString() + ");\n" + PIXI_WORKER;
@@ -34,6 +35,7 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
   onCoverFailed?: () => void;
 }>) {
   const theme = useWorkspaceTheme();
+  const verification = readVerification(verificationStatus);
   const code = program.code ?? "";
   const [failure, setFailure] = useState<{ code: string; message: string } | null>(null);
   const error = failure?.code === code ? failure.message : "";
@@ -139,8 +141,8 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
     ? <SceneReadouts scene={scene} values={presentation ? backendSample?.values ?? {} : sampleTimeline(timeline, time)} theme={theme} exact={Boolean(presentation)} /> : null;
   return <div className="sim-player" data-theme={theme === "DARK" ? "dark" : "light"}>
     <div className="sim-player__toolbar">
-      <span className={"sim-status sim-status--" + (/^VERIFIED/.test(verificationStatus) ? "ok" : verificationStatus === "PENDING" ? "pending" : "warn")}>
-        {/^VERIFIED/.test(verificationStatus) ? "Dữ liệu vật lý đã xác minh" : verificationStatus === "PENDING" ? "Đang tính lại…" : "Chưa xác minh vật lý"}
+      <span className={"sim-status sim-status--" + (verification.tone === "ok" || verification.tone === "partial" ? "ok" : verification.tone === "pending" ? "pending" : "warn")}>
+        {verification.badge}
       </span>
       {toolbarActions && <div className="sim-player__actions">{toolbarActions}</div>}
     </div>

@@ -1,0 +1,2060 @@
+{
+  "id": "oscillations_waves",
+  "title": "Dao động, sóng và truyền thông tin bằng sóng vô tuyến (Vật lí 11)",
+  "source": "Chương trình GDPT môn Vật lí 2018, mục V.2, lớp 11: Dao động; Sóng; Chuyên đề 11.2",
+  "contents": [
+    {
+      "name": "Dao động – Dao động điều hoà",
+      "level": "quantitative",
+      "requirement": "Vận dụng được các khái niệm biên độ, chu kì, tần số, tần số góc, độ lệch pha; vận dụng được các phương trình về li độ, vận tốc, gia tốc; vận dụng được a = −ω²x; mô tả được sự chuyển hoá động năng và thế năng."
+    },
+    {
+      "name": "Dao động – Dao động tắt dần, hiện tượng cộng hưởng",
+      "level": "qualitative",
+      "requirement": "Nêu được ví dụ về dao động tắt dần, dao động cưỡng bức và cộng hưởng; đánh giá được sự có lợi hay có hại của cộng hưởng. (Chỉ kiểm được chiều: cơ năng không tăng khi chỉ có lực cản.)"
+    },
+    {
+      "name": "Sóng – Mô tả sóng",
+      "level": "quantitative",
+      "requirement": "Mô tả được sóng qua bước sóng, biên độ, tần số, tốc độ và cường độ sóng; vận dụng được biểu thức v = λf."
+    },
+    {
+      "name": "Sóng – Sóng dọc và sóng ngang",
+      "level": "qualitative",
+      "requirement": "So sánh được sóng dọc và sóng ngang; đo được tần số của sóng âm bằng dao động kí."
+    },
+    {
+      "name": "Sóng – Sóng điện từ",
+      "level": "qualitative",
+      "requirement": "Nêu được trong chân không mọi sóng điện từ truyền với cùng tốc độ; liệt kê được bậc độ lớn bước sóng trong thang sóng điện từ. (Kiểm được v = c.)"
+    },
+    {
+      "name": "Sóng – Giao thoa sóng kết hợp",
+      "level": "quantitative",
+      "requirement": "Nêu được điều kiện quan sát hệ vân giao thoa; vận dụng được biểu thức i = λD/a cho giao thoa ánh sáng qua hai khe hẹp."
+    },
+    {
+      "name": "Sóng – Sóng dừng",
+      "level": "quantitative",
+      "requirement": "Sử dụng các cách biểu diễn đại số và đồ thị để phân tích, xác định được vị trí nút và bụng của sóng dừng."
+    },
+    {
+      "name": "Sóng – Đo tốc độ truyền âm",
+      "level": "quantitative",
+      "requirement": "Thiết kế và thực hiện phương án đo được tốc độ truyền âm bằng dụng cụ thực hành."
+    },
+    {
+      "name": "Chuyên đề 11.2 – Biến điệu",
+      "level": "qualitative",
+      "requirement": "So sánh được biến điệu biên độ (AM) và biến điệu tần số (FM); liệt kê được tần số và bước sóng của các kênh truyền thông."
+    },
+    {
+      "name": "Chuyên đề 11.2 – Tín hiệu tương tự và tín hiệu số",
+      "level": "qualitative",
+      "requirement": "Mô tả được ưu điểm của truyền dữ liệu dạng số; mô tả sơ lược chuyển đổi tương tự – số và số – tương tự."
+    },
+    {
+      "name": "Chuyên đề 11.2 – Suy giảm tín hiệu",
+      "level": "quantitative",
+      "requirement": "Nêu được độ suy giảm tín hiệu tính theo dB và tính theo dB trên một đơn vị độ dài."
+    }
+  ],
+  "roles": {
+    "displacement": "li độ: độ dời của vật khỏi vị trí cân bằng trên một trục, tính bằng mét; con lắc đơn dùng li độ dài s = l·α (of, axis)",
+    "amplitude": "biên độ dao động của vật hoặc của một phần tử môi trường (of)",
+    "angular_frequency": "tần số góc ω: của dao động hay đại lượng xoay chiều hình sin của một vật, linh kiện (of), hoặc của sóng (in)",
+    "frequency": "tần số: của dao động hay đại lượng xoay chiều của một vật, linh kiện (of); của sóng trong một môi trường (in); của một bức xạ (of = bức xạ đó)",
+    "phase": "pha dao động ωt + φ của vật hoặc của một phần tử môi trường, với x = A·cos(pha) (of)",
+    "initial_phase": "pha ban đầu φ của dao động (of)",
+    "phase_difference": "độ lệch pha: của điện áp so với cường độ dòng điện của một đoạn mạch, dương khi điện áp sớm pha (of); hoặc giữa hai dao động — hai điểm trên phương truyền sóng, hai sóng tới cùng một điểm (of, in)",
+    "max_speed": "tốc độ cực đại của vật dao động (of)",
+    "max_acceleration": "độ lớn gia tốc cực đại của vật dao động (of)",
+    "oscillation_energy": "cơ năng của dao động điều hoà với mốc thế năng ở vị trí cân bằng (of)",
+    "pendulum_length": "chiều dài dây của con lắc đơn (of)",
+    "wavelength": "bước sóng: của sóng trong một môi trường (in), hoặc của một bức xạ (of = bức xạ đó)",
+    "wave_speed": "tốc độ truyền sóng (in; kind = electromagnetic cho sóng điện từ trong chân không hoặc không khí, electromagnetic_medium cho sóng điện từ trong môi trường khác); hoặc of = bức xạ khi mô hình mô tả từng bức xạ",
+    "wave_travel_distance": "quãng đường sóng đã truyền được kể từ lúc bắt đầu (in)",
+    "source_phase": "pha dao động của nguồn sóng (in)",
+    "source_distance": "khoảng cách từ nguồn sóng tới điểm đang xét dọc theo phương truyền (of, in)",
+    "path_difference": "hiệu đường đi: khoảng cách giữa hai điểm dọc phương truyền sóng, hoặc hiệu khoảng cách từ điểm đang xét tới hai nguồn (of, in)",
+    "source_amplitude": "biên độ của mỗi sóng thành phần tới điểm đang xét khi hai sóng kết hợp có cùng biên độ (in)",
+    "intensity": "cường độ sóng tại một điểm hoặc trên một diện tích (of, in)",
+    "wave_power": "công suất của nguồn sóng (in, không có of), hoặc công suất sóng truyền qua một diện tích (of)",
+    "area": "diện tích của một mặt: mặt giới hạn bởi một vòng dây, hoặc mặt vuông góc với phương truyền mà sóng hay bức xạ đi qua (of)",
+    "fringe_spacing": "khoảng vân i trong giao thoa ánh sáng qua hai khe (in)",
+    "slit_separation": "khoảng cách a giữa hai khe hẹp (in)",
+    "screen_distance": "khoảng cách D từ mặt phẳng hai khe tới màn (in)",
+    "screen_position": "tọa độ của một điểm trên màn tính từ vân trung tâm (of, in; kind = bright cho vân sáng, dark cho vân tối)",
+    "fringe_order": "số nguyên k của vân: vân sáng bậc k, hoặc vân tối thứ k + 1 (of)",
+    "node_spacing": "khoảng cách giữa hai nút liên tiếp hoặc hai bụng liên tiếp của sóng dừng (in)",
+    "medium_length": "chiều dài dây hoặc cột khí có sóng dừng (in; kind = fixed_ends khi hai đầu cố định, free_ends khi hai đầu tự do, one_free_end khi một đầu cố định một đầu tự do)",
+    "antinode_count": "số bụng sóng n trên dây hoặc cột khí (in)",
+    "node_distance": "khoảng cách từ một nút sóng tới điểm đang xét (of, in; kind = node khi điểm đó là nút, antinode khi là bụng)",
+    "node_index": "số nguyên k đánh số nút hoặc bụng kể từ nút gốc, bắt đầu từ 0 (of)",
+    "antinode_amplitude": "biên độ dao động của bụng sóng (in)",
+    "attenuation": "độ suy giảm tín hiệu tính theo dB (of)",
+    "attenuation_per_length": "độ suy giảm tín hiệu trên một đơn vị độ dài, dB/m (of)",
+    "transmission_length": "chiều dài đường truyền tín hiệu (of)",
+    "input_power": "công suất đưa vào: công suất toàn phần cấp cho máy hoặc quá trình, hoặc công suất tín hiệu ở đầu vào đường truyền (of)",
+    "output_power": "công suất tín hiệu ở đầu ra đường truyền (of)"
+  },
+  "forceKinds": {},
+  "kinds": {
+    "electromagnetic": "sóng điện từ trong chân không hoặc không khí",
+    "electromagnetic_medium": "sóng điện từ trong môi trường khác chân không",
+    "bright": "vân sáng",
+    "dark": "vân tối",
+    "node": "nút sóng",
+    "antinode": "bụng sóng",
+    "fixed_ends": "hai đầu cố định (hai đầu là nút)",
+    "free_ends": "hai đầu tự do (hai đầu là bụng)",
+    "one_free_end": "một đầu cố định, một đầu tự do"
+  },
+  "constants": {
+    "c": {
+      "value": 299792458,
+      "unit": "m/s",
+      "label": "tốc độ ánh sáng trong chân không"
+    }
+  },
+  "laws": [
+    {
+      "id": "displacement_rate",
+      "title": "Vận tốc là tốc độ biến thiên của li độ",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "x": {
+          "role": "displacement"
+        },
+        "v": {
+          "role": "velocity"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "x"
+        ],
+        "v"
+      ]
+    },
+    {
+      "id": "sho_acceleration",
+      "title": "Dao động điều hoà: a = −ω²·x",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "x": {
+          "role": "displacement"
+        },
+        "v": {
+          "role": "velocity"
+        },
+        "w": {
+          "role": "angular_frequency"
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": [
+            "friction",
+            "drag",
+            "applied"
+          ]
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "v"
+        ],
+        [
+          "neg",
+          [
+            "mul",
+            [
+              "pow",
+              "w",
+              2
+            ],
+            "x"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "sho_acceleration_value",
+      "title": "Gia tốc của dao động điều hoà: a = −ω²·x",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "x": {
+          "role": "displacement"
+        },
+        "a": {
+          "role": "acceleration"
+        },
+        "w": {
+          "role": "angular_frequency"
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": [
+            "friction",
+            "drag",
+            "applied"
+          ]
+        }
+      },
+      "equal": [
+        "a",
+        [
+          "neg",
+          [
+            "mul",
+            [
+              "pow",
+              "w",
+              2
+            ],
+            "x"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "sho_amplitude",
+      "title": "Biên độ: A² = x² + (v/ω)²",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "x": {
+          "role": "displacement"
+        },
+        "v": {
+          "role": "velocity"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "A": {
+          "role": "amplitude"
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": [
+            "friction",
+            "drag",
+            "applied"
+          ]
+        }
+      },
+      "equal": [
+        [
+          "pow",
+          "A",
+          2
+        ],
+        [
+          "add",
+          [
+            "pow",
+            "x",
+            2
+          ],
+          [
+            "pow",
+            [
+              "div",
+              "v",
+              "w"
+            ],
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "displacement_within_amplitude",
+      "title": "Li độ không vượt quá biên độ",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "x": {
+          "role": "displacement"
+        },
+        "A": {
+          "role": "amplitude"
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": "applied"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "x"
+        ],
+        "A"
+      ]
+    },
+    {
+      "id": "period_frequency",
+      "title": "Tần số f = 1/T",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "T": {
+          "role": "period"
+        },
+        "f": {
+          "role": "frequency"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "f",
+          "T"
+        ],
+        1
+      ]
+    },
+    {
+      "id": "angular_frequency_frequency",
+      "title": "Tần số góc ω = 2π·f",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "w": {
+          "role": "angular_frequency"
+        },
+        "f": {
+          "role": "frequency"
+        }
+      },
+      "equal": [
+        "w",
+        [
+          "mul",
+          6.283185307179586,
+          "f"
+        ]
+      ]
+    },
+    {
+      "id": "angular_frequency_period",
+      "title": "Tần số góc ω = 2π/T",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "w": {
+          "role": "angular_frequency"
+        },
+        "T": {
+          "role": "period"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "w",
+          "T"
+        ],
+        6.283185307179586
+      ]
+    },
+    {
+      "id": "angular_frequency_positive",
+      "title": "Tần số góc là đại lượng dương",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "w": {
+          "role": "angular_frequency"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "w"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "wave_frequency_positive",
+      "title": "Tần số sóng là đại lượng dương",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "f": {
+          "role": "frequency",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "f"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "phase_rate",
+      "title": "Pha dao động tăng đều với tốc độ ω",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "p": {
+          "role": "phase"
+        },
+        "w": {
+          "role": "angular_frequency"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "p"
+        ],
+        "w"
+      ]
+    },
+    {
+      "id": "phase_initial",
+      "title": "Pha dao động: ω·t + φ₀",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "p": {
+          "role": "phase"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "p0": {
+          "role": "initial_phase"
+        }
+      },
+      "equal": [
+        "p",
+        [
+          "add",
+          [
+            "mul",
+            "w",
+            "t"
+          ],
+          "p0"
+        ]
+      ]
+    },
+    {
+      "id": "displacement_equation",
+      "title": "Phương trình li độ: x = A·cos(ωt + φ)",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "x": {
+          "role": "displacement"
+        },
+        "A": {
+          "role": "amplitude"
+        },
+        "p": {
+          "role": "phase"
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": [
+            "friction",
+            "drag",
+            "applied"
+          ]
+        }
+      },
+      "equal": [
+        "x",
+        [
+          "mul",
+          "A",
+          [
+            "cos",
+            "p"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "velocity_equation",
+      "title": "Phương trình vận tốc: v = −ω·A·sin(ωt + φ)",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "x": {
+          "role": "displacement"
+        },
+        "v": {
+          "role": "velocity"
+        },
+        "A": {
+          "role": "amplitude"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "p": {
+          "role": "phase"
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": [
+            "friction",
+            "drag",
+            "applied"
+          ]
+        }
+      },
+      "equal": [
+        "v",
+        [
+          "neg",
+          [
+            "mul",
+            [
+              "mul",
+              "w",
+              "A"
+            ],
+            [
+              "sin",
+              "p"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "max_speed",
+      "title": "Tốc độ cực đại v_max = ω·A",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "V": {
+          "role": "max_speed"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "A": {
+          "role": "amplitude"
+        }
+      },
+      "equal": [
+        "V",
+        [
+          "mul",
+          "w",
+          "A"
+        ]
+      ]
+    },
+    {
+      "id": "max_acceleration",
+      "title": "Gia tốc cực đại a_max = ω²·A",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "a": {
+          "role": "max_acceleration"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "A": {
+          "role": "amplitude"
+        }
+      },
+      "equal": [
+        "a",
+        [
+          "mul",
+          [
+            "pow",
+            "w",
+            2
+          ],
+          "A"
+        ]
+      ]
+    },
+    {
+      "id": "speed_within_max",
+      "title": "Tốc độ không vượt quá tốc độ cực đại",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "v": {
+          "role": "velocity"
+        },
+        "V": {
+          "role": "max_speed"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "v"
+        ],
+        "V"
+      ]
+    },
+    {
+      "id": "sho_kinetic_energy",
+      "title": "Động năng của dao động điều hoà: Wđ = ½·m·ω²·(A² − x²)",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "K": {
+          "role": "kinetic_energy"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "A": {
+          "role": "amplitude"
+        },
+        "x": {
+          "role": "displacement"
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": [
+            "friction",
+            "drag",
+            "applied"
+          ]
+        }
+      },
+      "equal": [
+        "K",
+        [
+          "mul",
+          [
+            "mul",
+            0.5,
+            "m"
+          ],
+          [
+            "mul",
+            [
+              "pow",
+              "w",
+              2
+            ],
+            [
+              "sub",
+              [
+                "pow",
+                "A",
+                2
+              ],
+              [
+                "pow",
+                "x",
+                2
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "sho_potential_energy",
+      "title": "Thế năng của dao động biến thiên như ½·m·ω²·x²",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "U": {
+          "role": "potential_energy",
+          "many": true,
+          "min": 1
+        },
+        "m": {
+          "role": "mass"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "x": {
+          "role": "displacement"
+        },
+        "v": {
+          "role": "velocity"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          [
+            "sum",
+            "U"
+          ]
+        ],
+        [
+          "mul",
+          [
+            "mul",
+            "m",
+            [
+              "pow",
+              "w",
+              2
+            ]
+          ],
+          [
+            "mul",
+            "x",
+            "v"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "sho_energy",
+      "title": "Cơ năng của dao động điều hoà: W = ½·m·ω²·A² (mốc thế năng ở vị trí cân bằng)",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "oscillation_energy"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "A": {
+          "role": "amplitude"
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "mul",
+          [
+            "mul",
+            0.5,
+            "m"
+          ],
+          [
+            "mul",
+            [
+              "pow",
+              "w",
+              2
+            ],
+            [
+              "pow",
+              "A",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "sho_energy_sum",
+      "title": "Cơ năng dao động bằng động năng cộng ½·m·ω²·x²",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "E": {
+          "role": "oscillation_energy"
+        },
+        "K": {
+          "role": "kinetic_energy"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "w": {
+          "role": "angular_frequency"
+        },
+        "x": {
+          "role": "displacement"
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": [
+            "friction",
+            "drag",
+            "applied"
+          ]
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "add",
+          "K",
+          [
+            "mul",
+            [
+              "mul",
+              0.5,
+              "m"
+            ],
+            [
+              "mul",
+              [
+                "pow",
+                "w",
+                2
+              ],
+              [
+                "pow",
+                "x",
+                2
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "restoring_force",
+      "title": "Lực kéo về luôn hướng về vị trí cân bằng",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": [
+              "spring",
+              "gravity",
+              "tension",
+              "normal",
+              "buoyancy"
+            ]
+          }
+        },
+        "x": {
+          "role": "displacement"
+        }
+      },
+      "atMost": [
+        [
+          "mul",
+          [
+            "sum",
+            "F"
+          ],
+          "x"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "spring_oscillator",
+      "title": "Con lắc lò xo: m·ω² = k",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "w": {
+          "role": "angular_frequency"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "k": {
+          "role": "stiffness"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "m",
+          [
+            "pow",
+            "w",
+            2
+          ]
+        ],
+        "k"
+      ]
+    },
+    {
+      "id": "simple_pendulum",
+      "title": "Con lắc đơn dao động nhỏ: ω²·l = g",
+      "curriculum": "Dao động – Dao động điều hoà",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "w": {
+          "role": "angular_frequency"
+        },
+        "l": {
+          "role": "pendulum_length"
+        },
+        "g": {
+          "role": "gravitational_acceleration"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          [
+            "pow",
+            "w",
+            2
+          ],
+          "l"
+        ],
+        "g"
+      ]
+    },
+    {
+      "id": "damping_loses_energy",
+      "title": "Dao động tắt dần: cơ năng không tăng khi chỉ có lực cản, ma sát",
+      "curriculum": "Dao động – Dao động tắt dần, hiện tượng cộng hưởng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "mechanical_energy"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": [
+              "friction",
+              "drag"
+            ]
+          }
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": [
+            "applied",
+            "contact",
+            "tension",
+            "normal",
+            "buoyancy"
+          ]
+        }
+      },
+      "atMost": [
+        [
+          "ddt",
+          "E"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "wave_speed",
+      "title": "Tốc độ truyền sóng v = λ·f",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "v": {
+          "role": "wave_speed",
+          "where": {
+            "of": null
+          }
+        },
+        "l": {
+          "role": "wavelength",
+          "where": {
+            "of": null
+          }
+        },
+        "f": {
+          "role": "frequency",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "v",
+          [
+            "mul",
+            "l",
+            "f"
+          ]
+        ],
+        1
+      ]
+    },
+    {
+      "id": "wave_period_frequency",
+      "title": "Tần số sóng f = 1/T",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "T": {
+          "role": "period",
+          "where": {
+            "of": null
+          }
+        },
+        "f": {
+          "role": "frequency",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "f",
+          "T"
+        ],
+        1
+      ]
+    },
+    {
+      "id": "wave_angular_frequency",
+      "title": "Tần số góc của sóng ω = 2π·f",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "w": {
+          "role": "angular_frequency",
+          "where": {
+            "of": null
+          }
+        },
+        "f": {
+          "role": "frequency",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        "w",
+        [
+          "mul",
+          6.283185307179586,
+          "f"
+        ]
+      ]
+    },
+    {
+      "id": "wave_angular_frequency_period",
+      "title": "Tần số góc của sóng ω = 2π/T",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "w": {
+          "role": "angular_frequency",
+          "where": {
+            "of": null
+          }
+        },
+        "T": {
+          "role": "period",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "w",
+          "T"
+        ],
+        6.283185307179586
+      ]
+    },
+    {
+      "id": "wave_speed_period",
+      "title": "Trong một chu kì sóng truyền được một bước sóng: λ = v·T",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "v": {
+          "role": "wave_speed",
+          "where": {
+            "of": null
+          }
+        },
+        "l": {
+          "role": "wavelength",
+          "where": {
+            "of": null
+          }
+        },
+        "T": {
+          "role": "period",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "l",
+          [
+            "mul",
+            "v",
+            "T"
+          ]
+        ],
+        1
+      ]
+    },
+    {
+      "id": "wavefront",
+      "title": "Sóng truyền đi với tốc độ v: quãng đường truyền tăng theo v",
+      "curriculum": "Sóng – Đo tốc độ truyền âm",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "s": {
+          "role": "wave_travel_distance"
+        },
+        "v": {
+          "role": "wave_speed",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "s"
+        ],
+        "v"
+      ]
+    },
+    {
+      "id": "wave_phase_difference",
+      "title": "Độ lệch pha Δφ = 2π·Δd/λ",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "dp": {
+          "role": "phase_difference"
+        },
+        "d": {
+          "role": "path_difference"
+        },
+        "l": {
+          "role": "wavelength"
+        }
+      },
+      "equal": [
+        "dp",
+        [
+          "div",
+          [
+            "mul",
+            6.283185307179586,
+            "d"
+          ],
+          "l"
+        ]
+      ]
+    },
+    {
+      "id": "wave_point_phase",
+      "title": "Điểm cách nguồn một đoạn d dao động trễ pha 2π·d/λ so với nguồn",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "p": {
+          "role": "phase"
+        },
+        "ps": {
+          "role": "source_phase"
+        },
+        "d": {
+          "role": "source_distance"
+        },
+        "l": {
+          "role": "wavelength"
+        }
+      },
+      "equal": [
+        [
+          "sub",
+          "ps",
+          "p"
+        ],
+        [
+          "div",
+          [
+            "mul",
+            6.283185307179586,
+            "d"
+          ],
+          "l"
+        ]
+      ]
+    },
+    {
+      "id": "source_phase_rate",
+      "title": "Pha của nguồn sóng tăng đều với tốc độ ω",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "ps": {
+          "role": "source_phase",
+          "where": {
+            "of": null
+          }
+        },
+        "w": {
+          "role": "angular_frequency",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "ps"
+        ],
+        "w"
+      ]
+    },
+    {
+      "id": "wave_intensity",
+      "title": "Cường độ sóng I = P/S",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "I": {
+          "role": "intensity"
+        },
+        "P": {
+          "role": "wave_power",
+          "where": {
+            "of": "*"
+          }
+        },
+        "S": {
+          "role": "area"
+        }
+      },
+      "equal": [
+        "I",
+        [
+          "div",
+          "P",
+          "S"
+        ]
+      ]
+    },
+    {
+      "id": "wave_intensity_sphere",
+      "title": "Sóng cầu: I = P/(4π·r²)",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "I": {
+          "role": "intensity"
+        },
+        "P": {
+          "role": "wave_power",
+          "where": {
+            "of": null
+          }
+        },
+        "d": {
+          "role": "source_distance"
+        }
+      },
+      "unless": {
+        "role": "area"
+      },
+      "equal": [
+        "I",
+        [
+          "div",
+          "P",
+          [
+            "mul",
+            12.566370614359172,
+            [
+              "pow",
+              "d",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "wave_speed_positive",
+      "title": "Tốc độ truyền sóng là đại lượng dương",
+      "curriculum": "Sóng – Mô tả sóng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "v": {
+          "role": "wave_speed",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "v"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "em_wave_speed",
+      "title": "Trong chân không mọi sóng điện từ truyền với cùng tốc độ c",
+      "curriculum": "Sóng – Sóng điện từ",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "v": {
+          "role": "wave_speed",
+          "where": {
+            "of": null,
+            "kind": "electromagnetic"
+          }
+        }
+      },
+      "equal": [
+        "v",
+        "c"
+      ]
+    },
+    {
+      "id": "em_wave_speed_medium",
+      "title": "Trong môi trường, sóng điện từ truyền không nhanh hơn c",
+      "curriculum": "Sóng – Sóng điện từ",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "v": {
+          "role": "wave_speed",
+          "where": {
+            "of": null,
+            "kind": "electromagnetic_medium"
+          }
+        }
+      },
+      "atMost": [
+        "v",
+        "c"
+      ]
+    },
+    {
+      "id": "interference_amplitude",
+      "title": "Giao thoa hai sóng kết hợp cùng biên độ a: A = 2a·|cos(Δφ/2)|",
+      "curriculum": "Sóng – Giao thoa sóng kết hợp",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "A": {
+          "role": "amplitude"
+        },
+        "a": {
+          "role": "source_amplitude"
+        },
+        "dp": {
+          "role": "phase_difference"
+        }
+      },
+      "equal": [
+        "A",
+        [
+          "mul",
+          [
+            "mul",
+            2,
+            "a"
+          ],
+          [
+            "abs",
+            [
+              "cos",
+              [
+                "mul",
+                0.5,
+                "dp"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "fringe_spacing",
+      "title": "Khoảng vân i = λ·D/a",
+      "curriculum": "Sóng – Giao thoa sóng kết hợp",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "i": {
+          "role": "fringe_spacing",
+          "where": {
+            "of": null
+          }
+        },
+        "l": {
+          "role": "wavelength",
+          "where": {
+            "of": null
+          }
+        },
+        "D": {
+          "role": "screen_distance",
+          "where": {
+            "of": null
+          }
+        },
+        "a": {
+          "role": "slit_separation",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            "i",
+            "a"
+          ],
+          [
+            "mul",
+            "l",
+            "D"
+          ]
+        ],
+        1
+      ]
+    },
+    {
+      "id": "double_slit_path_difference",
+      "title": "Hiệu đường đi tới điểm trên màn: Δd = a·x/D (so theo bước sóng)",
+      "curriculum": "Sóng – Giao thoa sóng kết hợp",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "d": {
+          "role": "path_difference"
+        },
+        "x": {
+          "role": "screen_position"
+        },
+        "D": {
+          "role": "screen_distance"
+        },
+        "a": {
+          "role": "slit_separation"
+        },
+        "l": {
+          "role": "wavelength"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "d",
+          "l"
+        ],
+        [
+          "div",
+          [
+            "mul",
+            "a",
+            "x"
+          ],
+          [
+            "mul",
+            "l",
+            "D"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "bright_fringe",
+      "title": "Vân sáng bậc k: x = k·i",
+      "curriculum": "Sóng – Giao thoa sóng kết hợp",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "x": {
+          "role": "screen_position",
+          "where": {
+            "kind": "bright"
+          }
+        },
+        "k": {
+          "role": "fringe_order"
+        },
+        "i": {
+          "role": "fringe_spacing"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "x",
+          "i"
+        ],
+        "k"
+      ]
+    },
+    {
+      "id": "dark_fringe",
+      "title": "Vân tối thứ k+1: x = (k + ½)·i",
+      "curriculum": "Sóng – Giao thoa sóng kết hợp",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "x": {
+          "role": "screen_position",
+          "where": {
+            "kind": "dark"
+          }
+        },
+        "k": {
+          "role": "fringe_order"
+        },
+        "i": {
+          "role": "fringe_spacing"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "x",
+          "i"
+        ],
+        [
+          "add",
+          "k",
+          0.5
+        ]
+      ]
+    },
+    {
+      "id": "node_spacing",
+      "title": "Hai nút (hoặc hai bụng) liên tiếp cách nhau λ/2",
+      "curriculum": "Sóng – Sóng dừng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "s": {
+          "role": "node_spacing",
+          "where": {
+            "of": null
+          }
+        },
+        "l": {
+          "role": "wavelength",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            2,
+            "s"
+          ],
+          "l"
+        ],
+        1
+      ]
+    },
+    {
+      "id": "standing_wave_fixed_ends",
+      "title": "Sóng dừng hai đầu cố định (hai đầu là nút): L = n·λ/2 với n bụng",
+      "curriculum": "Sóng – Sóng dừng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "L": {
+          "role": "medium_length",
+          "where": {
+            "of": null,
+            "kind": "fixed_ends"
+          }
+        },
+        "n": {
+          "role": "antinode_count",
+          "where": {
+            "of": null
+          }
+        },
+        "l": {
+          "role": "wavelength",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            2,
+            "L"
+          ],
+          "l"
+        ],
+        "n"
+      ]
+    },
+    {
+      "id": "standing_wave_free_ends",
+      "title": "Sóng dừng hai đầu tự do (hai đầu là bụng): L = (n − 1)·λ/2 với n bụng",
+      "curriculum": "Sóng – Sóng dừng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "L": {
+          "role": "medium_length",
+          "where": {
+            "of": null,
+            "kind": "free_ends"
+          }
+        },
+        "n": {
+          "role": "antinode_count",
+          "where": {
+            "of": null
+          }
+        },
+        "l": {
+          "role": "wavelength",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            2,
+            "L"
+          ],
+          "l"
+        ],
+        [
+          "sub",
+          "n",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "standing_wave_one_free_end",
+      "title": "Sóng dừng một đầu cố định, một đầu tự do: L = (2n − 1)·λ/4",
+      "curriculum": "Sóng – Sóng dừng",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "L": {
+          "role": "medium_length",
+          "where": {
+            "of": null,
+            "kind": "one_free_end"
+          }
+        },
+        "n": {
+          "role": "antinode_count",
+          "where": {
+            "of": null
+          }
+        },
+        "l": {
+          "role": "wavelength",
+          "where": {
+            "of": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            4,
+            "L"
+          ],
+          "l"
+        ],
+        [
+          "sub",
+          [
+            "mul",
+            2,
+            "n"
+          ],
+          1
+        ]
+      ]
+    },
+    {
+      "id": "node_position",
+      "title": "Vị trí nút sóng tính từ một nút: x = k·λ/2",
+      "curriculum": "Sóng – Sóng dừng",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "x": {
+          "role": "node_distance",
+          "where": {
+            "kind": "node"
+          }
+        },
+        "k": {
+          "role": "node_index"
+        },
+        "l": {
+          "role": "wavelength"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            2,
+            "x"
+          ],
+          "l"
+        ],
+        "k"
+      ]
+    },
+    {
+      "id": "antinode_position",
+      "title": "Vị trí bụng sóng tính từ một nút: x = (k + ½)·λ/2",
+      "curriculum": "Sóng – Sóng dừng",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "x": {
+          "role": "node_distance",
+          "where": {
+            "kind": "antinode"
+          }
+        },
+        "k": {
+          "role": "node_index"
+        },
+        "l": {
+          "role": "wavelength"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            2,
+            "x"
+          ],
+          "l"
+        ],
+        [
+          "add",
+          "k",
+          0.5
+        ]
+      ]
+    },
+    {
+      "id": "standing_wave_amplitude",
+      "title": "Biên độ của phần tử sóng dừng cách nút một đoạn d: A = A_bụng·|sin(2π·d/λ)|",
+      "curriculum": "Sóng – Sóng dừng",
+      "scope": [
+        "of",
+        "in"
+      ],
+      "bind": {
+        "A": {
+          "role": "amplitude"
+        },
+        "Ab": {
+          "role": "antinode_amplitude"
+        },
+        "d": {
+          "role": "node_distance"
+        },
+        "l": {
+          "role": "wavelength"
+        }
+      },
+      "equal": [
+        "A",
+        [
+          "mul",
+          "Ab",
+          [
+            "abs",
+            [
+              "sin",
+              [
+                "div",
+                [
+                  "mul",
+                  6.283185307179586,
+                  "d"
+                ],
+                "l"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "attenuation_decibel",
+      "title": "Độ suy giảm tín hiệu (dB) = 10·lg(P_vào/P_ra)",
+      "curriculum": "Chuyên đề 11.2 – Suy giảm tín hiệu",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "attenuation"
+        },
+        "Pi": {
+          "role": "input_power"
+        },
+        "Po": {
+          "role": "output_power"
+        }
+      },
+      "equal": [
+        "Po",
+        [
+          "mul",
+          "Pi",
+          [
+            "exp",
+            [
+              "neg",
+              [
+                "div",
+                "A",
+                4.342944819032518
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "attenuation_per_length",
+      "title": "Độ suy giảm = độ suy giảm trên một đơn vị độ dài × chiều dài đường truyền",
+      "curriculum": "Chuyên đề 11.2 – Suy giảm tín hiệu",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "attenuation"
+        },
+        "al": {
+          "role": "attenuation_per_length"
+        },
+        "L": {
+          "role": "transmission_length"
+        }
+      },
+      "equal": [
+        "A",
+        [
+          "mul",
+          "al",
+          "L"
+        ]
+      ]
+    },
+    {
+      "id": "attenuation_loses_power",
+      "title": "Tín hiệu bị suy giảm: công suất ra không lớn hơn công suất vào",
+      "curriculum": "Chuyên đề 11.2 – Suy giảm tín hiệu",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "attenuation"
+        },
+        "Pi": {
+          "role": "input_power"
+        },
+        "Po": {
+          "role": "output_power"
+        }
+      },
+      "atMost": [
+        "Po",
+        "Pi"
+      ]
+    }
+  ]
+}

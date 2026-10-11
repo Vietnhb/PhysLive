@@ -1,0 +1,180 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Mẫu iôt 131 có chu kì bán rã 8 ngày, ban đầu có 10^15 hạt nhân. Theo dõi số hạt còn lại, độ phóng xạ và số đếm của máy trong ba chu kì bán rã.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 3000000.0,
+  "parameters": [
+   {
+    "name": "T",
+    "label": "Chu kì bán rã",
+    "value": 8,
+    "unit": "ngày",
+    "min": 1,
+    "max": 30,
+    "step": 1,
+    "role": "half_life",
+    "of": "iot"
+   },
+   {
+    "name": "N0",
+    "label": "Số hạt ban đầu",
+    "value": 1000000000000000.0,
+    "unit": "1",
+    "min": 100000000000000.0,
+    "max": 1e+16,
+    "step": 100000000000000.0,
+    "role": "other"
+   },
+   {
+    "name": "m0",
+    "label": "Khối lượng ban đầu",
+    "value": 0.2,
+    "unit": "mg",
+    "min": 0.1,
+    "max": 1,
+    "step": 0.1,
+    "role": "other"
+   },
+   {
+    "name": "eff",
+    "label": "Phần hạt máy đếm được",
+    "value": 0.05,
+    "unit": "1",
+    "min": 0.01,
+    "max": 0.5,
+    "step": 0.01,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "iot",
+    "label": "iot",
+    "count": 1
+   },
+   {
+    "id": "may",
+    "label": "may",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "lam",
+    "label": "lam"
+   },
+   {
+    "quantity": "N",
+    "label": "N"
+   },
+   {
+    "quantity": "H",
+    "label": "H"
+   },
+   {
+    "quantity": "n",
+    "label": "n"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "lam",
+     "label": "Hằng số phóng xạ",
+     "unit": "1/s",
+     "role": "decay_constant",
+     "of": "iot",
+     "value": [
+      "div",
+      0.6931471805599453,
+      "T"
+     ]
+    },
+    {
+     "id": "N",
+     "label": "Số hạt chưa phân rã",
+     "unit": "1",
+     "role": "undecayed_count",
+     "of": "iot",
+     "initial": "N0",
+     "rate": [
+      "neg",
+      [
+       "mul",
+       "lam",
+       "N"
+      ]
+     ]
+    },
+    {
+     "id": "H",
+     "label": "Độ phóng xạ",
+     "unit": "Bq",
+     "role": "activity",
+     "of": "iot",
+     "value": [
+      "mul",
+      "lam",
+      "N"
+     ]
+    },
+    {
+     "id": "n",
+     "label": "Tốc độ đếm",
+     "unit": "1/s",
+     "role": "count_rate",
+     "of": "iot",
+     "value": [
+      "mul",
+      "eff",
+      "H"
+     ]
+    },
+    {
+     "id": "Nd",
+     "label": "Số hạt đã phân rã",
+     "unit": "1",
+     "role": "decayed_count",
+     "of": "iot",
+     "value": [
+      "sub",
+      "N0",
+      "N"
+     ]
+    },
+    {
+     "id": "m",
+     "label": "Khối lượng iôt còn lại",
+     "unit": "kg",
+     "role": "radioactive_mass",
+     "of": "iot",
+     "value": [
+      "mul",
+      "m0",
+      [
+       "exp",
+       [
+        "neg",
+        [
+         "mul",
+         "lam",
+         "t"
+        ]
+       ]
+      ]
+     ]
+    }
+   ],
+   "assumptions": [],
+   "duration": [
+    "mul",
+    3,
+    "T"
+   ]
+  }
+ }
+}

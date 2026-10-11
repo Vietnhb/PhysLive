@@ -1,0 +1,279 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Mô hình kiểm thử.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 5,
+  "parameters": [
+   {
+    "name": "m1",
+    "label": "Khối lượng vật 1",
+    "value": 2,
+    "unit": "kg",
+    "min": 0.5,
+    "max": 10,
+    "step": 0.5,
+    "role": "mass",
+    "of": "vat1"
+   },
+   {
+    "name": "d1",
+    "label": "Cánh tay đòn của vật 1",
+    "value": 30,
+    "unit": "cm",
+    "min": 5,
+    "max": 100,
+    "step": 5,
+    "role": "lever_arm",
+    "of": "thanh",
+    "kind": "tension",
+    "by": "vat1"
+   },
+   {
+    "name": "m2",
+    "label": "Khối lượng vật 2",
+    "value": 3,
+    "unit": "kg",
+    "min": 0.5,
+    "max": 10,
+    "step": 0.5,
+    "role": "mass",
+    "of": "vat2"
+   }
+  ],
+  "objects": [
+   {
+    "id": "thanh",
+    "label": "Thanh",
+    "count": 1
+   },
+   {
+    "id": "vat1",
+    "label": "Vật 1",
+    "count": 1
+   },
+   {
+    "id": "vat2",
+    "label": "Vật 2",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "d2",
+    "label": "d2"
+   },
+   {
+    "quantity": "M1",
+    "label": "M1"
+   },
+   {
+    "quantity": "M2",
+    "label": "M2"
+   },
+   {
+    "quantity": "N",
+    "label": "N"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "d2",
+     "label": "Cánh tay đòn của vật 2",
+     "unit": "m",
+     "role": "lever_arm",
+     "of": "thanh",
+     "kind": "tension",
+     "by": "vat2",
+     "value": [
+      "div",
+      [
+       "mul",
+       "m1",
+       "d1"
+      ],
+      "m2"
+     ]
+    },
+    {
+     "id": "P1",
+     "label": "Trọng lực vật 1",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "vat1",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m1",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "P2",
+     "label": "Trọng lực vật 2",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "vat2",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m2",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "T1",
+     "label": "Lực căng dây treo vật 1",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "vat1",
+     "by": "thanh",
+     "axis": "y",
+     "value": [
+      "mul",
+      "m1",
+      "g"
+     ]
+    },
+    {
+     "id": "T2",
+     "label": "Lực căng dây treo vật 2",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "vat2",
+     "by": "thanh",
+     "axis": "y",
+     "value": [
+      "mul",
+      "m2",
+      "g"
+     ]
+    },
+    {
+     "id": "K1",
+     "label": "Lực dây 1 kéo thanh",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "thanh",
+     "by": "vat1",
+     "axis": "y",
+     "value": [
+      "neg",
+      "T1"
+     ]
+    },
+    {
+     "id": "K2",
+     "label": "Lực dây 2 kéo thanh",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "thanh",
+     "by": "vat2",
+     "axis": "y",
+     "value": [
+      "neg",
+      "T2"
+     ]
+    },
+    {
+     "id": "N",
+     "label": "Phản lực của trục quay",
+     "unit": "N",
+     "role": "force",
+     "kind": "normal",
+     "of": "thanh",
+     "axis": "y",
+     "value": [
+      "add",
+      "T1",
+      "T2"
+     ]
+    },
+    {
+     "id": "F1",
+     "label": "Độ lớn lực dây 1 kéo thanh",
+     "unit": "N",
+     "role": "force_magnitude",
+     "kind": "tension",
+     "of": "thanh",
+     "by": "vat1",
+     "value": [
+      "abs",
+      "K1"
+     ]
+    },
+    {
+     "id": "F2",
+     "label": "Độ lớn lực dây 2 kéo thanh",
+     "unit": "N",
+     "role": "force_magnitude",
+     "kind": "tension",
+     "of": "thanh",
+     "by": "vat2",
+     "value": [
+      "abs",
+      "K2"
+     ]
+    },
+    {
+     "id": "M1",
+     "label": "Moment của lực dây 1",
+     "unit": "N*m",
+     "role": "torque",
+     "kind": "tension",
+     "of": "thanh",
+     "by": "vat1",
+     "value": [
+      "mul",
+      "F1",
+      "d1"
+     ]
+    },
+    {
+     "id": "M2",
+     "label": "Moment của lực dây 2",
+     "unit": "N*m",
+     "role": "torque",
+     "kind": "tension",
+     "of": "thanh",
+     "by": "vat2",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "F2",
+       "d2"
+      ]
+     ]
+    }
+   ],
+   "assumptions": [
+    "Thanh nhẹ, trục quay ở giữa hai điểm treo."
+   ]
+  }
+ }
+}

@@ -1,7 +1,7 @@
 {
   "capabilityId": "vertical_spring_mass",
   "title": "Con lắc lò xo treo thẳng đứng",
-  "version": "1.0",
+  "version": "1.1",
   "applicability": {
     "objectTypes": [
       "body",
@@ -12,7 +12,8 @@
       "stiffness",
       "gravitational_acceleration",
       "initial_offset",
-      "initial_velocity"
+      "initial_velocity",
+      "offset_from_natural_length"
     ]
   },
   "canonicalInputs": [
@@ -35,12 +36,22 @@
     {
       "key": "initial_offset",
       "unit": "m",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "độ lệch ban đầu của vật, dương hướng lên; đo từ vị trí cân bằng, hoặc từ vị trí lò xo không biến dạng khi offset_from_natural_length = 1"
     },
     {
       "key": "initial_velocity",
       "unit": "m/s",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "vận tốc ban đầu, dương hướng lên"
+    },
+    {
+      "key": "offset_from_natural_length",
+      "unit": "1",
+      "min": 0,
+      "max": 1,
+      "defaultValue": 0,
+      "description": "0: độ lệch ban đầu đo từ vị trí cân bằng (kéo vật khỏi vị trí cân bằng rồi thả); 1: đo từ vị trí lò xo không biến dạng (giữ vật ở chỗ lò xo chưa dãn rồi thả thì độ lệch ban đầu = 0)"
     }
   ],
   "outputs": [
@@ -66,7 +77,7 @@
     }
   ],
   "assumptions": [
-    "Lò xo nhẹ treo thẳng đứng, đầu trên cố định; vị trí 0 là chiều dài tự nhiên, chiều dương hướng lên; trong giới hạn đàn hồi."
+    "Lò xo nhẹ treo thẳng đứng, đầu trên cố định, trong giới hạn đàn hồi. Tọa độ (position) có gốc tại vị trí lò xo không biến dạng, chiều dương hướng lên; vị trí cân bằng ở -m*g/k. Độ dãn (elongation) dương khi lò xo dãn."
   ],
   "equationSet": {
     "canonical": [
@@ -92,18 +103,34 @@
         "position": [
           "add",
           [
-            "div",
+            "neg",
+            [
+              "div",
+              [
+                "mul",
+                "mass",
+                "gravitational_acceleration"
+              ],
+              "stiffness"
+            ]
+          ],
+          [
+            "add",
+            "initial_offset",
             [
               "mul",
+              "offset_from_natural_length",
               [
-                "neg",
-                "mass"
-              ],
-              "gravitational_acceleration"
-            ],
-            "stiffness"
-          ],
-          "initial_offset"
+                "div",
+                [
+                  "mul",
+                  "mass",
+                  "gravitational_acceleration"
+                ],
+                "stiffness"
+              ]
+            ]
+          ]
         ],
         "velocity": "initial_velocity"
       },
@@ -174,7 +201,23 @@
             ],
             [
               "mul",
-              "initial_offset",
+              [
+                "add",
+                "initial_offset",
+                [
+                  "mul",
+                  "offset_from_natural_length",
+                  [
+                    "div",
+                    [
+                      "mul",
+                      "mass",
+                      "gravitational_acceleration"
+                    ],
+                    "stiffness"
+                  ]
+                ]
+              ],
               [
                 "cos",
                 [
@@ -231,7 +274,23 @@
               "mul",
               [
                 "neg",
-                "initial_offset"
+                [
+                  "add",
+                  "initial_offset",
+                  [
+                    "mul",
+                    "offset_from_natural_length",
+                    [
+                      "div",
+                      [
+                        "mul",
+                        "mass",
+                        "gravitational_acceleration"
+                      ],
+                      "stiffness"
+                    ]
+                  ]
+                ]
               ],
               [
                 "sqrt",
@@ -293,7 +352,23 @@
             ],
             [
               "mul",
-              "initial_offset",
+              [
+                "add",
+                "initial_offset",
+                [
+                  "mul",
+                  "offset_from_natural_length",
+                  [
+                    "div",
+                    [
+                      "mul",
+                      "mass",
+                      "gravitational_acceleration"
+                    ],
+                    "stiffness"
+                  ]
+                ]
+              ],
               [
                 "cos",
                 [
@@ -360,7 +435,23 @@
               ],
               [
                 "mul",
-                "initial_offset",
+                [
+                  "add",
+                  "initial_offset",
+                  [
+                    "mul",
+                    "offset_from_natural_length",
+                    [
+                      "div",
+                      [
+                        "mul",
+                        "mass",
+                        "gravitational_acceleration"
+                      ],
+                      "stiffness"
+                    ]
+                  ]
+                ],
                 [
                   "cos",
                   [
@@ -434,7 +525,23 @@
                 ],
                 [
                   "mul",
-                  "initial_offset",
+                  [
+                    "add",
+                    "initial_offset",
+                    [
+                      "mul",
+                      "offset_from_natural_length",
+                      [
+                        "div",
+                        [
+                          "mul",
+                          "mass",
+                          "gravitational_acceleration"
+                        ],
+                        "stiffness"
+                      ]
+                    ]
+                  ],
                   [
                     "cos",
                     [

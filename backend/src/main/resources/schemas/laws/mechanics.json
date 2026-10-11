@@ -1,0 +1,1235 @@
+{
+  "id": "mechanics",
+  "title": "Cơ học (Vật lí 10)",
+  "source": "Chương trình giáo dục phổ thông môn Vật lí 2018, mục V.2, lớp 10",
+  "axes": "x: phương ngang, chiều dương sang phải; y: phương thẳng đứng, chiều dương hướng lên; z: phương ngang thứ hai (nhìn từ trên xuống). Tên trục khác (ví dụ s dọc mặt phẳng nghiêng) do mô hình tự đặt và phải nói rõ trong assumptions.",
+  "roles": {
+    "time": "thời điểm",
+    "position": "tọa độ của vật trên một trục (of, axis)",
+    "velocity": "vận tốc của vật trên một trục (of, axis)",
+    "acceleration": "gia tốc của vật trên một trục (of, axis)",
+    "mass": "khối lượng của vật hoặc của một lượng chất (of)",
+    "force": "một lực tác dụng lên vật, thành phần trên một trục (of, axis, kind; by = vật gây ra lực nếu vật đó cũng có trong mô hình)",
+    "gravitational_acceleration": "gia tốc rơi tự do g (độ lớn, dương)",
+    "friction_coefficient": "hệ số ma sát trượt giữa vật và mặt tiếp xúc (of)",
+    "stiffness": "độ cứng của lò xo gắn với vật (of)",
+    "deformation": "độ biến dạng của lò xo trên một trục: tọa độ đầu gắn vật trừ tọa độ khi lò xo không biến dạng (of, axis)",
+    "drag_coefficient": "hệ số lực cản tỉ lệ với vận tốc (of)",
+    "fluid_density": "khối lượng riêng của chất lỏng bao quanh vật (of)",
+    "volume": "thể tích của vật, của khối khí, hoặc phần vật chìm trong chất lỏng (of)",
+    "kinetic_energy": "động năng của vật (of)",
+    "potential_energy": "thế năng của vật ứng với một lực thế (of, kind = gravity hoặc spring)",
+    "mechanical_energy": "cơ năng của vật: động năng cộng mọi thế năng đã khai báo (of)",
+    "momentum": "động lượng của vật trên một trục (of, axis)",
+    "work": "công của một lực tính từ lúc bắt đầu (of, kind của lực đó)",
+    "power": "công suất tức thời của một lực (of, kind của lực đó)",
+    "angle": "một góc",
+    "other": "đại lượng không thuộc các vai trò trên; không định luật nào kiểm nó",
+    "radius": "bán kính quỹ đạo tròn của vật (of)",
+    "angular_velocity": "tốc độ góc của vật trên quỹ đạo tròn (of)",
+    "speed": "độ lớn vận tốc của vật (of)",
+    "force_magnitude": "độ lớn của một lực tác dụng lên vật (of, kind của lực đó)",
+    "total_momentum": "tổng động lượng của mọi vật trong mô hình trên một trục (axis)",
+    "total_kinetic_energy": "tổng động năng của mọi vật trong mô hình",
+    "centripetal_acceleration": "độ lớn gia tốc hướng tâm của vật chuyển động tròn (of)",
+    "period": "chu kì của chuyển động tròn hoặc dao động của vật (of)"
+  },
+  "forceKinds": {
+    "gravity": "trọng lực",
+    "normal": "phản lực vuông góc của mặt tiếp xúc",
+    "friction": "lực ma sát trượt",
+    "tension": "lực căng dây",
+    "spring": "lực đàn hồi của lò xo",
+    "drag": "lực cản của không khí hoặc chất lỏng",
+    "buoyancy": "lực đẩy Archimedes",
+    "applied": "lực kéo hoặc đẩy cho trước",
+    "contact": "lực do vật khác trong mô hình tác dụng khi tiếp xúc"
+  },
+  "laws": [
+    {
+      "id": "velocity_definition",
+      "title": "Vận tốc là tốc độ biến thiên của tọa độ",
+      "curriculum": "Động học – Mô tả chuyển động",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "x": {
+          "role": "position"
+        },
+        "v": {
+          "role": "velocity"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "x"
+        ],
+        "v"
+      ]
+    },
+    {
+      "id": "acceleration_definition",
+      "title": "Gia tốc là tốc độ biến thiên của vận tốc",
+      "curriculum": "Động học – Chuyển động biến đổi",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "v": {
+          "role": "velocity"
+        },
+        "a": {
+          "role": "acceleration"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "v"
+        ],
+        "a"
+      ]
+    },
+    {
+      "id": "newton_second_law",
+      "title": "Định luật II Newton: m·a bằng tổng các lực",
+      "curriculum": "Động lực học – Ba định luật Newton",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "m": {
+          "role": "mass"
+        },
+        "v": {
+          "role": "velocity"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "m",
+          [
+            "ddt",
+            "v"
+          ]
+        ],
+        [
+          "sum",
+          "F"
+        ]
+      ]
+    },
+    {
+      "id": "balance_without_motion",
+      "title": "Trên trục vật không chuyển động, các lực cân bằng",
+      "curriculum": "Động lực học – Cân bằng lực",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1
+        }
+      },
+      "unless": {
+        "role": "velocity"
+      },
+      "equal": [
+        [
+          "sum",
+          "F"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "weight_vertical",
+      "title": "Trọng lực hướng xuống, độ lớn P = m·g",
+      "curriculum": "Động lực học – Ba định luật Newton",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "m": {
+          "role": "mass"
+        },
+        "g": {
+          "role": "gravitational_acceleration",
+          "global": true
+        },
+        "P": {
+          "role": "force",
+          "where": {
+            "kind": "gravity",
+            "axis": "y"
+          }
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "neg",
+          [
+            "mul",
+            "m",
+            "g"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "weight_horizontal",
+      "title": "Trọng lực không có thành phần nằm ngang",
+      "curriculum": "Động lực học – Ba định luật Newton",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "force",
+          "where": {
+            "kind": "gravity",
+            "axis": "x"
+          }
+        }
+      },
+      "equal": [
+        "P",
+        0
+      ]
+    },
+    {
+      "id": "weight_component",
+      "title": "Thành phần của trọng lực không lớn hơn m·g",
+      "curriculum": "Động lực học – Cân bằng lực, phân tích lực",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "m": {
+          "role": "mass"
+        },
+        "g": {
+          "role": "gravitational_acceleration",
+          "global": true
+        },
+        "P": {
+          "role": "force",
+          "where": {
+            "kind": "gravity"
+          }
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "P"
+        ],
+        [
+          "mul",
+          "m",
+          "g"
+        ]
+      ]
+    },
+    {
+      "id": "normal_pushes",
+      "title": "Phản lực của mặt đỡ chỉ đẩy vật ra khỏi mặt",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "N": {
+          "role": "force",
+          "where": {
+            "kind": "normal",
+            "axis": "y"
+          }
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "N"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "friction_opposes_motion",
+      "title": "Lực ma sát trượt ngược chiều chuyển động",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "friction"
+          }
+        },
+        "v": {
+          "role": "velocity"
+        }
+      },
+      "atMost": [
+        [
+          "mul",
+          "F",
+          "v"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "friction_limit",
+      "title": "Lực ma sát không vượt quá μ·N",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "mu": {
+          "role": "friction_coefficient"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "friction"
+          }
+        },
+        "N": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "normal"
+          }
+        }
+      },
+      "atMost": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "F",
+              2
+            ]
+          ]
+        ],
+        [
+          "mul",
+          "mu",
+          [
+            "sqrt",
+            [
+              "sum",
+              [
+                "pow",
+                "N",
+                2
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "friction_magnitude",
+      "title": "Độ lớn lực ma sát trượt bằng μ·N khi vật đang trượt",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "mu": {
+          "role": "friction_coefficient"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "friction"
+          }
+        },
+        "N": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "normal"
+          }
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "when": [
+        "sqrt",
+        [
+          "sum",
+          [
+            "pow",
+            "v",
+            2
+          ]
+        ]
+      ],
+      "equal": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "F",
+              2
+            ]
+          ]
+        ],
+        [
+          "mul",
+          "mu",
+          [
+            "sqrt",
+            [
+              "sum",
+              [
+                "pow",
+                "N",
+                2
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "drag_opposes_motion",
+      "title": "Lực cản ngược chiều chuyển động",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "drag"
+          }
+        },
+        "v": {
+          "role": "velocity"
+        }
+      },
+      "atMost": [
+        [
+          "mul",
+          "F",
+          "v"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "linear_drag",
+      "title": "Lực cản tỉ lệ với vận tốc",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "k": {
+          "role": "drag_coefficient"
+        },
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "drag"
+          }
+        },
+        "v": {
+          "role": "velocity"
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "neg",
+          [
+            "mul",
+            "k",
+            "v"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "buoyancy",
+      "title": "Lực đẩy Archimedes hướng lên, độ lớn ρ·g·V",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn; Khối lượng riêng, áp suất chất lỏng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "rho": {
+          "role": "fluid_density"
+        },
+        "V": {
+          "role": "volume"
+        },
+        "g": {
+          "role": "gravitational_acceleration",
+          "global": true
+        },
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "buoyancy",
+            "axis": "y"
+          }
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "mul",
+          [
+            "mul",
+            "rho",
+            "g"
+          ],
+          "V"
+        ]
+      ]
+    },
+    {
+      "id": "hooke",
+      "title": "Định luật Hooke: lực đàn hồi F = −k·Δl",
+      "curriculum": "Biến dạng của vật rắn – Định luật Hooke",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "k": {
+          "role": "stiffness"
+        },
+        "d": {
+          "role": "deformation"
+        },
+        "F": {
+          "role": "force",
+          "where": {
+            "kind": "spring"
+          }
+        }
+      },
+      "equal": [
+        "F",
+        [
+          "neg",
+          [
+            "mul",
+            "k",
+            "d"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "newton_third_law",
+      "title": "Định luật III Newton: hai lực tương tác cùng độ lớn, ngược chiều",
+      "curriculum": "Động lực học – Ba định luật Newton",
+      "scope": [
+        "of",
+        "by",
+        "axis"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "by": "*"
+          }
+        },
+        "R": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "scope": false,
+          "where": {
+            "of": "$by",
+            "by": "$of",
+            "axis": "$axis"
+          }
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          "F"
+        ],
+        [
+          "neg",
+          [
+            "sum",
+            "R"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "kinetic_energy",
+      "title": "Động năng Wđ = ½·m·v²",
+      "curriculum": "Công, năng lượng, công suất – Động năng và thế năng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "m": {
+          "role": "mass"
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        },
+        "K": {
+          "role": "kinetic_energy"
+        }
+      },
+      "equal": [
+        "K",
+        [
+          "mul",
+          [
+            "mul",
+            0.5,
+            "m"
+          ],
+          [
+            "sum",
+            [
+              "pow",
+              "v",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "work_energy",
+      "title": "Độ biến thiên động năng bằng công của các lực",
+      "curriculum": "Công, năng lượng, công suất – Động năng và thế năng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "K": {
+          "role": "kinetic_energy"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "K"
+        ],
+        [
+          "sum",
+          [
+            "mul",
+            "F",
+            "v"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "gravitational_potential_energy",
+      "title": "Thế năng trọng trường giảm đúng bằng công của trọng lực",
+      "curriculum": "Công, năng lượng, công suất – Động năng và thế năng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "potential_energy",
+          "where": {
+            "kind": "gravity"
+          }
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "gravity"
+          }
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "U"
+        ],
+        [
+          "neg",
+          [
+            "sum",
+            [
+              "mul",
+              "F",
+              "v"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "elastic_potential_energy",
+      "title": "Thế năng đàn hồi giảm đúng bằng công của lực đàn hồi",
+      "curriculum": "Biến dạng của vật rắn – Định luật Hooke",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "potential_energy",
+          "where": {
+            "kind": "spring"
+          }
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "spring"
+          }
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "U"
+        ],
+        [
+          "neg",
+          [
+            "sum",
+            [
+              "mul",
+              "F",
+              "v"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "mechanical_energy",
+      "title": "Cơ năng bằng động năng cộng thế năng",
+      "curriculum": "Công, năng lượng, công suất – Động năng và thế năng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "mechanical_energy"
+        },
+        "K": {
+          "role": "kinetic_energy"
+        },
+        "U": {
+          "role": "potential_energy",
+          "many": true
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "add",
+          "K",
+          [
+            "sum",
+            "U"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "mechanical_energy_change",
+      "title": "Cơ năng chỉ thay đổi do công của các lực không phải lực thế",
+      "curriculum": "Công, năng lượng, công suất – Định luật bảo toàn cơ năng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "mechanical_energy"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "where": {
+            "kind": [
+              "normal",
+              "friction",
+              "tension",
+              "drag",
+              "buoyancy",
+              "applied",
+              "contact"
+            ]
+          }
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "E"
+        ],
+        [
+          "sum",
+          [
+            "mul",
+            "F",
+            "v"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "momentum",
+      "title": "Động lượng p = m·v",
+      "curriculum": "Động lượng – Định nghĩa động lượng",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "m": {
+          "role": "mass"
+        },
+        "v": {
+          "role": "velocity"
+        },
+        "p": {
+          "role": "momentum"
+        }
+      },
+      "equal": [
+        "p",
+        [
+          "mul",
+          "m",
+          "v"
+        ]
+      ]
+    },
+    {
+      "id": "momentum_change",
+      "title": "Tổng động lượng của hệ chỉ thay đổi do ngoại lực",
+      "curriculum": "Động lượng – Bảo toàn động lượng; Động lượng và va chạm",
+      "scope": [
+        "axis"
+      ],
+      "bind": {
+        "p": {
+          "role": "momentum",
+          "many": true,
+          "min": 2
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "where": {
+            "by": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          [
+            "sum",
+            "p"
+          ]
+        ],
+        [
+          "sum",
+          "F"
+        ]
+      ]
+    },
+    {
+      "id": "work_of_force",
+      "title": "Công của lực tăng theo F·v",
+      "curriculum": "Công, năng lượng, công suất – Công và năng lượng",
+      "scope": [
+        "of",
+        "kind"
+      ],
+      "bind": {
+        "A": {
+          "role": "work"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1,
+          "anyKind": true
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "A"
+        ],
+        [
+          "sum",
+          [
+            "mul",
+            "F",
+            "v"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "power_of_force",
+      "title": "Công suất P = F·v",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of",
+        "kind"
+      ],
+      "bind": {
+        "P": {
+          "role": "power"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1,
+          "anyKind": true
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "sum",
+          [
+            "mul",
+            "F",
+            "v"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "speed",
+      "title": "Tốc độ là độ lớn của vận tốc",
+      "curriculum": "Động học – Mô tả chuyển động",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "s": {
+          "role": "speed"
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        "s",
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "v",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "circular_speed",
+      "title": "Chuyển động tròn: v = ω·r",
+      "curriculum": "Chuyển động tròn – Động học của chuyển động tròn đều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "w": {
+          "role": "angular_velocity"
+        },
+        "r": {
+          "role": "radius"
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 2
+        }
+      },
+      "equal": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "v",
+              2
+            ]
+          ]
+        ],
+        [
+          "mul",
+          [
+            "abs",
+            "w"
+          ],
+          "r"
+        ]
+      ]
+    },
+    {
+      "id": "force_magnitude",
+      "title": "Độ lớn của lực bằng căn tổng bình phương các thành phần",
+      "curriculum": "Động lực học – Cân bằng lực, phân tích lực",
+      "scope": [
+        "of",
+        "kind"
+      ],
+      "bind": {
+        "M": {
+          "role": "force_magnitude"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        "M",
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "F",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "total_momentum",
+      "title": "Tổng động lượng của hệ bằng tổng động lượng các vật",
+      "curriculum": "Động lượng – Bảo toàn động lượng",
+      "scope": [
+        "axis"
+      ],
+      "bind": {
+        "T": {
+          "role": "total_momentum"
+        },
+        "p": {
+          "role": "momentum",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "p"
+        ]
+      ]
+    },
+    {
+      "id": "total_kinetic_energy",
+      "title": "Tổng động năng của hệ bằng tổng động năng các vật",
+      "curriculum": "Động lượng – Động lượng và va chạm",
+      "scope": [],
+      "bind": {
+        "T": {
+          "role": "total_kinetic_energy"
+        },
+        "K": {
+          "role": "kinetic_energy",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sum",
+          "K"
+        ]
+      ]
+    },
+    {
+      "id": "centripetal_acceleration",
+      "title": "Gia tốc hướng tâm a = v²/r",
+      "curriculum": "Chuyển động tròn – Gia tốc hướng tâm và lực hướng tâm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "a": {
+          "role": "centripetal_acceleration"
+        },
+        "r": {
+          "role": "radius"
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 2
+        }
+      },
+      "equal": [
+        "a",
+        [
+          "div",
+          [
+            "sum",
+            [
+              "pow",
+              "v",
+              2
+            ]
+          ],
+          "r"
+        ]
+      ]
+    },
+    {
+      "id": "circular_period",
+      "title": "Chu kì chuyển động tròn T = 2π/ω",
+      "curriculum": "Chuyển động tròn – Động học của chuyển động tròn đều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "T": {
+          "role": "period"
+        },
+        "w": {
+          "role": "angular_velocity"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "T",
+          [
+            "abs",
+            "w"
+          ]
+        ],
+        6.283185307179586
+      ]
+    },
+    {
+      "id": "speed_not_negative",
+      "title": "Tốc độ không âm",
+      "curriculum": "Động học – Mô tả chuyển động",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "s": {
+          "role": "speed"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "s"
+        ],
+        0
+      ]
+    }
+  ]
+}

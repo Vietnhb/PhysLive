@@ -82,6 +82,21 @@ public class SchemaEquationRuntime {
         return value * unitFactor.getOrDefault(from, 1.0) / unitFactor.getOrDefault(to, 1.0);
     }
 
+    /** The unit the catalog computes in for the quantity this spelling measures (cm → m, km/h → m/s); null when unknown. */
+    public String canonical(String unit) {
+        return canonicalUnit.get(unit);
+    }
+
+    /** Every unit the catalog computes in, with the spellings in which a value of that quantity may be written. */
+    public Map<String, List<String>> unitSpellings() {
+        Map<String, List<String>> all = new LinkedHashMap<>();
+        canonicalUnit.forEach((spelling, canonical) -> {
+            List<String> list = all.computeIfAbsent(canonical, unit -> new ArrayList<>(List.of(unit)));
+            if (!list.contains(spelling)) list.add(spelling);
+        });
+        return all;
+    }
+
     /** Every spelling the catalog accepts for the quantity this unit measures (the unit itself first). */
     public List<String> spellings(String unit) {
         String canonical = canonicalUnit.getOrDefault(unit, unit);
@@ -197,7 +212,54 @@ public class SchemaEquationRuntime {
             steps *= 2;
             result = run(coverage, bindings, duration, steps);
         }
+        // A result that swings faster than the samples can follow would be drawn as a false, jagged curve
+        // whatever the law is; sample it finer while the budget allows.
+        // (not for a large group whose members each switch at their own instant: its totals are staircases at any step)
+        boolean staircase = false;
+        for (Bound bound : bindings) {
+            List<JsonNode> conditions = new ArrayList<>();
+            bound.math().path("outputs").forEach(equation -> collectConditions(equation, conditions));
+            staircase |= conditions.size() > MAX_LOCATED_CONDITIONS;
+        }
+        while (!staircase && underSampled(result.path("solverTimeline").path("frames")) && steps * 2L <= Math.min(budgetSteps, MAX_DETAIL_STEPS)) {
+            steps *= 2;
+            result = run(coverage, bindings, duration, steps);
+        }
         return result;
+    }
+
+    private static final int MAX_DETAIL_STEPS = 2048;
+
+    /**
+     * True when straight lines between the samples misrepresent some result: at more than a few of its samples
+     * the value is far (against that result's whole range) from the line joining its two neighbours. A single
+     * jump or kink touches only a few samples and does not count.
+     */
+    private static boolean underSampled(JsonNode frames) {
+        int count = frames.size();
+        if (count < 5) return false;
+        var keys = frames.get(0).path("values").fieldNames();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
+            for (JsonNode frame : frames) {
+                double value = frame.path("values").path(key).asDouble();
+                min = Math.min(min, value);
+                max = Math.max(max, value);
+            }
+            double range = max - min;
+            if (!(range > 1e-9 * Math.max(Math.abs(min), Math.abs(max)))) continue;
+            int off = 0;
+            for (int i = 1; i < count - 1; i++) {
+                double before = frames.get(i - 1).path("t").asDouble(), here = frames.get(i).path("t").asDouble(), after = frames.get(i + 1).path("t").asDouble();
+                if (!(after > before)) continue;
+                double a = frames.get(i - 1).path("values").path(key).asDouble(), b = frames.get(i + 1).path("values").path(key).asDouble();
+                double line = a + (b - a) * (here - before) / (after - before);
+                if (Math.abs(frames.get(i).path("values").path(key).asDouble() - line) > 0.02 * range) off++;
+            }
+            if (off > 0.08 * (count - 2)) return true;
+        }
+        return false;
     }
 
     private static boolean close(double a, double b) {
@@ -318,10 +380,15 @@ public class SchemaEquationRuntime {
         final Map<String, Map<String, Double>> startInputs = new LinkedHashMap<>(), startOutputs = new LinkedHashMap<>();
         /** Instants between grid points where a participant ended: time → every participant's results. */
         final List<Map.Entry<Double, Map<String, Map<String, Double>>>> events = new ArrayList<>();
+        /** Instants at which a condition inside an equation changed side, so the equations changed form there. */
+        final List<Double> switches = new ArrayList<>();
+        final List<Map.Entry<Double, List<String>>> jumped = new ArrayList<>();
         double endTime;
     }
 
     /** The plan at one instant: who is running with which state, who has ended with which final results. */
+    private static final String AT_PARTICIPANT = " (đối tượng ";
+
     private final class Simulation {
         final List<Bound> bounds;
         final Map<String, Bound> byId = new LinkedHashMap<>();
@@ -355,7 +422,14 @@ public class SchemaEquationRuntime {
             JsonNode expressions = bound.math().path(phase);
             require(expressions.has(key), "Đại lượng trong phương trình không xác định: " + key);
             require(resolving.add(slot) && resolving.size() <= maxDepth * 8, "Các phương trình phụ thuộc vòng hoặc vượt quá độ sâu cho phép");
-            double value = evaluate(expressions.get(key), name -> symbol(bound, phase, name), 0, new int[]{0});
+            double value;
+            try {
+                value = evaluate(expressions.get(key), scope(bound, phase), 0, new int[]{0});
+            } catch (ApiException error) {
+                // Say which participant and quantity failed, so the plan (or a slider range) can be corrected.
+                if (error.getMessage().contains(AT_PARTICIPANT)) throw error;
+                throw ApiException.unprocessable(error.getMessage() + AT_PARTICIPANT + bound.id + ", đại lượng " + key + ")");
+            }
             resolving.remove(slot);
             memo.put(slot, value);
             return value;
@@ -369,7 +443,9 @@ public class SchemaEquationRuntime {
             }
             if (bound.constants.containsKey(name)) return bound.constants.get(name);
             if (bound.references.containsKey(name)) return input(bound, name);
-            return named(bound, phase, name);
+            // A rate or a starting value may be written with a named result of the same law (a net force, an acceleration).
+            JsonNode math = bound.math();
+            return named(bound, math.path(phase).has(name) || !math.path("outputs").has(name) ? phase : "outputs", name);
         }
 
         double input(Bound bound, String key) {
@@ -429,6 +505,144 @@ public class SchemaEquationRuntime {
             return bound.until.rising ? -value : value;
         }
 
+        private final Map<String, List<JsonNode>> conditions = new LinkedHashMap<>();
+        /**
+         * While a step is taken, every condition ("if", "sign") keeps the side it had when the step began, so all
+         * stages of the step integrate one smooth form of the equations; null evaluates conditions as they are.
+         */
+        Map<String, java.util.IdentityHashMap<JsonNode, Integer>> lock;
+        final Map<String, java.util.IdentityHashMap<JsonNode, Integer>> latched = new LinkedHashMap<>();
+        private static final java.util.IdentityHashMap<JsonNode, Integer> NONE = new java.util.IdentityHashMap<>();
+
+        /** Names and locked conditions of one participant, for evaluating its equations. */
+        Scope scope(Bound bound, String phase) {
+            return new Scope() {
+                public double applyAsDouble(String name) { return symbol(bound, phase, name); }
+                public Integer side(JsonNode condition) {
+                    if (latched.getOrDefault(bound.id, NONE).containsKey(condition)) return 1;
+                    return lock == null || !lock.containsKey(bound.id) ? null : lock.get(bound.id).get(condition);
+                }
+            };
+        }
+
+        /** Which side every condition of the running participants is on at this instant: "if" 1 or 0, "sign" -1, 0 or 1. */
+        Map<String, java.util.IdentityHashMap<JsonNode, Integer>> sides() {
+            Map<String, java.util.IdentityHashMap<JsonNode, Integer>> all = new LinkedHashMap<>();
+            for (Bound bound : bounds) {
+                if (!running(bound.id)) continue;
+                java.util.IdentityHashMap<JsonNode, Integer> own = new java.util.IdentityHashMap<>();
+                for (JsonNode node : conditions.computeIfAbsent(bound.id, id -> located(bound))) {
+                    double value;
+                    try { value = evaluate(node.get(1), scope(bound, "outputs"), 0, new int[]{0}); }
+                    catch (ApiException undefined) { value = Double.NaN; }
+                    own.put(node.get(1), node.get(0).asText().equals("sign") ? (int) Math.signum(value)
+                            : value > 0 || latched.getOrDefault(bound.id, NONE).containsKey(node.get(1)) ? 1 : 0);
+                }
+                all.put(bound.id, own);
+            }
+            return all;
+        }
+
+        final Map<String, List<JsonNode>> loose = new LinkedHashMap<>();
+
+        /**
+         * The conditions whose change of side is located in time. All of them, as a rule. A model with very many
+         * conditions that only shape what is reported (one per member of a large group) locates those that the
+         * motion, an end or a jump depends on; the others are read as they are and marked at the next sample.
+         */
+        List<JsonNode> located(Bound bound) {
+            List<JsonNode> all = new ArrayList<>();
+            for (String phase : List.of("rates", "outputs")) bound.math().path(phase).forEach(equation -> collectConditions(equation, all));
+            bound.math().path("jumps").forEach(list -> list.forEach(pair -> collectConditions(pair.get(0), all)));
+            if (all.size() <= MAX_LOCATED_CONDITIONS) return all;
+            List<JsonNode> needed = new ArrayList<>();
+            Set<String> seen = new HashSet<>();
+            java.util.ArrayDeque<JsonNode> open = new java.util.ArrayDeque<>();
+            bound.math().path("rates").forEach(open::add);
+            bound.math().path("jumps").forEach(list -> list.forEach(pair -> { open.add(pair.get(0)); open.add(pair.get(1)); }));
+            for (Bound other : bounds) if (other.until != null && other.until.sourceId.equals(bound.id) && bound.math().path("outputs").has(other.until.key))
+                open.add(bound.math().path("outputs").get(other.until.key));
+            while (!open.isEmpty()) {
+                JsonNode ast = open.pop();
+                collectConditions(ast, needed);
+                Set<String> names = new LinkedHashSet<>();
+                names(ast, names);
+                for (String name : names) if (seen.add(name) && bound.math().path("outputs").has(name)) open.add(bound.math().path("outputs").get(name));
+            }
+            List<JsonNode> rest = new ArrayList<>();
+            for (JsonNode node : all) if (needed.stream().noneMatch(known -> known == node)) { if (node.get(0).asText().equals("latched")) needed.add(node); else rest.add(node); }
+            loose.put(bound.id, rest);
+            return needed;
+        }
+
+        /** The sides of the conditions that are not located, as one comparable value. */
+        List<Integer> looseSides() {
+            List<Integer> sides = new ArrayList<>();
+            for (Bound bound : bounds) for (JsonNode node : loose.getOrDefault(bound.id, List.of())) {
+                if (!running(bound.id)) { sides.add(0); continue; }
+                double value;
+                try { value = evaluate(node.get(1), scope(bound, "outputs"), 0, new int[]{0}); } catch (ApiException undefined) { value = Double.NaN; }
+                sides.add(node.get(0).asText().equals("sign") ? (int) Math.signum(value) : value > 0 ? 1 : 0);
+            }
+            return sides;
+        }
+
+        /**
+         * A jump: at the instant its condition comes to hold, a state takes a new value, worked out from the values
+         * just before (a ball that bounces, two bodies that collide, a piece that leaves another).
+         */
+        List<String> jump(Map<String, java.util.IdentityHashMap<JsonNode, Integer>> held) {
+            List<String> hit = new ArrayList<>();
+            Map<String, Map<String, Double>> next = new LinkedHashMap<>(states);
+            boolean any = false;
+            for (Bound bound : bounds) {
+                if (!running(bound.id) || held == null || !held.containsKey(bound.id)) continue;
+                var jumps = bound.math().path("jumps").fields();
+                while (jumps.hasNext()) {
+                    var entry = jumps.next();
+                    for (JsonNode pair : entry.getValue()) {
+                        JsonNode condition = pair.get(0).get(1);
+                        Integer was = held.get(bound.id).get(condition);
+                        if (was == null || was != 0 || !(evaluate(condition, scope(bound, "outputs"), 0, new int[]{0}) > 0)) continue;
+                        double value = evaluate(pair.get(1), scope(bound, "outputs"), 0, new int[]{0});
+                        require(Double.isFinite(value), "Bước nhảy của " + entry.getKey() + " cho giá trị không xác định");
+                        if (next.get(bound.id) == states.get(bound.id)) next.put(bound.id, new LinkedHashMap<>(states.get(bound.id)));
+                        next.get(bound.id).put(entry.getKey(), value);
+                        any = true;
+                        hit.add(entry.getKey());
+                        break;
+                    }
+                }
+            }
+            if (any) at(next, time);
+            return hit;
+        }
+
+        /** Holds every condition on the side it is on now (true), or lets conditions evaluate as they are (false). */
+        void hold(boolean on) {
+            lock = null;
+            memo.clear();
+            if (on) {
+                lock = sides();
+                // "latched" remembers: once its condition has held at an instant the run has reached, it holds for good
+                for (Bound bound : bounds) for (JsonNode node : conditions.getOrDefault(bound.id, List.of()))
+                    if (node.get(0).asText().equals("latched") && lock.containsKey(bound.id) && lock.get(bound.id).get(node.get(1)) == 1)
+                        latched.computeIfAbsent(bound.id, id -> new java.util.IdentityHashMap<>()).put(node.get(1), 1);
+                memo.clear();
+            }
+        }
+
+        /** True when a running participant's condition is on another side than the lock holds it. */
+        boolean switched() {
+            Map<String, java.util.IdentityHashMap<JsonNode, Integer>> now = sides();
+            for (var entry : now.entrySet()) {
+                var held = lock == null ? null : lock.get(entry.getKey());
+                if (held == null) continue;
+                for (var side : entry.getValue().entrySet()) if (!side.getValue().equals(held.get(side.getKey()))) return true;
+            }
+            return false;
+        }
+
         Map<String, Map<String, Double>> derivative(Map<String, Map<String, Double>> at, double t) {
             at(at, t);
             Map<String, Map<String, Double>> all = new LinkedHashMap<>();
@@ -472,6 +686,25 @@ public class SchemaEquationRuntime {
         }
     }
 
+    /** A name lookup that can also hold a condition on one side while a step is taken. */
+    private interface Scope extends ToDoubleFunction<String> {
+        Integer side(JsonNode condition);
+    }
+
+    private static final int MAX_LOCATED_CONDITIONS = 48;
+
+    private static void names(JsonNode ast, Set<String> into) {
+        if (ast.isTextual()) into.add(ast.asText());
+        else if (ast.isArray()) for (int i = 1; i < ast.size(); i++) names(ast.get(i), into);
+    }
+
+    private static void collectConditions(JsonNode ast, List<JsonNode> into) {
+        if (!ast.isArray() || ast.isEmpty()) return;
+        String op = ast.get(0).asText();
+        if ((op.equals("if") || op.equals("sign") || op.equals("latched")) && ast.size() > 1 && into.stream().noneMatch(known -> known == ast)) into.add(ast);
+        for (int i = 1; i < ast.size(); i++) collectConditions(ast.get(i), into);
+    }
+
     private Trajectory integrate(List<Bound> bounds, double duration, int steps) {
         Simulation sim = new Simulation(bounds);
         Trajectory out = new Trajectory();
@@ -484,12 +717,18 @@ public class SchemaEquationRuntime {
         for (Bound bound : bounds) if (bound.after == null) begin(sim, out, bound);
         double h = duration / steps;
         boolean over = false;
+        List<Integer> looseBefore = null;
         for (int i = 0; i <= steps && !over; i++) {
             double t = duration * i / steps;
             Map<String, Map<String, Double>> state = sim.states;
             Map<String, Map<String, Double>> k1 = null;
             if (i < steps) k1 = sim.derivative(state, t); else sim.at(state, t);
             out.times.add(t);
+            if (!sim.loose.isEmpty()) {
+                List<Integer> sides = sim.looseSides();
+                if (looseBefore != null && !sides.equals(looseBefore)) out.switches.add(t);
+                looseBefore = sides;
+            }
             for (Bound bound : bounds) {
                 boolean running = sim.running(bound.id);
                 out.outputs.get(bound.id).add(running || sim.finished.containsKey(bound.id) ? sim.results(bound) : null);
@@ -499,27 +738,39 @@ public class SchemaEquationRuntime {
             out.endTime = t;
             if (i == steps) break;
             double remaining = h;
+            sim.hold(true);
+            if (sim.conditions.values().stream().anyMatch(list -> !list.isEmpty())) k1 = sim.derivative(state, t);
             for (int events = 0; ; events++) {
                 Map<String, Double> before = new LinkedHashMap<>();
                 for (Bound bound : bounds) if (bound.until != null && sim.running(bound.id)) before.put(bound.id, sim.distance(bound));
                 Map<String, Map<String, Double>> next = sim.step(state, t, remaining, k1);
                 sim.at(next, t + remaining);
                 List<Bound> ending = crossed(sim, bounds, before);
-                if (ending.isEmpty()) break;
-                require(events < MAX_EVENTS_PER_STEP, "Quá nhiều giai đoạn kết thúc trong một bước tính; hãy tăng thời lượng hoặc tách các giai đoạn");
-                // the earliest instant in this step at which one of them has reached its value
+                if (ending.isEmpty() && !sim.switched()) break;
+                require(events < MAX_EVENTS_PER_STEP, "Trong một bước tính có quá nhiều lần kết thúc giai đoạn hoặc đổi điều kiện (if, sign) liên tiếp. "
+                        + "Một điều kiện đổi qua lại liên tục thường là vật đã dừng lại mà phương trình vẫn coi là đang chuyển động: hãy kết thúc bằng until, hoặc viết riêng trạng thái đứng yên");
+                // the earliest instant in this step at which one of them has reached its value, or a condition changes side
                 double low = 0, high = remaining;
                 for (int cut = 0; cut < EVENT_BISECTIONS && high - low > Math.ulp(t + high); cut++) {
                     double middle = (low + high) / 2;
                     sim.at(sim.step(state, t, middle, k1), t + middle);
-                    if (crossed(sim, bounds, before).isEmpty()) low = middle; else high = middle;
+                    if (crossed(sim, bounds, before).isEmpty() && !sim.switched()) low = middle; else high = middle;
                 }
                 sim.at(sim.step(state, t, high, k1), t + high);
-                for (Bound bound : crossed(sim, bounds, before)) {
+                // just past the change the conditions are read as they are: a result that jumps there may end a stage
+                var held = sim.lock;
+                sim.hold(false);
+                List<String> hit = sim.jump(held);
+                if (!hit.isEmpty()) out.jumped.add(Map.entry(sim.time, hit));
+                List<Bound> ended = crossed(sim, bounds, before);
+                if (ended.isEmpty()) out.switches.add(sim.time);
+                for (Bound bound : ended) {
                     sim.finish(bound);
                     out.end.put(bound.id, sim.time);
                     for (Bound follower : bounds) if (bound.id.equals(follower.after)) begin(sim, out, follower);
                 }
+                // from here the equations run in the form the conditions have just past the change
+                sim.hold(true);
                 Map<String, Map<String, Double>> snapshot = new LinkedHashMap<>();
                 for (Bound bound : bounds) if (sim.running(bound.id) || sim.finished.containsKey(bound.id)) snapshot.put(bound.id, sim.results(bound));
                 out.events.add(Map.entry(sim.time, snapshot));
@@ -531,6 +782,7 @@ public class SchemaEquationRuntime {
                 if (remaining <= 0) break;
                 k1 = sim.derivative(state, t);
             }
+            sim.hold(false);
         }
         // before it starts, a participant shows the state it will start from
         sim.at(sim.states, out.endTime);
@@ -586,6 +838,19 @@ public class SchemaEquationRuntime {
             require(Double.isFinite(absTolerance) && absTolerance >= 0 && Double.isFinite(relTolerance) && relTolerance >= 0,
                     "Mô hình cần có sai số cho phép để kiểm định");
             List<Map<String, Double>> samples = coarse.outputs.get(bound.id), liveInputs = coarse.inputs.get(bound.id);
+            // A law with no reference solution may ask to be judged by step refinement alone, each result against
+            // its own size over the run (a result that passes through zero has no size of its own there).
+            boolean byRefinement = bound.capability.path("validation").path("strategy").asText().equals("step_refinement");
+            Map<String, Double> size = new LinkedHashMap<>();
+            if (byRefinement) {
+                // results of the same unit share one yardstick, so a sum that cancels to zero is still judged fairly
+                Map<String, Double> worth = new LinkedHashMap<>();
+                Map<String, String> unitOf = new LinkedHashMap<>();
+                for (JsonNode output : bound.capability.path("outputs")) unitOf.put(output.path("key").asText(), canonicalUnit.getOrDefault(output.path("unit").asText(), output.path("unit").asText()));
+                for (Map<String, Double> sample : samples) if (sample != null)
+                    sample.forEach((key, value) -> worth.merge(unitOf.getOrDefault(key, key), Math.abs(value), Math::max));
+                unitOf.forEach((key, unit) -> size.put(key, worth.getOrDefault(unit, 0.0)));
+            }
             Map<String, Double> startInputs = coarse.startInputs.get(bound.id);
             double start = coarse.start.getOrDefault(bound.id, Double.NaN);
             int first = -1, last = -1;
@@ -610,7 +875,7 @@ public class SchemaEquationRuntime {
                 if (reference != null) for (String key : sample.keySet()) {
                     require(reference.containsKey(key), "Dữ liệu đối chiếu thiếu đầu ra chuẩn: " + key);
                     double error = Math.abs(sample.get(key) - reference.get(key));
-                    double scale = Math.max(Math.abs(sample.get(key)), Math.abs(reference.get(key)));
+                    double scale = Math.max(Math.max(Math.abs(sample.get(key)), Math.abs(reference.get(key))), size.getOrDefault(key, 0.0));
                     absoluteError = Math.max(absoluteError, error);
                     relativeError = Math.max(relativeError, error / Math.max(scale, absTolerance > 0 ? absTolerance : Double.MIN_NORMAL));
                     passed &= error <= absTolerance + relTolerance * scale;
@@ -626,7 +891,9 @@ public class SchemaEquationRuntime {
                         passed &= valid;
                     }
                 }
-                if (i >= first + 2 && i <= last - 2 && coarse.times.get(i - 2) >= start) {
+                double stencilFrom = i >= 2 ? coarse.times.get(i - 2) : 0, stencilTo = coarse.times.get(Math.min(i + 2, coarse.times.size() - 1));
+                boolean smooth = coarse.switches.stream().noneMatch(at -> at >= stencilFrom && at <= stencilTo);
+                if (smooth && !byRefinement && i >= first + 2 && i <= last - 2 && coarse.times.get(i - 2) >= start) {
                     for (var rate : coarse.rates.get(bound.id).get(i).entrySet()) {
                         String key = rate.getKey();
                         require(sample.containsKey(key), "Kết quả bộ giải thiếu trạng thái phương trình vi phân: " + key);
@@ -668,7 +935,7 @@ public class SchemaEquationRuntime {
                 evidence.add(bound.id + ": inputs change during the run; the law verified on its own (" + law
                         + "), the coupled run by step refinement h -> h/2 over " + (last - first + 1) + " checkpoints");
             } else {
-                numericalEvidence &= hasReference || (hasInvariants && declaredBenchmarks > 0 && steps >= 4);
+                numericalEvidence &= hasReference || (hasInvariants && declaredBenchmarks > 0 && steps >= 4) || (byRefinement && steps >= 4);
                 evidence.add(bound.id + ": compared " + (first < 0 ? 0 : last - first + 1) + " checkpoints using "
                         + (hasReference ? "independent approved closed-form AST" : "step refinement h -> h/2 and declared invariants"));
             }
@@ -689,6 +956,15 @@ public class SchemaEquationRuntime {
             frame(frames, t, bindings, values);
         }
         for (; event < coarse.events.size(); event++) frame(frames, coarse.events.get(event).getKey(), bindings, coarse.events.get(event).getValue());
+        if (!coarse.events.isEmpty()) {
+            // instants where the equations changed form or a stage ended: results may have a corner or a jump there
+            var breaks = timeline.putArray("breaks");
+            coarse.events.forEach(moment -> breaks.add(moment.getKey()));
+            if (!coarse.jumped.isEmpty()) {
+                var jumps = timeline.putArray("jumps");
+                for (var moment : coarse.jumped) { var names = jumps.addObject().put("t", moment.getKey()).putArray("quantities"); moment.getValue().forEach(names::add); }
+            }
+        }
         if (staged) {
             ObjectNode phases = timeline.putObject("phases");
             for (Bound bound : bindings) {
@@ -735,6 +1011,18 @@ public class SchemaEquationRuntime {
 
     private void checkDimensions(JsonNode capability) {
         Map<String, Map<String, Double>> symbols = new LinkedHashMap<>();
+        capability.path("execution").path("math").path("jumps").fields().forEachRemaining(entry -> entry.getValue().forEach(pair -> {
+            Map<String, Map<String, Double>> known = new LinkedHashMap<>();
+            known.put("t", Map.of("T", 1.0));
+            for (String group : List.of("canonicalInputs", "outputs")) for (JsonNode quantity : capability.path(group)) known.put(quantity.path("key").asText(), unitDimensions.get(quantity.path("unit").asText()));
+            try {
+                dimension(pair.get(0), known, 0, new int[]{0});
+                Map<String, Double> actual = dimension(pair.get(1), known, 0, new int[]{0});
+                require(actual == null || actual.equals(known.get(entry.getKey())), "Giá trị sau bước nhảy không cùng thứ nguyên với đại lượng");
+            } catch (ApiException error) {
+                throw ApiException.unprocessable(error.getMessage() + " (trong bước nhảy của " + entry.getKey() + ")");
+            }
+        }));
         symbols.put("t", Map.of("T", 1.0));
         for (String group : List.of("canonicalInputs", "outputs")) for (JsonNode quantity : capability.path(group)) {
             String unit = quantity.path("unit").asText();
@@ -746,18 +1034,27 @@ public class SchemaEquationRuntime {
             var equations = math.path(phase).fields();
             while (equations.hasNext()) {
                 var equation = equations.next();
-                Map<String, Double> actual = dimension(equation.getValue(), symbols, 0, new int[]{0});
+                Map<String, Double> actual;
+                try {
+                    actual = dimension(equation.getValue(), symbols, 0, new int[]{0});
+                } catch (ApiException error) {
+                    // say which equation, so its author can correct it
+                    throw ApiException.unprocessable(error.getMessage() + " (trong phương trình của " + equation.getKey()
+                            + (phase.equals("rates") ? ", tốc độ biến thiên" : phase.equals("initial") ? ", giá trị ban đầu" : "") + ")");
+                }
                 if (!phase.equals("invariants")) {
                     require(symbols.containsKey(equation.getKey()), "Đơn vị của trạng thái hoặc đầu ra chưa được khai báo: " + equation.getKey());
                     Map<String, Double> expected = symbols.get(equation.getKey());
                     if (phase.equals("rates")) expected = combine(expected, Map.of("T", 1.0), -1);
-                    require(actual == null || actual.equals(expected), "Thứ nguyên không khớp tại " + phase + "." + equation.getKey());
+                    require(actual == null || actual.equals(expected), "Hai vế không cùng thứ nguyên trong phương trình của " + equation.getKey()
+                            + (phase.equals("rates") ? " (tốc độ biến thiên phải có đơn vị của đại lượng chia cho giây)" : phase.equals("initial") ? " (giá trị ban đầu)" : "")
+                            + ": đơn vị khai báo không khớp với biểu thức");
                 }
             }
         }
     }
 
-    private static final Set<String> UNARY = Set.of("neg", "sin", "cos", "tan", "sqrt", "exp", "abs", "log", "asin", "acos", "atan", "sign", "floor");
+    private static final Set<String> UNARY = Set.of("neg", "sin", "cos", "tan", "sqrt", "exp", "abs", "log", "asin", "acos", "atan", "sign", "floor", "latched");
     private static final Set<String> BINARY = Set.of("add", "sub", "mul", "div", "pow", "min", "max", "atan2", "mod");
 
     /** Operand count of an operator: one, two, or three for "if" (condition, value when positive, value otherwise). */
@@ -791,7 +1088,7 @@ public class SchemaEquationRuntime {
             }
             case "sin", "cos", "tan", "exp", "log", "asin", "acos", "atan", "floor" -> {
                 require(a == null || a.isEmpty(), "Đầu vào hàm siêu việt phải không có thứ nguyên; góc dùng đơn vị radian"); yield Map.of(); }
-            case "sign" -> Map.of();
+            case "sign", "latched" -> Map.of();
             case "atan2" -> { require(a == null || b == null || a.equals(b), "Hai thành phần của atan2 phải cùng thứ nguyên"); yield Map.of(); }
             case "if" -> {
                 Map<String, Double> otherwise = dimension(ast.get(3), symbols, depth + 1, nodes);
@@ -835,6 +1132,11 @@ public class SchemaEquationRuntime {
         return result;
     }
 
+    /** The value of one equation tree, its names read through the lookup. */
+    public double value(JsonNode ast, ToDoubleFunction<String> lookup) {
+        return evaluate(ast, lookup, 0, new int[]{0});
+    }
+
     private double evaluate(JsonNode ast, ToDoubleFunction<String> lookup, int depth, int[] nodes) {
         require(depth <= maxDepth && ++nodes[0] <= maxNodes, "Cấu trúc phương trình vượt quá giới hạn xử lý");
         if (ast.isNumber()) return ast.asDouble();
@@ -844,7 +1146,9 @@ public class SchemaEquationRuntime {
         require(ast.size() == arity(op) + 1, "Số toán hạng trong biểu thức không hợp lệ");
         double a = evaluate(ast.get(1), lookup, depth + 1, nodes);
         // only the chosen branch of a condition is evaluated, so the other may be undefined there
-        if (op.equals("if")) return evaluate(ast.get(a > 0 ? 2 : 3), lookup, depth + 1, nodes);
+        Integer held = (op.equals("if") || op.equals("sign") || op.equals("latched")) && lookup instanceof Scope scope ? scope.side(ast.get(1)) : null;
+        if (op.equals("if")) return evaluate(ast.get((held != null ? held > 0 : a > 0) ? 2 : 3), lookup, depth + 1, nodes);
+        if (held != null) return held;
         double b = ast.size() > 2 ? evaluate(ast.get(2), lookup, depth + 1, nodes) : 0;
         double value = switch (op) {
             case "add" -> a + b;
@@ -868,6 +1172,7 @@ public class SchemaEquationRuntime {
             case "acos" -> Math.acos(a);
             case "atan" -> Math.atan(a);
             case "sign" -> Math.signum(a);
+            case "latched" -> a > 0 ? 1 : 0;
             case "floor" -> Math.floor(a);
             default -> throw ApiException.unprocessable("Phép toán số học không được hỗ trợ: " + op);
         };

@@ -1,0 +1,285 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Con lắc đơn dao động nhỏ; trục s dọc theo cung tròn quỹ đạo, gốc ở vị trí cân bằng.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 10,
+  "parameters": [
+   {
+    "name": "l",
+    "label": "Chiều dài dây",
+    "value": 1,
+    "unit": "m",
+    "min": 0.2,
+    "max": 2,
+    "step": 0.1,
+    "role": "pendulum_length",
+    "of": "vat"
+   },
+   {
+    "name": "m",
+    "label": "Khối lượng",
+    "value": 0.1,
+    "unit": "kg",
+    "min": 0.05,
+    "max": 1,
+    "step": 0.05,
+    "role": "mass",
+    "of": "vat"
+   },
+   {
+    "name": "s0",
+    "label": "Li độ dài ban đầu",
+    "value": 8,
+    "unit": "cm",
+    "min": 1,
+    "max": 15,
+    "step": 1,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "vat",
+    "label": "vat",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "w",
+    "label": "Tần số góc"
+   },
+   {
+    "quantity": "T",
+    "label": "Chu kì"
+   },
+   {
+    "quantity": "f",
+    "label": "Tần số"
+   },
+   {
+    "quantity": "A",
+    "label": "Biên độ dài"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "w",
+     "label": "Tần số góc",
+     "unit": "rad/s",
+     "role": "angular_frequency",
+     "of": "vat",
+     "value": [
+      "sqrt",
+      [
+       "div",
+       "g",
+       "l"
+      ]
+     ]
+    },
+    {
+     "id": "T",
+     "label": "Chu kì",
+     "unit": "s",
+     "role": "period",
+     "of": "vat",
+     "value": [
+      "mul",
+      6.283185307179586,
+      [
+       "sqrt",
+       [
+        "div",
+        "l",
+        "g"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "f",
+     "label": "Tần số",
+     "unit": "Hz",
+     "role": "frequency",
+     "of": "vat",
+     "value": [
+      "div",
+      "w",
+      6.283185307179586
+     ]
+    },
+    {
+     "id": "A",
+     "label": "Biên độ dài",
+     "unit": "m",
+     "role": "amplitude",
+     "of": "vat",
+     "value": "s0"
+    },
+    {
+     "id": "s",
+     "label": "Li độ dài",
+     "unit": "m",
+     "role": "displacement",
+     "of": "vat",
+     "axis": "s",
+     "initial": "s0",
+     "rate": "v"
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "vat",
+     "axis": "s",
+     "initial": 0,
+     "rate": "a"
+    },
+    {
+     "id": "al",
+     "label": "Li độ góc",
+     "unit": "rad",
+     "role": "angle",
+     "of": "vat",
+     "value": [
+      "div",
+      "s",
+      "l"
+     ]
+    },
+    {
+     "id": "Pt",
+     "label": "Thành phần tiếp tuyến của trọng lực",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "vat",
+     "axis": "s",
+     "value": [
+      "neg",
+      [
+       "mul",
+       [
+        "mul",
+        "m",
+        "g"
+       ],
+       [
+        "sin",
+        "al"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "a",
+     "label": "Gia tốc tiếp tuyến",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "vat",
+     "axis": "s",
+     "value": [
+      "div",
+      "Pt",
+      "m"
+     ]
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "vat",
+     "value": [
+      "mul",
+      0.5,
+      [
+       "mul",
+       "m",
+       [
+        "pow",
+        "v",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Wt",
+     "label": "Thế năng trọng trường",
+     "unit": "J",
+     "role": "potential_energy",
+     "kind": "gravity",
+     "of": "vat",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "m",
+       "g"
+      ],
+      [
+       "mul",
+       "l",
+       [
+        "sub",
+        1,
+        [
+         "cos",
+         "al"
+        ]
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "W",
+     "label": "Cơ năng",
+     "unit": "J",
+     "role": "mechanical_energy",
+     "of": "vat",
+     "value": [
+      "add",
+      "Wd",
+      "Wt"
+     ]
+    },
+    {
+     "id": "vmax",
+     "label": "Tốc độ cực đại",
+     "unit": "m/s",
+     "role": "max_speed",
+     "of": "vat",
+     "value": [
+      "mul",
+      "w",
+      "A"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Con lắc đơn dao động nhỏ; trục s dọc theo cung tròn quỹ đạo, gốc ở vị trí cân bằng."
+   ],
+   "duration": [
+    "mul",
+    2,
+    "T"
+   ]
+  }
+ }
+}

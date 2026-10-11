@@ -20,135 +20,380 @@
     "limitations"
   ],
   "properties": {
-    "metaSchemaVersion": { "const": "2.0" },
-    "model": { "enum": ["matter_js", "generated_visual"] },
-    "description": { "type": "string" },
-    "objectTypes": { "type": "array", "items": { "$ref": "#/$defs/objectType" } },
-    "relationTypes": { "type": "array", "items": { "$ref": "#/$defs/relationType" } },
-    "quantityDefinitions": { "type": "array", "items": { "$ref": "#/$defs/quantity" } },
-    "unitCatalog": { "type": "array", "items": { "$ref": "#/$defs/unit" } },
-    "laws": { "type": "array", "items": { "$ref": "#/$defs/law" } },
-    "capabilities": { "type": "array", "items": { "$ref": "#/$defs/capability" } },
-    "applicationRequirements": { "type": "array", "items": { "$ref": "#/$defs/applicationRequirement" } },
-    "coreTypeRefs": { "type": "array", "items": { "type": "string" } },
+    "metaSchemaVersion": {
+      "const": "2.0"
+    },
+    "model": {
+      "enum": [
+        "matter_js",
+        "generated_visual"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "objectTypes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/objectType"
+      }
+    },
+    "relationTypes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relationType"
+      }
+    },
+    "quantityDefinitions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/quantity"
+      }
+    },
+    "unitCatalog": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/unit"
+      }
+    },
+    "laws": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/law"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/capability"
+      }
+    },
+    "applicationRequirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/applicationRequirement"
+      }
+    },
+    "coreTypeRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "conceptVocabulary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["openWorld", "scope", "guidance"],
+      "required": [
+        "openWorld",
+        "scope",
+        "guidance"
+      ],
       "properties": {
-        "openWorld": { "const": true },
-        "scope": { "const": "high_school_physics" },
-        "guidance": { "type": "string" }
+        "openWorld": {
+          "const": true
+        },
+        "scope": {
+          "const": "high_school_physics"
+        },
+        "guidance": {
+          "type": "string"
+        }
       }
     },
     "simulationCapability": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["mode", "scope", "limitations"],
+      "required": [
+        "mode",
+        "scope",
+        "limitations"
+      ],
       "properties": {
-        "mode": { "enum": ["matter_js", "generated_visual", "solver_bound", "unsupported"] },
-        "runtimes": { "type": "array", "items": { "enum": ["matter_js", "generated_visual"] } },
-        "scope": { "type": "string" },
-        "limitations": { "type": "array", "items": { "type": "string" } }
+        "mode": {
+          "enum": [
+            "matter_js",
+            "generated_visual",
+            "solver_bound",
+            "unsupported"
+          ]
+        },
+        "runtimes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "matter_js",
+              "generated_visual"
+            ]
+          }
+        },
+        "scope": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "visualCapability": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["mode", "scope", "purpose", "interaction"],
+      "required": [
+        "mode",
+        "scope",
+        "purpose",
+        "interaction"
+      ],
       "properties": {
-        "mode": { "const": "generated_scene" },
-        "scope": { "type": "string" },
-        "purpose": { "type": "string" },
-        "interaction": { "type": "string" }
+        "mode": {
+          "const": "generated_scene"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "interaction": {
+          "type": "string"
+        }
       }
     },
-    "limitations": { "type": "array", "items": { "type": "string" } }
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lawCatalogue": {
+      "type": "object",
+      "description": "The laws simulations of this topic are checked against: roles (what a quantity is), kinds, universal constants and laws (relations between roles that must hold at every instant). Merged from schemas/laws; reviewers extend it when a model reports quantities no law checks."
+    }
   },
   "$defs": {
     "applicability": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "objectTypes": { "type": "array", "items": { "type": "string" } },
-        "relationTypes": { "type": "array", "items": { "type": "string" } },
-        "quantities": { "type": "array", "items": { "type": "string" } }
+        "objectTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relationTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "quantities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "objectType": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "label", "description"],
+      "required": [
+        "type",
+        "label",
+        "description"
+      ],
       "properties": {
-        "type": { "type": "string" },
-        "label": { "type": "string" },
-        "description": { "type": "string" },
-        "appliesTo": { "$ref": "#/$defs/applicability" }
+        "type": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "appliesTo": {
+          "$ref": "#/$defs/applicability"
+        }
       }
     },
     "relationType": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "label", "description", "subjectTypes", "objectTypes"],
+      "required": [
+        "type",
+        "label",
+        "description",
+        "subjectTypes",
+        "objectTypes"
+      ],
       "properties": {
-        "type": { "type": "string" },
-        "label": { "type": "string" },
-        "description": { "type": "string" },
-        "subjectTypes": { "type": "array", "items": { "type": "string" } },
-        "objectTypes": { "type": "array", "items": { "type": "string" } },
-        "appliesTo": { "$ref": "#/$defs/applicability" }
+        "type": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "subjectTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "objectTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "appliesTo": {
+          "$ref": "#/$defs/applicability"
+        }
       }
     },
     "quantity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["key", "label", "description", "allowedUnits", "appliesTo"],
+      "required": [
+        "key",
+        "label",
+        "description",
+        "allowedUnits",
+        "appliesTo"
+      ],
       "properties": {
-        "key": { "type": "string" },
-        "label": { "type": "string" },
-        "description": { "type": "string" },
-        "aliases": { "type": "array", "items": { "type": "string" } },
-        "symbol": { "type": "string" },
-        "symbols": { "type": "array", "items": { "type": "string" } },
-        "allowedUnits": { "type": "array", "items": { "type": "string" } },
-        "dimension": { "type": "string" },
-        "positive": { "type": "boolean" },
-        "nonNegative": { "type": "boolean" },
-        "integer": { "type": "boolean" },
-        "appliesTo": { "$ref": "#/$defs/applicability" }
+        "key": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "symbols": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowedUnits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dimension": {
+          "type": "string"
+        },
+        "positive": {
+          "type": "boolean"
+        },
+        "nonNegative": {
+          "type": "boolean"
+        },
+        "integer": {
+          "type": "boolean"
+        },
+        "appliesTo": {
+          "$ref": "#/$defs/applicability"
+        }
       }
     },
     "unit": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["symbol", "dimension"],
+      "required": [
+        "symbol",
+        "dimension"
+      ],
       "properties": {
-        "symbol": { "type": "string" },
-        "dimension": { "type": "string" }
+        "symbol": {
+          "type": "string"
+        },
+        "dimension": {
+          "type": "string"
+        }
       }
     },
     "law": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "description", "inputs", "outputs", "appliesTo", "assumptions"],
+      "required": [
+        "id",
+        "name",
+        "description",
+        "inputs",
+        "outputs",
+        "appliesTo",
+        "assumptions"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "description": { "type": "string" },
-        "inputs": { "type": "array", "items": { "type": "string" } },
-        "outputs": { "type": "array", "items": { "type": "string" } },
-        "appliesTo": { "$ref": "#/$defs/applicability" },
-        "assumptions": { "type": "array", "items": { "type": "string" } }
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "appliesTo": {
+          "$ref": "#/$defs/applicability"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "applicationRequirement": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "description", "appliesTo"],
+      "required": [
+        "id",
+        "description",
+        "appliesTo"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "description": { "type": "string" },
-        "appliesTo": { "$ref": "#/$defs/applicability" }
+        "id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "appliesTo": {
+          "$ref": "#/$defs/applicability"
+        }
       }
     },
     "capability": {
@@ -168,108 +413,300 @@
         "rendererBindings"
       ],
       "properties": {
-        "capabilityId": { "type": "string" },
-        "version": { "type": "string" },
-        "applicability": { "$ref": "#/$defs/applicability" },
-        "canonicalInputs": { "type": "array", "items": { "$ref": "#/$defs/capabilityQuantity" } },
-        "outputs": { "type": "array", "items": { "$ref": "#/$defs/capabilityQuantity" } },
-        "assumptions": { "type": "array", "items": { "type": "string" } },
-        "validityDomain": { "type": "object", "additionalProperties": true },
+        "capabilityId": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "applicability": {
+          "$ref": "#/$defs/applicability"
+        },
+        "canonicalInputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/capabilityQuantity"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/capabilityQuantity"
+          }
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "validityDomain": {
+          "type": "object",
+          "additionalProperties": true
+        },
         "equationSet": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["canonical", "derived"],
+          "required": [
+            "canonical",
+            "derived"
+          ],
           "properties": {
-            "canonical": { "type": "array", "items": { "type": "string" } },
-            "derived": { "type": "array", "items": { "type": "string" } },
-            "dependencies": { "type": "array", "items": { "$ref": "#/$defs/equationDependency" } }
+            "canonical": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "derived": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "dependencies": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/equationDependency"
+              }
+            }
           }
         },
         "execution": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["primary", "numerical", "closedForm"],
+          "required": [
+            "primary",
+            "numerical",
+            "closedForm"
+          ],
           "properties": {
-            "primary": { "enum": ["numerical", "closed_form", "visual_only"] },
-            "math": { "$ref": "#/$defs/equationProgram" },
-            "numerical": { "$ref": "#/$defs/solverBinding" },
+            "primary": {
+              "enum": [
+                "numerical",
+                "closed_form",
+                "visual_only"
+              ]
+            },
+            "math": {
+              "$ref": "#/$defs/equationProgram"
+            },
+            "numerical": {
+              "$ref": "#/$defs/solverBinding"
+            },
             "closedForm": {
               "anyOf": [
-                { "type": "null" },
-                { "$ref": "#/$defs/solverBinding" }
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/$defs/solverBinding"
+                }
               ]
             }
           }
         },
-        "validation": { "$ref": "#/$defs/validationContract" },
-        "rendererBindings": { "type": "array", "items": { "type": "object", "additionalProperties": true } }
+        "validation": {
+          "$ref": "#/$defs/validationContract"
+        },
+        "rendererBindings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
       }
     },
     "capabilityQuantity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["key", "unit"],
+      "required": [
+        "key",
+        "unit"
+      ],
       "properties": {
-        "key": { "type": "string" },
-        "unit": { "type": "string" },
-        "description": { "type": "string" },
-        "defaultValue": { "type": "number" },
-        "min": { "type": "number" },
-        "max": { "type": "number" },
-        "timeVarying": { "type": "boolean", "description": "Inputs only. True when the law holds at every instant for a changing value of this input, so the input may read another participant's result that changes during the run. Ignored when a result or rate using the input is written as a function of elapsed time." }
+        "key": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "defaultValue": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "timeVarying": {
+          "type": "boolean",
+          "description": "Inputs only. True when the law holds at every instant for a changing value of this input, so the input may read another participant's result that changes during the run. Ignored when a result or rate using the input is written as a function of elapsed time."
+        }
       }
     },
     "solverBinding": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["solverId", "method"],
+      "required": [
+        "solverId",
+        "method"
+      ],
       "properties": {
-        "solverId": { "type": "string" },
-        "method": { "type": "string" },
-        "stepSeconds": { "type": "number" }
+        "solverId": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        },
+        "stepSeconds": {
+          "type": "number"
+        }
       }
     },
     "validationContract": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["strategy", "absoluteTolerance", "relativeTolerance", "invariants", "benchmarks"],
+      "required": [
+        "strategy",
+        "absoluteTolerance",
+        "relativeTolerance",
+        "invariants",
+        "benchmarks"
+      ],
       "properties": {
-        "strategy": { "enum": ["closed_form_checkpoints", "step_refinement", "residual_invariants", "visual_only"] },
-        "absoluteTolerance": { "type": "number" },
-        "relativeTolerance": { "type": "number" },
-        "invariants": { "type": "array", "items": { "type": "string" } },
-        "benchmarks": { "type": "array", "items": { "type": "object", "additionalProperties": true } }
+        "strategy": {
+          "enum": [
+            "closed_form_checkpoints",
+            "step_refinement",
+            "residual_invariants",
+            "visual_only"
+          ]
+        },
+        "absoluteTolerance": {
+          "type": "number"
+        },
+        "relativeTolerance": {
+          "type": "number"
+        },
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "benchmarks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
       }
     },
     "arithmeticExpression": {
       "anyOf": [
-        { "type": "number" },
-        { "type": "string", "description": "Canonical quantity reference; never executable source code." },
         {
-          "type": "array", "minItems": 2, "maxItems": 4,
+          "type": "number"
+        },
+        {
+          "type": "string",
+          "description": "Canonical quantity reference; never executable source code."
+        },
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
           "description": "Operator followed by its operands. One operand: neg, abs, sign, floor, sqrt, exp, log, sin, cos, tan, asin, acos, atan. Two: add, sub, mul, div, pow, min, max, mod, atan2 (y, x). Three: if (condition, value when the condition is positive, value otherwise); only the chosen branch is evaluated.",
-          "prefixItems": [{ "enum": ["add", "sub", "mul", "div", "pow", "min", "max", "mod", "atan2", "neg", "abs", "sign", "floor", "sqrt", "exp", "log", "sin", "cos", "tan", "asin", "acos", "atan", "if"] }],
-          "items": { "$ref": "#/$defs/arithmeticExpression" }
+          "prefixItems": [
+            {
+              "enum": [
+                "add",
+                "sub",
+                "mul",
+                "div",
+                "pow",
+                "min",
+                "max",
+                "mod",
+                "atan2",
+                "neg",
+                "abs",
+                "sign",
+                "floor",
+                "sqrt",
+                "exp",
+                "log",
+                "sin",
+                "cos",
+                "tan",
+                "asin",
+                "acos",
+                "atan",
+                "if"
+              ]
+            }
+          ],
+          "items": {
+            "$ref": "#/$defs/arithmeticExpression"
+          }
         }
       ]
     },
-    "equationMap": { "type": "object", "additionalProperties": { "$ref": "#/$defs/arithmeticExpression" } },
+    "equationMap": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/arithmeticExpression"
+      }
+    },
     "equationProgram": {
-      "type": "object", "additionalProperties": false,
-      "required": ["initial", "rates", "outputs"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initial",
+        "rates",
+        "outputs"
+      ],
       "properties": {
-        "initial": { "$ref": "#/$defs/equationMap" }, "rates": { "$ref": "#/$defs/equationMap" },
-        "outputs": { "$ref": "#/$defs/equationMap" }, "closedForm": { "$ref": "#/$defs/equationMap" },
-        "invariants": { "$ref": "#/$defs/equationMap" }
+        "initial": {
+          "$ref": "#/$defs/equationMap"
+        },
+        "rates": {
+          "$ref": "#/$defs/equationMap"
+        },
+        "outputs": {
+          "$ref": "#/$defs/equationMap"
+        },
+        "closedForm": {
+          "$ref": "#/$defs/equationMap"
+        },
+        "invariants": {
+          "$ref": "#/$defs/equationMap"
+        }
       }
     },
     "equationDependency": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "dependsOn"],
+      "required": [
+        "id",
+        "dependsOn"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "dependsOn": { "type": "array", "items": { "type": "string" } }
+        "id": {
+          "type": "string"
+        },
+        "dependsOn": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     }
   }

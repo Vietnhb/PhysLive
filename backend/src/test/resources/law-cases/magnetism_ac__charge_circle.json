@@ -1,0 +1,310 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Hạt mang điện bay vuông góc với từ trường đều chịu lực từ luôn vuông góc với vận tốc nên chuyển động tròn đều.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 0.0001,
+  "parameters": [
+   {
+    "name": "q",
+    "label": "Điện tích của hạt",
+    "value": 1.6e-19,
+    "unit": "C",
+    "min": 1.6e-19,
+    "max": 4.8e-19,
+    "step": 1.6e-19,
+    "role": "charge",
+    "of": "hat"
+   },
+   {
+    "name": "m",
+    "label": "Khối lượng của hạt",
+    "value": 1.67e-27,
+    "unit": "kg",
+    "min": 1e-27,
+    "max": 1e-26,
+    "step": 1e-28,
+    "role": "mass",
+    "of": "hat"
+   },
+   {
+    "name": "B",
+    "label": "Cảm ứng từ",
+    "value": 0.01,
+    "unit": "T",
+    "min": 0.005,
+    "max": 0.05,
+    "step": 0.005,
+    "role": "magnetic_field",
+    "of": "hat",
+    "axis": "z"
+   },
+   {
+    "name": "v0",
+    "label": "Tốc độ ban đầu",
+    "value": 100000.0,
+    "unit": "m/s",
+    "min": 10000.0,
+    "max": 500000.0,
+    "step": 10000.0,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "hat",
+    "label": "Hạt mang điện",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "x",
+    "label": "x"
+   },
+   {
+    "quantity": "y",
+    "label": "y"
+   },
+   {
+    "quantity": "r",
+    "label": "r"
+   },
+   {
+    "quantity": "T",
+    "label": "T"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "th",
+     "label": "Góc giữa vận tốc và cảm ứng từ",
+     "value": 1.5707963267948966,
+     "unit": "rad",
+     "role": "velocity_field_angle",
+     "of": "hat"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "x",
+     "label": "Tọa độ x",
+     "unit": "m",
+     "role": "position",
+     "of": "hat",
+     "axis": "x",
+     "initial": 0,
+     "rate": "vx"
+    },
+    {
+     "id": "y",
+     "label": "Tọa độ y",
+     "unit": "m",
+     "role": "position",
+     "of": "hat",
+     "axis": "y",
+     "initial": 0,
+     "rate": "vy"
+    },
+    {
+     "id": "vx",
+     "label": "Vận tốc x",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "hat",
+     "axis": "x",
+     "initial": "v0",
+     "rate": [
+      "div",
+      "Fx",
+      "m"
+     ]
+    },
+    {
+     "id": "vy",
+     "label": "Vận tốc y",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "hat",
+     "axis": "y",
+     "initial": 0,
+     "rate": [
+      "div",
+      "Fy",
+      "m"
+     ]
+    },
+    {
+     "id": "Fx",
+     "label": "Lực từ x",
+     "unit": "N",
+     "role": "force",
+     "of": "hat",
+     "axis": "x",
+     "kind": "magnetic",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "q",
+       "vy"
+      ],
+      "B"
+     ]
+    },
+    {
+     "id": "Fy",
+     "label": "Lực từ y",
+     "unit": "N",
+     "role": "force",
+     "of": "hat",
+     "axis": "y",
+     "kind": "magnetic",
+     "value": [
+      "neg",
+      [
+       "mul",
+       [
+        "mul",
+        "q",
+        "vx"
+       ],
+       "B"
+      ]
+     ]
+    },
+    {
+     "id": "F",
+     "label": "Độ lớn lực từ",
+     "unit": "N",
+     "role": "force_magnitude",
+     "of": "hat",
+     "kind": "magnetic",
+     "value": [
+      "mul",
+      [
+       "mul",
+       [
+        "abs",
+        "q"
+       ],
+       "v"
+      ],
+      "B"
+     ]
+    },
+    {
+     "id": "Bm",
+     "label": "Độ lớn cảm ứng từ",
+     "unit": "T",
+     "role": "magnetic_field_magnitude",
+     "of": "hat",
+     "value": [
+      "abs",
+      "B"
+     ]
+    },
+    {
+     "id": "v",
+     "label": "Tốc độ",
+     "unit": "m/s",
+     "role": "speed",
+     "of": "hat",
+     "value": [
+      "sqrt",
+      [
+       "add",
+       [
+        "pow",
+        "vx",
+        2
+       ],
+       [
+        "pow",
+        "vy",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "hat",
+     "value": [
+      "mul",
+      [
+       "mul",
+       0.5,
+       "m"
+      ],
+      [
+       "pow",
+       "v",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "w",
+     "label": "Tốc độ góc",
+     "unit": "rad/s",
+     "role": "angular_velocity",
+     "of": "hat",
+     "value": [
+      "div",
+      [
+       "mul",
+       "q",
+       "B"
+      ],
+      "m"
+     ]
+    },
+    {
+     "id": "r",
+     "label": "Bán kính quỹ đạo",
+     "unit": "m",
+     "role": "radius",
+     "of": "hat",
+     "value": [
+      "div",
+      "v",
+      [
+       "abs",
+       "w"
+      ]
+     ]
+    },
+    {
+     "id": "T",
+     "label": "Chu kì",
+     "unit": "s",
+     "role": "period",
+     "of": "hat",
+     "value": [
+      "div",
+      6.283185307179586,
+      [
+       "abs",
+       "w"
+      ]
+     ]
+    }
+   ],
+   "assumptions": [
+    "Từ trường đều hướng theo trục z (vuông góc với mặt phẳng quỹ đạo xy); bỏ qua trọng lực."
+   ],
+   "duration": [
+    "mul",
+    2,
+    "T"
+   ]
+  }
+ }
+}

@@ -36,5 +36,10 @@
       "name": "Định luật Hooke",
       "summary": "F = kΔl."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "mechanics_more",
+    "oscillations_waves"
   ]
 }

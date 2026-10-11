@@ -1779,5 +1779,15 @@
     "aliases": [
       "C_td"
     ]
+  },
+  "offset_from_natural_length": {
+    "label": "gốc đo độ lệch ban đầu: vị trí cân bằng (0) hay vị trí lò xo không biến dạng (1)",
+    "description": "gốc đo độ lệch ban đầu: vị trí cân bằng (0) hay vị trí lò xo không biến dạng (1)",
+    "aliases": []
+  },
+  "phase_difference": {
+    "label": "độ lệch pha giữa điện áp và dòng điện",
+    "description": "độ lệch pha giữa điện áp và dòng điện",
+    "aliases": []
   }
 }

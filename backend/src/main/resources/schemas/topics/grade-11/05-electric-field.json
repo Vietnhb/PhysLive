@@ -63,5 +63,9 @@
       "name": "Tụ điện và điện dung",
       "summary": "Ghép tụ; năng lượng tụ điện."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "electricity"
   ]
 }

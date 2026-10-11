@@ -36,5 +36,9 @@
       "name": "Động lượng và va chạm",
       "summary": "F = Δp/Δt; năng lượng trong va chạm."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "mechanics_more"
   ]
 }

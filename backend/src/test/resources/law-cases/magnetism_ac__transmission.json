@@ -1,0 +1,253 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Tăng điện áp bằng máy biến áp trước khi truyền tải làm giảm cường độ dòng điện trên dây nên giảm hao phí toả nhiệt I²R.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 5,
+  "parameters": [
+   {
+    "name": "P2",
+    "label": "Công suất truyền đi",
+    "value": 2000,
+    "unit": "kW",
+    "min": 100,
+    "max": 5000,
+    "step": 100,
+    "role": "average_power",
+    "of": "mba",
+    "kind": "secondary",
+    "in_series": "duongday",
+    "in_series_total": "duongday"
+   },
+   {
+    "name": "U1",
+    "label": "Điện áp máy phát",
+    "value": 2,
+    "unit": "kV",
+    "min": 1,
+    "max": 10,
+    "step": 0.5,
+    "role": "voltage_rms",
+    "of": "mba",
+    "kind": "primary"
+   },
+   {
+    "name": "N1",
+    "label": "Số vòng cuộn sơ cấp",
+    "value": 200,
+    "unit": "1",
+    "min": 50,
+    "max": 1000,
+    "step": 50,
+    "role": "turns",
+    "of": "mba",
+    "kind": "primary"
+   },
+   {
+    "name": "N2",
+    "label": "Số vòng cuộn thứ cấp",
+    "value": 2000,
+    "unit": "1",
+    "min": 50,
+    "max": 20000,
+    "step": 50,
+    "role": "turns",
+    "of": "mba",
+    "kind": "secondary"
+   },
+   {
+    "name": "R",
+    "label": "Điện trở đường dây",
+    "value": 10,
+    "unit": "ohm",
+    "min": 1,
+    "max": 50,
+    "step": 1,
+    "role": "resistance",
+    "of": "day"
+   }
+  ],
+  "objects": [
+   {
+    "id": "mba",
+    "label": "Máy biến áp",
+    "count": 1
+   },
+   {
+    "id": "day",
+    "label": "Đường dây tải điện",
+    "count": 1
+   },
+   {
+    "id": "tai",
+    "label": "Nơi tiêu thụ",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "Php",
+    "label": "Php"
+   },
+   {
+    "quantity": "U2",
+    "label": "U2"
+   },
+   {
+    "quantity": "Id",
+    "label": "Id"
+   },
+   {
+    "quantity": "ty",
+    "label": "ty"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "H",
+     "label": "Hiệu suất máy biến áp",
+     "value": 1,
+     "unit": "1",
+     "role": "efficiency",
+     "of": "mba"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "U2",
+     "label": "Điện áp cuộn thứ cấp",
+     "unit": "V",
+     "role": "voltage_rms",
+     "of": "mba",
+     "kind": "secondary",
+     "value": [
+      "div",
+      [
+       "mul",
+       "U1",
+       "N2"
+      ],
+      "N1"
+     ]
+    },
+    {
+     "id": "I2",
+     "label": "Dòng điện cuộn thứ cấp",
+     "unit": "A",
+     "role": "current_rms",
+     "of": "mba",
+     "kind": "secondary",
+     "in_series": "duongday",
+     "in_series_total": "duongday",
+     "value": [
+      "div",
+      "P2",
+      "U2"
+     ]
+    },
+    {
+     "id": "I1",
+     "label": "Dòng điện cuộn sơ cấp",
+     "unit": "A",
+     "role": "current_rms",
+     "of": "mba",
+     "kind": "primary",
+     "value": [
+      "div",
+      [
+       "mul",
+       "U2",
+       "I2"
+      ],
+      [
+       "mul",
+       "H",
+       "U1"
+      ]
+     ]
+    },
+    {
+     "id": "P1",
+     "label": "Công suất đưa vào máy biến áp",
+     "unit": "W",
+     "role": "average_power",
+     "of": "mba",
+     "kind": "primary",
+     "value": [
+      "mul",
+      "U1",
+      "I1"
+     ]
+    },
+    {
+     "id": "Id",
+     "label": "Dòng điện trên dây",
+     "unit": "A",
+     "role": "current_rms",
+     "of": "day",
+     "in_series": "duongday",
+     "value": "I2"
+    },
+    {
+     "id": "Php",
+     "label": "Công suất hao phí",
+     "unit": "W",
+     "role": "average_power",
+     "of": "day",
+     "in_series": "duongday",
+     "value": [
+      "mul",
+      [
+       "pow",
+       "Id",
+       2
+      ],
+      "R"
+     ]
+    },
+    {
+     "id": "ud",
+     "label": "Độ giảm điện áp trên dây",
+     "unit": "V",
+     "role": "voltage_rms",
+     "of": "day",
+     "value": [
+      "mul",
+      "Id",
+      "R"
+     ]
+    },
+    {
+     "id": "Ptt",
+     "label": "Công suất đến nơi tiêu thụ",
+     "unit": "W",
+     "role": "average_power",
+     "of": "tai",
+     "in_series": "duongday",
+     "value": [
+      "sub",
+      "P2",
+      "Php"
+     ]
+    },
+    {
+     "id": "ty",
+     "label": "Tỉ lệ hao phí",
+     "unit": "1",
+     "role": "other",
+     "value": [
+      "div",
+      "Php",
+      "P2"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Máy biến áp lí tưởng, hệ số công suất bằng 1."
+   ]
+  }
+ }
+}

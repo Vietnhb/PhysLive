@@ -47,5 +47,10 @@
       "name": "Vùng năng lượng",
       "summary": "Điện trở kim loại, bán dẫn, LDR."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "modern",
+    "oscillations_waves"
   ]
 }

@@ -1,0 +1,111 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Ánh sáng có tần số 5·10^14 Hz truyền trong nước chiết suất 1,33. Tính tốc độ, bước sóng trong nước và năng lượng photon.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1,
+  "parameters": [
+   {
+    "name": "f",
+    "label": "Tần số ánh sáng",
+    "value": 500000000000000.0,
+    "unit": "Hz",
+    "min": 400000000000000.0,
+    "max": 750000000000000.0,
+    "step": 10000000000000.0,
+    "role": "frequency",
+    "of": "sang"
+   },
+   {
+    "name": "n",
+    "label": "Chiết suất của nước",
+    "value": 1.33,
+    "unit": "1",
+    "min": 1,
+    "max": 2.5,
+    "step": 0.01,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "sang",
+    "label": "sang",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "v",
+    "label": "v"
+   },
+   {
+    "quantity": "lam",
+    "label": "lam"
+   },
+   {
+    "quantity": "eps",
+    "label": "eps"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "h",
+     "label": "Hằng số Planck",
+     "value": 6.626e-34,
+     "unit": "J*s",
+     "role": "other"
+    },
+    {
+     "id": "c",
+     "label": "Tốc độ ánh sáng",
+     "value": 299800000.0,
+     "unit": "m/s",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "v",
+     "label": "Tốc độ ánh sáng trong nước",
+     "unit": "m/s",
+     "role": "wave_speed",
+     "of": "sang",
+     "value": [
+      "div",
+      "c",
+      "n"
+     ]
+    },
+    {
+     "id": "lam",
+     "label": "Bước sóng trong nước",
+     "unit": "m",
+     "role": "wavelength",
+     "of": "sang",
+     "value": [
+      "div",
+      "v",
+      "f"
+     ]
+    },
+    {
+     "id": "eps",
+     "label": "Năng lượng photon",
+     "unit": "J",
+     "role": "photon_energy",
+     "of": "sang",
+     "value": [
+      "mul",
+      "h",
+      "f"
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

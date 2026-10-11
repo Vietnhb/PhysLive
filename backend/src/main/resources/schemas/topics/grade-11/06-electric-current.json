@@ -55,5 +55,8 @@
       "name": "Năng lượng điện, công suất điện",
       "summary": "A = UIt; P = UI."
     }
+  ],
+  "lawCatalogues": [
+    "electricity"
   ]
 }

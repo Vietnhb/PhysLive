@@ -44,5 +44,9 @@
       "name": "Động năng phân tử",
       "summary": "k = R/Nₐ; Wđ = (3/2)kT."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "thermal_gas"
   ]
 }

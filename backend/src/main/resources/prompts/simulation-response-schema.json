@@ -42,7 +42,7 @@
                 "properties": {
                   "object": {
                     "type": "string",
-                    "description": "An object of confirmedPlan.requiredObjects."
+                    "description": "An object of confirmedPlan.objects."
                   },
                   "representation": {
                     "type": "string",

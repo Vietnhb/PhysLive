@@ -1,0 +1,207 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Mô hình kiểm thử.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 100,
+  "parameters": [
+   {
+    "name": "m",
+    "label": "Khối lượng của vật",
+    "value": 60,
+    "unit": "kg",
+    "min": 1,
+    "max": 100,
+    "step": 1,
+    "role": "mass",
+    "of": "vat"
+   }
+  ],
+  "objects": [
+   {
+    "id": "vat",
+    "label": "Vật trên xích đạo",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "N",
+    "label": "N"
+   },
+   {
+    "quantity": "Fhd",
+    "label": "Fhd"
+   },
+   {
+    "quantity": "Fht",
+    "label": "Fht"
+   },
+   {
+    "quantity": "v",
+    "label": "v"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "G",
+     "label": "Hằng số hấp dẫn",
+     "value": 6.674e-11,
+     "unit": "N*m2/kg2",
+     "role": "other"
+    },
+    {
+     "id": "M",
+     "label": "Khối lượng Trái Đất",
+     "value": 5.972e+24,
+     "unit": "kg",
+     "role": "source_mass"
+    },
+    {
+     "id": "Rd",
+     "label": "Bán kính Trái Đất",
+     "value": 6371,
+     "unit": "km",
+     "role": "source_radius"
+    },
+    {
+     "id": "Tn",
+     "label": "Chu kì tự quay của Trái Đất",
+     "value": 86164,
+     "unit": "s",
+     "role": "period",
+     "of": "vat"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "R",
+     "label": "Bán kính quỹ đạo của vật",
+     "unit": "m",
+     "role": "radius",
+     "of": "vat",
+     "value": "Rd"
+    },
+    {
+     "id": "r",
+     "label": "Khoảng cách đến tâm Trái Đất",
+     "unit": "m",
+     "role": "center_distance",
+     "of": "vat",
+     "value": "Rd"
+    },
+    {
+     "id": "th",
+     "label": "Góc quay",
+     "unit": "rad",
+     "role": "angular_position",
+     "of": "vat",
+     "initial": 0,
+     "rate": "om"
+    },
+    {
+     "id": "om",
+     "label": "Tốc độ góc",
+     "unit": "rad/s",
+     "role": "angular_velocity",
+     "of": "vat",
+     "value": [
+      "div",
+      6.283185307179586,
+      "Tn"
+     ]
+    },
+    {
+     "id": "v",
+     "label": "Tốc độ",
+     "unit": "m/s",
+     "role": "speed",
+     "of": "vat",
+     "value": [
+      "mul",
+      "om",
+      "R"
+     ]
+    },
+    {
+     "id": "aht",
+     "label": "Gia tốc hướng tâm",
+     "unit": "m/s2",
+     "role": "centripetal_acceleration",
+     "of": "vat",
+     "value": [
+      "mul",
+      "R",
+      [
+       "pow",
+       "om",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "Fht",
+     "label": "Lực hướng tâm",
+     "unit": "N",
+     "role": "centripetal_force",
+     "of": "vat",
+     "value": [
+      "mul",
+      "m",
+      "aht"
+     ]
+    },
+    {
+     "id": "gh",
+     "label": "Cường độ trường hấp dẫn",
+     "unit": "m/s2",
+     "role": "gravitational_field_strength",
+     "of": "vat",
+     "value": [
+      "div",
+      [
+       "mul",
+       "G",
+       "M"
+      ],
+      [
+       "pow",
+       "r",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "Fhd",
+     "label": "Lực hấp dẫn",
+     "unit": "N",
+     "role": "force_magnitude",
+     "kind": "gravitation",
+     "of": "vat",
+     "value": [
+      "mul",
+      "m",
+      "gh"
+     ]
+    },
+    {
+     "id": "N",
+     "label": "Số chỉ của cân",
+     "unit": "N",
+     "role": "other",
+     "value": [
+      "sub",
+      "Fhd",
+      "Fht"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Trái Đất là quả cầu đồng chất quay đều."
+   ]
+  }
+ }
+}

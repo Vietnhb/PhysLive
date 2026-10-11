@@ -43,5 +43,9 @@
       "name": "Dao động tắt dần, hiện tượng cộng hưởng",
       "summary": "Dao động cưỡng bức, cộng hưởng."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "oscillations_waves"
   ]
 }

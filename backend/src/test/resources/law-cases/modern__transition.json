@@ -1,0 +1,170 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Nguyên tử hiđrô chuyển từ mức M và mức N về mức L. Tính tần số và bước sóng hai vạch phát ra.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1,
+  "parameters": [],
+  "objects": [
+   {
+    "id": "H",
+    "label": "H",
+    "count": 1
+   },
+   {
+    "id": "do",
+    "label": "do",
+    "count": 1
+   },
+   {
+    "id": "lam",
+    "label": "lam",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "e32",
+    "label": "e32"
+   },
+   {
+    "quantity": "f32",
+    "label": "f32"
+   },
+   {
+    "quantity": "l32",
+    "label": "l32"
+   },
+   {
+    "quantity": "e42",
+    "label": "e42"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "h",
+     "label": "Hằng số Planck",
+     "value": 6.626e-34,
+     "unit": "J*s",
+     "role": "other"
+    },
+    {
+     "id": "c",
+     "label": "Tốc độ ánh sáng",
+     "value": 299800000.0,
+     "unit": "m/s",
+     "role": "other"
+    },
+    {
+     "id": "E2",
+     "label": "Mức L",
+     "value": -3.4,
+     "unit": "eV",
+     "role": "energy_level",
+     "of": "H",
+     "kind": "lower"
+    },
+    {
+     "id": "E3",
+     "label": "Mức M",
+     "value": -1.511,
+     "unit": "eV",
+     "role": "energy_level",
+     "of": "H",
+     "kind": "upper",
+     "in": "ML"
+    },
+    {
+     "id": "E4",
+     "label": "Mức N",
+     "value": -0.85,
+     "unit": "eV",
+     "role": "energy_level",
+     "of": "H",
+     "kind": "upper",
+     "in": "NL"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "e32",
+     "label": "Năng lượng photon vạch đỏ",
+     "unit": "J",
+     "role": "photon_energy",
+     "of": "do",
+     "in": "ML",
+     "value": [
+      "sub",
+      "E3",
+      "E2"
+     ]
+    },
+    {
+     "id": "f32",
+     "label": "Tần số vạch đỏ",
+     "unit": "Hz",
+     "role": "frequency",
+     "of": "do",
+     "value": [
+      "div",
+      "e32",
+      "h"
+     ]
+    },
+    {
+     "id": "l32",
+     "label": "Bước sóng vạch đỏ",
+     "unit": "m",
+     "role": "wavelength",
+     "of": "do",
+     "value": [
+      "div",
+      "c",
+      "f32"
+     ]
+    },
+    {
+     "id": "e42",
+     "label": "Năng lượng photon vạch lam",
+     "unit": "J",
+     "role": "photon_energy",
+     "of": "lam",
+     "in": "NL",
+     "value": [
+      "sub",
+      "E4",
+      "E2"
+     ]
+    },
+    {
+     "id": "f42",
+     "label": "Tần số vạch lam",
+     "unit": "Hz",
+     "role": "frequency",
+     "of": "lam",
+     "value": [
+      "div",
+      "e42",
+      "h"
+     ]
+    },
+    {
+     "id": "l42",
+     "label": "Bước sóng vạch lam",
+     "unit": "m",
+     "role": "wavelength",
+     "of": "lam",
+     "value": [
+      "div",
+      "c",
+      "f42"
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

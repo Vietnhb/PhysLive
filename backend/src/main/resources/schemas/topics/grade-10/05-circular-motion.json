@@ -25,5 +25,9 @@
       "name": "Gia tốc hướng tâm và lực hướng tâm",
       "summary": "a = rω², F = mrω²."
     }
+  ],
+  "lawCatalogues": [
+    "mechanics",
+    "mechanics_more"
   ]
 }

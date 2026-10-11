@@ -1,7 +1,7 @@
 {
   "capabilityId": "photoelectric_emission",
   "title": "Hiệu ứng quang điện",
-  "version": "1.0",
+  "version": "1.1",
   "applicability": {
     "objectTypes": [
       "photon",
@@ -69,7 +69,7 @@
     }
   ],
   "assumptions": [
-    "Ánh sáng có tần số lớn hơn giới hạn quang điện (h*f > A); vị trí là quãng đường electron có động năng cực đại bay ra khỏi bề mặt trong chân không, không có điện trường."
+    "Khi năng lượng phôtôn không vượt công thoát (h*f ≤ A) không có electron bật ra: động năng cực đại, tốc độ và hiệu điện thế hãm bằng 0. Vị trí là quãng đường electron có động năng cực đại bay ra khỏi bề mặt trong chân không, không có điện trường."
   ],
   "equationSet": {
     "canonical": [
@@ -104,13 +104,17 @@
               "mul",
               2,
               [
-                "sub",
+                "max",
+                0,
                 [
-                  "mul",
-                  "planck_constant",
-                  "light_frequency"
-                ],
-                "work_function"
+                  "sub",
+                  [
+                    "mul",
+                    "planck_constant",
+                    "light_frequency"
+                  ],
+                  "work_function"
+                ]
               ]
             ],
             "electron_mass"
@@ -125,13 +129,17 @@
           "light_frequency"
         ],
         "kinetic_energy": [
-          "sub",
+          "max",
+          0,
           [
-            "mul",
-            "planck_constant",
-            "light_frequency"
-          ],
-          "work_function"
+            "sub",
+            [
+              "mul",
+              "planck_constant",
+              "light_frequency"
+            ],
+            "work_function"
+          ]
         ],
         "speed": [
           "sqrt",
@@ -141,13 +149,17 @@
               "mul",
               2,
               [
-                "sub",
+                "max",
+                0,
                 [
-                  "mul",
-                  "planck_constant",
-                  "light_frequency"
-                ],
-                "work_function"
+                  "sub",
+                  [
+                    "mul",
+                    "planck_constant",
+                    "light_frequency"
+                  ],
+                  "work_function"
+                ]
               ]
             ],
             "electron_mass"
@@ -156,13 +168,17 @@
         "stopping_voltage": [
           "div",
           [
-            "sub",
+            "max",
+            0,
             [
-              "mul",
-              "planck_constant",
-              "light_frequency"
-            ],
-            "work_function"
+              "sub",
+              [
+                "mul",
+                "planck_constant",
+                "light_frequency"
+              ],
+              "work_function"
+            ]
           ],
           "elementary_charge"
         ]
@@ -178,13 +194,17 @@
                 "mul",
                 2,
                 [
-                  "sub",
+                  "max",
+                  0,
                   [
-                    "mul",
-                    "planck_constant",
-                    "light_frequency"
-                  ],
-                  "work_function"
+                    "sub",
+                    [
+                      "mul",
+                      "planck_constant",
+                      "light_frequency"
+                    ],
+                    "work_function"
+                  ]
                 ]
               ],
               "electron_mass"
@@ -198,13 +218,17 @@
           "light_frequency"
         ],
         "kinetic_energy": [
-          "sub",
+          "max",
+          0,
           [
-            "mul",
-            "planck_constant",
-            "light_frequency"
-          ],
-          "work_function"
+            "sub",
+            [
+              "mul",
+              "planck_constant",
+              "light_frequency"
+            ],
+            "work_function"
+          ]
         ],
         "speed": [
           "sqrt",
@@ -214,13 +238,17 @@
               "mul",
               2,
               [
-                "sub",
+                "max",
+                0,
                 [
-                  "mul",
-                  "planck_constant",
-                  "light_frequency"
-                ],
-                "work_function"
+                  "sub",
+                  [
+                    "mul",
+                    "planck_constant",
+                    "light_frequency"
+                  ],
+                  "work_function"
+                ]
               ]
             ],
             "electron_mass"
@@ -229,13 +257,17 @@
         "stopping_voltage": [
           "div",
           [
-            "sub",
+            "max",
+            0,
             [
-              "mul",
-              "planck_constant",
-              "light_frequency"
-            ],
-            "work_function"
+              "sub",
+              [
+                "mul",
+                "planck_constant",
+                "light_frequency"
+              ],
+              "work_function"
+            ]
           ],
           "elementary_charge"
         ]

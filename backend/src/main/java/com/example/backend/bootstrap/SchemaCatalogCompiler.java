@@ -25,15 +25,18 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  * schemas/library/defaults.json                     shared policy (vocabulary, visual contract, relations…)
  * schemas/library/quantities.json                   quantity key → Vietnamese label/description/aliases
  * schemas/library/capabilities/&lt;area&gt;/&lt;id&gt;.json   one executable capability (equation AST) per file
- * schemas/topics/grade-NN/&lt;nn&gt;-&lt;slug&gt;.json          topic manifest: curriculum strand + capability ids
+ * schemas/laws/&lt;strand&gt;.json                       the laws of a curriculum strand: roles and the relations between them
+ * schemas/topics/grade-NN/&lt;nn&gt;-&lt;slug&gt;.json          topic manifest: curriculum strand, law catalogues, worked examples
  * </pre>
  *
- * A capability is written once and reused by every topic that lists it; the topic definition
- * (quantities, units, laws) is derived from the capabilities, so nothing is duplicated by hand.
+ * A topic's law catalogue is what a simulation is checked against: any model whose quantities carry its roles.
+ * The capabilities a topic lists are worked examples of those laws (and compute the plans saved before models were
+ * written per description); they do not limit what can be simulated.
  */
 public final class SchemaCatalogCompiler {
     public static final String LIBRARY = "schemas/library/";
     public static final String TOPICS = "schemas/topics/";
+    public static final String LAWS = "schemas/laws/";
     private static final JsonNodeFactory NODES = JsonNodeFactory.instance;
 
     private SchemaCatalogCompiler() { }
@@ -52,11 +55,20 @@ public final class SchemaCatalogCompiler {
             topic.put("_source", String.valueOf(resource.getFilename()));
             topics.add(topic);
         }
-        return compile(defaults, quantities, capabilities, topics);
+        List<JsonNode> laws = new ArrayList<>();
+        for (Resource resource : resolver.getResources("classpath*:" + LAWS + "*.json")) laws.add(read(json, resource));
+        return compile(defaults, quantities, capabilities, topics, laws);
     }
 
     /** Pure compilation step (no I/O) so it can be unit-tested with in-memory documents. */
     public static ArrayNode compile(JsonNode defaults, JsonNode quantities, List<JsonNode> capabilities, List<JsonNode> topics) {
+        return compile(defaults, quantities, capabilities, topics, List.of());
+    }
+
+    public static ArrayNode compile(JsonNode defaults, JsonNode quantities, List<JsonNode> capabilities, List<JsonNode> topics, List<JsonNode> laws) {
+        Map<String, JsonNode> strands = new LinkedHashMap<>();
+        for (JsonNode catalogue : laws)
+            if (strands.put(catalogue.path("id").asText(), catalogue) != null) throw new IllegalStateException("Duplicate law catalogue: " + catalogue.path("id").asText());
         Map<String, JsonNode> library = new LinkedHashMap<>();
         for (JsonNode capability : capabilities) {
             String id = capability.path("capabilityId").asText();
@@ -77,7 +89,15 @@ public final class SchemaCatalogCompiler {
             entry.put("name", require(topic, "name"));
             entry.put("topic", require(topic, "topic"));
             entry.put("version", require(topic, "version"));
-            entry.set("definition", definition(defaults, quantities, library, topic));
+            ObjectNode definition = definition(defaults, quantities, library, topic);
+            List<JsonNode> own = new ArrayList<>();
+            for (JsonNode id : topic.path("lawCatalogues")) {
+                if (!strands.containsKey(id.asText())) throw new IllegalStateException("Topic " + schemaId + " references unknown law catalogue " + id.asText());
+                own.add(strands.get(id.asText()));
+            }
+            if (!own.isEmpty())
+                definition.set("lawCatalogue", com.example.backend.system.physics.service.LawChecks.merge(new ObjectMapper(), own));
+            entry.set("definition", definition);
         }
         return catalog;
     }

@@ -47,5 +47,8 @@
       "name": "Thiết bị cảm biến",
       "summary": "Ứng dụng, nguyên tắc hoạt động."
     }
+  ],
+  "lawCatalogues": [
+    "electricity"
   ]
 }
