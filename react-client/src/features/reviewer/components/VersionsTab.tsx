@@ -35,6 +35,9 @@ export function VersionsTab() {
     if (ok) { setDecision(null); resource.refresh(); }
   };
 
+  // Editing takes the page; the list comes back when the reviewer saves or leaves.
+  if (editor) return <VersionEditorModal initial={editor.version} clone={editor.clone} onClose={() => setEditor(null)} onSaved={() => { setEditor(null); resource.refresh(); }} />;
+
   return <Card size="3" className="reviewer-panel">
     <div className="reviewer-toolbar">
       <SegmentedControl.Root size="2" value={filter} onValueChange={value => setFilter(value as typeof filter)} aria-label="Lọc trạng thái">
@@ -80,7 +83,6 @@ export function VersionsTab() {
     </ReviewerDialog>}
 
     {selected && <VersionDetail version={selected} onClose={() => setSelected(null)} />}
-    {editor && <VersionEditorModal initial={editor.version} clone={editor.clone} onClose={() => setEditor(null)} onSaved={() => { setEditor(null); resource.refresh(); }} />}
   </Card>;
 }
 

@@ -6,7 +6,14 @@ import { FormulaReview, SimulationParameterControl } from "./SimulationReview";
 import type { SimulationWorkspaceModel } from "../hooks/useSimulationWorkspace";
 import type { SimulationParameter } from "../api/simulationUnderstandingApi";
 
-export default function SimulationInspector({ experiment, explanation, save, readoutsRef }: Readonly<Pick<SimulationWorkspaceModel, "experiment" | "explanation" | "save"> & { readoutsRef?: Ref<HTMLDivElement> }>) {
+const QUICK_DESCRIPTIONS = [
+  { label: "Ba con lắc đơn", text: "3 con lắc đơn có chiều dài dây 1.5 m, vật nặng 0.5 kg được kéo lệch góc 30 độ so với phương thẳng đứng rồi thả nhẹ không vận tốc đầu." },
+  { label: "Ô tô hãm phanh", text: "Một ô tô đang chạy với vận tốc 15 m/s thì hãm phanh chuyển động chậm dần đều với gia tốc 2 m/s². Hãy mô phỏng chuyển động của xe cho đến khi dừng lại." },
+  { label: "Ném ngang", text: "Ném một vật từ độ cao 20 m theo phương ngang với vận tốc đầu 15 m/s. Lấy gia tốc trọng trường g = 9.8 m/s², bỏ qua sức cản không khí." },
+  { label: "Mạch điện nối tiếp và song song", text: "Một nguồn điện có suất điện động 12 V và điện trở trong 1 Ω được nối với mạch ngoài gồm điện trở R1 = 4 Ω mắc nối tiếp với cụm hai điện trở R2 = 6 Ω và R3 = 3 Ω mắc song song với nhau. Hãy mô phỏng cường độ dòng điện trong mạch chính và dòng điện qua từng điện trở R2, R3." },
+];
+
+export default function SimulationInspector({ experiment, explanation, save, library, onSelectExample, readoutsRef }: Readonly<Pick<SimulationWorkspaceModel, "experiment" | "explanation" | "save" | "library"> & { onSelectExample: (description: string) => void; readoutsRef?: Ref<HTMLDivElement> }>) {
   const { simulation, values, validation, updateParameter, resetParameters } = experiment;
   const { intent, revision, setRevision, handleRevision } = explanation;
   const { busy, saveOpen, savedMessage, renderError, currentSimulationId, canManageLearningContent,
@@ -18,6 +25,8 @@ export default function SimulationInspector({ experiment, explanation, save, rea
   const inspectorTab = navigation.simulation !== simulation && simulation ? "experiment" : navigation.tab;
   if (navigation.simulation !== simulation) setNavigation({ simulation, tab: inspectorTab });
   const setInspectorTab = (tab: typeof navigation.tab) => setNavigation({ simulation, tab });
+  const recentItems = [...library.items].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .filter((item, index, items) => items.findIndex(value => value.simulationId === item.simulationId) === index).slice(0, 5);
   return (
     <aside className="learn-inspector" aria-label="Thông số và giải thích">
       <div className="learn-inspector-nav">
@@ -152,6 +161,32 @@ export default function SimulationInspector({ experiment, explanation, save, rea
                 <p key={index}>{flag}</p>
               ))}
             </div>
+            <section className="simulation-shortcuts" aria-labelledby="simulation-examples-heading">
+              <h3 id="simulation-examples-heading">Ví dụ mô tả nhanh</h3>
+              <p className="simulation-muted">Chọn để điền đề bài, rồi chỉnh sửa theo ý bạn.</p>
+              <div className="simulation-shortcut-list">
+                {QUICK_DESCRIPTIONS.map(example => <button key={example.label} type="button"
+                  className="simulation-shortcut" disabled={busy || Boolean(library.openingId)}
+                  onClick={() => onSelectExample(example.text)}>
+                  <Icon name="atom" /><span><strong>{example.label}</strong><small>{example.text}</small></span>
+                </button>)}
+              </div>
+            </section>
+            {canManageLearningContent && <section className="simulation-shortcuts" aria-labelledby="simulation-recent-heading">
+              <h3 id="simulation-recent-heading">Mô phỏng gần đây</h3>
+              <p className="simulation-muted">Các mô phỏng bạn đã tạo và lưu gần nhất.</p>
+              {library.loading ? <p role="status" className="simulation-muted">Đang tải mô phỏng…</p>
+                : library.error ? <div><p role="alert" className="simulation-muted">{library.error}</p>
+                  <button type="button" className="simulation-reset" onClick={library.onRetry}>Thử lại</button></div>
+                : recentItems.length ? <div className="simulation-shortcut-list">
+                  {recentItems.map(item => <button key={item.id} type="button" className="simulation-shortcut"
+                    disabled={busy || Boolean(library.openingId)} aria-current={currentSimulationId === item.simulationId ? "true" : undefined}
+                    onClick={() => void library.onOpen(item)}>
+                    <Icon name="play" /><span><strong>{item.title}</strong>
+                      <small>{library.openingId === item.id ? "Đang mở…" : item.topic || "Mở mô phỏng đã lưu"}</small></span>
+                  </button>)}
+                </div> : <p className="simulation-muted">Chưa có mô phỏng đã lưu. Các bài mới sẽ xuất hiện ở đây sau khi lưu.</p>}
+            </section>}
           </div>
         )}
 

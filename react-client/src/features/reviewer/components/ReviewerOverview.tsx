@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button, Card, Heading, Text } from "@radix-ui/themes";
 import api from "../../../shared/api/client";
 import type { ReviewerAccess, ReviewerView } from "../model/reviewerAccess";
-import type { Benchmark, ModuleRelease, Version } from "../model/reviewerTypes";
+import type { ModuleRelease, Version } from "../model/reviewerTypes";
 import { timeAgo } from "../model/reviewerUtils";
 import { ReviewerIcon, ReviewerRefresh, type ReviewerIconName } from "./ReviewerKit";
 
@@ -10,7 +10,7 @@ type PendingItem = { createdAt?: string };
 type Counts = {
   moderation?: { pending: number; oldest?: string };
   drafts?: { schemas: number; modules: number };
-  benchmarks?: { annotate: number; adjudicate: number; draft: number };
+  gaps?: { open: number; met: number };
 };
 type Task = { id: string; view: ReviewerView; section?: string; icon: ReviewerIconName; count: number; title: string; detail: string; action: string };
 
@@ -27,8 +27,8 @@ function useOverview(access: ReviewerAccess) {
       access.canReview ? settle(api.get<PendingItem[]>("/reviewer/library", { params: { status: "PENDING" } })) : undefined,
       access.canEdit ? settle(api.get<Version[]>("/reviewer/schemas")) : undefined,
       access.canEdit ? settle(api.get<ModuleRelease[]>("/reviewer/module-releases")) : undefined,
-      access.canEdit ? settle(api.get<Benchmark[]>("/reviewer/benchmarks")) : undefined,
-  ]).then(([library, schemas, modules, benchmarks]) => {
+      access.canEdit ? settle(api.get<{ occurrences: number }[]>("/reviewer/law-gaps", { params: { status: "OPEN" } })) : undefined,
+  ]).then(([library, schemas, modules, gaps]) => {
     const next: Counts = {};
     if (access.canReview && library) {
       const oldest = library.map(item => item.createdAt).filter(Boolean).sort()[0];
@@ -39,14 +39,10 @@ function useOverview(access: ReviewerAccess) {
         schemas: schemas?.filter(item => item.lifecycleStatus === "DRAFT").length ?? 0,
         modules: modules?.filter(item => item.lifecycleStatus === "DRAFT").length ?? 0,
       };
-      if (benchmarks) next.benchmarks = {
-        annotate: benchmarks.filter(item => item.canAnnotate).length,
-        adjudicate: benchmarks.filter(item => item.canAdjudicate).length,
-        draft: benchmarks.filter(item => item.status === "DRAFT").length,
-      };
+      if (gaps) next.gaps = { open: gaps.length, met: gaps.reduce((sum, item) => sum + item.occurrences, 0) };
     }
     const expected = (access.canReview ? 1 : 0) + (access.canEdit ? 1 : 0);
-    setFailed(expected > 0 && !library && !benchmarks);
+    setFailed(expected > 0 && !library && !gaps);
     setCounts(next); setLoading(false);
   }), [access.canEdit, access.canReview]);
   useEffect(() => { void load(); }, [load]);
@@ -57,10 +53,7 @@ export function ReviewerOverview({ access, name, onOpen }: Readonly<{ access: Re
   const { counts, loading, failed, refresh } = useOverview(access);
   const tasks: Task[] = [];
   if (counts.moderation) tasks.push({ id: "moderation", view: "moderation", icon: "library", count: counts.moderation.pending, title: "Mô phỏng chờ duyệt", detail: counts.moderation.pending ? `Giáo viên gửi lên thư viện công khai${counts.moderation.oldest ? ` · cũ nhất ${timeAgo(counts.moderation.oldest)}` : ""}.` : "Không có mô phỏng nào đang chờ.", action: "Bắt đầu duyệt" });
-  if (counts.benchmarks) {
-    const work = counts.benchmarks.annotate + counts.benchmarks.adjudicate;
-    tasks.push({ id: "benchmarks", view: "benchmarks", icon: "benchmark", count: work, title: "Đề kiểm thử cần bạn", detail: work ? `${counts.benchmarks.annotate} đề cần gán đáp án · ${counts.benchmarks.adjudicate} đề cần phân xử.` : "Không có đề nào đang chờ bạn.", action: "Mở danh sách đề" });
-  }
+  if (counts.gaps) tasks.push({ id: "gaps", view: "gaps", icon: "benchmark", count: counts.gaps.open, title: "Định luật còn thiếu", detail: counts.gaps.open ? `${counts.gaps.open} loại đại lượng chưa có định luật kiểm, gặp ${counts.gaps.met} lần trong mô phỏng của giáo viên.` : "Mọi đại lượng giáo viên dùng đều đã có định luật kiểm.", action: "Xem danh sách" });
   if (counts.drafts) {
     const drafts = counts.drafts.schemas + counts.drafts.modules;
     tasks.push({ id: "drafts", view: "topics", section: counts.drafts.schemas ? "schemas" : "modules", icon: "schema", count: drafts, title: "Bản nháp chờ phê duyệt", detail: drafts ? `${counts.drafts.schemas} chủ đề · ${counts.drafts.modules} gói phát hành.` : "Không có bản nháp tồn đọng.", action: "Xem bản nháp" });
@@ -90,7 +83,7 @@ export function ReviewerOverview({ access, name, onOpen }: Readonly<{ access: Re
       <Heading as="h2" size="3">Quyền của bạn</Heading>
       <ul>
         {access.canReview && <li><ReviewerIcon name="eye" size={16} /><span><strong>Kiểm duyệt nội dung</strong> — xem mô phỏng giáo viên chia sẻ, phê duyệt, đánh dấu nổi bật, từ chối hoặc gỡ khỏi thư viện công khai.</span></li>}
-        {access.canEdit && <li><ReviewerIcon name="edit" size={16} /><span><strong>Biên soạn dữ liệu chuẩn</strong> — quản lý chủ đề vật lý và đề kiểm thử độ chính xác.</span></li>}
+        {access.canEdit && <li><ReviewerIcon name="edit" size={16} /><span><strong>Biên soạn dữ liệu chuẩn</strong> — quản lý vai trò, định luật của từng chủ đề và bổ sung định luật còn thiếu.</span></li>}
       </ul>
       {!access.isManager && (!access.canEdit || !access.canReview) && <Text as="p" size="2" color="gray">Cần thêm quyền? Liên hệ bộ phận vận hành (Manager) để được cấp.</Text>}
     </Card>

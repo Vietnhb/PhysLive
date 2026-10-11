@@ -27,7 +27,7 @@ const ReviewerHome = lazy(() => reviewerModule().then(module => ({ default: modu
 const ReviewerModeration = lazy(() => reviewerModule().then(module => ({ default: module.ReviewerModerationPage })));
 const ReviewerTopics = lazy(() => reviewerModule().then(module => ({ default: module.ReviewerTopicsPage })));
 const ReviewerComplaints = lazy(() => reviewerModule().then(module => ({ default: module.ReviewerComplaintsPage })));
-const ReviewerBenchmarks = lazy(() => reviewerModule().then(module => ({ default: module.ReviewerBenchmarksPage })));
+const ReviewerGaps = lazy(() => reviewerModule().then(module => ({ default: module.ReviewerGapsPage })));
 const adminAreaModule = () => import("../features/account/pages/AdminArea");
 const AdminArea = lazy(adminAreaModule);
 const AdminOverview = lazy(() => adminAreaModule().then(module => ({ default: module.AdminOverviewPage })));
@@ -158,7 +158,7 @@ export default function AppRoutes({ authReady }: { authReady: boolean }) {
             <Route index element={<ReviewerHome />} />
             <Route path="moderation" element={<ReviewerModeration />} />
             <Route path="topics/:section?" element={<ReviewerTopics />} />
-            <Route path="benchmarks" element={<ReviewerBenchmarks />} />
+            <Route path="gaps" element={<ReviewerGaps />} />
             <Route path="complaints" element={<ReviewerComplaints />} />
             <Route path="*" element={<Navigate to="/reviewer" replace />} />
           </Route>

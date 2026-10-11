@@ -30,6 +30,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class AIService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AIService.class);
+    /** The reviewers' list of what the law catalogues are missing; absent where no such list is kept. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private LawGapSink gaps;
     private static final String NO_MATCH = "NO_MATCH";
     /** How many times a model the solver or a law refuses goes back to its author before the best one stands. */
     private static final int MAX_MODEL_REPAIRS = 2;
@@ -493,6 +496,13 @@ public class AIService {
         String status = computed.path("validation").path("status").asText();
         spec.put("physicsCoverage", status.equals(FreeModel.VERIFIED) ? "COMPLETE" : status.equals(FreeModel.ILLUSTRATIVE) ? "NONE" : "PARTIAL");
         ((ObjectNode) computed.path("validation")).put("topicVersion", selected.getVersion());
+        // What no law could check goes on the reviewers' list, and the teacher is told that it did.
+        if (gaps != null && gaps.record(selected.getSchemaId(), selected.getTopic(), description, spec, computed.path("validation")) > 0) {
+            ObjectNode checked = (ObjectNode) computed.path("validation");
+            String notice = "Phần chưa có định luật đối chiếu đã được gửi cho bộ phận biên soạn để bổ sung; mô phỏng vẫn dùng được.";
+            checked.put("reviewNotice", notice);
+            checked.put("verificationScope", checked.path("verificationScope").asText() + ". " + notice);
+        }
         response.set("validation", computed.path("validation"));
         response.put("planSignature", signPlan(response, true));
         response.set("formulas", models.formulas(spec));

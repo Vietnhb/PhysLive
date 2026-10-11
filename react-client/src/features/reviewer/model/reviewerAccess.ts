@@ -14,7 +14,7 @@ export function reviewerAccess(user: User | null | undefined): ReviewerAccess {
   };
 }
 
-export type ReviewerView = "overview" | "moderation" | "topics" | "benchmarks";
+export type ReviewerView = "overview" | "moderation" | "topics" | "gaps";
 
 export type ReviewerNavItem = { id: ReviewerView; label: string; hint: string; icon: "home" | "library" | "schema" | "benchmark" };
 export type ReviewerNavGroup = { id: string; label: string; items: ReviewerNavItem[] };
@@ -25,8 +25,8 @@ export function reviewerNavigation(access: ReviewerAccess): ReviewerNavGroup[] {
     { id: "moderation", label: "Mô phỏng chờ duyệt", hint: "Giáo viên chia sẻ lên thư viện công khai", icon: "library" },
   ] });
   if (access.canEdit) groups.push({ id: "edit", label: "Biên soạn dữ liệu chuẩn", items: [
-    { id: "topics", label: "Chủ đề vật lý", hint: "Cấu trúc chủ đề, gói phát hành", icon: "schema" },
-    { id: "benchmarks", label: "Đề kiểm thử AI", hint: "Đáp án chuẩn để đo độ chính xác", icon: "benchmark" },
+    { id: "topics", label: "Chủ đề vật lý", hint: "Vai trò, định luật, gói phát hành", icon: "schema" },
+    { id: "gaps", label: "Định luật còn thiếu", hint: "Đại lượng trong mô phỏng của giáo viên chưa có định luật kiểm", icon: "benchmark" },
   ] });
   return groups;
 }

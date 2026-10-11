@@ -830,6 +830,26 @@
   align-items: center;
 }
 
+.simulation-shortcuts { margin-top: 24px; }
+.simulation-shortcuts h3 { margin: 0 0 8px; font-size: 14px; }
+.simulation-shortcuts > .simulation-muted { margin: 0 0 12px; font-size: 12px; line-height: 1.6; }
+.simulation-shortcut-list { display: grid; gap: 8px; }
+.learning-app .simulation-shortcut {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%;
+  padding: 12px; border: 1px solid var(--learn-line); border-radius: 12px;
+  background: var(--surface-2); color: var(--learn-ink); text-align: left; cursor: pointer;
+}
+.simulation-shortcut > .learn-icon { flex: 0 0 auto; margin-top: 2px; color: var(--learn-blue); }
+.simulation-shortcut > span { min-width: 0; }
+.simulation-shortcut strong, .simulation-shortcut small {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.simulation-shortcut strong { font-size: 12px; line-height: 1.6; }
+.simulation-shortcut small { margin-top: 4px; font-size: 11px; line-height: 1.6; color: var(--muted); }
+.simulation-shortcut:hover:not(:disabled), .simulation-shortcut[aria-current="true"] { border-color: var(--learn-blue); }
+.simulation-shortcut:focus-visible { outline: 2px solid var(--learn-blue); outline-offset: 2px; }
+.simulation-shortcut:disabled { opacity: .6; cursor: wait; }
+
 .learn-inspector-footer {
   display: flex;
   align-items: center;

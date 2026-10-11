@@ -9,14 +9,14 @@ import { ReviewerIcon } from "../components/ReviewerKit";
 import { ReviewerOverview } from "../components/ReviewerOverview";
 import { ContentModeration } from "../components/ContentModeration";
 import { TopicsWorkspace } from "../components/TopicsWorkspace";
-import { BenchmarksTab } from "../components/BenchmarksTab";
+import { LawGapsDesk } from "../components/LawGapsDesk";
 import { ComplaintsDesk } from "../components/ComplaintsDesk";
 import { complaintsForReview } from "../../support/api/supportApi";
 import "../styles/reviewer.css";
 import "../../support/styles/complaints.css";
 
 /** Older links used ?view= / ?tab=; send them to the matching route. */
-const LEGACY: Record<string, string> = { overview: "", moderation: "moderation", library: "moderation", topics: "topics", schemas: "topics", modules: "topics", benchmarks: "benchmarks" };
+const LEGACY: Record<string, string> = { overview: "", moderation: "moderation", library: "moderation", topics: "topics", schemas: "topics", modules: "topics", benchmarks: "", gaps: "gaps" };
 const pathOf = (view: ReviewerView, extra?: Record<string, string>) =>
   view === "overview" ? "/reviewer" : `/reviewer/${view}${view === "topics" && extra?.section ? `/${extra.section}` : ""}`;
 
@@ -48,6 +48,15 @@ export default function ReviewerLayout() {
     return () => { active = false; window.clearInterval(timer); };
   }, [canHandleComplaints]);
 
+  const [openGaps, setOpenGaps] = useState(0);
+  useEffect(() => {
+    if (!access.canEdit) return;
+    let active = true;
+    const load = () => void api.get<unknown[]>("/reviewer/law-gaps", { params: { status: "OPEN" } }).then(response => { if (active) setOpenGaps(response.data.length); }).catch(() => undefined);
+    load(); const timer = window.setInterval(load, 60000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [access.canEdit]);
+
   const legacy = params.get("view") ?? params.get("tab");
   if (legacy !== null && legacy in LEGACY) return <Navigate to={`/reviewer${LEGACY[legacy] ? `/${LEGACY[legacy]}` : ""}`} replace />;
 
@@ -56,7 +65,7 @@ export default function ReviewerLayout() {
   if (canHandleComplaints) groups.push({ label: "Hỗ trợ giáo viên", items: [{ to: "/reviewer/complaints", label: "Khiếu nại mô phỏng", icon: "message", badge: openComplaints }] });
   if (access.canEdit) groups.push({ label: "Biên soạn dữ liệu chuẩn", items: [
     { to: "/reviewer/topics", label: "Chủ đề vật lý", icon: "atom" },
-    { to: "/reviewer/benchmarks", label: "Đề kiểm thử AI", icon: "chart" },
+    { to: "/reviewer/gaps", label: "Định luật còn thiếu", icon: "chart", badge: openGaps },
   ] });
   if (access.isManager) groups.push({ label: "Vận hành", items: [{ to: "/manager", label: "Về trang vận hành", icon: "back" }] });
 
@@ -95,7 +104,7 @@ export function ReviewerComplaintsPage() {
   return access.canEdit || access.canReview ? <ComplaintsDesk /> : <Navigate to="/reviewer" replace />;
 }
 
-export function ReviewerBenchmarksPage() {
+export function ReviewerGapsPage() {
   const { access } = useReviewer();
-  return access.canEdit ? <BenchmarksTab /> : <Navigate to="/reviewer" replace />;
+  return access.canEdit ? <LawGapsDesk /> : <Navigate to="/reviewer" replace />;
 }

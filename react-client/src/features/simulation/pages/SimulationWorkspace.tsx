@@ -35,7 +35,12 @@ export default function SimulationWorkspace() {
           {canManageLearningContent && <TeacherLibraryPane {...library} />}
           <SimulationStage input={input} preview={preview} readoutsTarget={readoutsTarget}
             complaint={canManageLearningContent ? { simulationId: save.currentSimulationId || undefined, description: experiment.simulation?.description, parameters: experiment.values } : undefined} />
-          <SimulationInspector experiment={experiment} explanation={explanation} save={save} readoutsRef={setReadoutsTarget} />
+          <SimulationInspector experiment={experiment} explanation={explanation} save={save} library={library}
+            readoutsRef={setReadoutsTarget} onSelectExample={description => {
+              input.reset(); input.setSourceMode("TEXT"); input.setText(description);
+              setMobilePanel("observe");
+              requestAnimationFrame(() => document.getElementById("simulation-input")?.focus());
+            }} />
         </div>
       </main>
     </div>
