@@ -8,13 +8,15 @@ import { describeScene, formatNumber, formatTime, seriesColor,
 import { PIXI_WORKER, PIXI_BRIDGE } from "../engine/pixiRuntime";
 import SimulationCharts from "./SimulationCharts";
 import { useWorkspaceTheme } from "../hooks/useWorkspaceTheme";
+import type { TeacherPresentation } from "../model/teacherPresentation";
 
 const RUNTIME = "const sampleTimeline = (" + sampleTimeline.toString() + ");\n" + PIXI_WORKER;
 const SPEEDS = [0.25, 0.5, 1, 2];
 const formatRate = (value: number) => formatNumber(value >= 100 ? value : Math.round(value * 10) / 10, 3);
 
-export default function SvgPixiScene({ program, timeline, parameters, parameterInfo, verificationStatus, models, fieldMeta, observables, onRenderError, toolbarActions, cover = false, coverPlaying = false, onCoverFailed, readoutsTarget }: Readonly<{
+export default function SvgPixiScene({ program, timeline, parameters, parameterInfo, verificationStatus, models, fieldMeta, observables, onRenderError, toolbarActions, cover = false, coverPlaying = false, onCoverFailed, readoutsTarget, presentation }: Readonly<{
   program: PixiVisualProgram; timeline: SolverTimeline; parameters: Record<string, number>; verificationStatus: string;
+  presentation?: TeacherPresentation;
   models?: readonly SimulationModelRef[]; fieldMeta?: BackendFieldMeta; onRenderError?: (message: string) => void;
   /** The values the plan asks the learner to watch (simulationSpec.observables). */
   observables?: readonly SceneObservable[];
@@ -38,6 +40,8 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
   const setError = useCallback((message: string) => setFailure({ code, message }), [code]);
   const [ready, setReady] = useState(false);
   const [time, setTime] = useState(0);
+  const [receivedSample, setReceivedSample] = useState<{ contract: TeacherPresentation | undefined; sample: TeacherPresentation["initialFrame"] }>();
+  const backendSample = receivedSample?.contract === presentation ? receivedSample?.sample ?? presentation?.initialFrame : presentation?.initialFrame;
   const [playing, setPlaying] = useState(!cover);
   const [speed, setSpeed] = useState(1);
   // The author chooses the time scale; the transport never infers a replay speed from physical quantities.
@@ -47,9 +51,9 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
     : effectiveRate < 1 / 1.5 ? "Chậm hơn thời gian thực " + formatRate(1 / effectiveRate) + " lần" : "";
   const [loop, setLoop] = useState(cover);
   const iframe = useRef<HTMLIFrameElement>(null);
-  const scene = useMemo(() => describeScene(timeline, models ?? [], fieldMeta ?? {}, observables ?? [], parameterInfo ?? []),
-    [timeline, models, fieldMeta, observables, parameterInfo]);
-  const dataRef = useRef({ timeline, parameters, verificationStatus, fieldMeta, models, observables, parameterInfo });
+  const scene = useMemo(() => presentation ? presentation.scene : describeScene(timeline, models ?? [], fieldMeta ?? {}, observables ?? [], parameterInfo ?? []),
+    [presentation, timeline, models, fieldMeta, observables, parameterInfo]);
+  const dataRef = useRef({ timeline, parameters, verificationStatus, fieldMeta, models, observables, parameterInfo, presentation });
   const callbackRef = useRef(onRenderError);
   const coverRef = useRef(cover);
   useEffect(() => { callbackRef.current = onRenderError; }, [onRenderError]);
@@ -71,9 +75,9 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
     { channel: "pixi-host", ...message }, "*"), []);
 
   useEffect(() => {
-    dataRef.current = { timeline, parameters, verificationStatus, fieldMeta, models, observables, parameterInfo };
+    dataRef.current = { timeline, parameters, verificationStatus, fieldMeta, models, observables, parameterInfo, presentation };
     send({ type: "data", ...dataRef.current });
-  }, [timeline, parameters, verificationStatus, fieldMeta, models, observables, parameterInfo, send]);
+  }, [timeline, parameters, verificationStatus, fieldMeta, models, observables, parameterInfo, presentation, send]);
   useEffect(() => { send({ type: "theme", theme }); }, [theme, send]);
   useEffect(() => {
     const receive = (event: MessageEvent) => {
@@ -85,6 +89,7 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
       }
       if (event.data.type === "ready") setReady(true);
       if (event.data.type === "ended") setPlaying(false);
+      if (event.data.sample) setReceivedSample({contract: dataRef.current.presentation, sample: {t: event.data.sample.t, dt: event.data.sample.dt, values: event.data.sample.fields}});
       if ((event.data.type === "tick" || event.data.type === "ready" || event.data.type === "ended") && Number.isFinite(event.data.t)) {
         // Coalesce worker ticks into one React update per animation frame so a
         // busy main thread never builds a backlog (clock and charts stay in sync).
@@ -131,7 +136,7 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
   </div>;
 
   const readouts = !error && timeline.frames.length > 0
-    ? <SceneReadouts scene={scene} values={sampleTimeline(timeline, time)} theme={theme} /> : null;
+    ? <SceneReadouts scene={scene} values={presentation ? backendSample?.values ?? {} : sampleTimeline(timeline, time)} theme={theme} exact={Boolean(presentation)} /> : null;
   return <div className="sim-player" data-theme={theme === "DARK" ? "dark" : "light"}>
     <div className="sim-player__toolbar">
       <span className={"sim-status sim-status--" + (/^VERIFIED/.test(verificationStatus) ? "ok" : verificationStatus === "PENDING" ? "pending" : "warn")}>
@@ -157,7 +162,7 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
       <input className="sim-scrubber" aria-label="Thời gian mô phỏng" type="range" min={0} max={timeline.durationSeconds} step="any"
         value={time} style={{ "--progress": progress + "%" } as CSSProperties} onChange={event => seek(Number(event.target.value))} />
       <output className="sim-clock" aria-label="Thời gian mô phỏng" title="Thời gian của hiện tượng trong mô phỏng">
-        {formatTime(time, timeline.durationSeconds)} <span>/ {formatTime(timeline.durationSeconds, timeline.durationSeconds)}</span>
+        {formatTime(presentation ? backendSample?.t ?? 0 : time, timeline.durationSeconds)} <span>/ {formatTime(timeline.durationSeconds, timeline.durationSeconds)}</span>
       </output>
       <select className="sim-select" aria-label="Tốc độ phát" value={speed}
         onChange={event => { const value = Number(event.target.value); setSpeed(value); send({ type: "speed", speed: value * rate }); }}>
@@ -169,19 +174,19 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
       </label>
       {rateNote && <span className="sim-rate-note">{rateNote}</span>}
     </div>
-    <SimulationCharts scene={scene} timeline={timeline} time={time} theme={theme} onSeek={seek} />
+    <SimulationCharts scene={scene} timeline={timeline} time={time} theme={theme} onSeek={seek} backendSample={presentation ? backendSample : undefined} />
   </div>;
 }
 
 /** The signed plan selects focused numeric readings; no scene artwork is interpreted here. */
-function SceneReadouts({ scene, values, theme }: {
-  scene: SceneDescriptor; values: Record<string, number>; theme: "LIGHT" | "DARK";
+function SceneReadouts({ scene, values, theme, exact = false }: {
+  scene: SceneDescriptor; values: Record<string, number>; theme: "LIGHT" | "DARK"; exact?: boolean;
 }) {
   if (!scene.participants.length) return null;
   const focus = scene.observables.map(key => ({ key, label: scene.fields[key].caption ?? scene.fields[key].label }));
   const reading = (key: string) => {
     const meta = scene.fields[key];
-    return formatNumber(values[key], 4, Math.max(Math.abs(meta.min), Math.abs(meta.max))) + (meta.unit ? " " + meta.unit : "");
+    return (exact ? String(values[key] ?? "—") : formatNumber(values[key], 4, Math.max(Math.abs(meta.min), Math.abs(meta.max)))) + (meta.unit ? " " + meta.unit : "");
   };
   return <section className="sim-measurements" aria-label="Số liệu mô phỏng">
     {focus.length > 0 && <dl className="sim-focus-readouts">

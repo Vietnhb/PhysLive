@@ -17,7 +17,7 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
     recognition, correction, setCorrection, editingRecognition, setEditingRecognition, recognitionLowConfidence,
     intent, revision, setRevision, normalize, handleRecognition, handleRevision, generate, reset,
   } = input;
-  const { simulation, liveTimeline, runValues, sandboxKey, validation, renderError, setRenderError, restartPreview, recomputing } = preview;
+  const { simulation, liveTimeline, presentation, runValues, sandboxKey, validation, renderError, setRenderError, restartPreview, recomputing } = preview;
   // "Báo lỗi" and "Dựng lại" live in the authored player's toolbar.
   const stageActions = <>
     {complaint && <button type="button" className="sim-action" title="Báo cho người kiểm duyệt khi mô phỏng sai" onClick={() => setComplaintOpen(true)}><Icon name="message" />Báo lỗi</button>}
@@ -30,12 +30,13 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
           /* Layout giữa khi có mô phỏng: Canvas card + Header + Restart */
           <div className="simulation-stage-container">
             {complaintOpen && complaint && <SimulationComplaintDialog {...complaint} onClose={() => setComplaintOpen(false)} />}
-            {liveTimeline ? (
+            {liveTimeline && presentation ? (
               <div className="simulation-scene-frame" aria-busy={recomputing}>
               <SvgPixiScene
                 key={sandboxKey}
                 program={simulation.simulationSpec.visualProgram ?? { code: "" }}
                 timeline={liveTimeline}
+                presentation={presentation}
                 parameters={runValues}
                 parameterInfo={simulation.parameters}
                 models={simulation.simulationSpec.physicsModels}

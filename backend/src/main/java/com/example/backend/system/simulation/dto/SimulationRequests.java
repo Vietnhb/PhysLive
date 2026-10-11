@@ -14,7 +14,8 @@ public final class SimulationRequests {
     public record Understand(@Size(max = 20_000) String description, String sessionId,
                              @Size(max = 20_000) String recognizedText, @Size(max = 20_000) String correctedText) { }
     public record Revision(@NotNull ObjectNode intent, @NotBlank @Size(max = 20_000) String text) { }
-    public record RenderDiagnostic(@NotNull ObjectNode simulation, @NotBlank @Size(max = 20_000) String message) { }
+    public record RenderDiagnostic(@NotNull ObjectNode simulation, @NotBlank @Size(max = 20_000) String message,
+                                   ObjectNode runtime) { }
     public record Save(@NotBlank @Size(max = 160) String title, @NotNull UUID folderId, @NotNull UUID lessonId,
                        @NotNull ObjectNode simulation, @NotNull ObjectNode parameters) { }
     public record Adjustment(UUID simulationId, @NotEmpty Map<String, Double> adjustableParams) { }

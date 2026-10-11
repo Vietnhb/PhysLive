@@ -85,7 +85,7 @@ public class AIService {
     }
 
     /** Runtime reports are diagnostics, never a new physics-validation result or a client-selected repair policy. */
-    public void reportRenderDiagnostic(JsonNode simulation, String message) {
+    public void reportRenderDiagnostic(JsonNode simulation, String message, JsonNode runtime) {
         requireSignedPlan(simulation);
         String code = simulation.path("simulationSpec").path("visualProgram").path("code").asText("");
         if (code.length() > maxProgramCharacters) throw ApiException.badRequest("Mã trình bày vượt quá giới hạn");
@@ -97,6 +97,12 @@ public class AIService {
         diagnostic.put("planSignature", simulation.path("planSignature").asText());
         diagnostic.put("sourceChecksum", schemas.compiledChecksum(json.createObjectNode().put("code", code)));
         diagnostic.put("message", message);
+        // A client-reported snapshot is diagnostic evidence, not an approved plan or solver result.
+        if (runtime != null && runtime.isObject()) {
+            diagnostic.set("reportedParameters", runtime.path("parameters"));
+            if (runtime.path("timeline").isObject())
+                diagnostic.put("reportedTimelineChecksum", schemas.compiledChecksum(runtime.path("timeline")));
+        }
         log.warn("{}", diagnostic);
     }
 
@@ -107,7 +113,9 @@ public class AIService {
         JsonNode definition = definition(request, schema);
         ObjectNode computed = equations.compute(definition, brief, json.createObjectNode());
         ObjectNode fieldMeta = solverFieldMeta(definition, brief);
+        ObjectNode presentation = TeacherSimulationPresentation.create((ObjectNode) computed.path("solverTimeline"), brief, fieldMeta, null);
         ObjectNode input = completeVisualInput(json, request, definition, fieldMeta, computed);
+        input.set("presentationContract", presentation);
         JsonNode diagnostics = request.path("renderDiagnostics");
         if (!diagnostics.isMissingNode()) {
             if (!diagnostics.path("code").isTextual() || !diagnostics.path("message").isTextual()
@@ -140,6 +148,7 @@ public class AIService {
         ObjectNode validation = (ObjectNode) computed.path("validation");
         validation.put("topicVersion", schema.getVersion());
         response.set("validation", validation);
+        response.set("presentation", presentation);
         return response;
     }
 
@@ -159,6 +168,8 @@ public class AIService {
         ObjectNode result = equations.compute(definition(request, schema), request.path("simulationSpec"),
                 request.path("parameters"));
         ((ObjectNode) result.path("validation")).put("topicVersion", schema.getVersion());
+        result.set("presentation", TeacherSimulationPresentation.create((ObjectNode) result.path("solverTimeline"),
+                request.path("simulationSpec"), solverFieldMeta(definition(request, schema), request.path("simulationSpec")), request.path("parameters")));
         return result;
     }
 
@@ -172,7 +183,12 @@ public class AIService {
     }
 
     public ObjectNode openSaved(UUID id) {
-        return storage.open(id);
+        ObjectNode result = storage.open(id);
+        if (!(result.path("simulationSpec").path("solverTimeline") instanceof ObjectNode))
+            throw ApiException.unprocessable("Mô phỏng đã lưu thiếu dữ liệu diễn tiến từ máy chủ");
+        result.set("presentation", TeacherSimulationPresentation.create((ObjectNode) result.path("simulationSpec").path("solverTimeline"),
+                result.path("simulationSpec"), result.path("simulationSpec").path("solverFieldMeta"), result.path("savedParameters")));
+        return result;
     }
 
     public void updateSavedVisual(UUID id, ObjectNode generated) {

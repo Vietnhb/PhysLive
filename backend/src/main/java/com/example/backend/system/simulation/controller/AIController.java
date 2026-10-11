@@ -46,7 +46,7 @@ public class AIController {
 
     @PostMapping(path = "/render-diagnostics", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void renderDiagnostic(@Valid @RequestBody SimulationRequests.RenderDiagnostic request) {
-        ai.reportRenderDiagnostic(request.simulation(), request.message());
+        ai.reportRenderDiagnostic(request.simulation(), request.message(), request.runtime());
     }
 
     @PostMapping(path = "/compute", consumes = MediaType.APPLICATION_JSON_VALUE)

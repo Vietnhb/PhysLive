@@ -80,12 +80,18 @@ class GeneratedSimulationEndpointsTest {
         simulation.put("planSignature", (String) ReflectionTestUtils.invokeMethod(ai, "signPlan", simulation));
         ObjectNode request = json.createObjectNode().put("message", "SVG_CONTRACT: unsupported element <script>; original SVG was not modified.");
         request.set("simulation", simulation);
+        ObjectNode runtime = request.putObject("runtime");
+        runtime.putObject("parameters").put("mass", 3.123456789);
+        ObjectNode timeline = runtime.putObject("timeline").put("durationSeconds", 2);
+        timeline.putArray("frames").addObject().put("t", 0).putObject("values").put("body.x", 4);
         String original = simulation.toString();
         mvc.perform(post("/api/simulation/render-diagnostics").contentType(MediaType.APPLICATION_JSON).content(request.toString()))
                 .andExpect(status().isOk());
         org.junit.jupiter.api.Assertions.assertEquals(original, simulation.toString());
         verify(equations, never()).compute(any(), any(), any());
         verify(ai, never()).generate(any());
+        verify(ai).reportRenderDiagnostic(eq(simulation), eq(request.path("message").asText()), eq(runtime));
+        verify(schemas).compiledChecksum(eq(timeline));
     }
 
     @Test
@@ -114,9 +120,17 @@ class GeneratedSimulationEndpointsTest {
     @Test
     void savedSimulationCanBeReopenedThroughStorageOwnershipChecks() throws Exception {
         UUID id = UUID.randomUUID();
-        when(storage.open(id)).thenReturn(json.createObjectNode().put("description", "Saved projectile"));
+        ObjectNode saved = (ObjectNode) json.readTree("""
+                {"description":"Saved projectile","savedParameters":{"m":3},"simulationSpec":{
+                  "parameters":[{"name":"m","value":2}],"solverFieldMeta":{},
+                  "solverTimeline":{"durationSeconds":1,"frames":[{"t":0,"values":{"x":4}},{"t":1,"values":{"x":9}}]}}}
+                """);
+        when(storage.open(id)).thenReturn(saved);
         mvc.perform(get("/api/simulation/saved/" + id)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value("Saved projectile"));
+                .andExpect(jsonPath("$.description").value("Saved projectile"))
+                .andExpect(jsonPath("$.presentation.parameters.m").value(3))
+                .andExpect(jsonPath("$.presentation.fieldRanges.x.max").value(9))
+                .andExpect(jsonPath("$.simulationSpec.solverTimeline.frames[1].dt").value(1));
         verify(storage).open(id);
     }
 

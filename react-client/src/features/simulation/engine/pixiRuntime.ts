@@ -6,7 +6,8 @@ let app, lifecycle, data, playing = true, loop = false, speed = 1, t = 0, last =
 let frames = 0, lastSent = -1, dirty = true, disposed = false;
 const assets = new Map(), textureIds = new WeakMap();
 const QUIET_KEYS = new Set(['toJSON', 'then', 'asymmetricMatch', 'nodeType', '$$typeof']);
-const send = (type, extra = {}) => postMessage({type, ...extra});
+const send = (type, extra = {}) => postMessage({type, ...extra,
+  ...(data?.resolveFrame && ['tick', 'ready', 'ended'].includes(type) ? {sample: data.resolveFrame(data.timeline, t)} : {})});
 function freeze(value) {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
     for (const child of Object.values(value)) freeze(child);
@@ -30,7 +31,11 @@ function setData(message) {
   data.models = freeze(data.models || []);
   data.observables = freeze(data.observables || []);
   data.parameterInfo = freeze(data.parameterInfo || []);
-  data.ranges = ranges(data.timeline);
+  if (data.presentation) {
+    if (data.presentation.version !== 1 || typeof data.presentation.frameResolver !== 'string') throw Error('Unsupported teacher presentation contract.');
+    data.resolveFrame = new Function('return (' + data.presentation.frameResolver + '\n);')();
+    data.ranges = freeze(data.presentation.fieldRanges);
+  } else {data.resolveFrame = null; data.ranges = ranges(data.timeline);}
 }
 function strictFields(values) {
   return new Proxy(Object.freeze(values), {get(target, key) {
@@ -40,7 +45,8 @@ function strictFields(values) {
   }});
 }
 function frame(dt = 0) {
-  return Object.freeze({t, dt, fields: strictFields(sampleTimeline(data.timeline, t)), parameters: data.parameters,
+  const state = data.resolveFrame ? data.resolveFrame(data.timeline, t) : {t, dt, fields: sampleTimeline(data.timeline, t)};
+  return Object.freeze({...state, fields: strictFields(state.fields), parameters: data.parameters,
     width: app.screen.width, height: app.screen.height, theme: data.theme, verificationStatus: data.verificationStatus});
 }
 function render(dt = 0) { lifecycle.update(frame(dt)); app.render(); }
@@ -82,7 +88,7 @@ async function start(message) {
     get observables() {return data.observables;}, get parameterInfo() {return data.parameterInfo;},
     get timeline() {return data.timeline;},
     getFrame: () => frame(), getFieldRanges: () => data.ranges,
-    sample: time => strictFields(sampleTimeline(data.timeline, time)),
+    sample: time => strictFields(data.resolveFrame ? data.resolveFrame(data.timeline, time).fields : sampleTimeline(data.timeline, time)),
     svgTexture, releaseTexture,
   });
   const AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
@@ -241,7 +247,7 @@ addEventListener('message', ({source, data}) => {
       } else if (result.type === 'release') {
         texturePixels = Math.max(0, texturePixels - (assetPixels.get(result.id) || 0)); assetPixels.delete(result.id);
       } else if (['tick','ready','ended'].includes(result.type)) {
-        lastHeartbeat = Date.now(); send(result.type, {t: result.t});
+        lastHeartbeat = Date.now(); send(result.type, result);
       } else if (result.type === 'error') stop(String(result.message));
     };
     worker.onerror = event => stop(event.message || 'PixiJS worker failed.');

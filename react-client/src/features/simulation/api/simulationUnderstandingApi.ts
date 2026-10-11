@@ -1,6 +1,7 @@
 import axiosClient from "../../../shared/api/client";
 import type { SolverTimeline, PixiVisualProgram } from "../model/svgScene";
 import type { LibraryItem } from "../../../shared/types/physlive";
+import type { TeacherPresentation } from "../model/teacherPresentation";
 
 export type SimulationSourceMode = "TEXT" | "LATEX" | "IMAGE";
 export type RecognitionResult = {
@@ -54,6 +55,7 @@ export type SimulationValidation = {
   benchmarkSummary?: string | null;
 };
 export type GeneratedSimulationResult = {
+  presentation?: TeacherPresentation;
   savedParameters?: Record<string, number>;
   formulas?: SimulationFormula[];
   explanation?: string;
@@ -77,8 +79,9 @@ export const openSharedGeneratedSimulation = (id: string) =>
   axiosClient.get<GeneratedSimulationResult>(`/simulations/shared/${id}`, { params: { view: "generated" } }).then(r => r.data);
 export const updateSavedSimulationVisual = (id: string, simulation: GeneratedSimulationResult) =>
   axiosClient.patch<void>(`/simulation/saved/${id}/visual`, simulation);
-export const reportSimulationRenderFailure = (simulation: GeneratedSimulationResult, message: string) =>
-  axiosClient.post<void>("/simulation/render-diagnostics", { simulation, message });
+export const reportSimulationRenderFailure = (simulation: GeneratedSimulationResult, message: string,
+  parameters?: Record<string, number>, timeline?: SolverTimeline) =>
+  axiosClient.post<void>("/simulation/render-diagnostics", { simulation, message, ...(parameters ? { runtime: { parameters, timeline } } : {}) });
 export const understandSimulationText = (description: string) =>
   axiosClient.post<IntentResult>("/simulation/understand", { description }).then(response => response.data);
 
@@ -101,7 +104,7 @@ export const confirmSimulationExplanation = (intent: IntentResult, renderDiagnos
   }).then(response => response.data);
 
 export const recomputeSimulation = (simulation: GeneratedSimulationResult, parameters: Record<string, number>, signal: AbortSignal) =>
-  axiosClient.post<{ solverTimeline: SolverTimeline; validation: SimulationValidation }>("/simulation/compute", {
+  axiosClient.post<{ solverTimeline: SolverTimeline; validation: SimulationValidation; presentation: TeacherPresentation }>("/simulation/compute", {
     schemaId: simulation.schemaId, schemaVersion: simulation.schemaVersion,
     description: simulation.description, planSignature: simulation.planSignature,
     simulationSpec: simulation.simulationSpec, parameters,

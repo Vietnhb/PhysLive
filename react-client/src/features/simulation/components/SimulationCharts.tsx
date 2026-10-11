@@ -9,11 +9,11 @@ type Group = { id: string; title: string; axis: string; unit: string; series: Se
  * One chart per unit, so values that can be compared share an axis. The plan's watched values are charted when it
  * names any, otherwise every result; nothing is grouped or ordered by what a quantity is called.
  */
-function buildGroups(scene: SceneDescriptor, timeline: SolverTimeline, theme: ThemeName): Group[] {
+function buildGroups(scene: SceneDescriptor, timeline: SolverTimeline, theme: ThemeName, exact = false): Group[] {
   const groups = new Map<string, Group>();
   const colorOf = new Map(scene.participants.map(item => [item.id, item.colorIndex]));
   const labelOf = new Map(scene.participants.map(item => [item.id, item.label]));
-  const every = Math.max(1, Math.floor(timeline.frames.length / 480));
+  const every = exact ? 1 : Math.max(1, Math.floor(timeline.frames.length / 480));
   const pointsOf = (meta: FieldMeta) => {
     const points: Array<[number, number]> = [], frames = timeline.frames;
     for (let i = 0; i < frames.length; i += every) points.push([frames[i].t, frames[i].values[meta.key]]);
@@ -59,7 +59,7 @@ function useWidth<T extends HTMLElement>() {
   return [ref, width] as const;
 }
 
-function Chart({ group, duration, time, onSeek }: Readonly<{ group: Group; duration: number; time: number; onSeek: (t: number) => void }>) {
+function Chart({ group, duration, time, onSeek, values }: Readonly<{ group: Group; duration: number; time: number; onSeek: (t: number) => void; values?: Record<string, number> }>) {
   const [ref, width] = useWidth<HTMLDivElement>();
   const height = 230, m = { l: 56, r: 18, t: 14, b: 34 };
   const plotW = width - m.l - m.r, plotH = height - m.t - m.b;
@@ -108,7 +108,7 @@ function Chart({ group, duration, time, onSeek }: Readonly<{ group: Group; durat
         strokeWidth={2.2} strokeDasharray={series.dashed ? "7 5" : undefined} strokeLinejoin="round" strokeLinecap="round" />)}
       <line x1={cursorX} x2={cursorX} y1={m.t} y2={m.t + plotH} className="sim-chart__cursor" />
       {group.series.map(series => {
-        const value = interpolate(series.points, time);
+        const value = values ? values[series.key] : interpolate(series.points, time);
         return Number.isFinite(value) && <circle key={series.key} cx={cursorX} cy={layout.y(value)} r={4.2}
           fill={series.color} className="sim-chart__dot" />;
       })}
@@ -126,15 +126,19 @@ function interpolate(points: Array<[number, number]>, t: number) {
   return points[points.length - 1][1];
 }
 
-export default function SimulationCharts({ scene, timeline, time, theme, onSeek }: Readonly<{
+export default function SimulationCharts({ scene, timeline, time, theme, onSeek, backendSample }: Readonly<{
   scene: SceneDescriptor; timeline: SolverTimeline; time: number; theme: ThemeName; onSeek: (t: number) => void;
+  backendSample?: {t: number; values: Record<string, number>};
 }>) {
-  const groups = useMemo(() => buildGroups(scene, timeline, theme), [scene, timeline, theme]);
+  const exact = Boolean(backendSample);
+  const groups = useMemo(() => buildGroups(scene, timeline, theme, exact), [scene, timeline, theme, exact]);
   const [tab, setTab] = useState<string>("");
   const active = groups.find(group => group.id === tab) ?? (tab === "table" ? null : groups[0]);
   const values = useMemo(() => {
+    if (backendSample) return backendSample.values;
     try { return sampleTimeline(timeline, time); } catch { return {} as Record<string, number>; }
-  }, [timeline, time]);
+  }, [timeline, time, backendSample]);
+  const labelNumber = (value: number, scale = 0) => backendSample ? String(value ?? "—") : formatNumber(value, 4, scale);
   if (!groups.length) return null;
   const labelOf = new Map(scene.participants.map(item => [item.id, item.label]));
   return <section className="sim-analysis" aria-label="Đồ thị và số liệu">
@@ -148,23 +152,23 @@ export default function SimulationCharts({ scene, timeline, time, theme, onSeek 
         {active.series.map(series => {
           return <span key={series.key} className="sim-legend__item">
             <i style={{ background: series.color }} data-dashed={series.dashed || undefined} />
-            {series.name}<b>{formatNumber(values[series.key], 4, Math.max(Math.abs(series.meta.min), Math.abs(series.meta.max)))} {series.meta.unit}</b>
+            {series.name}<b>{labelNumber(values[series.key], Math.max(Math.abs(series.meta.min), Math.abs(series.meta.max)))} {series.meta.unit}</b>
           </span>;
         })}
       </div>
-      <Chart group={active} duration={timeline.durationSeconds} time={time} onSeek={onSeek} />
+      <Chart group={active} duration={timeline.durationSeconds} time={backendSample?.t ?? time} onSeek={onSeek} values={backendSample?.values} />
       <p className="sim-analysis__hint">Đồ thị {active.title.toLowerCase()} từ dữ liệu solver backend · kéo trên đồ thị để tua thời gian.</p>
     </> : <div className="sim-table-wrap">
       <table className="sim-table">
-        <thead><tr><th>Đối tượng</th><th>Đại lượng</th><th>Tại t = {time.toFixed(2)} s</th><th>Nhỏ nhất</th><th>Lớn nhất</th></tr></thead>
+        <thead><tr><th>Đối tượng</th><th>Đại lượng</th><th>Tại t = {backendSample ? String(backendSample.t) : time.toFixed(2)} s</th><th>Nhỏ nhất</th><th>Lớn nhất</th></tr></thead>
         <tbody>{Object.values(scene.fields).map(meta => {
           const scale = Math.max(Math.abs(meta.min), Math.abs(meta.max));
           return <tr key={meta.key}>
             <td>{meta.object ?? labelOf.get(meta.participantId) ?? meta.participantId}</td>
             <td>{meta.caption ?? meta.label}{!meta.caption && meta.symbol.toLowerCase() !== meta.label.toLowerCase() && <> <span className="sim-muted">({meta.symbol})</span></>}</td>
-            <td className="sim-num">{formatNumber(values[meta.key], 4, scale)} {meta.unit}</td>
-            <td className="sim-num">{formatNumber(meta.min, 4, scale)} {meta.unit}</td>
-            <td className="sim-num">{formatNumber(meta.max, 4, scale)} {meta.unit}</td>
+            <td className="sim-num">{labelNumber(values[meta.key], scale)} {meta.unit}</td>
+            <td className="sim-num">{labelNumber(meta.min, scale)} {meta.unit}</td>
+            <td className="sim-num">{labelNumber(meta.max, scale)} {meta.unit}</td>
           </tr>;
         })}</tbody>
       </table>

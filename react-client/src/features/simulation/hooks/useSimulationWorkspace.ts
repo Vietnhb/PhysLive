@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { confirmSimulationExplanation, openGeneratedSimulation, updateSavedSimulationVisual, confirmSimulationInput, recognizeSimulationImage, understandSimulationText, recomputeSimulation, reviseSimulationIntent, reportSimulationRenderFailure, type IntentResult, type SimulationParameter, type GeneratedSimulationResult, type SimulationSourceMode, type SimulationValidation, type RecognitionResult } from "../api/simulationUnderstandingApi";
 import type { SolverTimeline } from "../model/svgScene";
+import type { TeacherPresentation } from "../model/teacherPresentation";
 import { createLibraryFolder } from "../../library/api/libraryApi";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
 import { canTeach } from "../../../shared/auth/permissions";
@@ -62,6 +63,7 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
   const [revision, setRevision] = useState("");
   const [simulation, setSimulation] = useState<GeneratedSimulationResult | null>(null);
   const [liveTimeline, setLiveTimeline] = useState<SolverTimeline | null>(null);
+  const [presentation, setPresentation] = useState<TeacherPresentation | null>(null);
   const [renderError, setRenderError] = useState("");
   const [values, setValues] = useState<Record<string, number>>({});
   const [runValues, setRunValues] = useState<Record<string, number>>({});
@@ -72,7 +74,9 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
   const [recomputing, setRecomputing] = useState(false);
 
   const restoreSaved = useCallback((result: GeneratedSimulationResult, id: string) => {
-    const params = result.savedParameters ?? Object.fromEntries(result.parameters.map(p => [p.name, p.value]));
+    if (!result.presentation) throw new Error("Máy chủ chưa trả hợp đồng trình bày cho luồng tạo mô phỏng.");
+    const params = result.presentation.parameters;
+    setPresentation(result.presentation);
     setSimulation(result);
     setIntent({ ...result, stage: "EXPLAIN" });
     setRecognition(null);
@@ -151,6 +155,7 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
     setRevision("");
     setSimulation(null);
     setLiveTimeline(null);
+    setPresentation(null);
     setValues({});
     setRunValues({});
     setValidation(null);
@@ -244,9 +249,19 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
     setBusy(true);
     setError("");
     try {
-      const result = await reviseSimulationIntent(intent, revision.trim());
+      const result = await reviseSimulationIntent(intent, revision);
       setIntent(result);
       setSimulation(null);
+      setLiveTimeline(null);
+      setPresentation(null);
+      setRunValues({});
+      setValues({});
+      setLocallyAdjusted(false);
+      setRecomputing(false);
+      setRenderError("");
+      setSaveOpen(false);
+      setSavedMessage("");
+      setCurrentSimulationId("");
       setValidation(result.validation ?? null);
       setRevision("");
     } catch (cause) {
@@ -267,21 +282,11 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
     }
     try {
       const result = await confirmSimulationExplanation(intent, renderDiagnostics);
+      if (!result.presentation) throw new Error("Máy chủ chưa trả hợp đồng trình bày cho luồng tạo mô phỏng.");
       const parameters = result.parameters ?? [];
       if (new Set(parameters.map((item) => item.name)).size !== parameters.length)
         throw new Error("Mô phỏng được tạo có tên tham số bị trùng.");
-      if (
-        parameters.some(
-          (item) =>
-            (item.min !== undefined && (!Number.isFinite(item.min) || item.value < item.min)) ||
-            (item.max !== undefined && (!Number.isFinite(item.max) || item.value > item.max)) ||
-            (item.min !== undefined && item.max !== undefined && item.min > item.max),
-        )
-      )
-        throw new Error("Giới hạn tham số của mô phỏng được tạo không nhất quán.");
-      const paramValues = Object.fromEntries(
-        parameters.map((item) => [item.name, item.value]),
-      );
+      const paramValues = result.presentation.parameters;
       if (
         Object.values(paramValues).some(
           (value) => !Number.isFinite(value),
@@ -304,7 +309,9 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
       setSimulation(result);
       setRenderError("");
       setLiveTimeline(previous => renderDiagnostics ? previous : result.simulationSpec.solverTimeline!);
+      setPresentation(previous => renderDiagnostics ? previous : result.presentation!);
       setLocallyAdjusted(Boolean(renderDiagnostics));
+      setRecomputing(Boolean(renderDiagnostics));
       setSandboxKey((key) => key + 1);
     } catch (cause) {
       setError(getError(cause));
@@ -315,7 +322,7 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
 
   const reportRenderError = (message: string) => {
     setRenderError(message);
-    if (simulation) void reportSimulationRenderFailure(simulation, message).catch(cause => setError(getError(cause)));
+    if (simulation) void reportSimulationRenderFailure(simulation, message, runValues, liveTimeline ?? undefined).catch(cause => setError(getError(cause)));
   };
 
   useEffect(() => {
@@ -324,8 +331,10 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
     const timeout = window.setTimeout(() => {
       void recomputeSimulation(simulation, values, controller.signal).then(result => {
         if (controller.signal.aborted) return;
+        if (!result.presentation) throw new Error("Máy chủ chưa trả hợp đồng trình bày cho luồng tạo mô phỏng.");
         setLiveTimeline(result.solverTimeline);
-        setRunValues(values);
+        setPresentation(result.presentation);
+        setRunValues(result.presentation.parameters);
         setValidation(result.validation);
         setError(null);
         // New parameters mean a new motion: replay it from t = 0 instead of continuing mid-way.
@@ -388,7 +397,7 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
       recognition, correction, setCorrection, editingRecognition, setEditingRecognition, recognitionLowConfidence,
       intent, revision, setRevision, normalize, handleRecognition, handleRevision, generate, reset,
     },
-    preview: { simulation, liveTimeline, runValues, sandboxKey, validation, renderError, setRenderError: reportRenderError, restartPreview, recomputing },
+    preview: { simulation, liveTimeline, presentation, runValues, sandboxKey, validation, renderError, setRenderError: reportRenderError, restartPreview, recomputing },
     experiment: { simulation, values, validation, updateParameter, resetParameters },
     explanation: { intent, revision, setRevision, handleRevision },
     save: {
