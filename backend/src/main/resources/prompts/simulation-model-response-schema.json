@@ -243,13 +243,13 @@
                     "type": "string"
                   },
                   "value": {
-                    "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                    "description": "A formula as a string, e.g. \"m*g*sin(alpha) - mu*N\"."
                   },
                   "initial": {
-                    "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                    "description": "A formula as a string, e.g. \"m*g*sin(alpha) - mu*N\"."
                   },
                   "rate": {
-                    "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                    "description": "A formula as a string, e.g. \"m*g*sin(alpha) - mu*N\"."
                   },
                   "expected": {
                     "type": "string",
@@ -265,10 +265,10 @@
                       ],
                       "properties": {
                         "when": {
-                          "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                          "description": "A formula as a string, e.g. \"m*g*sin(alpha) - mu*N\"."
                         },
                         "to": {
-                          "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+                          "description": "A formula as a string, e.g. \"m*g*sin(alpha) - mu*N\"."
                         }
                       }
                     }
@@ -345,7 +345,7 @@
               }
             },
             "duration": {
-              "description": "An equation tree: a number, a name, or [operation, operand, ...]."
+              "description": "A formula as a string, e.g. \"m*g*sin(alpha) - mu*N\"."
             },
             "assumptions": {
               "type": "array",

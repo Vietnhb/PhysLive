@@ -129,8 +129,26 @@ public class AIService {
         }
         JsonNode program = client.visual(input, resource("prompts/simulation-visual-system.txt"),
                 jsonResource("prompts/simulation-response-schema.json")).path("visualProgram");
+        asExpression(program);
         // The LLM owns the presentation. The frontend executes its lifecycle without assembling or correcting a scene.
         requireVisualProgram(program, maxProgramCharacters);
+        // A drawing that breaks a rule it was given goes back to its author once, with the rule named; what comes
+        // back stands if it is a program at all, so this never keeps a teacher from a simulation.
+        java.util.List<String> slips = drawingSlips(program.path("code").asText(), brief, computed.path("solverTimeline"));
+        if (!slips.isEmpty() && diagnostics.isMissingNode()) {
+            try {
+                ObjectNode again = input.deepCopy();
+                again.putObject("renderDiagnostics").put("code", program.path("code").asText()).put("message", String.join(" ", slips));
+                JsonNode repaired = client.visual(again, resource("prompts/simulation-visual-system.txt"),
+                        jsonResource("prompts/simulation-response-schema.json")).path("visualProgram");
+                asExpression(repaired);
+                requireVisualProgram(repaired, maxProgramCharacters);
+                if (drawingSlips(repaired.path("code").asText(), brief, computed.path("solverTimeline")).size() < slips.size())
+                    program = repaired;
+            } catch (RuntimeException unavailable) {
+                log.warn("VISUAL_REPAIR_UNAVAILABLE {}", unavailable.getMessage());
+            }
+        }
         ObjectNode spec = (ObjectNode) brief.deepCopy();
         spec.remove("scene");
         spec.set("visualProgram", program);
@@ -151,6 +169,49 @@ public class AIService {
         response.set("validation", computed.path("validation"));
         response.set("presentation", TeacherSimulationPresentation.create((ObjectNode) computed.path("solverTimeline"), spec, perMember(fieldMeta), null));
         return response;
+    }
+
+    private static final java.util.regex.Pattern LEGACY_DRAWING = java.util.regex.Pattern.compile("\\.(beginFill|endFill|drawCircle|drawRect|drawRoundedRect|drawEllipse|drawPolygon|lineStyle)\\s*\\(");
+    private static final java.util.regex.Pattern BUILT_KEY = java.util.regex.Pattern.compile("\\$\\{[^}]*\\}\\.|[\"'`]\\s*\\+[^;\\n]*\\+\\s*[\"'`]\\.");
+
+    /** What a drawing program does against the rules it was given, said the way its author can act on. */
+    static java.util.List<String> drawingSlips(String code, JsonNode plan, JsonNode timeline) {
+        java.util.List<String> slips = new java.util.ArrayList<>();
+        java.util.Set<String> legacy = new java.util.TreeSet<>();
+        java.util.regex.Matcher old = LEGACY_DRAWING.matcher(code);
+        while (old.find()) legacy.add(old.group(1));
+        if (!legacy.isEmpty()) slips.add("The code uses PixiJS calls that PixiJS 8 does not draw with (" + String.join(", ", legacy)
+                + "). Use only the PixiJS 8 forms: graphics.circle(x,y,r).fill({color}), graphics.rect(x,y,w,h).fill({color}), graphics.moveTo(x,y).lineTo(x,y).stroke({color,width}).");
+        if (java.util.regex.Pattern.compile("Math\\.(sin|cos|exp|sqrt)\\s*\\([^()]*(\\([^()]*\\))?[^()]*\\b(t|time|frame\\.t)\\b").matcher(code).find())
+            slips.add("The code works out a motion from the time itself (a sine, cosine or exponential of t). Every physical state must be read from frame.fields or api.sample(); the drawing never computes physics. If a value you need is not among the backend fields, draw only what is there.");
+        if (java.util.regex.Pattern.compile("\\)\\s*\\.alpha\\s*\\(").matcher(code).find())
+            slips.add("The code calls .alpha(...) as a method in a drawing chain; alpha is not a method there. Give the transparency in the fill or stroke itself: .fill({color, alpha: 0.3}).");
+        // every object of the plan has values of its own; a drawing that never reads them shows it with another's motion
+        java.util.Set<String> reported = new java.util.LinkedHashSet<>();
+        timeline.path("frames").path(0).path("values").fieldNames().forEachRemaining(key -> { int dot = key.indexOf('.'); if (dot > 0) reported.add(key.substring(0, dot)); });
+        if (!BUILT_KEY.matcher(code).find()) {
+            java.util.List<String> unread = new java.util.ArrayList<>();
+            for (JsonNode object : plan.path("objects")) {
+                String id = object.path("id").asText();
+                if (reported.contains(id) && !code.contains(id + ".")) unread.add(id + " (" + object.path("label").asText(id) + ")");
+            }
+            if (!unread.isEmpty() && unread.size() < Math.max(1, reported.size())) slips.add("The code never reads the backend values of " + String.join(", ", unread)
+                    + ": each object must be drawn from its own fields in frame.fields (keys begin with its id and a dot) and its own sliders, never from another object's values.");
+        }
+        return slips;
+    }
+
+    /**
+     * The page runs the program as one function expression. A program wrapped in a Markdown fence, or followed by a
+     * semicolon, is the same program and would only fail to parse there.
+     */
+    static void asExpression(JsonNode program) {
+        if (!(program instanceof ObjectNode holder) || !program.path("code").isTextual()) return;
+        String code = program.path("code").asText().strip();
+        if (code.startsWith("```")) code = code.replaceFirst("^```[A-Za-z]*\\s*", "").replaceFirst("\\s*```\\s*$", "").strip();
+        if (code.startsWith("export default ")) code = code.substring("export default ".length()).strip();
+        while (code.endsWith(";")) code = code.substring(0, code.length() - 1).stripTrailing();
+        holder.put("code", code);
     }
 
     static void requireVisualProgram(JsonNode program, int maxCharacters) {
@@ -446,10 +507,49 @@ public class AIService {
         java.util.List<String> problems = new java.util.ArrayList<>();
         try {
             normalizePlan(spec);
+            models.tidy(spec, catalogue());
             models.project(spec);
             ObjectNode computed = models.compute(catalogue(), spec, json.createObjectNode());
             if (computed.path("validation").path("status").asText().equals(FreeModel.FLAGGED))
                 computed.path("validation").path("flags").forEach(flag -> problems.add(flag.asText()));
+            // A thing the learner can set but of which nothing is computed is a model left unfinished: the drawing
+            // would then have to invent its motion. The author is told; the model stands if nothing better comes.
+            java.util.Set<String> computedFor = new java.util.LinkedHashSet<>();
+            spec.path("model").path("quantities").forEach(quantity -> computedFor.add(quantity.path("of").asText("")));
+            java.util.List<String> idle = new java.util.ArrayList<>();
+            for (JsonNode object : spec.path("objects")) {
+                String id = object.path("id").asText();
+                boolean set = false;
+                for (JsonNode parameter : spec.path("parameters")) set |= parameter.path("of").asText("").equals(id);
+                if (set && !computedFor.contains(id)) idle.add(id + " (" + object.path("label").asText(id) + ")");
+            }
+            if (!idle.isEmpty()) problems.add("Mô hình chưa tính đại lượng nào cho " + String.join(", ", idle)
+                    + ": mỗi đối tượng cần các đại lượng của riêng nó (of = id của nó), tính từ thanh trượt của chính nó — ít nhất là vị trí hoặc góc theo thời gian và những gì mô tả muốn xem. Phần vẽ chỉ được dùng số liệu đã tính ở đây, không tự tính chuyển động.");
+            // Things of one kind (their names differ only by a number) are modelled alike: the same sliders and the same
+            // quantities for each. One written in full and the others in part is a model left unfinished.
+            java.util.Map<String, java.util.List<JsonNode>> kinds = new java.util.LinkedHashMap<>();
+            for (JsonNode object : spec.path("objects"))
+                kinds.computeIfAbsent(object.path("label").asText(object.path("id").asText()).replaceAll("\\d", "").trim().toLowerCase(), kind -> new java.util.ArrayList<>()).add(object);
+            for (java.util.List<JsonNode> alike : kinds.values()) {
+                if (alike.size() < 2) continue;
+                java.util.Map<String, int[]> size = new java.util.LinkedHashMap<>();
+                int[] most = {0, 0};
+                for (JsonNode object : alike) {
+                    String id = object.path("id").asText();
+                    int[] own = {0, 0};
+                    for (JsonNode parameter : spec.path("parameters")) if (parameter.path("of").asText("").equals(id)) own[0]++;
+                    for (JsonNode quantity : spec.path("model").path("quantities")) if (quantity.path("of").asText("").equals(id)) own[1]++;
+                    size.put(object.path("label").asText(id), own);
+                    most[0] = Math.max(most[0], own[0]);
+                    most[1] = Math.max(most[1], own[1]);
+                }
+                java.util.List<String> less = new java.util.ArrayList<>();
+                for (var entry : size.entrySet()) if (entry.getValue()[0] < most[0] || entry.getValue()[1] < most[1])
+                    less.add(entry.getKey() + " (" + entry.getValue()[0] + " thanh trượt, " + entry.getValue()[1] + " đại lượng)");
+                if (!less.isEmpty()) problems.add("Các đối tượng cùng loại phải được viết như nhau, mỗi cái có đủ thanh trượt riêng và đủ đại lượng riêng (đầy đủ nhất hiện có "
+                        + most[0] + " thanh trượt, " + most[1] + " đại lượng). Còn thiếu ở: " + String.join("; ", less)
+                        + ". Viết lại đầy đủ cho từng đối tượng, mỗi đại lượng tính từ thanh trượt của chính đối tượng đó.");
+            }
             return new Attempt(spec, computed, problems);
         } catch (ApiException error) {
             problems.add(String.valueOf(error.getMessage()));
@@ -463,6 +563,7 @@ public class AIService {
      * teacher is shown a model that breaks a law, with that law named, sooner than nothing.
      */
     private ObjectNode settleModel(String description, SchemaVersion selected, ObjectNode response) {
+        JsonNode answerAsWritten = response.path("simulationSpec").deepCopy();
         Attempt best = attempt((ObjectNode) response.path("simulationSpec"));
         Attempt latest = best;
         for (int round = 0; round < MAX_MODEL_REPAIRS && !latest.problems().isEmpty(); round++) {
@@ -488,9 +589,41 @@ public class AIService {
                         response.set(field, retry.get(field));
             }
         }
+        if (best.computed() == null) {
+            // Corrections that go nowhere usually circle around the first broken answer: one answer written afresh,
+            // without it, before the teacher is told anything.
+            try {
+                JsonNode fresh = askModel(description, selected, null);
+                if ("EXPLAIN".equals(stageOf(fresh)) && fresh.path("simulationSpec").isObject()) {
+                    Attempt again = attempt((ObjectNode) fresh.path("simulationSpec").deepCopy());
+                    if (again.computed() != null) {
+                        best = again;
+                        response.set("simulationSpec", again.spec());
+                        for (String field : java.util.List.of("explanation", "defaults"))
+                            if (fresh.has(field))
+                                response.set(field, fresh.get(field));
+                    } else latest = again;
+                }
+            } catch (RuntimeException unavailable) {
+                // the message below stands
+            }
+        }
+        if (best.computed() == null) {
+            // what the author actually wrote, for whoever has to find out why no model could be computed
+            log.warn("MODEL_NOT_COMPUTABLE problems={} answer={}", latest.problems(), latest.spec());
+            try {
+                ObjectNode record = json.createObjectNode().put("description", description).put("problems", String.join(" | ", latest.problems()));
+                record.set("firstAnswer", answerAsWritten);
+                record.set("lastAnswerAfterTidying", latest.spec());
+                java.nio.file.Files.createDirectories(java.nio.file.Path.of("logs"));
+                java.nio.file.Files.writeString(java.nio.file.Path.of("logs", "model-not-computable.json"), record.toPrettyString(), StandardCharsets.UTF_8);
+            } catch (java.io.IOException | RuntimeException ignored) {
+                // a diagnostic file that cannot be written changes nothing for the teacher
+            }
+        }
         if (best.computed() == null)
             throw ApiException.unprocessable(
-                    "Chưa dựng được mô hình tính toán từ mô tả này. Hãy mô tả rõ hơn tình huống hoặc thử lại. (Chi tiết: "
+                    "AI chưa viết được mô hình tính toán hợp lệ cho mô tả này sau nhiều lần thử. Mô tả của bạn không sai; hãy bấm thử lại, hoặc chia tình huống thành phần đơn giản hơn. (Chi tiết kỹ thuật: "
                             + String.join(" ", best.problems()) + ")");
         return best.computed();
     }

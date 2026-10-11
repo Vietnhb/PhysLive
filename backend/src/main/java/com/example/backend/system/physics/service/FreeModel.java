@@ -32,7 +32,7 @@ public final class FreeModel {
 
     /** Solves the model of a plan and checks the run against the catalogue's laws. */
     public ObjectNode compute(JsonNode catalogue, JsonNode authored, JsonNode overrides) {
-        require(authored.path("model").path("quantities").isArray() && !authored.path("model").path("quantities").isEmpty(), "Mô hình chưa có đại lượng nào");
+        require(authored.path("model").path("quantities").isArray() && !authored.path("model").path("quantities").isEmpty(), "Mô hình chưa có đại lượng nào: simulationSpec.model.quantities phải là một danh sách, mỗi phần tử có id, label, unit, role và value (hoặc initial và rate)");
         for (JsonNode object : authored.path("objects"))
             require(object.path("id").asText().matches("[A-Za-z_][A-Za-z0-9_]{0,31}") && !object.path("id").asText().equals(ID),
                     "Mỗi đối tượng cần một id riêng gồm chữ, số, gạch dưới (không dùng \"" + ID + "\"): " + object.path("id").asText());
@@ -656,6 +656,331 @@ public final class FreeModel {
     }
 
     /**
+     * Puts right what is only a matter of form in a model as written — a unit spelled another way, a role or a kind
+     * of force the catalogue does not have, an object named but not listed, a slider whose value lies outside its
+     * own range — so that such slips never refuse a model. Nothing here touches an equation or a number of the physics.
+     */
+    public void tidy(ObjectNode spec, JsonNode catalogue) {
+        // the parts of the model written one level too high, or as a map by id instead of a list, are the same model
+        boolean misplaced = false;
+        for (String part : List.of("quantities", "constants", "until", "duration", "assumptions", "seed")) misplaced |= spec.has(part);
+        if (!spec.path("model").isObject()) { if (!misplaced) return; spec.putObject("model"); }
+        ObjectNode model = (ObjectNode) spec.path("model");
+        for (String part : List.of("quantities", "constants", "until", "duration", "assumptions", "seed"))
+            if (spec.has(part)) { JsonNode moved = spec.remove(part); if (!model.has(part) || model.path(part).isEmpty() && !moved.isEmpty()) model.set(part, moved); }
+        listed(model, "quantities", "id");
+        listed(model, "constants", "id");
+        listed(spec, "parameters", "name");
+        listed(spec, "objects", "id");
+        // an equation may be written as an ordinary formula ("m*g*sin(a) - mu*N"); it is read into the same tree
+        for (JsonNode quantity : model.path("quantities")) {
+            for (String side : List.of("value", "initial", "rate")) if (quantity.has(side)) ((ObjectNode) quantity).set(side, formula(quantity.get(side)));
+            for (JsonNode jump : quantity.path("jumps")) for (String side : List.of("when", "to")) if (jump.has(side)) ((ObjectNode) jump).set(side, formula(jump.get(side)));
+        }
+        if (model.has("duration")) model.set("duration", formula(model.get("duration")));
+        for (JsonNode object : spec.path("objects")) if (object.has("present")) ((ObjectNode) object).set("present", formula(object.get("present")));
+        // Inside an equation a slider already has its SI value (30 độ is 0.5236 rad, 10 cm is 0.1 m). A formula that
+        // converts it once more by hand (theta*pi/180, d*0.01) would make it wrong by that factor without any
+        // dimension to show it; the second conversion is taken out.
+        Map<String, Double> factors = new LinkedHashMap<>(), plain = new LinkedHashMap<>();
+        for (JsonNode slider : spec.path("parameters")) {
+            String canonical = equations.canonical(slider.path("unit").asText());
+            if (canonical == null) continue;
+            double factor = equations.convert(1, slider.path("unit").asText(), canonical);
+            if (Math.abs(factor - 1) > 1e-9 && equations.convert(0, slider.path("unit").asText(), canonical) == 0) factors.put(slider.path("name").asText(), factor);
+        }
+        for (JsonNode constant : model.path("constants")) if (constant.path("value").isNumber() && "1".equals(equations.canonical(constant.path("unit").asText("1"))) && !constant.hasNonNull("of"))
+            plain.put(constant.path("id").asText(), constant.path("value").asDouble());
+        if (!factors.isEmpty()) for (JsonNode quantity : model.path("quantities")) {
+            for (String side : List.of("value", "initial", "rate")) if (quantity.has(side)) ((ObjectNode) quantity).set(side, once(quantity.get(side), factors, plain));
+            for (JsonNode jump : quantity.path("jumps")) for (String side : List.of("when", "to")) if (jump.has(side)) ((ObjectNode) jump).set(side, once(jump.get(side), factors, plain));
+        }
+        apart(spec, model);
+        if (!(spec.path("durationSeconds").asDouble(0) > 0)) spec.put("durationSeconds", 10);
+        Set<String> objects = new LinkedHashSet<>();
+        spec.withArray("objects").forEach(object -> objects.add(object.path("id").asText()));
+        java.util.function.Consumer<JsonNode> owned = source -> {
+            String of = source.path("of").asText("");
+            if (of.matches("[A-Za-z_][A-Za-z0-9_]{0,31}") && !of.equals(ID) && objects.add(of)) spec.withArray("objects").addObject().put("id", of).put("label", of);
+            else if (!of.isEmpty() && !objects.contains(of)) ((ObjectNode) source).remove("of");
+        };
+        for (JsonNode parameter : spec.withArray("parameters")) {
+            ObjectNode slider = (ObjectNode) parameter;
+            slider.put("unit", spelled(slider.path("unit").asText()));
+            double value = slider.path("value").asDouble(), min = slider.path("min").asDouble(value), max = slider.path("max").asDouble(value);
+            if (min > max) { double swap = min; min = max; max = swap; }
+            slider.put("min", Math.min(min, value)).put("max", Math.max(max, value));
+            if (!(slider.path("step").asDouble(0) > 0)) slider.put("step", max > min ? (max - min) / 100 : 1);
+            if (!slider.hasNonNull("label")) slider.put("label", slider.path("name").asText());
+            owned.accept(slider);
+        }
+        for (JsonNode constant : model.withArray("constants")) { ((ObjectNode) constant).put("unit", spelled(constant.path("unit").asText())); owned.accept(constant); }
+        for (JsonNode item : model.withArray("quantities")) {
+            ObjectNode quantity = (ObjectNode) item;
+            // a quantity is computed in SI whatever unit was written beside it
+            String unit = spelled(quantity.path("unit").asText()), canonical = equations.canonical(unit);
+            quantity.put("unit", canonical == null ? unit : canonical);
+            if (!catalogue.path("roles").has(quantity.path("role").asText())) quantity.put("role", "other");
+            if (quantity.path("role").asText().equals("force") && !catalogue.path("forceKinds").has(quantity.path("kind").asText())) quantity.put("kind", "applied");
+            if (!quantity.hasNonNull("label")) quantity.put("label", quantity.path("id").asText());
+            owned.accept(quantity);
+        }
+        JsonNode untils = model.path("until");
+        if (untils.isObject()) model.putArray("until").add(untils);
+        for (JsonNode until : model.path("until")) if (until.hasNonNull("of") && !objects.contains(until.path("of").asText())) ((ObjectNode) until).remove("of");
+    }
+
+    /**
+     * A few alike things written as one group (three pendulums, two carts) become that many objects of their own:
+     * each gets its own copy of the group's sliders and quantities, so the learner can set and watch them one by
+     * one. A crowd stays a group. Nothing of the physics changes: every copy has the equations the group had.
+     */
+    private void apart(ObjectNode spec, ObjectNode model) {
+        if (model.toString().contains("\"random\"")) return;
+        for (JsonNode group : List.copyOf(toList(spec.path("objects")))) {
+            int size = group.path("members").asInt(group.path("count").asInt(1));
+            String id = group.path("id").asText();
+            if (size < 2 || size >= SMALL_GROUP || group.has("present") || !id.matches("[A-Za-z_][A-Za-z0-9_]{0,24}")) continue;
+            // with "count" the author wrote one representative: only what belongs to it is copied, and only if something does
+            Set<String> own = new LinkedHashSet<>();
+            for (String part : List.of("parameters")) for (JsonNode item : spec.path(part)) if (item.path("of").asText("").equals(id)) own.add(item.path("name").asText());
+            for (JsonNode item : model.path("constants")) if (item.path("of").asText("").equals(id)) own.add(item.path("id").asText());
+            for (JsonNode item : model.path("quantities")) if (item.path("of").asText("").equals(id)) own.add(item.path("id").asText());
+            if (own.isEmpty()) continue;
+            boolean taken = false;
+            Set<String> names = new LinkedHashSet<>();
+            spec.path("parameters").forEach(item -> names.add(item.path("name").asText()));
+            for (String part : List.of("constants", "quantities")) model.path(part).forEach(item -> names.add(item.path("id").asText()));
+            for (String name : own) for (int i = 1; i <= size; i++) taken |= names.contains(name + "_" + i);
+            if (taken) continue;
+            class Copy {
+                JsonNode of(JsonNode ast, int i) {
+                    if (ast.isTextual()) {
+                        String name = ast.asText();
+                        if (name.equals("index")) return json.getNodeFactory().numberNode(i - 1);
+                        if (name.equals("members")) return json.getNodeFactory().numberNode(size);
+                        return own.contains(name) ? json.getNodeFactory().textNode(name + "_" + i) : ast;
+                    }
+                    if (!ast.isArray() || ast.isEmpty()) return ast;
+                    String op = ast.get(0).asText();
+                    if ((OVER_GROUP.contains(op) || op.equals("member")) && ast.size() >= 2 && own.contains(ast.get(1).asText())) {
+                        String name = ast.get(1).asText();
+                        if (op.equals("member")) return json.getNodeFactory().textNode(name + "_" + (ast.path(2).asInt() + 1));
+                        JsonNode all = json.getNodeFactory().textNode(name + "_1");
+                        for (int k = 2; k <= size; k++) all = json.createArrayNode().add(op.equals("largest") ? "max" : op.equals("smallest") ? "min" : "add").add(all).add(name + "_" + k);
+                        return op.equals("mean") ? json.createArrayNode().add("div").add(all).add(size) : all;
+                    }
+                    ArrayNode copy = json.createArrayNode().add(op);
+                    for (int k = 1; k < ast.size(); k++) copy.add(of(ast.get(k), i));
+                    return copy;
+                }
+                void each(ArrayNode list, String key, boolean equations) {
+                    ArrayNode out = json.createArrayNode();
+                    for (JsonNode item : list) {
+                        boolean mine = own.contains(item.path(key).asText());
+                        for (int i = 1; i <= (mine ? size : 1); i++) {
+                            ObjectNode one = (ObjectNode) item.deepCopy();
+                            if (mine) {
+                                one.put(key, item.path(key).asText() + "_" + i).put("of", id + "_" + i);
+                                if (one.hasNonNull("label")) one.put("label", one.path("label").asText() + " " + i);
+                            }
+                            if (equations) {
+                                for (String side : List.of("value", "initial", "rate")) if (one.has(side)) one.set(side, of(one.get(side), mine ? i : 1));
+                                for (JsonNode jump : one.path("jumps")) for (String side : List.of("when", "to")) ((ObjectNode) jump).set(side, of(jump.path(side), mine ? i : 1));
+                            }
+                            out.add(one);
+                        }
+                    }
+                    list.removeAll();
+                    list.addAll(out);
+                }
+            }
+            Copy copy = new Copy();
+            // a quantity outside the group that reads one of its sliders by name reads the first copy; totals read them all
+            copy.each(spec.withArray("parameters"), "name", false);
+            copy.each(model.withArray("constants"), "id", false);
+            copy.each(model.withArray("quantities"), "id", true);
+            ArrayNode ends = json.createArrayNode();
+            for (JsonNode until : model.path("until")) {
+                boolean mine = own.contains(until.path("quantity").asText()) || until.path("of").asText("").equals(id);
+                for (int i = 1; i <= (mine ? size : 1); i++) {
+                    ObjectNode one = (ObjectNode) until.deepCopy();
+                    if (mine) {
+                        if (own.contains(until.path("quantity").asText())) one.put("quantity", until.path("quantity").asText() + "_" + i);
+                        if (until.path("value").isTextual() && own.contains(until.path("value").asText())) one.put("value", until.path("value").asText() + "_" + i);
+                        one.put("of", id + "_" + i);
+                    }
+                    ends.add(one);
+                }
+            }
+            if (model.has("until")) model.set("until", ends);
+            if (model.has("duration")) model.set("duration", copy.of(model.get("duration"), 1));
+            if (own.contains(spec.path("durationParameter").asText(""))) spec.remove("durationParameter");
+            ArrayNode objects = json.createArrayNode();
+            for (JsonNode object : spec.path("objects")) {
+                if (!object.path("id").asText().equals(id)) { objects.add(object); continue; }
+                for (int i = 1; i <= size; i++) objects.addObject().put("id", id + "_" + i).put("label", object.path("label").asText(id) + " " + i);
+            }
+            spec.set("objects", objects);
+        }
+    }
+
+    /** A product in which a slider is multiplied by exactly the number that turns its unit into SI: the product without that number. */
+    private JsonNode once(JsonNode ast, Map<String, Double> factors, Map<String, Double> plain) {
+        if (!ast.isArray() || ast.isEmpty()) return ast;
+        String op = ast.get(0).asText();
+        if ((op.equals("mul") || op.equals("div")) && ast.size() == 3) {
+            List<JsonNode> above = new ArrayList<>(), below = new ArrayList<>();
+            chain(ast, false, above, below);
+            double number = 1;
+            String slider = null;
+            int sliders = 0;
+            List<JsonNode> keptAbove = new ArrayList<>(), keptBelow = new ArrayList<>();
+            for (JsonNode item : above) {
+                Double value = item.isNumber() ? Double.valueOf(item.asDouble()) : item.isTextual() ? plain.get(item.asText()) : null;
+                if (value != null) number *= value;
+                else { if (item.isTextual() && factors.containsKey(item.asText())) { slider = item.asText(); sliders++; } keptAbove.add(item); }
+            }
+            for (JsonNode item : below) {
+                Double value = item.isNumber() ? Double.valueOf(item.asDouble()) : item.isTextual() ? plain.get(item.asText()) : null;
+                if (value != null) number /= value; else keptBelow.add(item);
+            }
+            if (sliders == 1 && Math.abs(number / factors.get(slider) - 1) < 2e-3) {
+                JsonNode product = null;
+                for (JsonNode item : keptAbove) { JsonNode part = once(item, factors, plain); product = product == null ? part : json.createArrayNode().add("mul").add(product).add(part); }
+                for (JsonNode item : keptBelow) product = json.createArrayNode().add("div").add(product).add(once(item, factors, plain));
+                return product;
+            }
+        }
+        ArrayNode copy = json.createArrayNode().add(ast.get(0));
+        for (int i = 1; i < ast.size(); i++) copy.add(once(ast.get(i), factors, plain));
+        return copy;
+    }
+
+    private static void chain(JsonNode ast, boolean inverted, List<JsonNode> above, List<JsonNode> below) {
+        if (ast.isArray() && ast.size() == 3 && (ast.get(0).asText().equals("mul") || ast.get(0).asText().equals("div"))) {
+            chain(ast.get(1), inverted, above, below);
+            chain(ast.get(2), ast.get(0).asText().equals("div") != inverted, above, below);
+        } else (inverted ? below : above).add(ast);
+    }
+
+    private static final int SMALL_GROUP = 10;
+    private static final Set<String> FUNCTIONS = Set.of("add", "sub", "mul", "div", "pow", "min", "max", "mod", "atan2", "neg", "abs", "sqrt", "sin", "cos", "tan",
+            "exp", "log", "asin", "acos", "atan", "sign", "floor", "if", "random", "total", "mean", "largest", "smallest", "member");
+
+    /** An equation given as text, or a tree with text inside it, as a tree; a name, a number or a tree stays what it is. */
+    private JsonNode formula(JsonNode written) {
+        if (written.isArray()) {
+            ArrayNode copy = json.createArrayNode();
+            for (int i = 0; i < written.size(); i++) copy.add(i == 0 ? written.get(i) : formula(written.get(i)));
+            return copy;
+        }
+        if (!written.isTextual() || written.asText().matches("\\s*[A-Za-z_][A-Za-z0-9_]*\\s*")) return written.isTextual() ? json.getNodeFactory().textNode(written.asText().trim()) : written;
+        String text = written.asText().replace("·", "*").replace("×", "*").replace("−", "-").replace("÷", "/").replace("²", "^2").replace("³", "^3").replace("π", "pi").replace("√", "sqrt");
+        int[] at = {0};
+        class Reader {
+            void space() { while (at[0] < text.length() && Character.isWhitespace(text.charAt(at[0]))) at[0]++; }
+            boolean take(String token) { space(); if (!text.startsWith(token, at[0])) return false; at[0] += token.length(); return true; }
+            JsonNode two(String op, JsonNode a, JsonNode b) { return json.createArrayNode().add(op).add(a).add(b); }
+            JsonNode compared() {
+                JsonNode left = sum();
+                // a condition holds when it is positive: a > b is a - b
+                if (take(">=") || take(">")) return two("sub", left, sum());
+                if (take("<=") || take("<")) return two("sub", sum(), left);
+                return left;
+            }
+            JsonNode sum() {
+                JsonNode left = product();
+                while (true) {
+                    if (take("+")) left = two("add", left, product());
+                    else if (take("-")) left = two("sub", left, product());
+                    else return left;
+                }
+            }
+            JsonNode product() {
+                JsonNode left = signed();
+                while (true) {
+                    if (take("*")) left = two("mul", left, signed());
+                    else if (take("/")) left = two("div", left, signed());
+                    else return left;
+                }
+            }
+            JsonNode signed() {
+                if (take("-")) { JsonNode inner = signed(); return inner.isNumber() ? json.getNodeFactory().numberNode(-inner.asDouble()) : json.createArrayNode().add("neg").add(inner); }
+                if (take("+")) return signed();
+                JsonNode base = primary();
+                if (take("^") || take("**")) return two("pow", base, signed());
+                return base;
+            }
+            JsonNode primary() {
+                space();
+                require(at[0] < text.length(), "Công thức kết thúc giữa chừng: " + text);
+                char c = text.charAt(at[0]);
+                if (c == '(') { at[0]++; JsonNode inner = compared(); require(take(")"), "Thiếu dấu ) trong công thức: " + text); return inner; }
+                if (Character.isDigit(c) || c == '.') {
+                    java.util.regex.Matcher number = java.util.regex.Pattern.compile("\\d*\\.?\\d+(?:[eE][-+]?\\d+)?|\\d+\\.").matcher(text).region(at[0], text.length());
+                    require(number.lookingAt(), "Số không đọc được trong công thức: " + text);
+                    at[0] = number.end();
+                    double value = Double.parseDouble(number.group());
+                    return value == Math.rint(value) && Math.abs(value) < 1e9 && !number.group().contains(".") && !number.group().toLowerCase().contains("e") ? json.getNodeFactory().numberNode((int) value) : json.getNodeFactory().numberNode(value);
+                }
+                require(Character.isLetter(c) || c == '_', "Ký hiệu không đọc được trong công thức \"" + text + "\" tại: " + text.substring(at[0]));
+                int start = at[0];
+                while (at[0] < text.length() && (Character.isLetterOrDigit(text.charAt(at[0])) || text.charAt(at[0]) == '_')) at[0]++;
+                String name = text.substring(start, at[0]);
+                if (!take("(")) return name.equals("pi") ? json.getNodeFactory().numberNode(Math.PI) : json.getNodeFactory().textNode(name);
+                String op = name.equals("ln") ? "log" : name.equals("sqr") ? "pow" : name;
+                require(FUNCTIONS.contains(op), "Hàm không có trong danh sách phép toán: " + name + " (trong công thức " + text + ")");
+                ArrayNode call = json.createArrayNode().add(op);
+                if (!take(")")) { do call.add(compared()); while (take(",")); require(take(")"), "Thiếu dấu ) trong công thức: " + text); }
+                if (name.equals("sqr")) call.add(2);
+                return call;
+            }
+        }
+        Reader reader = new Reader();
+        JsonNode tree = reader.compared();
+        reader.space();
+        require(at[0] == text.length(), "Công thức không đọc được hết: \"" + text + "\" (dừng tại \"" + text.substring(at[0]) + "\")");
+        return tree;
+    }
+
+    private static List<JsonNode> toList(JsonNode array) { List<JsonNode> list = new ArrayList<>(); array.forEach(list::add); return list; }
+
+    /** {"v": {…}, "x": {…}} written where a list was asked for becomes that list, each entry named by its key. */
+    private void listed(ObjectNode owner, String part, String key) {
+        if (!owner.path(part).isObject()) return;
+        ArrayNode list = json.createArrayNode();
+        owner.path(part).fields().forEachRemaining(entry -> {
+            if (!entry.getValue().isObject()) return;
+            ObjectNode one = (ObjectNode) entry.getValue();
+            if (!one.hasNonNull(key)) one.put(key, entry.getKey());
+            list.add(one);
+        });
+        owner.set(part, list);
+    }
+
+    /** A unit as the catalogue spells it, when it was written in another common way (m/s², kg·m/s, N.m, m s-1). */
+    private String spelled(String unit) {
+        if (unit.isBlank()) return "1";
+        if (equations.canonical(unit) != null) return unit;
+        String plain = unit.trim().replace("²", "^2").replace("³", "^3").replace("·", "*").replace("⋅", "*").replace("×", "*").replace(" ", "");
+        for (String candidate : List.of(plain, plain.replace(".", "*"), plain.replaceAll("([A-Za-zΩµ])(-?\\d)", "$1^$2"), plain.replace(".", "*").replaceAll("([A-Za-zΩµ])(-?\\d)", "$1^$2"), plain.toLowerCase(java.util.Locale.ROOT)))
+            if (equations.canonical(candidate) != null) return candidate;
+        // "kg m s-2": factors side by side, negative powers below the line
+        StringBuilder above = new StringBuilder(), below = new StringBuilder();
+        for (String factor : unit.trim().replace("²", "^2").replace("³", "^3").split("[\\s.*·⋅×]+")) {
+            java.util.regex.Matcher parts = java.util.regex.Pattern.compile("([A-Za-zΩµ°]+)\\^?(-?\\d+)?").matcher(factor);
+            if (!parts.matches()) return unit;
+            int power = parts.group(2) == null ? 1 : Integer.parseInt(parts.group(2));
+            if (power == 0) continue;
+            String written = parts.group(1) + (Math.abs(power) == 1 ? "" : "^" + Math.abs(power));
+            if (power > 0) above.append(above.length() == 0 ? "" : "*").append(written); else below.append("/").append(written);
+        }
+        String rebuilt = (above.length() == 0 ? "1" : above.toString()) + below;
+        return equations.canonical(rebuilt) != null ? rebuilt : unit;
+    }
+
+    /**
      * The plan as the page reads it, derived from the model and never authored: one entry per object with the
      * sliders that belong to it, the objects the learner sees, and each watched quantity under its reported key.
      */
@@ -676,9 +1001,23 @@ public final class FreeModel {
         }
         Map<String, JsonNode> quantities = new LinkedHashMap<>();
         spec.path("model").path("quantities").forEach(quantity -> quantities.put(quantity.path("id").asText(), quantity));
+        // What the learner watches is presentation, not physics: a name that is the common stem of several objects'
+        // quantities ("theta" for theta1, theta2, theta3) means each of them, and a name that matches nothing is left out.
+        ArrayNode watched = json.createArrayNode();
+        for (JsonNode observable : spec.path("observables")) {
+            String name = observable.path("quantity").asText();
+            if (quantities.containsKey(name)) { watched.add(observable); continue; }
+            for (String id : quantities.keySet()) if (!name.isBlank() && id.startsWith(name) && id.substring(name.length()).matches("_?[A-Za-z0-9]{1,3}")) {
+                ObjectNode one = ((ObjectNode) observable.deepCopy()).put("quantity", id);
+                one.remove("label");
+                watched.add(one);
+            }
+        }
+        if (watched.isEmpty()) for (JsonNode quantity : quantities.values()) { if (watched.size() < 4 && quantity.has("rate")) watched.addObject().put("quantity", quantity.path("id").asText()); }
+        if (watched.isEmpty()) for (JsonNode quantity : quantities.values()) { if (watched.size() < 6 && !quantity.path("role").asText("other").equals("other")) watched.addObject().put("quantity", quantity.path("id").asText()); }
+        spec.set("observables", watched);
         for (JsonNode observable : spec.path("observables")) {
             JsonNode quantity = quantities.get(observable.path("quantity").asText());
-            require(quantity != null, "observables phải nêu id của một đại lượng trong mô hình: " + observable.path("quantity").asText());
             boolean member = false;
             for (JsonNode object : spec.path("objects")) member |= object.path("members").asInt(1) > 1 && object.path("id").asText().equals(quantity.path("of").asText(""));
             // a quantity of a group is watched through its first member

@@ -133,7 +133,15 @@ export default function SimulationCharts({ scene, timeline, time, theme, onSeek,
   const exact = Boolean(backendSample);
   const groups = useMemo(() => buildGroups(scene, timeline, theme, exact), [scene, timeline, theme, exact]);
   const [tab, setTab] = useState<string>("");
-  const active = groups.find(group => group.id === tab) ?? (tab === "table" ? null : groups[0]);
+  /* the table of values comes first: it is where a reader looks up what every quantity is at a chosen instant */
+  const active = groups.find(group => group.id === tab) ?? null;
+  const [draft, setDraft] = useState<string | null>(null);
+  const shownTime = backendSample?.t ?? time;
+  const seekTo = (text: string) => {
+    setDraft(text);
+    const wanted = Number(text.replace(",", "."));
+    if (text.trim() !== "" && Number.isFinite(wanted)) onSeek(Math.max(0, Math.min(timeline.durationSeconds, wanted)));
+  };
   const values = useMemo(() => {
     if (backendSample) return backendSample.values;
     try { return sampleTimeline(timeline, time); } catch { return {} as Record<string, number>; }
@@ -143,9 +151,9 @@ export default function SimulationCharts({ scene, timeline, time, theme, onSeek,
   const labelOf = new Map(scene.participants.map(item => [item.id, item.label]));
   return <section className="sim-analysis" aria-label="Đồ thị và số liệu">
     <div className="sim-analysis__tabs" role="tablist">
+      <button type="button" role="tab" aria-selected={!active} onClick={() => setTab("table")}>Bảng số liệu</button>
       {groups.map(group => <button key={group.id} type="button" role="tab" aria-selected={active?.id === group.id}
         onClick={() => setTab(group.id)}>{group.title.split(" – ")[0]}</button>)}
-      <button type="button" role="tab" aria-selected={!active} onClick={() => setTab("table")}>Bảng số liệu</button>
     </div>
     {active ? <>
       <div className="sim-legend">
@@ -159,6 +167,13 @@ export default function SimulationCharts({ scene, timeline, time, theme, onSeek,
       <Chart group={active} duration={timeline.durationSeconds} time={backendSample?.t ?? time} onSeek={onSeek} values={backendSample?.values} />
       <p className="sim-analysis__hint">Đồ thị {active.title.toLowerCase()} từ dữ liệu solver backend · kéo trên đồ thị để tua thời gian.</p>
     </> : <div className="sim-table-wrap">
+      <label className="sim-analysis__hint" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        Xem giá trị tại thời điểm
+        <input type="number" inputMode="decimal" min={0} max={timeline.durationSeconds} step="any" aria-label="Thời điểm cần xem (giây)"
+          value={draft ?? shownTime.toFixed(2)} onChange={event => seekTo(event.target.value)} onBlur={() => setDraft(null)}
+          style={{ width: 96, padding: "4px 8px", font: "inherit" }} />
+        s (từ 0 đến {formatNumber(timeline.durationSeconds, 4)} s)
+      </label>
       <table className="sim-table">
         <thead><tr><th>Đối tượng</th><th>Đại lượng</th><th>Tại t = {backendSample ? String(backendSample.t) : time.toFixed(2)} s</th><th>Nhỏ nhất</th><th>Lớn nhất</th></tr></thead>
         <tbody>{Object.values(scene.fields).map(meta => {

@@ -1,0 +1,252 @@
+{
+  "description" : " Một ca nô chạy trong hồ nước yên lặng có vận tốc tối đa 18 km/h. Nếu ca nô chạy ngang một con sông có dòng chảy theo hướng Bắc – Nam với vận tốc lên tới 5 m/s thì vận tốc tối đa nó có z`thể đạt được so với bờ sông là bao nhiêu và theo hướng nào",
+  "problems" : "Cấu trúc phương trình không hợp lệ (trong phương trình của run_over)",
+  "firstAnswer" : {
+    "durationSeconds" : 0,
+    "parameters" : [ {
+      "name" : "boat_max_speed_kmh",
+      "label" : "Vận tốc tối đa của ca nô (trong nước)",
+      "value" : 18,
+      "unit" : "km/h",
+      "min" : 0,
+      "max" : 50,
+      "step" : 0.1,
+      "role" : "speed",
+      "of" : "boat"
+    }, {
+      "name" : "river_speed",
+      "label" : "Vận tốc dòng chảy của sông",
+      "value" : 5,
+      "unit" : "m/s",
+      "min" : 0,
+      "max" : 10,
+      "step" : 0.1,
+      "role" : "speed",
+      "of" : "river"
+    }, {
+      "name" : "boat_angle",
+      "label" : "Góc hướng di chuyển của ca nô so với trục x (đông)",
+      "value" : 0,
+      "unit" : "rad",
+      "min" : -3.1416,
+      "max" : 3.1416,
+      "step" : 0.01,
+      "role" : "angle",
+      "of" : "boat"
+    } ],
+    "objects" : [ {
+      "id" : "boat",
+      "label" : "Ca nô"
+    }, {
+      "id" : "river",
+      "label" : "Dòng chảy sông"
+    } ],
+    "observables" : [ {
+      "quantity" : "resultant_speed",
+      "label" : "Vận tốc tổng hợp so với bờ (m/s)"
+    }, {
+      "quantity" : "resultant_angle",
+      "label" : "Góc hướng của vận tốc tổng hợp (rad)"
+    }, {
+      "quantity" : "resultant_angle_deg",
+      "label" : "Góc hướng của vận tốc tổng hợp (độ)"
+    } ],
+    "model" : {
+      "constants" : [ ],
+      "quantities" : [ {
+        "id" : "boat_speed_mps",
+        "label" : "Vận tốc ca nô trong nước (m/s)",
+        "unit" : "m/s",
+        "role" : "speed",
+        "of" : "boat",
+        "value" : "boat_max_speed_kmh*0.2777777778"
+      }, {
+        "id" : "v_x",
+        "label" : "Thành phần vận tốc theo trục x (đông‑tây)",
+        "unit" : "m/s",
+        "role" : "velocity",
+        "of" : "boat",
+        "axis" : "x",
+        "value" : "boat_speed_mps*cos(boat_angle)"
+      }, {
+        "id" : "v_y",
+        "label" : "Thành phần vận tốc theo trục y (bắc‑nam, bờ)",
+        "unit" : "m/s",
+        "role" : "velocity",
+        "of" : "boat",
+        "axis" : "y",
+        "value" : "river_speed + boat_speed_mps*sin(boat_angle)"
+      }, {
+        "id" : "resultant_speed",
+        "label" : "Vận tốc tổng hợp so với bờ",
+        "unit" : "m/s",
+        "role" : "speed",
+        "of" : "boat",
+        "value" : "sqrt(v_x^2 + v_y^2)"
+      }, {
+        "id" : "resultant_angle",
+        "label" : "Góc hướng của vận tốc tổng hợp so với trục x",
+        "unit" : "rad",
+        "role" : "angle",
+        "of" : "boat",
+        "value" : "atan2(v_y, v_x)"
+      }, {
+        "id" : "resultant_angle_deg",
+        "label" : "Góc hướng của vận tốc tổng hợp (độ)",
+        "unit" : "deg",
+        "role" : "other",
+        "of" : "boat",
+        "value" : "resultant_angle*180/pi"
+      } ],
+      "until" : [ ],
+      "duration" : null,
+      "assumptions" : [ "Dòng chảy sông là một vận tốc không đổi, hướng dọc trục y (bắc‑nam).", "Ca nô có thể duy trì vận tốc tối đa trong mọi hướng trong nước, không bị ảnh hưởng bởi lực cản không khí hay ma sát nước.", "Không có gió, không có lực ngoài khác tác dụng lên ca nô.", "Trục x hướng Đông, trục y hướng Bắc; góc đo từ trục x dương (theo quy tắc góc chuẩn)." ],
+      "seed" : 0
+    }
+  },
+  "lastAnswerAfterTidying" : {
+    "durationSeconds" : 1,
+    "parameters" : [ {
+      "name" : "boat_max_speed",
+      "label" : "Tốc độ tối đa ca nô (km/h)",
+      "value" : 18,
+      "unit" : "km/h",
+      "min" : 0.0,
+      "max" : 100.0,
+      "step" : 0.1,
+      "role" : "speed",
+      "of" : "boat"
+    }, {
+      "name" : "river_speed",
+      "label" : "Tốc độ dòng chảy sông (m/s)",
+      "value" : 5,
+      "unit" : "m/s",
+      "min" : 0.0,
+      "max" : 10.0,
+      "step" : 0.1,
+      "role" : "speed",
+      "of" : "river",
+      "axis" : "y",
+      "kind" : "flow"
+    }, {
+      "name" : "theta_deg",
+      "label" : "Góc hướng ca nô so với Bắc (độ)",
+      "value" : 0,
+      "unit" : "deg",
+      "min" : -180.0,
+      "max" : 180.0,
+      "step" : 1,
+      "role" : "angle",
+      "of" : "boat"
+    } ],
+    "objects" : [ {
+      "id" : "boat",
+      "label" : "Ca nô"
+    }, {
+      "id" : "river",
+      "label" : "Dòng chảy sông"
+    } ],
+    "observables" : [ {
+      "quantity" : "resultant_speed",
+      "label" : "Vận tốc so với bờ (m/s)",
+      "field" : "boat.resultant_speed",
+      "object" : "Ca nô"
+    }, {
+      "quantity" : "direction_angle",
+      "label" : "Góc so với hướng Bắc (rad)",
+      "field" : "boat.direction_angle",
+      "object" : "Ca nô"
+    } ],
+    "model" : {
+      "constants" : [ ],
+      "quantities" : [ {
+        "id" : "boat_speed_mps",
+        "label" : "Tốc độ ca nô trong nước (m/s)",
+        "unit" : "m/s",
+        "role" : "speed",
+        "of" : "boat",
+        "value" : "boat_max_speed"
+      }, {
+        "id" : "theta_rad",
+        "label" : "Góc hướng ca nô (rad)",
+        "unit" : "rad",
+        "role" : "angle",
+        "of" : "boat",
+        "value" : "theta_deg"
+      }, {
+        "id" : "vbx",
+        "label" : "Thành phần x của vận tốc ca nô (m/s)",
+        "unit" : "m/s",
+        "role" : "velocity",
+        "of" : "boat",
+        "axis" : "x",
+        "value" : [ "mul", "boat_speed_mps", [ "sin", "theta_rad" ] ]
+      }, {
+        "id" : "vby",
+        "label" : "Thành phần y của vận tốc ca nô (m/s)",
+        "unit" : "m/s",
+        "role" : "velocity",
+        "of" : "boat",
+        "axis" : "y",
+        "value" : [ "mul", "boat_speed_mps", [ "cos", "theta_rad" ] ]
+      }, {
+        "id" : "vx",
+        "label" : "Thành phần x của vận tốc tổng (m/s)",
+        "unit" : "m/s",
+        "role" : "velocity",
+        "of" : "boat",
+        "axis" : "x",
+        "value" : "vbx"
+      }, {
+        "id" : "vy",
+        "label" : "Thành phần y của vận tốc tổng (m/s)",
+        "unit" : "m/s",
+        "role" : "velocity",
+        "of" : "boat",
+        "axis" : "y",
+        "value" : [ "add", "vby", "river_speed" ]
+      }, {
+        "id" : "resultant_speed",
+        "label" : "Vận tốc tổng (m/s)",
+        "unit" : "m/s",
+        "role" : "speed",
+        "of" : "boat",
+        "value" : [ "sqrt", [ "add", [ "pow", "vx", 2 ], [ "pow", "vy", 2 ] ] ]
+      }, {
+        "id" : "direction_angle",
+        "label" : "Góc hướng tổng so với Bắc (rad)",
+        "unit" : "rad",
+        "role" : "angle",
+        "of" : "boat",
+        "value" : [ "atan2", "vx", "vy" ]
+      } ],
+      "until" : [ ],
+      "duration" : null,
+      "assumptions" : [ "Mặt nước trong hồ yên lặng, không có gió.", "Ca nô có thể duy trì tốc độ tối đa trong mọi hướng.", "Dòng chảy sông đồng nhất, hướng Bắc‑Nam và không thay đổi trong thời gian mô phỏng.", "Không xét lực cản không khí hay ma sát nước." ],
+      "seed" : 42
+    },
+    "requiredObjects" : [ {
+      "label" : "Ca nô",
+      "count" : 1
+    }, {
+      "label" : "Dòng chảy sông",
+      "count" : 1
+    } ],
+    "physicsModels" : [ {
+      "id" : "boat",
+      "label" : "Ca nô",
+      "capabilityId" : "model",
+      "inputs" : {
+        "speed" : "boat_max_speed",
+        "angle" : "theta_deg"
+      }
+    }, {
+      "id" : "river",
+      "label" : "Dòng chảy sông",
+      "capabilityId" : "model",
+      "inputs" : {
+        "speed.y.flow" : "river_speed"
+      }
+    } ]
+  }
+}

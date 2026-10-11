@@ -116,7 +116,8 @@ public final class LawChecks {
                     bound.get(AMBIGUOUS).forEach(symbol -> note.withArray("quantities").add(symbol.id()));
                     continue;
                 }
-                results.add(evaluate(law, where, bound, time));
+                ObjectNode result = evaluate(law, where, bound, time);
+                if (result != null) results.add(result);
             }
         }
         return results;
@@ -213,6 +214,7 @@ public final class LawChecks {
             if (by > RELATIVE * scale + floor) off++;
             if (by > worstBy) { worstBy = by; worst = i; }
         }
+        if (counted == 0) return null;
         boolean passed = off <= FRACTION * counted;
         // "the rate of X is Y" also says that X does not jump. Where several of the law's objects jump at one instant
         // (they act on each other there), X just after must be X just before; one object jumping alone met something
@@ -295,9 +297,15 @@ public final class LawChecks {
                 inner.put(primary, new double[][]{item.values(), noiseOf(item, count)});
                 for (String other : lists.subList(1, lists.size())) {
                     double[] partner = new double[count];
-                    for (Symbol candidate : bound.get(other))
+                    // a product of two directed quantities needs their directions: a magnitude given without an axis
+                    // cannot be paired, and the law then says nothing about this model
+                    boolean directed = item.get("axis") != null;
+                    for (Symbol candidate : bound.get(other)) {
+                        directed &= candidate.get("axis") != null;
                         if (java.util.Objects.equals(candidate.get("axis"), item.get("axis")))
                             for (int i = 0; i < count; i++) partner[i] += candidate.values()[i];
+                    }
+                    if (!directed) java.util.Arrays.fill(partner, Double.NaN);
                     inner.put(other, new double[][]{partner, new double[count]});
                 }
                 double[][] term = series(ast.get(1), bound, inner, time);
