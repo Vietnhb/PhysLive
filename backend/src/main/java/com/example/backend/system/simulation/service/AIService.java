@@ -525,6 +525,19 @@ public class AIService {
             }
             if (!idle.isEmpty()) problems.add("Mô hình chưa tính đại lượng nào cho " + String.join(", ", idle)
                     + ": mỗi đối tượng cần các đại lượng của riêng nó (of = id của nó), tính từ thanh trượt của chính nó — ít nhất là vị trí hoặc góc theo thời gian và những gì mô tả muốn xem. Phần vẽ chỉ được dùng số liệu đã tính ở đây, không tự tính chuyển động.");
+            // Something has a velocity and yet nothing in the run changes: its position was left out, and the
+            // learner would watch a still picture.
+            JsonNode frames = computed.path("solverTimeline").path("frames");
+            boolean still = frames.size() > 1;
+            for (int i = 1; still && i < frames.size(); i++) {
+                var values = frames.get(i).path("values").fields();
+                while (still && values.hasNext()) { var value = values.next(); still = Math.abs(value.getValue().asDouble() - frames.get(0).path("values").path(value.getKey()).asDouble()) <= 1e-12; }
+            }
+            java.util.List<String> moving = new java.util.ArrayList<>();
+            if (still) for (JsonNode quantity : spec.path("model").path("quantities"))
+                if (quantity.path("role").asText().equals("velocity") && Math.abs(frames.get(0).path("values").path(FreeModel.key(quantity)).asDouble()) > 0) moving.add(quantity.path("id").asText());
+            if (!moving.isEmpty()) problems.add("Mô hình có vận tốc khác không (" + String.join(", ", moving) + ") nhưng không đại lượng nào thay đổi theo thời gian, nên mô phỏng sẽ đứng yên. "
+                    + "Thêm toạ độ của vật chuyển động theo từng trục (role position, initial là vị trí đầu, rate là vận tốc trên trục đó) và chọn durationSeconds đủ để thấy vật đi được một quãng.");
             // Things of one kind (their names differ only by a number) are modelled alike: the same sliders and the same
             // quantities for each. One written in full and the others in part is a model left unfinished.
             java.util.Map<String, java.util.List<JsonNode>> kinds = new java.util.LinkedHashMap<>();

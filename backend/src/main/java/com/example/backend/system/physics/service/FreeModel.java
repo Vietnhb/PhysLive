@@ -661,6 +661,8 @@ public final class FreeModel {
      * own range — so that such slips never refuse a model. Nothing here touches an equation or a number of the physics.
      */
     public void tidy(ObjectNode spec, JsonNode catalogue) {
+        // "duration": null says the same as no duration at all
+        unset(spec);
         // the parts of the model written one level too high, or as a map by id instead of a list, are the same model
         boolean misplaced = false;
         for (String part : List.of("quantities", "constants", "until", "duration", "assumptions", "seed")) misplaced |= spec.has(part);
@@ -719,6 +721,23 @@ public final class FreeModel {
             ObjectNode quantity = (ObjectNode) item;
             // a quantity is computed in SI whatever unit was written beside it
             String unit = spelled(quantity.path("unit").asText()), canonical = equations.canonical(unit);
+            // … so a formula that turns its SI result into the unit written beside it (angle*180/pi for "deg") would
+            // be shown under the SI unit with the wrong number: that last conversion is taken out
+            if (canonical != null && quantity.has("value") && equations.convert(0, unit, canonical) == 0) {
+                double factor = equations.convert(1, unit, canonical);
+                List<JsonNode> above = new ArrayList<>(), below = new ArrayList<>(), keptAbove = new ArrayList<>(), keptBelow = new ArrayList<>();
+                chain(quantity.get("value"), false, above, below);
+                double number = 1;
+                boolean constant = false;
+                for (JsonNode part : above) { Double value = part.isNumber() ? Double.valueOf(part.asDouble()) : part.isTextual() ? plain.get(part.asText()) : null; if (value != null) { number *= value; constant = true; } else keptAbove.add(part); }
+                for (JsonNode part : below) { Double value = part.isNumber() ? Double.valueOf(part.asDouble()) : part.isTextual() ? plain.get(part.asText()) : null; if (value != null) { number /= value; constant = true; } else keptBelow.add(part); }
+                if (Math.abs(factor - 1) > 1e-9 && constant && !keptAbove.isEmpty() && Math.abs(number * factor - 1) < 2e-3) {
+                    JsonNode product = null;
+                    for (JsonNode part : keptAbove) product = product == null ? part : json.createArrayNode().add("mul").add(product).add(part);
+                    for (JsonNode part : keptBelow) product = json.createArrayNode().add("div").add(product).add(part);
+                    quantity.set("value", product);
+                }
+            }
             quantity.put("unit", canonical == null ? unit : canonical);
             if (!catalogue.path("roles").has(quantity.path("role").asText())) quantity.put("role", "other");
             if (quantity.path("role").asText().equals("force") && !catalogue.path("forceKinds").has(quantity.path("kind").asText())) quantity.put("kind", "applied");
@@ -823,6 +842,15 @@ public final class FreeModel {
             }
             spec.set("objects", objects);
         }
+    }
+
+    /** Takes out every field written as null, at any depth. */
+    private static void unset(JsonNode node) {
+        if (node.isObject()) {
+            List<String> empty = new ArrayList<>();
+            node.fields().forEachRemaining(field -> { if (field.getValue().isNull()) empty.add(field.getKey()); else unset(field.getValue()); });
+            ((ObjectNode) node).remove(empty);
+        } else if (node.isArray()) node.forEach(FreeModel::unset);
     }
 
     /** A product in which a slider is multiplied by exactly the number that turns its unit into SI: the product without that number. */

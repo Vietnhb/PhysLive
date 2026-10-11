@@ -1,252 +1,434 @@
 {
-  "description" : " Một ca nô chạy trong hồ nước yên lặng có vận tốc tối đa 18 km/h. Nếu ca nô chạy ngang một con sông có dòng chảy theo hướng Bắc – Nam với vận tốc lên tới 5 m/s thì vận tốc tối đa nó có z`thể đạt được so với bờ sông là bao nhiêu và theo hướng nào",
+  "description" : "Một nguồn điện có suất điện động 12 V và điện trở trong 1 Ω được nối với mạch ngoài gồm điện trở R1 = 4 Ω mắc nối tiếp với cụm hai điện trở R2 = 6 Ω và R3 = 3 Ω\n\nCâu hỏi đã hỏi người dùng: Trong mô tả, cụm hai điện trở R2 = 6 Ω và R3 = 3 Ω được nối như thế nào?\nNgười dùng trả lời: R2 và R3 mắc song song",
   "problems" : "Cấu trúc phương trình không hợp lệ (trong phương trình của run_over)",
   "firstAnswer" : {
     "durationSeconds" : 0,
     "parameters" : [ {
-      "name" : "boat_max_speed_kmh",
-      "label" : "Vận tốc tối đa của ca nô (trong nước)",
-      "value" : 18,
-      "unit" : "km/h",
+      "name" : "E",
+      "label" : "Suất điện động ℰ",
+      "value" : 12,
+      "unit" : "V",
       "min" : 0,
-      "max" : 50,
+      "max" : 30,
       "step" : 0.1,
-      "role" : "speed",
-      "of" : "boat"
+      "role" : "emf",
+      "of" : "source"
     }, {
-      "name" : "river_speed",
-      "label" : "Vận tốc dòng chảy của sông",
-      "value" : 5,
-      "unit" : "m/s",
+      "name" : "r",
+      "label" : "Điện trở trong r",
+      "value" : 1,
+      "unit" : "ohm",
       "min" : 0,
       "max" : 10,
       "step" : 0.1,
-      "role" : "speed",
-      "of" : "river"
+      "role" : "internal_resistance",
+      "of" : "source"
     }, {
-      "name" : "boat_angle",
-      "label" : "Góc hướng di chuyển của ca nô so với trục x (đông)",
-      "value" : 0,
-      "unit" : "rad",
-      "min" : -3.1416,
-      "max" : 3.1416,
-      "step" : 0.01,
-      "role" : "angle",
-      "of" : "boat"
+      "name" : "R1",
+      "label" : "Điện trở R1",
+      "value" : 4,
+      "unit" : "ohm",
+      "min" : 0.1,
+      "max" : 100,
+      "step" : 0.1,
+      "role" : "resistance",
+      "of" : "R1"
+    }, {
+      "name" : "R2",
+      "label" : "Điện trở R2",
+      "value" : 6,
+      "unit" : "ohm",
+      "min" : 0.1,
+      "max" : 100,
+      "step" : 0.1,
+      "role" : "resistance",
+      "of" : "R2"
+    }, {
+      "name" : "R3",
+      "label" : "Điện trở R3",
+      "value" : 3,
+      "unit" : "ohm",
+      "min" : 0.1,
+      "max" : 100,
+      "step" : 0.1,
+      "role" : "resistance",
+      "of" : "R3"
     } ],
     "objects" : [ {
-      "id" : "boat",
-      "label" : "Ca nô"
+      "id" : "source",
+      "label" : "Nguồn điện"
     }, {
-      "id" : "river",
-      "label" : "Dòng chảy sông"
+      "id" : "R1",
+      "label" : "Điện trở R1"
+    }, {
+      "id" : "R2",
+      "label" : "Điện trở R2"
+    }, {
+      "id" : "R3",
+      "label" : "Điện trở R3"
+    }, {
+      "id" : "circuit",
+      "label" : "Mạch toàn phần"
     } ],
     "observables" : [ {
-      "quantity" : "resultant_speed",
-      "label" : "Vận tốc tổng hợp so với bờ (m/s)"
+      "quantity" : "I",
+      "label" : "Dòng điện toàn mạch I (A)"
     }, {
-      "quantity" : "resultant_angle",
-      "label" : "Góc hướng của vận tốc tổng hợp (rad)"
+      "quantity" : "U_term",
+      "label" : "Hiệu điện thế đầu ra của nguồn (V)"
     }, {
-      "quantity" : "resultant_angle_deg",
-      "label" : "Góc hướng của vận tốc tổng hợp (độ)"
+      "quantity" : "R_total",
+      "label" : "Điện trở tương đương toàn mạch (Ω)"
+    }, {
+      "quantity" : "V_R1",
+      "label" : "Điện áp trên R1 (V)"
+    }, {
+      "quantity" : "V_par",
+      "label" : "Điện áp trên cụm R2‑R3 (V)"
+    }, {
+      "quantity" : "I_R2",
+      "label" : "Dòng qua R2 (A)"
+    }, {
+      "quantity" : "I_R3",
+      "label" : "Dòng qua R3 (A)"
+    }, {
+      "quantity" : "P_R1",
+      "label" : "Công suất R1 (W)"
+    }, {
+      "quantity" : "P_R2",
+      "label" : "Công suất R2 (W)"
+    }, {
+      "quantity" : "P_R3",
+      "label" : "Công suất R3 (W)"
+    }, {
+      "quantity" : "P_source",
+      "label" : "Công suất nguồn (W)"
     } ],
     "model" : {
+      "seed" : 0,
       "constants" : [ ],
       "quantities" : [ {
-        "id" : "boat_speed_mps",
-        "label" : "Vận tốc ca nô trong nước (m/s)",
-        "unit" : "m/s",
-        "role" : "speed",
-        "of" : "boat",
-        "value" : "boat_max_speed_kmh*0.2777777778"
+        "id" : "R_par",
+        "label" : "Điện trở tương đương của cụm R2‑R3",
+        "unit" : "ohm",
+        "role" : "resistance",
+        "of" : "circuit",
+        "value" : "1 / (1/R2 + 1/R3)"
       }, {
-        "id" : "v_x",
-        "label" : "Thành phần vận tốc theo trục x (đông‑tây)",
-        "unit" : "m/s",
-        "role" : "velocity",
-        "of" : "boat",
-        "axis" : "x",
-        "value" : "boat_speed_mps*cos(boat_angle)"
+        "id" : "R_total",
+        "label" : "Điện trở toàn mạch",
+        "unit" : "ohm",
+        "role" : "resistance",
+        "of" : "circuit",
+        "value" : "R1 + R_par"
       }, {
-        "id" : "v_y",
-        "label" : "Thành phần vận tốc theo trục y (bắc‑nam, bờ)",
-        "unit" : "m/s",
-        "role" : "velocity",
-        "of" : "boat",
-        "axis" : "y",
-        "value" : "river_speed + boat_speed_mps*sin(boat_angle)"
+        "id" : "I",
+        "label" : "Dòng điện toàn mạch",
+        "unit" : "A",
+        "role" : "current",
+        "of" : "circuit",
+        "value" : "E / (r + R_total)"
       }, {
-        "id" : "resultant_speed",
-        "label" : "Vận tốc tổng hợp so với bờ",
-        "unit" : "m/s",
-        "role" : "speed",
-        "of" : "boat",
-        "value" : "sqrt(v_x^2 + v_y^2)"
+        "id" : "U_term",
+        "label" : "Hiệu điện thế đầu ra của nguồn",
+        "unit" : "V",
+        "role" : "voltage",
+        "of" : "source",
+        "value" : "E - I * r"
       }, {
-        "id" : "resultant_angle",
-        "label" : "Góc hướng của vận tốc tổng hợp so với trục x",
-        "unit" : "rad",
-        "role" : "angle",
-        "of" : "boat",
-        "value" : "atan2(v_y, v_x)"
+        "id" : "V_R1",
+        "label" : "Điện áp trên R1",
+        "unit" : "V",
+        "role" : "voltage",
+        "of" : "R1",
+        "value" : "I * R1"
       }, {
-        "id" : "resultant_angle_deg",
-        "label" : "Góc hướng của vận tốc tổng hợp (độ)",
-        "unit" : "deg",
-        "role" : "other",
-        "of" : "boat",
-        "value" : "resultant_angle*180/pi"
+        "id" : "V_par",
+        "label" : "Điện áp trên cụm R2‑R3",
+        "unit" : "V",
+        "role" : "voltage",
+        "of" : "circuit",
+        "value" : "I * R_par"
+      }, {
+        "id" : "I_R2",
+        "label" : "Dòng qua R2",
+        "unit" : "A",
+        "role" : "current",
+        "of" : "R2",
+        "value" : "V_par / R2"
+      }, {
+        "id" : "I_R3",
+        "label" : "Dòng qua R3",
+        "unit" : "A",
+        "role" : "current",
+        "of" : "R3",
+        "value" : "V_par / R3"
+      }, {
+        "id" : "P_R1",
+        "label" : "Công suất tiêu thụ R1",
+        "unit" : "W",
+        "role" : "power",
+        "of" : "R1",
+        "value" : "I * I * R1"
+      }, {
+        "id" : "P_R2",
+        "label" : "Công suất tiêu thụ R2",
+        "unit" : "W",
+        "role" : "power",
+        "of" : "R2",
+        "value" : "I_R2 * I_R2 * R2"
+      }, {
+        "id" : "P_R3",
+        "label" : "Công suất tiêu thụ R3",
+        "unit" : "W",
+        "role" : "power",
+        "of" : "R3",
+        "value" : "I_R3 * I_R3 * R3"
+      }, {
+        "id" : "P_source",
+        "label" : "Công suất nguồn cung cấp",
+        "unit" : "W",
+        "role" : "power",
+        "of" : "source",
+        "value" : "E * I"
       } ],
       "until" : [ ],
       "duration" : null,
-      "assumptions" : [ "Dòng chảy sông là một vận tốc không đổi, hướng dọc trục y (bắc‑nam).", "Ca nô có thể duy trì vận tốc tối đa trong mọi hướng trong nước, không bị ảnh hưởng bởi lực cản không khí hay ma sát nước.", "Không có gió, không có lực ngoài khác tác dụng lên ca nô.", "Trục x hướng Đông, trục y hướng Bắc; góc đo từ trục x dương (theo quy tắc góc chuẩn)." ],
-      "seed" : 0
+      "assumptions" : [ "Mạch một chiều, trạng thái ổn định (không thay đổi theo thời gian).", "Dây dẫn có điện trở không đáng kể.", "Các điện trở là lý tưởng, không phụ thuộc vào nhiệt độ." ]
     }
   },
   "lastAnswerAfterTidying" : {
-    "durationSeconds" : 1,
+    "durationSeconds" : 10,
     "parameters" : [ {
-      "name" : "boat_max_speed",
-      "label" : "Tốc độ tối đa ca nô (km/h)",
-      "value" : 18,
-      "unit" : "km/h",
+      "name" : "E",
+      "label" : "Suất điện động ℰ",
+      "value" : 12,
+      "unit" : "V",
       "min" : 0.0,
       "max" : 100.0,
       "step" : 0.1,
-      "role" : "speed",
-      "of" : "boat"
+      "role" : "emf",
+      "of" : "source"
     }, {
-      "name" : "river_speed",
-      "label" : "Tốc độ dòng chảy sông (m/s)",
-      "value" : 5,
-      "unit" : "m/s",
+      "name" : "r",
+      "label" : "Điện trở trong r",
+      "value" : 1,
+      "unit" : "ohm",
       "min" : 0.0,
       "max" : 10.0,
-      "step" : 0.1,
-      "role" : "speed",
-      "of" : "river",
-      "axis" : "y",
-      "kind" : "flow"
+      "step" : 0.01,
+      "role" : "internal_resistance",
+      "of" : "source"
     }, {
-      "name" : "theta_deg",
-      "label" : "Góc hướng ca nô so với Bắc (độ)",
-      "value" : 0,
-      "unit" : "deg",
-      "min" : -180.0,
-      "max" : 180.0,
-      "step" : 1,
-      "role" : "angle",
-      "of" : "boat"
+      "name" : "R1",
+      "label" : "Điện trở R1",
+      "value" : 4,
+      "unit" : "ohm",
+      "min" : 0.0,
+      "max" : 100.0,
+      "step" : 0.1,
+      "role" : "resistance",
+      "of" : "R1"
+    }, {
+      "name" : "R2",
+      "label" : "Điện trở R2",
+      "value" : 6,
+      "unit" : "ohm",
+      "min" : 0.0,
+      "max" : 100.0,
+      "step" : 0.1,
+      "role" : "resistance",
+      "of" : "R2"
+    }, {
+      "name" : "R3",
+      "label" : "Điện trở R3",
+      "value" : 3,
+      "unit" : "ohm",
+      "min" : 0.0,
+      "max" : 100.0,
+      "step" : 0.1,
+      "role" : "resistance",
+      "of" : "R3"
     } ],
     "objects" : [ {
-      "id" : "boat",
-      "label" : "Ca nô"
+      "id" : "source",
+      "label" : "Nguồn điện"
     }, {
-      "id" : "river",
-      "label" : "Dòng chảy sông"
+      "id" : "R1",
+      "label" : "Điện trở R1"
+    }, {
+      "id" : "R2",
+      "label" : "Điện trở R2"
+    }, {
+      "id" : "R3",
+      "label" : "Điện trở R3"
+    }, {
+      "id" : "branch",
+      "label" : "branch"
+    }, {
+      "id" : "circuit",
+      "label" : "circuit"
     } ],
     "observables" : [ {
-      "quantity" : "resultant_speed",
-      "label" : "Vận tốc so với bờ (m/s)",
-      "field" : "boat.resultant_speed",
-      "object" : "Ca nô"
+      "quantity" : "I",
+      "label" : "Cường độ I",
+      "field" : "circuit.I",
+      "object" : "circuit"
     }, {
-      "quantity" : "direction_angle",
-      "label" : "Góc so với hướng Bắc (rad)",
-      "field" : "boat.direction_angle",
-      "object" : "Ca nô"
+      "quantity" : "U_R1",
+      "label" : "Hiệu điện thế trên R1",
+      "field" : "R1.U_R1",
+      "object" : "Điện trở R1"
+    }, {
+      "quantity" : "U_branch",
+      "label" : "Hiệu điện thế trên nhánh R2‑R3",
+      "field" : "branch.U_branch",
+      "object" : "branch"
+    }, {
+      "quantity" : "I_R2",
+      "label" : "Cường độ qua R2",
+      "field" : "R2.I_R2",
+      "object" : "Điện trở R2"
+    }, {
+      "quantity" : "I_R3",
+      "label" : "Cường độ qua R3",
+      "field" : "R3.I_R3",
+      "object" : "Điện trở R3"
+    }, {
+      "quantity" : "P_total",
+      "label" : "Công suất tổng P",
+      "field" : "circuit.P_total",
+      "object" : "circuit"
     } ],
     "model" : {
       "constants" : [ ],
       "quantities" : [ {
-        "id" : "boat_speed_mps",
-        "label" : "Tốc độ ca nô trong nước (m/s)",
-        "unit" : "m/s",
-        "role" : "speed",
-        "of" : "boat",
-        "value" : "boat_max_speed"
+        "id" : "R_parallel",
+        "label" : "Điện trở tương đương của R2 và R3 mắc song song",
+        "unit" : "ohm",
+        "role" : "resistance",
+        "of" : "branch",
+        "value" : [ "div", [ "mul", "R2", "R3" ], [ "add", "R2", "R3" ] ]
       }, {
-        "id" : "theta_rad",
-        "label" : "Góc hướng ca nô (rad)",
-        "unit" : "rad",
-        "role" : "angle",
-        "of" : "boat",
-        "value" : "theta_deg"
+        "id" : "R_ext",
+        "label" : "Tổng điện trở ngoài (R1 + R_parallel)",
+        "unit" : "ohm",
+        "role" : "resistance",
+        "of" : "circuit",
+        "value" : [ "add", "R1", "R_parallel" ]
       }, {
-        "id" : "vbx",
-        "label" : "Thành phần x của vận tốc ca nô (m/s)",
-        "unit" : "m/s",
-        "role" : "velocity",
-        "of" : "boat",
-        "axis" : "x",
-        "value" : [ "mul", "boat_speed_mps", [ "sin", "theta_rad" ] ]
+        "id" : "R_total",
+        "label" : "Tổng điện trở của mạch (r + R_ext)",
+        "unit" : "ohm",
+        "role" : "resistance",
+        "of" : "circuit",
+        "value" : [ "add", "r", "R_ext" ]
       }, {
-        "id" : "vby",
-        "label" : "Thành phần y của vận tốc ca nô (m/s)",
-        "unit" : "m/s",
-        "role" : "velocity",
-        "of" : "boat",
-        "axis" : "y",
-        "value" : [ "mul", "boat_speed_mps", [ "cos", "theta_rad" ] ]
+        "id" : "I",
+        "label" : "Cường độ dòng điện I",
+        "unit" : "A",
+        "role" : "current",
+        "of" : "circuit",
+        "value" : [ "div", "E", "R_total" ]
       }, {
-        "id" : "vx",
-        "label" : "Thành phần x của vận tốc tổng (m/s)",
-        "unit" : "m/s",
-        "role" : "velocity",
-        "of" : "boat",
-        "axis" : "x",
-        "value" : "vbx"
+        "id" : "U_R1",
+        "label" : "Hiệu điện thế trên R1",
+        "unit" : "V",
+        "role" : "voltage",
+        "of" : "R1",
+        "value" : [ "mul", "I", "R1" ]
       }, {
-        "id" : "vy",
-        "label" : "Thành phần y của vận tốc tổng (m/s)",
-        "unit" : "m/s",
-        "role" : "velocity",
-        "of" : "boat",
-        "axis" : "y",
-        "value" : [ "add", "vby", "river_speed" ]
+        "id" : "U_branch",
+        "label" : "Hiệu điện thế trên nhánh song song (R2,R3)",
+        "unit" : "V",
+        "role" : "voltage",
+        "of" : "branch",
+        "value" : [ "mul", "I", "R_parallel" ]
       }, {
-        "id" : "resultant_speed",
-        "label" : "Vận tốc tổng (m/s)",
-        "unit" : "m/s",
-        "role" : "speed",
-        "of" : "boat",
-        "value" : [ "sqrt", [ "add", [ "pow", "vx", 2 ], [ "pow", "vy", 2 ] ] ]
+        "id" : "I_R2",
+        "label" : "Cường độ qua R2",
+        "unit" : "A",
+        "role" : "current",
+        "of" : "R2",
+        "value" : [ "div", "U_branch", "R2" ]
       }, {
-        "id" : "direction_angle",
-        "label" : "Góc hướng tổng so với Bắc (rad)",
-        "unit" : "rad",
-        "role" : "angle",
-        "of" : "boat",
-        "value" : [ "atan2", "vx", "vy" ]
+        "id" : "I_R3",
+        "label" : "Cường độ qua R3",
+        "unit" : "A",
+        "role" : "current",
+        "of" : "R3",
+        "value" : [ "div", "U_branch", "R3" ]
+      }, {
+        "id" : "P_total",
+        "label" : "Công suất tổng tiêu thụ",
+        "unit" : "W",
+        "role" : "power",
+        "of" : "circuit",
+        "value" : [ "mul", [ "mul", "I", "I" ], "R_total" ]
       } ],
       "until" : [ ],
       "duration" : null,
-      "assumptions" : [ "Mặt nước trong hồ yên lặng, không có gió.", "Ca nô có thể duy trì tốc độ tối đa trong mọi hướng.", "Dòng chảy sông đồng nhất, hướng Bắc‑Nam và không thay đổi trong thời gian mô phỏng.", "Không xét lực cản không khí hay ma sát nước." ],
-      "seed" : 42
+      "assumptions" : [ "Mạch một chiều, dây dẫn không có điện trở đáng kể.", "Các điện trở tuyến tính, không phụ thuộc nhiệt độ.", "Điều kiện ổn định DC, các đại lượng không thay đổi theo thời gian." ],
+      "seed" : 0
     },
     "requiredObjects" : [ {
-      "label" : "Ca nô",
+      "label" : "Nguồn điện",
       "count" : 1
     }, {
-      "label" : "Dòng chảy sông",
+      "label" : "Điện trở R1",
+      "count" : 1
+    }, {
+      "label" : "Điện trở R2",
+      "count" : 1
+    }, {
+      "label" : "Điện trở R3",
+      "count" : 1
+    }, {
+      "label" : "branch",
+      "count" : 1
+    }, {
+      "label" : "circuit",
       "count" : 1
     } ],
     "physicsModels" : [ {
-      "id" : "boat",
-      "label" : "Ca nô",
+      "id" : "source",
+      "label" : "Nguồn điện",
       "capabilityId" : "model",
       "inputs" : {
-        "speed" : "boat_max_speed",
-        "angle" : "theta_deg"
+        "emf" : "E",
+        "internal_resistance" : "r"
       }
     }, {
-      "id" : "river",
-      "label" : "Dòng chảy sông",
+      "id" : "R1",
+      "label" : "Điện trở R1",
       "capabilityId" : "model",
       "inputs" : {
-        "speed.y.flow" : "river_speed"
+        "resistance" : "R1"
       }
+    }, {
+      "id" : "R2",
+      "label" : "Điện trở R2",
+      "capabilityId" : "model",
+      "inputs" : {
+        "resistance" : "R2"
+      }
+    }, {
+      "id" : "R3",
+      "label" : "Điện trở R3",
+      "capabilityId" : "model",
+      "inputs" : {
+        "resistance" : "R3"
+      }
+    }, {
+      "id" : "branch",
+      "label" : "branch",
+      "capabilityId" : "model",
+      "inputs" : { }
+    }, {
+      "id" : "circuit",
+      "label" : "circuit",
+      "capabilityId" : "model",
+      "inputs" : { }
     } ]
   }
 }

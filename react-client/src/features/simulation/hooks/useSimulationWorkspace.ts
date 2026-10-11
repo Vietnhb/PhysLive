@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ClipboardEvent, type DragEvent, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type DragEvent, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { confirmSimulationExplanation, openGeneratedSimulation, updateSavedSimulationVisual, confirmSimulationInput, recognizeSimulationImage, understandSimulationText, recomputeSimulation, reviseSimulationIntent, reportSimulationRenderFailure, type IntentResult, type SimulationParameter, type GeneratedSimulationResult, type SimulationSourceMode, type SimulationValidation, type RecognitionResult } from "../api/simulationUnderstandingApi";
@@ -320,9 +320,19 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
     }
   };
 
+  /* A drawing that fails when it runs goes back to its author with the error, twice at most for one plan; the
+     physics is untouched, and after that the error stays on screen with the manual redesign. */
+  const autoRepairs = useRef({ plan: "", count: 0 });
   const reportRenderError = (message: string) => {
     setRenderError(message);
-    if (simulation) void reportSimulationRenderFailure(simulation, message, runValues, liveTimeline ?? undefined).catch(cause => setError(getError(cause)));
+    if (!simulation) return;
+    void reportSimulationRenderFailure(simulation, message, runValues, liveTimeline ?? undefined).catch(cause => setError(getError(cause)));
+    const plan = simulation.planSignature ?? "";
+    if (autoRepairs.current.plan !== plan) autoRepairs.current = { plan, count: 0 };
+    const code = visualSource(simulation);
+    if (!message || !code || busy || autoRepairs.current.count >= 2) return;
+    autoRepairs.current.count += 1;
+    void generate({ code, message: "The program failed when the page ran it: " + message + ". Fix exactly this and return the whole corrected program." });
   };
 
   useEffect(() => {
