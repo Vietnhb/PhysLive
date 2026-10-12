@@ -1,107 +1,210 @@
 import { useMemo, useState } from "react";
-import { Button, Text, TextField } from "@radix-ui/themes";
-import { AdvancedJson, RowsEditor } from "./JsonEditor";
+import { AdvancedJson } from "./JsonEditor";
 import type { JsonObject } from "../model/jsonRows";
+import { codeFrom, parseRelation, plainName, pretty, relationOf, relationText, sameAs, symbols, print, type Ast } from "../model/lawText";
+import "../styles/lawbook.css";
 
 type Catalogue = JsonObject;
 type Law = JsonObject;
+type Bind = Record<string, JsonObject>;
+type Names = Record<string, unknown>;
 
-const INFIX: Record<string, string> = { add: " + ", sub: " − ", mul: "·", div: "/", pow: "^" };
+const record = (value: unknown): Names => value && typeof value === "object" && !Array.isArray(value) ? value as Names : {};
+const without = (source: Names, ...keys: string[]) => Object.fromEntries(Object.entries(source).filter(([key]) => !keys.includes(key)));
+const bindOf = (law: Law) => record(law.bind) as Bind;
+const UNSORTED = "Chưa xếp vào phần nào";
+const partOf = (law: Law) => String(law.curriculum ?? "").split(" – ")[0].trim() || UNSORTED;
 
-/** A law's expression the way a reader checks it: m·a, d(v)/dt, Σ F. */
-function expression(ast: unknown): string {
-  if (typeof ast === "number" || typeof ast === "string") return String(ast);
-  if (!Array.isArray(ast) || ast.length === 0) return "?";
-  const [op, ...rest] = ast as [string, ...unknown[]];
-  if (INFIX[op] && rest.length === 2) {
-    const side = (item: unknown) => Array.isArray(item) && INFIX[String(item[0])] && op !== "add" && op !== "sub" ? `(${expression(item)})` : expression(item);
-    return side(rest[0]) + INFIX[op] + side(rest[1]);
-  }
-  if (op === "ddt") return `d(${expression(rest[0])})/dt`;
-  if (op === "sum") return `Σ ${expression(rest[0])}`;
-  if (op === "neg") return `−${expression(rest[0])}`;
-  return `${op}(${rest.map(expression).join(", ")})`;
+/** What the reviewer still has to fill in before this law can check anything. */
+function gaps(law: Law, roles: Names): string[] {
+  const out: string[] = [];
+  if (!String(law.title ?? "").trim()) out.push("chưa có tên");
+  if (!relationOf(law)) out.push("chưa có công thức");
+  const unnamed = Object.entries(bindOf(law)).filter(([, rule]) => !rule?.role || !(String(rule.role) in roles)).map(([symbol]) => symbol);
+  if (unnamed.length) out.push(`chưa nói ${unnamed.join(", ")} là đại lượng nào`);
+  return out;
 }
 
-function relation(law: Law): string {
-  const sides = (law.equal ?? law.atMost) as unknown;
-  if (!Array.isArray(sides) || sides.length !== 2) return "Chưa có quan hệ";
-  return `${expression(sides[0])} ${law.equal ? "=" : "≤"} ${expression(sides[1])}`;
+/** "tất cả lực tác dụng lên vật — loại: lực ma sát trượt" */
+function meaning(rule: JsonObject, roles: Names, kinds: Names): string {
+  const role = String(rule?.role ?? "");
+  if (!role) return "chưa chọn đại lượng";
+  const where = record(rule.where);
+  const kind = where.kind;
+  const kindText = kind === undefined ? "" : kind === "*" ? "thuộc một loại bất kì" : `loại: ${(Array.isArray(kind) ? kind : [kind]).map(item => plainName(kinds[String(item)], String(item))).join(" / ")}`;
+  const extra = [kindText, Object.keys(where).some(key => key !== "kind") ? "có điều kiện riêng" : "", rule.global ? "dùng chung cho cả mô hình" : ""].filter(Boolean);
+  return `${rule.many ? "tất cả " : ""}${plainName(roles[role], role).replace(rule.many ? /^(một|mỗi) / : /^$/, "")}${extra.length ? ` — ${extra.join(", ")}` : ""}`;
 }
 
-function rolesOf(law: Law): string[] {
-  const bind = law.bind && typeof law.bind === "object" ? Object.values(law.bind as Record<string, JsonObject>) : [];
-  return [...new Set(bind.map(item => String(item?.role ?? "")).filter(Boolean))];
+/** The fine print of a law, in a sentence. */
+function conditions(law: Law, roles: Names): string[] {
+  const out: string[] = [];
+  const scope = Array.isArray(law.scope) ? law.scope.map(String) : [];
+  if (scope.length) out.push(`Xét các đại lượng thuộc ${scope.map(sameAs).join(", ")}.`);
+  if (law.when !== undefined) out.push(`Chỉ xét những lúc ${pretty(print(law.when as Ast))} khác 0.`);
+  const unless = record(law.unless);
+  if (unless.role) out.push(`Bỏ qua khi mô hình có ${plainName(roles[String(unless.role)], String(unless.role))}${unless.where ? " (thuộc loại nêu trong phần nâng cao)" : ""}.`);
+  return out;
 }
-
-const NEW_LAW: Law = {
-  id: "", title: "", curriculum: "", scope: ["of"],
-  bind: { a: { role: "" }, b: { role: "" } },
-  equal: ["a", "b"],
-};
 
 /**
- * The laws a topic checks simulations against. A reviewer adds a role (what a quantity can be) and a law
- * (a relation between roles); the backend then checks every simulation whose quantities carry those roles.
+ * The laws a topic checks simulations against, laid out like a formula sheet: grouped by part of the programme,
+ * each law with its formula, what every letter stands for and when it applies. With onChange it is editable.
  */
-export function LawCatalogueEditor({ value, onChange }: Readonly<{ value: Catalogue; onChange: (next: Catalogue) => void }>) {
+export function LawBook({ value, onChange }: Readonly<{ value: Catalogue; onChange?: (next: Catalogue) => void }>) {
   const [query, setQuery] = useState("");
-  const [open, setOpen] = useState<number | null>(null);
+  const [editing, setEditing] = useState<number | null>(null);
   const laws = useMemo(() => (Array.isArray(value.laws) ? value.laws as Law[] : []), [value.laws]);
-  const roles = value.roles && typeof value.roles === "object" && !Array.isArray(value.roles) ? value.roles as Record<string, unknown> : {};
-  const roleRows = Object.entries(roles).map(([id, description]) => ({ id, description: String(description ?? "") }));
-  const setLaws = (next: Law[]) => onChange({ ...value, laws: next });
-  const setLaw = (index: number, next: Law) => setLaws(laws.map((law, i) => i === index ? next : law));
+  const roles = record(value.roles);
+  const kinds = { ...record(value.forceKinds), ...record(value.kinds) };
+  const constants = record(value.constants);
   const needle = query.trim().toLowerCase();
-  const shown = laws.map((law, index) => ({ law, index })).filter(({ law }) => !needle
-    || String(law.title ?? "").toLowerCase().includes(needle) || String(law.id ?? "").toLowerCase().includes(needle)
-    || rolesOf(law).some(role => role.toLowerCase().includes(needle)));
-  const known = new Set(Object.keys(roles));
+  const hit = (law: Law) => !needle || [law.title, law.curriculum, relationText(law), ...Object.values(bindOf(law)).map(rule => plainName(roles[String(rule?.role)], ""))].some(text => String(text ?? "").toLowerCase().includes(needle));
+  const groups = new Map<string, number[]>();
+  laws.forEach((law, index) => { if (index === editing || hit(law)) groups.set(partOf(law), [...(groups.get(partOf(law)) ?? []), index]); });
+  const unfinished = laws.filter(law => gaps(law, roles).length).length;
+  const setLaws = (next: Law[]) => onChange?.({ ...value, laws: next });
+  const add = () => { setQuery(""); setLaws([{ id: "", title: "", curriculum: "", scope: ["of"], bind: {} }, ...laws]); setEditing(0); };
 
-  return <div className="reviewer-form-sections">
-    <section className="reviewer-form-section">
-      <Text as="div" size="2" weight="bold">Vai trò vật lý ({roleRows.length})</Text>
-      <Text as="p" size="1" color="gray" mb="2">Vai trò là thứ một đại lượng có thể là: lực, vận tốc, cường độ dòng điện… AI gắn vai trò cho từng đại lượng khi viết mô hình; định luật bên dưới kiểm theo vai trò.</Text>
-      <details className="reviewer-disclosure">
-        <summary>Xem và sửa danh sách vai trò</summary>
-        <RowsEditor rows={roleRows} addLabel="Thêm vai trò" empty="Chưa có vai trò nào."
-          onChange={rows => onChange({ ...value, roles: Object.fromEntries(rows.filter(row => String(row.id ?? "").trim()).map(row => [String(row.id).trim(), String(row.description ?? "")])) })}
-          columns={[{ key: "id", label: "Mã vai trò", placeholder: "angular_velocity", width: "30%" }, { key: "description", label: "Mô tả cho AI", placeholder: "tốc độ góc của vật quay (of)" }]} />
-      </details>
-    </section>
+  // The book sits inside the topic form: Enter in one of its boxes must not save the whole topic.
+  return <div className="lawbook" onKeyDown={event => { if (event.key === "Enter" && (event.target as HTMLElement).tagName === "INPUT") event.preventDefault(); }}>
+    <div className="lawbook-bar">
+      <input className="lawbook-input lawbook-search" type="search" placeholder="Tìm định luật, công thức hoặc đại lượng…" value={query} onChange={event => setQuery(event.target.value)} aria-label="Tìm định luật" />
+      <span className="lawbook-count">{laws.length} định luật · {new Set(laws.map(partOf)).size} phần{unfinished > 0 && <b> · {unfinished} cần bổ sung</b>}</span>
+      {onChange && <button type="button" className="lawbook-button is-primary" onClick={add}>+ Thêm định luật</button>}
+    </div>
 
-    <section className="reviewer-form-section">
-      <Text as="div" size="2" weight="bold">Định luật ({laws.length})</Text>
-      <Text as="p" size="1" color="gray" mb="2">Mỗi định luật là một quan hệ giữa các vai trò. Mô phỏng nào có đủ các vai trò đó sẽ được đối chiếu; vi phạm thì không lưu được.</Text>
-      <TextField.Root size="2" placeholder="Tìm theo tên định luật hoặc vai trò…" value={query} onChange={event => setQuery(event.target.value)} aria-label="Tìm định luật" />
-      <table className="reviewer-mini-table" style={{ marginTop: 8 }}>
-        <thead><tr><th style={{ width: "34%" }}>Định luật</th><th>Quan hệ được kiểm</th><th style={{ width: "22%" }}>Vai trò dùng</th><th aria-label="Thao tác" style={{ width: 96 }} /></tr></thead>
-        <tbody>
-          {shown.length === 0 && <tr><td colSpan={4}><Text size="2" color="gray">{laws.length ? "Không có định luật nào khớp." : "Chủ đề này chưa có định luật nào."}</Text></td></tr>}
-          {shown.map(({ law, index }) => {
-            const used = rolesOf(law), missing = used.filter(role => !known.has(role));
-            return [
-              <tr key={`row-${index}`}>
-                <td><strong>{String(law.title || "(chưa đặt tên)")}</strong>{law.curriculum ? <><br /><Text size="1" color="gray">{String(law.curriculum)}</Text></> : null}</td>
-                <td><code>{relation(law)}</code></td>
-                <td><Text size="1">{used.join(", ") || "—"}</Text>{missing.length > 0 && <><br /><Text size="1" color="red">Chưa khai báo vai trò: {missing.join(", ")}</Text></>}</td>
-                <td><Button type="button" size="1" variant="soft" onClick={() => setOpen(open === index ? null : index)}>{open === index ? "Đóng" : "Sửa"}</Button></td>
-              </tr>,
-              open === index && <tr key={`edit-${index}`}><td colSpan={4}>
-                <div className="reviewer-form-row">
-                  <label className="reviewer-field"><span>Tên định luật</span><TextField.Root size="2" value={String(law.title ?? "")} onChange={event => setLaw(index, { ...law, title: event.target.value })} /></label>
-                  <label className="reviewer-field"><span>Mã (không dấu, duy nhất)</span><TextField.Root size="2" value={String(law.id ?? "")} onChange={event => setLaw(index, { ...law, id: event.target.value.trim() })} /></label>
-                </div>
-                <label className="reviewer-field"><span>Nội dung chương trình liên quan</span><TextField.Root size="2" value={String(law.curriculum ?? "")} onChange={event => setLaw(index, { ...law, curriculum: event.target.value })} /></label>
-                <AdvancedJson open value={law} onChange={next => setLaw(index, next)} label="Quan hệ và điều kiện áp dụng"
-                  hint={'"bind" gán mỗi kí hiệu cho một vai trò; "equal": [vế trái, vế phải] hoặc "atMost" cho bất đẳng thức; "scope" là các thuộc tính phải trùng nhau (thường là "of", "axis"); "when" giới hạn lúc áp dụng.'} />
-                <Button type="button" size="1" variant="soft" color="red" mt="2" onClick={() => { setOpen(null); setLaws(laws.filter((_, i) => i !== index)); }}>Xoá định luật này</Button>
-              </td></tr>,
-            ];
-          })}
-        </tbody>
-      </table>
-      <Button type="button" size="1" variant="soft" mt="2" onClick={() => { setQuery(""); setLaws([...laws, structuredClone(NEW_LAW)]); setOpen(laws.length); }}>+ Thêm định luật</Button>
-    </section>
+    {laws.length === 0 && <p className="lawbook-empty">Chủ đề này chưa có định luật nào, nên mô phỏng thuộc chủ đề chỉ được gắn nhãn “minh hoạ”.{onChange ? " Bấm “Thêm định luật” để bắt đầu." : ""}</p>}
+    {laws.length > 0 && groups.size === 0 && <p className="lawbook-empty">Không có định luật nào khớp với “{query}”.</p>}
+
+    {[...groups].map(([part, indexes]) => <details key={part} className="lawbook-part" open>
+      <summary><span>{part}</span><small>{indexes.length} định luật</small></summary>
+      {indexes.map(index => {
+        const law = laws[index], missing = gaps(law, roles), notes = conditions(law, roles);
+        if (onChange && editing === index) return <LawForm key={index} law={law} roles={roles} kinds={kinds} constants={constants} curricula={[...new Set(laws.map(item => String(item.curriculum ?? "")).filter(Boolean))]}
+          onChange={next => setLaws(laws.map((item, i) => i === index ? next : item))} onDone={() => setEditing(null)}
+          onDelete={() => { setEditing(null); setLaws(laws.filter((_, i) => i !== index)); }}
+          takenIds={laws.filter((_, i) => i !== index).map(item => String(item.id ?? ""))} />;
+        return <article key={index} className={`law${missing.length ? " has-gap" : ""}`}>
+          <div className="law-text">
+            <h4>{String(law.title || "Định luật chưa đặt tên")}</h4>
+            {String(law.curriculum ?? "").includes(" – ") && <p className="law-lesson">{String(law.curriculum).split(" – ").slice(1).join(" – ")}</p>}
+            {notes.map(note => <p key={note} className="law-note">{note}</p>)}
+            {missing.length > 0 && <p className="law-gap">Cần bổ sung: {missing.join("; ")}.</p>}
+          </div>
+          <div className="law-maths">
+            <div className="law-formula">{pretty(relationText(law)) || "—"}</div>
+            <dl className="law-legend">{Object.entries(bindOf(law)).map(([symbol, rule]) => <div key={symbol}><dt>{symbol}</dt><dd>{meaning(rule, roles, kinds)}</dd></div>)}</dl>
+          </div>
+          {onChange && <button type="button" className="lawbook-button" onClick={() => setEditing(index)}>Sửa</button>}
+        </article>;
+      })}
+    </details>)}
+
+    <RoleDictionary value={value} laws={laws} onChange={onChange} />
   </div>;
 }
+
+function LawForm({ law, roles, kinds, constants, curricula, takenIds, onChange, onDone, onDelete }: Readonly<{ law: Law; roles: Names; kinds: Names; constants: Names; curricula: string[]; takenIds: string[]; onChange: (next: Law) => void; onDone: () => void; onDelete: () => void }>) {
+  const current = relationText(law);
+  // The box keeps what is being typed, even half a formula; the law changes only when the text reads as one.
+  const [draft, setDraft] = useState<{ base: string; text: string; problem: string } | null>(null);
+  const typed = draft && draft.base === current ? draft : null;
+  const bind = bindOf(law);
+  const scope = Array.isArray(law.scope) ? law.scope.map(String) : [];
+  const write = (text: string) => {
+    const read = parseRelation(text);
+    if (typeof read === "string") { setDraft({ base: current, text, problem: text.trim() ? read : "" }); return; }
+    // Letters follow the formula: a new one gets a row to fill in, one that left and was never filled in goes away.
+    const used = [...symbols(read.left), ...symbols(read.right), ...symbols(law.when)].filter(symbol => !(symbol in constants));
+    const next: Bind = {};
+    for (const [symbol, rule] of Object.entries(bind)) if (used.includes(symbol) || rule?.role) next[symbol] = rule;
+    for (const symbol of used) next[symbol] ??= { role: "" };
+    const updated = { ...without(law, "equal", "atMost"), bind: next, [read.sign === "=" ? "equal" : "atMost"]: [read.left, read.right] };
+    setDraft({ base: relationText(updated), text, problem: "" });
+    onChange(updated);
+  };
+  const setRule = (symbol: string, rule: JsonObject | null) => {
+    const next = { ...bind };
+    if (rule) next[symbol] = rule; else delete next[symbol];
+    onChange({ ...law, bind: next });
+  };
+  // A new law gets its code from its name; a law that already has one keeps it, since saved results refer to it.
+  const setTitle = (title: string) => onChange({ ...law, title, id: !law.id || law.id === codeFrom(String(law.title ?? ""), takenIds) ? codeFrom(title, takenIds) : law.id });
+  const inFormula = symbols([0, relationOf(law)?.left, relationOf(law)?.right, law.when]);
+  const kindNames = Object.keys(kinds);
+  const scopeChoices = [...new Set(["of", "axis", ...scope])];
+
+  return <article className="law is-editing">
+    <div className="lawform">
+      <label className="lawform-field"><span>Tên định luật</span>
+        <input className="lawbook-input" value={String(law.title ?? "")} placeholder="Định luật II Newton: m·a bằng tổng các lực" onChange={event => setTitle(event.target.value)} /></label>
+      <label className="lawform-field"><span>Thuộc phần nào của chương trình</span>
+        <input className="lawbook-input" list="lawbook-curricula" value={String(law.curriculum ?? "")} placeholder="Động lực học – Ba định luật Newton" onChange={event => onChange({ ...law, curriculum: event.target.value })} />
+        <datalist id="lawbook-curricula">{curricula.map(item => <option key={item} value={item} />)}</datalist></label>
+
+      <label className="lawform-field is-wide"><span>Công thức</span>
+        <input className="lawbook-input lawform-formula" spellCheck={false} value={typed ? typed.text : current} placeholder="m·d(v)/dt = ΣF" aria-invalid={Boolean(typed?.problem)} onChange={event => write(event.target.value)} />
+        {typed?.problem ? <em className="lawform-problem">{typed.problem}</em>
+          : <small>Nhân: <kbd>·</kbd> hoặc <kbd>*</kbd> · luỹ thừa: <kbd>v^2</kbd> · tổng: <kbd>ΣF</kbd> hoặc <kbd>sum(F)</kbd> · đạo hàm theo thời gian: <kbd>d(v)/dt</kbd> · căn: <kbd>sqrt(x)</kbd> · trị tuyệt đối: <kbd>|x|</kbd> · bất đẳng thức: <kbd>≤</kbd> hoặc <kbd>&lt;=</kbd></small>}</label>
+
+      <div className="lawform-field is-wide"><span>Mỗi kí hiệu là đại lượng nào</span>
+        {Object.keys(bind).length === 0 ? <small>Viết công thức ở trên; từng kí hiệu sẽ hiện ra ở đây để bạn chọn đại lượng.</small>
+          : <table className="lawform-symbols"><thead><tr><th>Kí hiệu</th><th>Là đại lượng</th><th>Lấy bao nhiêu</th>{kindNames.length > 0 && <th>Chỉ loại</th>}<th /></tr></thead><tbody>
+            {Object.entries(bind).map(([symbol, rule]) => {
+              const where = record(rule.where), simple = Object.keys(where).every(key => key === "kind") && (where.kind === undefined || typeof where.kind === "string");
+              return <tr key={symbol}>
+                <td><b>{symbol}</b></td>
+                <td><select className="lawbook-input" value={String(rule.role ?? "")} aria-label={`Đại lượng của ${symbol}`} onChange={event => setRule(symbol, { ...rule, role: event.target.value })}>
+                  <option value="">— chọn đại lượng —</option>
+                  {rule.role && !(String(rule.role) in roles) ? <option value={String(rule.role)}>{String(rule.role)} (chưa có trong danh mục)</option> : null}
+                  {Object.entries(roles).map(([id, description]) => <option key={id} value={id}>{plainName(description, id)}</option>)}
+                </select></td>
+                <td><select className="lawbook-input" value={rule.many ? "many" : "one"} aria-label={`Số lượng của ${symbol}`} onChange={event => setRule(symbol, event.target.value === "many" ? { ...rule, many: true, min: 1 } : without(rule, "many", "min"))}>
+                  <option value="one">một đại lượng</option><option value="many">tất cả (để cộng lại)</option>
+                </select></td>
+                {kindNames.length > 0 && <td>{simple ? <select className="lawbook-input" value={String(where.kind ?? "")} aria-label={`Loại của ${symbol}`} onChange={event => setRule(symbol, event.target.value ? { ...rule, where: { kind: event.target.value } } : without(rule, "where"))}>
+                  <option value="">mọi loại</option>{kindNames.map(kind => <option key={kind} value={kind}>{plainName(kinds[kind], kind)}</option>)}
+                </select> : <small>có điều kiện riêng (xem phần nâng cao)</small>}</td>}
+                <td>{!inFormula.includes(symbol) && <button type="button" className="lawbook-button is-quiet" onClick={() => setRule(symbol, null)} title="Kí hiệu này không còn trong công thức">Bỏ</button>}</td>
+              </tr>;
+            })}</tbody></table>}
+      </div>
+
+      <div className="lawform-field is-wide"><span>Chỉ so sánh các đại lượng thuộc</span>
+        <div className="lawform-checks">{scopeChoices.map(attribute => <label key={attribute}><input type="checkbox" checked={scope.includes(attribute)} onChange={event => onChange({ ...law, scope: event.target.checked ? [...scope, attribute] : scope.filter(item => item !== attribute) })} />{sameAs(attribute)}</label>)}</div>
+      </div>
+    </div>
+    <details className="lawform-advanced"><summary>Nâng cao: mã định luật và điều kiện đặc biệt</summary>
+      <AdvancedJson open value={law} onChange={onChange} label="Dữ liệu đầy đủ của định luật" hint="Chỉ cần mở khi định luật có điều kiện mà biểu mẫu trên chưa diễn đạt được (when, unless, where)." />
+    </details>
+    <div className="lawform-actions">
+      <button type="button" className="lawbook-button is-danger" onClick={() => { if (window.confirm("Xoá định luật này khỏi chủ đề?")) onDelete(); }}>Xoá định luật</button>
+      <button type="button" className="lawbook-button is-primary" onClick={onDone}>Xong</button>
+    </div>
+  </article>;
+}
+
+/** The quantities laws can talk about. The AI tags each quantity of a model with one of these names. */
+function RoleDictionary({ value, laws, onChange }: Readonly<{ value: Catalogue; laws: Law[]; onChange?: (next: Catalogue) => void }>) {
+  const [name, setName] = useState("");
+  const roles = record(value.roles);
+  const uses = (id: string) => laws.filter(law => Object.values(bindOf(law)).some(rule => rule?.role === id) || record(law.unless).role === id).length;
+  const setRoles = (next: Names) => onChange?.({ ...value, roles: next });
+  const add = () => { if (name.trim()) { setRoles({ ...roles, [codeFrom(name, Object.keys(roles))]: name.trim() }); setName(""); } };
+  return <details className="lawbook-part lawbook-roles">
+    <summary><span>Danh mục đại lượng</span><small>{Object.keys(roles).length} đại lượng</small></summary>
+    <p className="lawbook-hint">Định luật được viết bằng các đại lượng trong danh mục này. Khi AI dựng mô hình, nó gắn mỗi đại lượng của mô hình với một tên ở đây, nhờ vậy hệ thống biết định luật nào cần kiểm.</p>
+    <table className="lawform-symbols"><thead><tr><th>Đại lượng</th><th>Dùng trong</th>{onChange && <th />}</tr></thead><tbody>
+      {Object.entries(roles).map(([id, description]) => <tr key={id}>
+        <td>{onChange ? <input className="lawbook-input" value={String(description ?? "")} aria-label={`Tên đại lượng ${id}`} onChange={event => setRoles({ ...roles, [id]: event.target.value })} /> : String(description ?? id)}</td>
+        <td className="lawbook-uses">{uses(id) ? `${uses(id)} định luật` : "chưa dùng"}</td>
+        {onChange && <td>{uses(id) === 0 && <button type="button" className="lawbook-button is-quiet" onClick={() => setRoles(without(roles, id))}>Xoá</button>}</td>}
+      </tr>)}
+    </tbody></table>
+    {onChange && <div className="lawbook-bar"><input className="lawbook-input" value={name} placeholder="Tên đại lượng mới, ví dụ: tốc độ góc của vật quay" aria-label="Tên đại lượng mới" onChange={event => setName(event.target.value)} onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); add(); } }} />
+      <button type="button" className="lawbook-button" disabled={!name.trim()} onClick={add}>+ Thêm đại lượng</button></div>}
+  </details>;
+}
+
+export const LawCatalogueEditor = LawBook;

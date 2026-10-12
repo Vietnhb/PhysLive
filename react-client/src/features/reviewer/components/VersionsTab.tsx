@@ -9,7 +9,7 @@ import type { Version } from "../model/reviewerTypes";
 import { formatDate, matches } from "../model/reviewerUtils";
 import { ReviewerIcon, ReviewerRefresh, ReviewerSearch, ReviewStatus } from "./ReviewerKit";
 import { objectRows } from "../model/jsonRows";
-import { CapabilitiesSummary } from "./CapabilitiesEditor";
+import { LawBook } from "./LawCatalogueEditor";
 
 type Lifecycle = "DRAFT" | "APPROVED" | "RETIRED";
 const ORDER = ["DRAFT", "APPROVED", "RETIRED"];
@@ -35,6 +35,9 @@ export function VersionsTab() {
     if (ok) { setDecision(null); resource.refresh(); }
   };
 
+  // Reading a topic takes the page too: its roles and laws need the width, and the actions sit beside its title.
+  if (selected && !editor) return <VersionDetail version={selected} onClose={() => setSelected(null)}
+    onEdit={() => { setEditor({ version: selected, clone: selected.lifecycleStatus !== "DRAFT" }); setSelected(null); }} />;
   // Editing takes the page; the list comes back when the reviewer saves or leaves.
   if (editor) return <VersionEditorModal initial={editor.version} clone={editor.clone} onClose={() => setEditor(null)} onSaved={() => { setEditor(null); resource.refresh(); }} />;
 
@@ -82,31 +85,41 @@ export function VersionsTab() {
       <div className="reviewer-form-footer"><Button type="button" variant="soft" color="gray" size="2" onClick={() => setDecision(null)}>Hủy</Button><Button type="button" size="2" color={decision.status === "RETIRED" ? "red" : undefined} disabled={action.busy} onClick={() => void changeLifecycle()}>{action.busy ? "Đang cập nhật…" : decision.status === "APPROVED" ? "Phê duyệt" : "Ngừng sử dụng"}</Button></div>
     </ReviewerDialog>}
 
-    {selected && <VersionDetail version={selected} onClose={() => setSelected(null)} />}
   </Card>;
 }
 
-function VersionDetail({ version, onClose }: Readonly<{ version: Version; onClose: () => void }>) {
+function VersionDetail({ version, onClose, onEdit }: Readonly<{ version: Version; onClose: () => void; onEdit: () => void }>) {
   const definition = (version.definition && typeof version.definition === "object" ? version.definition : {}) as Record<string, unknown>;
   const objects = objectRows(definition.objectTypes);
   const quantities = objectRows(definition.quantityDefinitions);
-  const capabilities = objectRows(definition.capabilities);
+  const examples = objectRows(definition.capabilities);
+  const catalogue = (definition.lawCatalogue && typeof definition.lawCatalogue === "object" ? definition.lawCatalogue : {}) as Record<string, unknown>;
   const limitations = Array.isArray(definition.limitations) ? definition.limitations.map(String) : [];
-  return <ReviewerDialog title={`${version.name || version.schemaId} · v${version.version}`} wide onClose={onClose}>
+  return <Card size="3" className="reviewer-panel">
+    <div className="reviewer-toolbar" style={{ alignItems: "center" }}>
+      <Button type="button" variant="soft" color="gray" size="2" onClick={onClose}>← Danh sách chủ đề</Button>
+      <Heading as="h2" size="5" style={{ flex: 1, minWidth: 0 }}>{version.name || version.schemaId} · v{version.version}</Heading>
+      <Button type="button" size="2" onClick={onEdit}>{version.lifecycleStatus === "DRAFT" ? "Sửa bản nháp" : "Tạo phiên bản mới để sửa"}</Button>
+    </div>
     <div className="reviewer-detail-meta"><ReviewStatus status={version.lifecycleStatus} /><Text size="2" color="gray">Tạo ngày {formatDate(version.createdAt)}</Text></div>
     <div className="reviewer-summary">
       {typeof definition.description === "string" && <Text as="p" size="2" className="reviewer-context-text">{definition.description}</Text>}
-      <Heading as="h3" size="2">Đối tượng ({objects.length})</Heading>
-      <div className="reviewer-chips">{objects.length ? objects.map((item, index) => <Badge key={index} color="gray" variant="soft" size="2">{String(item.label ?? item.type ?? "—")}</Badge>) : <Text size="2" color="gray">Chưa khai báo.</Text>}</div>
-      <Heading as="h3" size="2">Đại lượng ({quantities.length})</Heading>
-      <div className="reviewer-chips">{quantities.length ? quantities.map((item, index) => <Badge key={index} color="indigo" variant="soft" size="2">{String(item.label ?? item.key ?? "—")}{item.symbol ? ` (${String(item.symbol)})` : ""}</Badge>) : <Text size="2" color="gray">Chưa khai báo.</Text>}</div>
-      <Heading as="h3" size="2">Bài toán mô phỏng và công thức ({capabilities.length})</Heading>
-      <CapabilitiesSummary capabilities={capabilities} />
+      <Heading as="h3" size="3">Định luật dùng để xác minh mô phỏng</Heading>
+      <Text as="p" size="2" color="gray">AI viết mô hình theo mô tả của giáo viên; hệ thống tính rồi đối chiếu kết quả với từng định luật dưới đây.</Text>
+      <LawBook value={catalogue} />
+      <details className="reviewer-disclosure"><summary>Vật và đại lượng thường gặp trong đề bài (gợi ý cho AI): {objects.length} vật, {quantities.length} đại lượng</summary>
+        <div className="reviewer-chips">{objects.map((item, index) => <Badge key={"o" + index} color="gray" variant="soft" size="2">{String(item.label ?? item.type ?? "—")}</Badge>)}</div>
+        <div className="reviewer-chips" style={{ marginTop: 8 }}>{quantities.map((item, index) => <Badge key={"q" + index} color="indigo" variant="soft" size="2">{String(item.label ?? item.key ?? "—")}{item.symbol ? ` (${String(item.symbol)})` : ""}</Badge>)}</div>
+      </details>
+      {examples.length > 0 && <details className="reviewer-disclosure"><summary>Bài mẫu ({examples.length}) — chỉ để tham khảo</summary>
+        <Text as="p" size="1" color="gray" mb="2">Ví dụ về kí hiệu và công thức cho AI, và để mở lại mô phỏng đã lưu trước đây. Chúng không còn quyết định mô phỏng nào được tạo.</Text>
+        <ul>{examples.map((item, index) => <li key={index}><Text size="2">{String(item.title ?? item.capabilityId ?? "")}</Text></li>)}</ul>
+      </details>}
       {limitations.length > 0 && <><Heading as="h3" size="2">Giới hạn</Heading><ul className="reviewer-consequences">{limitations.map(item => <li key={item}>{item}</li>)}</ul></>}
     </div>
     <details className="reviewer-disclosure"><summary>Thông tin kỹ thuật</summary>
       <dl className="reviewer-evidence-grid"><div><dt>Mã chủ đề</dt><dd><code>{version.schemaId}</code></dd></div><div><dt>Số lần chỉnh sửa</dt><dd>{version.recordVersion ?? 0}</dd></div><div><dt>Mã kiểm tra nội dung</dt><dd><code>{version.definitionChecksum ?? "—"}</code></dd></div></dl>
       <pre className="reviewer-json">{JSON.stringify(version.definition, null, 2)}</pre>
     </details>
-  </ReviewerDialog>;
+  </Card>;
 }

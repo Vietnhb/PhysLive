@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Text, TextArea } from "@radix-ui/themes";
+import { Heading, Text, TextArea } from "@radix-ui/themes";
 import { AdvancedJson, RowsEditor } from "./JsonEditor";
 import { objectRows } from "../model/jsonRows";
-import { LawCatalogueEditor } from "./LawCatalogueEditor";
+import { LawBook } from "./LawCatalogueEditor";
 
 type Definition = Record<string, unknown>;
 
@@ -23,24 +23,27 @@ export function TopicDefinitionForm({ value, onChange }: Readonly<{ value: Defin
   });
   return <div className="reviewer-form-sections">
     <label className="reviewer-field"><span>Mô tả chủ đề</span><TextArea size="2" rows={3} placeholder="Chủ đề này bao gồm những hiện tượng nào?" value={typeof value.description === "string" ? value.description : ""} onChange={event => set("description", event.target.value)} /></label>
+    <section className="reviewer-law-section"><Heading as="h3" size="4">Định luật dùng để xác minh mô phỏng</Heading>
+      <Text as="p" size="2" color="gray" mb="3">AI viết mô hình theo mô tả của giáo viên; hệ thống tính rồi đối chiếu kết quả với từng định luật dưới đây. Khi mục “Định luật còn thiếu” báo có đại lượng chưa được kiểm, hãy thêm định luật tương ứng ở đây.</Text>
+      <LawBook value={value.lawCatalogue && typeof value.lawCatalogue === "object" && !Array.isArray(value.lawCatalogue) ? value.lawCatalogue as Definition : {}} onChange={next => set("lawCatalogue", next)} />
+    </section>
+    <details className="reviewer-disclosure"><summary>Vật và đại lượng thường gặp trong đề bài (gợi ý cho AI)</summary>
     <section className="reviewer-form-section"><Text as="div" size="2" weight="bold">Đối tượng vật lý</Text><Text as="p" size="1" color="gray" mb="2">Những vật/hệ thường gặp trong đề bài của chủ đề (xe, lò xo, điện tích…).</Text>
       <RowsEditor rows={objectRows(value.objectTypes)} onChange={rows => set("objectTypes", rows)} addLabel="Thêm đối tượng" empty="Chưa có đối tượng nào."
-        columns={[{ key: "label", label: "Tên hiển thị", placeholder: "vật chuyển động", width: "28%" }, { key: "description", label: "Mô tả", placeholder: "Xe, người, bóng…" }, { key: "type", label: "Mã kỹ thuật", placeholder: "moving_body", width: "22%" }]} />
+        columns={[{ key: "label", label: "Tên hiển thị", placeholder: "vật chuyển động", width: "28%" }, { key: "description", label: "Mô tả", placeholder: "Xe, người, bóng…" }, { key: "type", label: "Mã (cho hệ thống)", placeholder: "moving_body", width: "22%" }]} />
     </section>
     <section className="reviewer-form-section"><Text as="div" size="2" weight="bold">Đại lượng</Text><Text as="p" size="1" color="gray" mb="2">Các đại lượng AI được phép trích xuất, kèm đơn vị hợp lệ (cách nhau bởi dấu phẩy).</Text>
       <RowsEditor rows={objectRows(value.quantityDefinitions)} onChange={rows => set("quantityDefinitions", rows)} addLabel="Thêm đại lượng" empty="Chưa có đại lượng nào."
-        columns={[{ key: "label", label: "Tên", placeholder: "tốc độ ban đầu", width: "24%" }, { key: "symbol", label: "Kí hiệu", placeholder: "v₀", width: "10%" }, { key: "allowedUnits", label: "Đơn vị", placeholder: "m/s, km/h", type: "list", width: "16%" }, { key: "description", label: "Mô tả" }, { key: "key", label: "Mã kỹ thuật", placeholder: "initial_speed", width: "20%" }]} />
+        columns={[{ key: "label", label: "Tên", placeholder: "tốc độ ban đầu", width: "24%" }, { key: "symbol", label: "Kí hiệu", placeholder: "v₀", width: "10%" }, { key: "allowedUnits", label: "Đơn vị", placeholder: "m/s, km/h", type: "list", width: "16%" }, { key: "description", label: "Mô tả" }, { key: "key", label: "Mã (cho hệ thống)", placeholder: "initial_speed", width: "20%" }]} />
     </section>
-    <section className="reviewer-form-section"><Text as="div" size="2" weight="bold">Định luật dùng để xác minh mô phỏng</Text><Text as="p" size="1" color="gray" mb="2">AI viết mô hình theo mô tả của giáo viên; hệ thống tính rồi đối chiếu kết quả với các định luật dưới đây. Bổ sung vai trò và định luật ở đây khi mục “Định luật còn thiếu” báo có đại lượng chưa được kiểm.</Text>
-      <LawCatalogueEditor value={value.lawCatalogue && typeof value.lawCatalogue === "object" && !Array.isArray(value.lawCatalogue) ? value.lawCatalogue as Definition : {}} onChange={next => set("lawCatalogue", next)} />
-    </section>
+    </details>
     {objectRows(value.capabilities).length > 0 && <details className="reviewer-disclosure"><summary>Bài mẫu của chủ đề ({objectRows(value.capabilities).length}) — chỉ để tham khảo</summary>
       <Text as="p" size="1" color="gray" mb="2">Các bài mẫu là ví dụ về kí hiệu và công thức cho AI, và để mở lại mô phỏng đã lưu trước đây. Chúng không còn quyết định mô phỏng nào được tạo.</Text>
       <ul>{objectRows(value.capabilities).map((item, index) => <li key={index}><Text size="2">{String(item.title ?? item.capabilityId ?? "")}</Text></li>)}</ul>
     </details>}
     <LinesField label="Giới hạn của chủ đề (mỗi dòng một ý)" placeholder="Bỏ qua sức cản không khí…" value={limitations} onChange={lines => set("limitations", lines)} />
     {others.length > 0 && <Text as="p" size="1" color="gray">Phần khác giữ nguyên: {others.join(", ")}. Chỉnh trong mục nâng cao nếu cần.</Text>}
-    <AdvancedJson value={value} onChange={onChange} />
+    <AdvancedJson value={value} onChange={onChange} label="Dữ liệu đầy đủ của chủ đề (dành cho kĩ thuật viên)" />
   </div>;
 }
 
