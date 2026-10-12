@@ -119,13 +119,4 @@ public class School {
         LocalDate today = LocalDate.now();
         return licenseStart != null && licenseEnd != null && !today.isBefore(licenseStart) && !today.isAfter(licenseEnd);
     }
-
-    /**
-     * Check if school has remaining AI quota.
-     * @return true if the current month has remaining tokens
-     */
-    public boolean hasQuotaRemaining() {
-        long used = LocalDate.now().withDayOfMonth(1).equals(tokenUsageMonth) && usedTokens != null ? usedTokens : 0;
-        return monthlyTokenQuota == null || used < monthlyTokenQuota;
-    }
 }

@@ -3,7 +3,6 @@ package com.example.backend.security;
 import com.example.backend.base.web.dto.ErrorResponse;
 import com.example.backend.system.account.model.enums.RoleName;
 import com.example.backend.system.account.repository.UserRepository;
-import com.example.backend.system.school.model.entity.School;
 import com.example.backend.system.school.service.LicenseCheckService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;

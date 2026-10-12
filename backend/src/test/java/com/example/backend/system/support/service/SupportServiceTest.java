@@ -6,7 +6,6 @@ import com.example.backend.system.account.model.entity.User;
 import com.example.backend.system.account.model.enums.RoleName;
 import com.example.backend.system.account.service.CurrentUserService;
 import com.example.backend.system.support.dto.SupportContracts.UpdateSupportRequest;
-import com.example.backend.system.support.dto.SupportContracts;
 import com.example.backend.system.support.model.entity.SupportItem;
 import com.example.backend.system.support.model.enums.SupportKind;
 import com.example.backend.system.support.model.enums.SupportStatus;

@@ -8,7 +8,6 @@ import com.example.backend.system.account.service.RoleValidationService;
 import com.example.backend.system.school.dto.SchoolReportContracts.ClassRow;
 import com.example.backend.system.school.dto.SchoolReportContracts.Summary;
 import com.example.backend.system.school.dto.SchoolReportContracts.TokenRow;
-import com.example.backend.system.school.dto.SchoolReportContracts;
 import com.example.backend.system.school.model.entity.School;
 import com.example.backend.system.school.repository.ClassEnrollmentRepository;
 import com.example.backend.system.school.repository.ClassTeacherAssignmentRepository;

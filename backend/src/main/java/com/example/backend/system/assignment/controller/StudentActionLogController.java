@@ -2,7 +2,6 @@ package com.example.backend.system.assignment.controller;
 
 import com.example.backend.system.assignment.dto.AssignmentContracts.StudentActionLogRequest;
 import com.example.backend.system.assignment.dto.AssignmentContracts.StudentActionLogResponse;
-import com.example.backend.system.assignment.dto.AssignmentContracts;
 import com.example.backend.system.assignment.service.StudentActionLogService;
 import jakarta.validation.Valid;
 import java.util.List;

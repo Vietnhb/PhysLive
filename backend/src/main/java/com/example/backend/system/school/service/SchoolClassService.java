@@ -15,7 +15,6 @@ import com.example.backend.system.school.dto.SchoolClassContracts.SchoolClassReq
 import com.example.backend.system.school.dto.SchoolClassContracts.StudentClassSummary;
 import com.example.backend.system.school.dto.SchoolClassContracts.StudentClassTeacher;
 import com.example.backend.system.school.dto.SchoolClassContracts.TeacherAssignment;
-import com.example.backend.system.school.dto.SchoolClassContracts;
 import com.example.backend.system.school.model.entity.ClassEnrollment;
 import com.example.backend.system.school.model.entity.ClassTeacherAssignment;
 import com.example.backend.system.school.model.entity.School;

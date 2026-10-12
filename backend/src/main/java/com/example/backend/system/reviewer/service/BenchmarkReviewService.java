@@ -2,7 +2,6 @@ package com.example.backend.system.reviewer.service;
 
 import com.example.backend.exception.ApiException;
 import com.example.backend.system.account.service.CurrentUserService;
-import com.example.backend.system.problem.model.entity.Specification;
 import com.example.backend.system.reviewer.dto.BenchmarkContracts.*;
 import com.example.backend.system.reviewer.dto.BenchmarkContracts;
 import com.example.backend.system.reviewer.model.entity.Adjudication;
@@ -12,7 +11,6 @@ import com.example.backend.system.reviewer.repository.BenchmarkProblemRepository
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

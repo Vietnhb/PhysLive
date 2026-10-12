@@ -2,7 +2,6 @@ package com.example.backend.system.school.controller;
 
 import com.example.backend.system.library.dto.LibraryItemResponse;
 import com.example.backend.system.library.dto.LibraryModeration.Request;
-import com.example.backend.system.library.dto.LibraryModeration;
 import com.example.backend.system.library.model.enums.LibraryModerationStatus;
 import com.example.backend.system.library.service.LibraryModerationService;
 import jakarta.validation.Valid;

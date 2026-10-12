@@ -13,7 +13,6 @@ import com.example.backend.system.account.service.CurrentUserService;
 import com.example.backend.system.account.service.RoleValidationService;
 import com.example.backend.system.school.dataio.dto.SchoolImport;
 import com.example.backend.system.school.dto.SchoolClassContracts.SchoolClassRequest;
-import com.example.backend.system.school.dto.SchoolClassContracts;
 import com.example.backend.system.school.model.entity.School;
 import com.example.backend.system.school.model.entity.SchoolClass;
 import com.example.backend.system.school.repository.ClassEnrollmentRepository;

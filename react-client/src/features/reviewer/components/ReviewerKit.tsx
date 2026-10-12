@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Heading, Select, Text, TextField } from "@radix-ui/themes";
+import { Badge, Button, Heading, Select, TextField } from "@radix-ui/themes";
 import type { ComponentProps, ReactNode } from "react";
 import { reviewerStatusLabel } from "../model/reviewerUtils";
 
@@ -48,17 +48,9 @@ export function ReviewerFilter({ label, value, onChange, statuses }: Readonly<{ 
   return <Select.Root size="3" value={value || "ALL"} onValueChange={(next) => onChange(next === "ALL" ? "" : next)}><Select.Trigger aria-label={label} className="reviewer-filter" /><Select.Content><Select.Item value="ALL">Tất cả trạng thái</Select.Item><Select.Separator />{statuses.map((status) => <Select.Item key={status} value={status}>{reviewerStatusLabel(status)}</Select.Item>)}</Select.Content></Select.Root>;
 }
 
-export function ReviewerFormSelect({ name, label, defaultValue, required, options, placeholder = "Chọn giá trị" }: Readonly<{ name: string; label: string; defaultValue?: string; required?: boolean; options: { value: string; label: string }[]; placeholder?: string }>) {
-  return <Select.Root size="3" name={name} defaultValue={defaultValue || undefined} required={required}><Select.Trigger aria-label={label} placeholder={placeholder} className="reviewer-field-select" /><Select.Content>{options.map((option) => <Select.Item key={option.value} value={option.value}>{option.label}</Select.Item>)}</Select.Content></Select.Root>;
-}
-
 export function ReviewStatus({ status }: Readonly<{ status: string }>) {
   const color = ["APPROVED", "FEATURED", "GOLD_READY", "COMPLETED", "SUCCESS", "SUCCEEDED"].includes(status) ? "cyan" : ["RETIRED", "REJECTED", "REMOVED", "FAILED", "ARCHIVED"].includes(status) ? "gray" : ["PENDING", "DRAFT", "DISAGREEMENT"].includes(status) ? "amber" : "indigo";
   return <Badge color={color} variant="soft" size="2">{reviewerStatusLabel(status)}</Badge>;
-}
-
-export function ReviewerMetric({ label, value, icon, tone }: Readonly<{ label: string; value: ReactNode; icon: ReviewerIconName; tone: "indigo" | "cyan" | "amber" }>) {
-  return <Card size="2" className="reviewer-metric"><span className={`reviewer-icon-tile reviewer-tone-${tone}`}><ReviewerIcon name={icon} /></span><div><Text as="div" size="2" color="gray">{label}</Text><Heading as="h3" size="6" mt="1">{value}</Heading></div></Card>;
 }
 
 export function ReviewerRefresh({ refresh, loading }: Readonly<{ refresh: () => void; loading: boolean }>) {

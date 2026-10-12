@@ -1,6 +1,6 @@
 # Danh mục API PhysLive
 
-Tổng: **162 API**. Một API là một cặp HTTP method + path; JSON/multipart cùng đường dẫn tính một API. Không tính Swagger, Actuator và WebSocket handshake.
+Tổng: **160 API**. Một API là một cặp HTTP method + path; JSON/multipart cùng đường dẫn tính một API. Không tính Swagger, Actuator và WebSocket handshake.
 
 Nguồn: mapping của controller đã biên dịch và kiểm tra SecurityConfig bằng MockMvc trong ApiCatalogTest. Đây là quyền qua lớp HTTP; service tiếp tục kiểm tra quyền sở hữu, trường, bản quyền, mật khẩu lần đầu và capability. Vì vậy số API HTTP không đồng nghĩa mỗi tài khoản được phép dùng mọi tài nguyên.
 
@@ -8,11 +8,11 @@ Nguồn: mapping của controller đã biên dịch và kiểm tra SecurityConfi
 
 - **GUEST: 11 API qua HTTP**, gồm 11 API public. Xem cộng đồng PUBLIC đã duyệt và bình luận; đăng nhập, đăng ký trường, xem gói và luồng thanh toán public. Không viết bình luận hoặc thích.
 - **ADMIN: 22 API qua HTTP**, gồm 11 API public. Xem toàn bộ người dùng và tạo/quản lý MANAGER. Service chặn quản lý các role khác.
-- **MANAGER: 151 API qua HTTP**, gồm 11 API public. Quản lý người dùng toàn hệ thống, trường/gói/chương trình học, phản hồi và sự cố; quản lý nội dung và đánh giá.
-- **REVIEWER: 71 API qua HTTP**, gồm 11 API public. Biên tập ngữ cảnh/schema/bộ giải khi có quyền CONTENT_EDIT; kiểm duyệt public và xóa bình luận public khi có quyền CONTENT_REVIEW. Hai quyền độc lập, do MANAGER gắn.
-- **SCHOOL: 68 API qua HTTP**, gồm 11 API public. Mua/nâng/gia hạn bản quyền, tạo lớp, quản lý tài khoản và mật khẩu trong trường, import CSV và báo cáo.
-- **STAFF: 83 API qua HTTP**, gồm 11 API public. Quyền TEACH: tạo mô phỏng, quản lý thư viện và bài tập của lớp được phân công. Quyền DEPARTMENT_HEAD_PHYSICS: phân công giáo viên/học sinh và duyệt nội bộ. Một tài khoản có thể có một hoặc cả hai quyền, do SCHOOL gắn. STAFF không được tạo lớp.
-- **STUDENT: 47 API qua HTTP**, gồm 11 API public. Xem lớp, làm bài được cấp quyền, nộp bài, nhận điểm, tương tác cộng đồng thuộc phạm vi được đọc.
+- **MANAGER: 149 API qua HTTP**, gồm 11 API public. Quản lý người dùng toàn hệ thống, trường/gói/chương trình học, phản hồi và sự cố; quản lý nội dung và đánh giá.
+- **REVIEWER: 69 API qua HTTP**, gồm 11 API public. Biên tập ngữ cảnh/schema/bộ giải khi có quyền CONTENT_EDIT; kiểm duyệt public và xóa bình luận public khi có quyền CONTENT_REVIEW. Hai quyền độc lập, do MANAGER gắn.
+- **SCHOOL: 66 API qua HTTP**, gồm 11 API public. Mua/nâng/gia hạn bản quyền, tạo lớp, quản lý tài khoản và mật khẩu trong trường, import CSV và báo cáo.
+- **STAFF: 81 API qua HTTP**, gồm 11 API public. Quyền TEACH: tạo mô phỏng, quản lý thư viện và bài tập của lớp được phân công. Quyền DEPARTMENT_HEAD_PHYSICS: phân công giáo viên/học sinh và duyệt nội bộ. Một tài khoản có thể có một hoặc cả hai quyền, do SCHOOL gắn. STAFF không được tạo lớp.
+- **STUDENT: 45 API qua HTTP**, gồm 11 API public. Xem lớp, làm bài được cấp quyền, nộp bài, nhận điểm, tương tác cộng đồng thuộc phạm vi được đọc.
 
 ADMIN và các role đăng nhập vẫn có API hồ sơ cá nhân. Các số trên có giao nhau vì nhiều role dùng chung một API; không cộng các số theo role để tính tổng.
 
@@ -170,11 +170,9 @@ ADMIN và các role đăng nhập vẫn có API hồ sơ cá nhân. Các số tr
 - `PUT /api/reviewer/solvers/{id}` — Sửa phiên bản bộ giải nháp. Quyền HTTP: `MANAGER`, `REVIEWER`.
 - `PUT /api/reviewer/solvers/{id}/lifecycle` — Đổi trạng thái phiên bản bộ giải. Quyền HTTP: `MANAGER`, `REVIEWER`.
 
-### SchemaController (6)
+### SchemaController (4)
 
 - `GET /api/schemas` — Xem schema; tài khoản thường chỉ thấy bản đã duyệt. Quyền HTTP: `MANAGER`, `REVIEWER`, `SCHOOL`, `STAFF`, `STUDENT`.
-- `GET /api/schemas/core-types` — Đọc thư viện kiểu dữ liệu vật lý chuẩn. Quyền HTTP: `MANAGER`, `REVIEWER`, `SCHOOL`, `STAFF`, `STUDENT`.
-- `GET /api/schemas/meta-schema` — Đọc hợp đồng cấu trúc topic pack. Quyền HTTP: `MANAGER`, `REVIEWER`, `SCHOOL`, `STAFF`, `STUDENT`.
 - `GET /api/schemas/{schemaId}` — Đọc bản schema đã duyệt mới nhất. Quyền HTTP: `MANAGER`, `REVIEWER`, `SCHOOL`, `STAFF`, `STUDENT`.
 - `POST /api/schemas` — Tạo phiên bản schema nháp. Quyền HTTP: `MANAGER`, `REVIEWER`.
 - `PUT /api/schemas/{schemaId}/lifecycle` — Đổi trạng thái phiên bản mới nhất của schema. Quyền HTTP: `MANAGER`, `REVIEWER`.
@@ -278,4 +276,4 @@ ADMIN và các role đăng nhập vẫn có API hồ sơ cá nhân. Các số tr
 
 ## Tạo lại danh mục
 
-Từ thư mục backend: `./mvnw -Dtest=ApiCatalogTest test`. Sau đó từ thư mục repository: `node scripts/api-catalog.mjs`.
+Từ thư mục backend: `./mvnw -Dtest=ApiCatalogTest test`, kết quả ở `backend/target/api-catalog.json`.

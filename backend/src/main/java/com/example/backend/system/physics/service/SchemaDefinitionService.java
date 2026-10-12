@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -47,11 +45,6 @@ public class SchemaDefinitionService {
                 .collect(java.util.stream.Collectors.toMap(s -> s.getSchemaId().toLowerCase(), s -> s,
                         SchemaVersionOrdering::newer));
         return new java.util.TreeMap<>(latest).values().stream().toList();
-    }
-
-    @Transactional(readOnly = true)
-    public SchemaVersion requireApproved(String schemaId) {
-        return findApproved(schemaId).orElseThrow(() -> ApiException.unprocessable("Không có định nghĩa mô hình đã được phê duyệt cho: " + schemaId));
     }
 
     @Transactional(readOnly = true)
@@ -87,21 +80,8 @@ public class SchemaDefinitionService {
         validateDefinition(definition, schemaId);
     }
 
-    public JsonNode topicPackMetaSchema() { return readSchemaResource("schemas/topic-pack.meta-schema-2.0.json"); }
-    public JsonNode coreTypeLibrary() { return readSchemaResource("schemas/core-types/registry.json"); }
 
     public String compiledChecksum(JsonNode definition) { return checksum(definition); }
-
-    private Optional<SchemaVersion> findApproved(String schemaId) {
-        if (!StringUtils.hasText(schemaId)) return Optional.empty();
-        return schemas.findAllBySchemaIdIgnoreCaseAndLifecycleStatusOrderByCreatedAtDesc(
-                schemaId.trim(), LifecycleStatus.APPROVED).stream().reduce(SchemaVersionOrdering::newer);
-    }
-
-    private JsonNode readSchemaResource(String path) {
-        try { return json.readTree(new ClassPathResource(path).getInputStream()); }
-        catch (Exception exception) { throw new IllegalStateException("Required schema resource is unavailable: " + path, exception); }
-    }
 
     private String checksum(JsonNode definition) {
         try {

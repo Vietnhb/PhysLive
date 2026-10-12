@@ -5,7 +5,6 @@ import com.example.backend.system.account.model.entity.User;
 import com.example.backend.system.account.service.AccountAccessService;
 import com.example.backend.system.account.service.CurrentUserService;
 import com.example.backend.system.assignment.dto.AssignmentContracts.SchoolAssignment;
-import com.example.backend.system.assignment.dto.AssignmentContracts;
 import com.example.backend.system.assignment.repository.AssignmentRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

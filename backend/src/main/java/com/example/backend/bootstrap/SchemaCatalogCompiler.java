@@ -142,7 +142,7 @@ public final class SchemaCatalogCompiler {
             appliesTo.putArray("quantities");
             requirements.add(item);
         }
-        for (String field : List.of("coreTypeRefs", "simulationCapability", "limitations", "conceptVocabulary", "visualCapability"))
+        for (String field : List.of("simulationCapability", "limitations", "conceptVocabulary", "visualCapability"))
             if (defaults.has(field)) definition.set(field, defaults.get(field).deepCopy());
         if (topic.has("curriculum")) definition.set("curriculum", topic.get("curriculum").deepCopy());
         return definition;

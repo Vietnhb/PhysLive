@@ -13,7 +13,6 @@ import com.example.backend.system.assignment.dto.AssignmentContracts.CreateAssig
 import com.example.backend.system.assignment.dto.AssignmentContracts.SubmitPredictionRequest;
 import com.example.backend.system.assignment.dto.AssignmentContracts.TeacherClassOption;
 import com.example.backend.system.assignment.dto.AssignmentContracts.TeacherClassStudent;
-import com.example.backend.system.assignment.dto.AssignmentContracts;
 import com.example.backend.system.assignment.model.entity.Assignment;
 import com.example.backend.system.assignment.model.entity.AssignmentSubmission;
 import com.example.backend.system.assignment.model.enums.AssignmentStatus;
@@ -28,7 +27,6 @@ import com.example.backend.system.school.repository.ClassEnrollmentRepository;
 import com.example.backend.system.school.repository.ClassTeacherAssignmentRepository;
 import com.example.backend.system.simulation.dto.SimulationRequests;
 import com.example.backend.system.simulation.dto.SimulationResponse;
-import com.example.backend.system.simulation.model.entity.Simulation;
 import com.example.backend.system.simulation.model.enums.SimulationStatus;
 import com.example.backend.system.simulation.service.SimulationService;
 import com.fasterxml.jackson.databind.JsonNode;

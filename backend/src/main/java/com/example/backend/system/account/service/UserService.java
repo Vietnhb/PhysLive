@@ -8,7 +8,6 @@ import com.example.backend.system.account.model.enums.RoleName;
 import com.example.backend.system.account.repository.UserRepository;
 import com.example.backend.system.school.dto.LicenseStatusResponse;
 import com.example.backend.system.school.dto.SchoolClassContracts.StudentOptionResponse;
-import com.example.backend.system.school.dto.SchoolClassContracts;
 import com.example.backend.system.school.service.LicenseCheckService;
 import java.util.List;
 import java.util.Locale;

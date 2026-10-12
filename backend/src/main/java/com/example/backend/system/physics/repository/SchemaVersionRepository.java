@@ -11,14 +11,10 @@ public interface SchemaVersionRepository extends JpaRepository<SchemaVersion, UU
     List<SchemaVersion> findByLifecycleStatus(LifecycleStatus lifecycleStatus);
     List<SchemaVersion> findAllByLifecycleStatusAndTopicInOrderByTopicAscSchemaIdAscCreatedAtDesc(
             LifecycleStatus lifecycleStatus, List<String> topics);
-    List<SchemaVersion> findAllBySchemaIdIgnoreCaseAndLifecycleStatusAndTopicInOrderByCreatedAtDesc(
-            String schemaId, LifecycleStatus lifecycleStatus, List<String> topics);
     Optional<SchemaVersion> findFirstBySchemaIdAndVersion(String schemaId, String version);
     Optional<SchemaVersion> findTopBySchemaIdIgnoreCaseAndLifecycleStatusOrderByCreatedAtDesc(
             String schemaId, LifecycleStatus lifecycleStatus);
     Optional<SchemaVersion> findTopBySchemaIdIgnoreCaseOrderByCreatedAtDesc(String schemaId);
-    List<SchemaVersion> findAllBySchemaIdIgnoreCaseAndLifecycleStatusOrderByCreatedAtDesc(
-            String schemaId, LifecycleStatus lifecycleStatus);
     boolean existsBySchemaIdAndVersion(String schemaId, String version);
     List<SchemaVersion> findAllByLifecycleStatusOrderByTopicAscSchemaIdAscCreatedAtDesc(LifecycleStatus lifecycleStatus);
     List<SchemaVersion> findAllByOrderByTopicAscNameAscVersionAsc();

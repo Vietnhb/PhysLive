@@ -6,8 +6,6 @@ export type SupportItem = { id: string; kind: SupportKind; senderId: number; sen
 
 export const adminSupportItems = (kind: SupportKind) => axiosClient.get<SupportItem[]>(`/support/admin?kind=${kind}`).then(r => r.data);
 export const updateSupportItem = (id: string, status: SupportStatus, response?: string) => axiosClient.put<SupportItem>(`/support/admin/${id}`, { status, response }).then(r => r.data);
-export const submitFeedback = (subject: string, content: string) => axiosClient.post<SupportItem>("/support/feedback", { subject, content }).then(r => r.data);
-export const submitMessage = (subject: string, content: string) => axiosClient.post<SupportItem>("/support/messages", { subject, content }).then(r => r.data);
 /** Simulation complaints: sent by teachers, answered by reviewers. */
 export type SimulationComplaint = SupportItem & { simulationId?: string | null; responderName?: string | null };
 export const submitSimulationComplaint = (subject: string, content: string, simulationId?: string) =>

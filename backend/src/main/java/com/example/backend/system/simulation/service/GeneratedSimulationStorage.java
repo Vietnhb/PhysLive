@@ -2,7 +2,6 @@ package com.example.backend.system.simulation.service;
 
 import com.example.backend.exception.ApiException;
 import com.example.backend.system.account.service.CurrentUserService;
-import com.example.backend.system.curriculum.model.entity.Lesson;
 import com.example.backend.system.curriculum.repository.LessonRepository;
 import com.example.backend.system.library.dto.LibraryItemResponse;
 import com.example.backend.system.library.dto.LibraryRequests.Save;

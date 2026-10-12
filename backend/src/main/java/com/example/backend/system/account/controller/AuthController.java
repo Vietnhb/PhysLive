@@ -4,7 +4,6 @@ import com.example.backend.system.account.dto.LoginRequest;
 import com.example.backend.system.account.dto.LoginResponse;
 import com.example.backend.system.account.service.AuthService;
 import com.example.backend.system.school.dto.SchoolPaymentContracts.LicensePlanResponse;
-import com.example.backend.system.school.dto.SchoolPaymentContracts;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;

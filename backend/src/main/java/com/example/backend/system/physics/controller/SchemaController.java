@@ -3,7 +3,6 @@ package com.example.backend.system.physics.controller;
 import com.example.backend.base.crud.model.enums.LifecycleStatus;
 import com.example.backend.system.physics.dto.SchemaContracts;
 import com.example.backend.system.physics.service.SchemaService;
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,16 +26,6 @@ public class SchemaController {
     @GetMapping
     public List<SchemaContracts.Response> list(@RequestParam(defaultValue = "false") boolean enabledOnly) {
         return schemaService.listVisible(enabledOnly);
-    }
-
-    @GetMapping("/meta-schema")
-    public JsonNode topicPackMetaSchema() {
-        return schemaService.topicPackMetaSchema();
-    }
-
-    @GetMapping("/core-types")
-    public JsonNode coreTypeLibrary() {
-        return schemaService.coreTypeLibrary();
     }
 
     @GetMapping("/{schemaId}")

@@ -5,7 +5,6 @@ import com.example.backend.system.account.dto.UserResponse;
 import com.example.backend.system.account.service.UserService;
 import com.example.backend.system.school.dto.LicenseStatusResponse;
 import com.example.backend.system.school.dto.SchoolClassContracts.StudentOptionResponse;
-import com.example.backend.system.school.dto.SchoolClassContracts;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

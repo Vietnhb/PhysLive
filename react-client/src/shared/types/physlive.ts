@@ -156,13 +156,6 @@ export type VisualizationDefinition = {
   spec?: SimulationSpec;
 };
 
-export type Specification = {
-  id?: string; schemaVersion?: string; schemaId?: string; topic?: string; confidence: number;
-  objects: unknown[]; quantities: Quantity[]; relations: unknown[]; endCondition?: EndCondition | null; ambiguity?: unknown;
-  endConditionCapabilities?: string[];
-  confirmationState: string; validationStatus?: string; validationResult?: unknown;
-};
-
 export type Validation = { passed: boolean; tolerance: number; checkpoints: { time: number; maxRelativeError: number; passed: boolean }[] };
 
 export type Simulation = { simulationId: string; runId: string; specificationId: string; schemaId: string; valid: boolean; ready: boolean; time: number[]; positions: Record<string, number[]>; velocities: Record<string, number[]>; accelerations: Record<string, number[]>; values: Record<string, number[]>; /** Standalone scalar outputs stay separate from sampled `values` series. */ scalarOutputs?: Record<string, number>; /** Versioned spatial data; legacy clients may send either an array or an object-map. */ scalarFields?: ScalarFieldCollection; parameters: Record<string, number>; visualization: VisualizationDefinition; validation: Validation; endCondition?: EndCondition; resolvedEnd?: ResolvedEnd; spec?: SimulationSpec; result?: unknown; elapsedMilliseconds: number };

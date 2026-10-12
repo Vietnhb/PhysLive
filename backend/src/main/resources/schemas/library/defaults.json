@@ -1,11 +1,6 @@
 {
   "metaSchemaVersion": "2.0",
   "model": "generated_visual",
-  "coreTypeRefs": [
-    "object_identity",
-    "scalar_quantity",
-    "typed_relation"
-  ],
   "simulationCapability": {
     "mode": "generated_visual",
     "scope": "LLM-generated contextual SVG/PixiJS presentation. Physical quantities are computed from applicable approved capability equation ASTs. Participant names, counts, shapes and environments are unrestricted by the renderer.",

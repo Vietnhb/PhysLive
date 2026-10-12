@@ -20,7 +20,6 @@ import com.example.backend.system.school.dto.SchoolPaymentContracts.Quote;
 import com.example.backend.system.school.dto.SchoolPaymentContracts.RevenueSummary;
 import com.example.backend.system.school.dto.SchoolPaymentContracts.SchoolPaymentRecoveryRequest;
 import com.example.backend.system.school.dto.SchoolPaymentContracts.SchoolRegistrationRequest;
-import com.example.backend.system.school.dto.SchoolPaymentContracts;
 import com.example.backend.system.school.model.entity.LicensePlan;
 import com.example.backend.system.school.model.entity.School;
 import com.example.backend.system.school.model.entity.SchoolPayment;

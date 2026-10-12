@@ -13,6 +13,4 @@ public interface TopicRepository extends JpaRepository<Topic, UUID> {
     List<Topic> findAllByOrderBySortOrderAsc();
 
     List<Topic> findByEnabledTrueOrderBySortOrderAsc();
-
-    boolean existsByNameIgnoreCaseAndEnabledTrue(String name);
 }

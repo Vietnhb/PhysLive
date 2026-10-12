@@ -9,8 +9,6 @@
   generation, sandbox execution, and local controls.
 - [Rebuild report](implementation/matter-rebuild-report.md) records the implemented
   flow, real provider/runtime evidence, deleted files, and observed limitations.
-- `implementation/schema-catalog-source-modules.md` documents pack sources,
-  catalog generation, and the legacy replay archive.
 
 ## Operations
 

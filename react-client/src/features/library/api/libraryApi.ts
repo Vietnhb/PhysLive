@@ -6,27 +6,9 @@ import type { LibraryFolder, LibraryItem } from "../../../shared/types/physlive"
  * Handles personal library, shared library, folders, and library items
  */
 
-export const saveLibrary = (
-  simulationId: string, 
-  folderId: string, 
-  lessonId: string, 
-  title: string, 
-  visibility: LibraryItem["visibility"] = "PERSONAL"
-) => 
-  axiosClient.post<LibraryItem>("/library", { 
-    simulationId, 
-    folderId, 
-    lessonId, 
-    title, 
-    visibility 
-  }).then(r => r.data);
-
 /** PERSONAL: only the owner. SHARED: the school, after the department head approves. PUBLIC: the community, after a reviewer approves. */
 export const shareLibraryItem = (id: string, visibility: LibraryItem["visibility"]) =>
   axiosClient.patch<LibraryItem>(`/library/${id}/visibility`, { visibility }).then(r => r.data);
-
-export const cloneSharedLibrary = (id: string, folderId: string, title?: string) =>
-  axiosClient.post<LibraryItem>(`/library/${id}/clone`, { folderId, title }).then(r => r.data);
 
 export const library = (topic?: string) => 
   axiosClient.get<LibraryItem[]>("/library", { params: { topic } }).then(r => r.data);
@@ -84,9 +66,3 @@ export const libraryFolders = () =>
 
 export const createLibraryFolder = (name: string) => 
   axiosClient.post<LibraryFolder>("/library/folders", { name }).then(r => r.data);
-
-export const renameLibraryFolder = (id: string, name: string) => 
-  axiosClient.patch<LibraryFolder>(`/library/folders/${id}`, { name }).then(r => r.data);
-
-export const deleteLibraryFolder = (id: string) => 
-  axiosClient.delete(`/library/folders/${id}`);

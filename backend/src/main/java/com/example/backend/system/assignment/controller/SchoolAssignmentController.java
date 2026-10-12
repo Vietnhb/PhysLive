@@ -1,7 +1,6 @@
 package com.example.backend.system.assignment.controller;
 
 import com.example.backend.system.assignment.dto.AssignmentContracts.SchoolAssignment;
-import com.example.backend.system.assignment.dto.AssignmentContracts;
 import com.example.backend.system.assignment.service.SchoolAssignmentService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

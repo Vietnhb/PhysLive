@@ -1,8 +1,3 @@
-export function lifecycleClass(status: string) {
-  if (status === "APPROVED") return "pass";
-  if (status === "DRAFT") return "draft";
-  return "fail";
-}
 
 export function reviewerStatusLabel(status: string) {
   const labels: Record<string, string> = {

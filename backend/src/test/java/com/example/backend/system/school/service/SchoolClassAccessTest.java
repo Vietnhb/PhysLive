@@ -5,7 +5,6 @@ import com.example.backend.system.account.TestPermissions;
 import com.example.backend.system.account.model.entity.Role;
 import com.example.backend.system.account.model.entity.User;
 import com.example.backend.system.account.repository.UserRepository;
-import com.example.backend.system.account.service.AccountAccessService;
 import com.example.backend.system.account.service.CurrentUserService;
 import com.example.backend.system.account.service.RoleValidationService;
 import com.example.backend.system.school.dto.SchoolClassContracts.SchoolClassRequest;

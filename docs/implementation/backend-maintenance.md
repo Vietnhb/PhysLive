@@ -133,7 +133,7 @@ Audit database thật xác định 38 bảng đều còn dùng bởi runtime, na
 - `EmbeddingUnavailableException`, `ExtractionRunRepository`, `SchoolService` không có consumer và bốn DTO chỉ dùng bởi handler đã ngừng hoạt động.
 - Helper schema snapshot/historical alias/projectCoreTypes, readiness.toJson và simulation.latestFor không có caller; các helper phát lại đang dùng vẫn giữ.
 - Hai prompt đặc tả cũ, matcher/interceptor cho route đã bỏ, kiểm tra template trỏ vào catalog đã không còn được sinh.
-- CI trỏ vào script/service đã bị xóa được đồng bộ sang build/test hiện tại. `npm run check:templates` dùng validator nguồn schema chung.
+- CI trỏ vào script/service đã bị xóa được đồng bộ sang build/test hiện tại.
 
 Entity và API đọc dữ liệu mô phỏng/đề bài cũ vẫn cần cho phát lại; không phải dead code.
 
@@ -154,4 +154,4 @@ Các kết quả chức năng đã xác minh trong đợt trước vẫn đượ
 - GET cộng đồng, cây chương trình và danh sách gói cho khách trả 200; POST bình luận của khách trả 401. Không tạo/sửa tài khoản thật để chạy QA. Database sau migration còn đủ 17 user và 6 role đúng ID/in hoa.
 - Một lần đo mục lục trên cùng database: khoảng 16,7 giây trước batch fetch và 1,2 giây sau. Đây là phép đo local, không phải benchmark tải đồng thời.
 
-Tạo lại thống kê API: chạy `./mvnw -Dtest=ApiCatalogTest test` trong `backend`, sau đó `node scripts/api-catalog.mjs` tại repository. Danh mục dựa trên mapping đã biên dịch; không đếm bằng chuỗi grep hoặc số controller.
+Tạo lại thống kê API: chạy `./mvnw -Dtest=ApiCatalogTest test` trong `backend`; kết quả ở `backend/target/api-catalog.json`. Danh mục dựa trên mapping đã biên dịch; không đếm bằng chuỗi grep hoặc số controller.

@@ -2,17 +2,14 @@ package com.example.backend.system.operations.service;
 
 import com.example.backend.exception.ApiException;
 import com.example.backend.system.curriculum.dto.CurriculumTreeResponse;
-import com.example.backend.system.curriculum.model.entity.Topic;
 import com.example.backend.system.curriculum.repository.TopicRepository;
 import com.example.backend.system.curriculum.service.CurriculumService;
 import com.example.backend.system.operations.dto.OperationsContracts.PlanRequest;
 import com.example.backend.system.operations.dto.OperationsContracts.TopicStatus;
 import com.example.backend.system.operations.dto.OperationsContracts.ValidationMetrics;
 import com.example.backend.system.operations.dto.OperationsContracts.ValidationRow;
-import com.example.backend.system.operations.dto.OperationsContracts;
 import com.example.backend.system.school.dto.SchoolContracts;
 import com.example.backend.system.school.dto.SchoolPaymentContracts.LicensePlanResponse;
-import com.example.backend.system.school.dto.SchoolPaymentContracts;
 import com.example.backend.system.school.model.entity.LicensePlan;
 import com.example.backend.system.school.model.entity.School;
 import com.example.backend.system.school.repository.LicensePlanRepository;

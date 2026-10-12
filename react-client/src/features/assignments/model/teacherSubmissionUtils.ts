@@ -18,10 +18,6 @@ export function formatDateTime(value: string) {
   return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString("vi-VN");
 }
 
-export function predictionText(predictions: unknown) {
-  return predictionDetails(predictions).answer;
-}
-
 export function predictionDetails(predictions: unknown) {
   if (typeof predictions === "string")
     return { answer: predictions, reasoning: "", conclusion: "", estimatedValue: undefined as number | undefined };

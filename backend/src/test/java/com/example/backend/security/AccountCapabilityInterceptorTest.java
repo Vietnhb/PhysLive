@@ -5,7 +5,6 @@ import com.example.backend.system.account.model.entity.Permission;
 import com.example.backend.system.account.TestPermissions;
 import com.example.backend.system.account.model.entity.Role;
 import com.example.backend.system.account.model.entity.User;
-import com.example.backend.system.account.service.AccountAccessService;
 import com.example.backend.system.account.service.CurrentUserService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

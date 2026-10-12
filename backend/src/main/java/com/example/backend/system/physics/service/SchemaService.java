@@ -28,14 +28,6 @@ public class SchemaService {
                 .map(SchemaContracts.Response::from).toList();
     }
 
-    public com.fasterxml.jackson.databind.JsonNode topicPackMetaSchema() {
-        return schemaDefinitions.topicPackMetaSchema();
-    }
-
-    public com.fasterxml.jackson.databind.JsonNode coreTypeLibrary() {
-        return schemaDefinitions.coreTypeLibrary();
-    }
-
     @Transactional(readOnly = true)
     public List<SchemaVersion> list(boolean enabledOnly) {
         return enabledOnly

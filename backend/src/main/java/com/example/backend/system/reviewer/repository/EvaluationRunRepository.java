@@ -9,8 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface EvaluationRunRepository extends JpaRepository<EvaluationRun, UUID> {
-    Page<EvaluationRun> findAllByOrderByCreatedAtDesc(Pageable pageable);
-
     @Query("""
             select run from EvaluationRun run
             where (:status is null or run.status = :status)

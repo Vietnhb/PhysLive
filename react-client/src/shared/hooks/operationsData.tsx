@@ -34,14 +34,3 @@ export function useAction() {
   };
   return { busy, run, feedback: <>{error && <div className="ops-alert" role="alert">{error}</div>}{notice && <output className="ops-success">{notice}</output>}</> };
 }
-
-export function parseObject(value: string) {
-  const parsed: unknown = JSON.parse(value);
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("JSON phải là một object.");
-  return parsed;
-}
-
-export function downloadJson(value: unknown, name: string) {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: "application/json" }));
-  const link = document.createElement("a"); link.href = url; link.download = name; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
-}

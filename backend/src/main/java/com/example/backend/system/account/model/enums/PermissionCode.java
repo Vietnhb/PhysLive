@@ -9,22 +9,18 @@ import java.util.Optional;
  * Each permission belongs to exactly one role; an account may hold several permissions of its role.
  */
 public enum PermissionCode {
-    TEACH(RoleName.STAFF, "Giáo viên"),
-    DEPARTMENT_HEAD_PHYSICS(RoleName.STAFF, "Tổ trưởng bộ môn Vật Lý"),
-    CONTENT_EDIT(RoleName.REVIEWER, "Biên soạn"),
-    CONTENT_REVIEW(RoleName.REVIEWER, "Kiểm duyệt");
+    TEACH(RoleName.STAFF),
+    DEPARTMENT_HEAD_PHYSICS(RoleName.STAFF),
+    CONTENT_EDIT(RoleName.REVIEWER),
+    CONTENT_REVIEW(RoleName.REVIEWER);
 
     private final RoleName role;
-    private final String label;
 
-    PermissionCode(RoleName role, String label) {
+    PermissionCode(RoleName role) {
         this.role = role;
-        this.label = label;
     }
 
     public RoleName role() { return role; }
-
-    public String label() { return label; }
 
     public static Optional<PermissionCode> from(String value) {
         if (value == null) return Optional.empty();

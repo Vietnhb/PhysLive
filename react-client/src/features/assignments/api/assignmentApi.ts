@@ -37,8 +37,6 @@ export const adjustAssignedSimulation = (
 
 export const assignmentSubmissions = (assignmentId: string) => 
   axiosClient.get<AssignmentSubmission[]>(`/assignments/${assignmentId}/submissions`).then(r => r.data);
-export type AssignmentReport = { assigned: number; submitted: number; pending: number; graded: number; confirmed: number; retryAllowed: number; averageScore?: number | null; maxScore: number };
-export const assignmentReport = (assignmentId: string) => axiosClient.get<AssignmentReport>(`/assignments/${assignmentId}/report`).then(r => r.data);
 
 export const gradeAssignmentSubmission = (assignmentId: string, submissionId: string, score: number, feedback: string, confirm = true) =>
   axiosClient.put<AssignmentSubmission>(`/assignments/${assignmentId}/submissions/${submissionId}/grade`, { score, feedback, confirm }).then(r => r.data);

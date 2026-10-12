@@ -4,8 +4,6 @@ import com.example.backend.exception.ApiException;
 import com.example.backend.system.account.service.CurrentUserService;
 import com.example.backend.system.assignment.dto.AssignmentContracts.StudentActionLogRequest;
 import com.example.backend.system.assignment.dto.AssignmentContracts.StudentActionLogResponse;
-import com.example.backend.system.assignment.dto.AssignmentContracts;
-import com.example.backend.system.assignment.model.entity.Assignment;
 import com.example.backend.system.assignment.model.entity.StudentActionLog;
 import com.example.backend.system.assignment.repository.AssignmentRepository;
 import com.example.backend.system.assignment.repository.StudentActionLogRepository;

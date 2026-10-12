@@ -97,13 +97,6 @@ public class SchemaEquationRuntime {
         return all;
     }
 
-    /** Every spelling the catalog accepts for the quantity this unit measures (the unit itself first). */
-    public List<String> spellings(String unit) {
-        String canonical = canonicalUnit.getOrDefault(unit, unit);
-        List<String> result = new ArrayList<>(List.of(unit));
-        canonicalUnit.forEach((spelling, target) -> { if (target.equals(canonical) && !result.contains(spelling)) result.add(spelling); });
-        return result;
-    }
 
     // ---------------------------------------------------------------- what a law allows
 

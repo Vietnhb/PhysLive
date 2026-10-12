@@ -8,9 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "check:architecture": "node scripts/check-architecture.mjs",
-    "check:templates": "node ../scripts/generate-schema-catalog.mjs --check",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
-    "check": "npm run check:architecture && npm run check:templates && npm run lint && npm test && npm run build",
+    "check": "npm run check:architecture && npm run lint && npm test && npm run build",
     "preview": "vite preview"
   },
   "dependencies": {

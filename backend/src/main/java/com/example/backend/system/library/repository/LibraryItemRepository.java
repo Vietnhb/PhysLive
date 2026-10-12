@@ -109,7 +109,6 @@ public interface LibraryItemRepository extends JpaRepository<LibraryItem, UUID> 
 
     long countByFolderIdAndActiveTrue(UUID folderId);
 
-    List<LibraryItem> findByVisibilityAndModerationStatusOrderByCreatedAtAsc(Visibility visibility, LibraryModerationStatus status);
     @Query("select i from LibraryItem i where i.visibility in :visibilities and i.moderationStatus = :status and (i.active = true or i.moderationStatus = com.example.backend.system.library.model.enums.LibraryModerationStatus.REMOVED) order by i.createdAt asc")
     List<LibraryItem> findByVisibilityInAndModerationStatusOrderByCreatedAtAsc(@Param("visibilities") java.util.Set<Visibility> visibilities, @Param("status") LibraryModerationStatus status);
     @EntityGraph(attributePaths = {"specification", "owner", "owner.school"})

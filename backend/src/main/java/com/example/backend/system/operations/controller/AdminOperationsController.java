@@ -5,11 +5,9 @@ import com.example.backend.system.operations.dto.OperationsContracts.PlanRequest
 import com.example.backend.system.operations.dto.OperationsContracts.TopicStatus;
 import com.example.backend.system.operations.dto.OperationsContracts.ValidationMetrics;
 import com.example.backend.system.operations.dto.OperationsContracts.ValidationRow;
-import com.example.backend.system.operations.dto.OperationsContracts;
 import com.example.backend.system.operations.service.AdminOperationsService;
 import com.example.backend.system.school.dto.SchoolContracts;
 import com.example.backend.system.school.dto.SchoolPaymentContracts.LicensePlanResponse;
-import com.example.backend.system.school.dto.SchoolPaymentContracts;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;

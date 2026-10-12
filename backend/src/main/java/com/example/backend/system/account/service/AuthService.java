@@ -9,8 +9,6 @@ import com.example.backend.system.account.model.entity.User;
 import com.example.backend.system.account.model.enums.RoleName;
 import com.example.backend.system.account.repository.UserRepository;
 import com.example.backend.system.school.dto.SchoolPaymentContracts.LicensePlanResponse;
-import com.example.backend.system.school.dto.SchoolPaymentContracts;
-import com.example.backend.system.school.model.entity.School;
 import com.example.backend.system.school.repository.LicensePlanRepository;
 import com.example.backend.system.school.service.LicenseCheckService;
 import java.util.List;

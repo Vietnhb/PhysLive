@@ -44,8 +44,6 @@ public final class LawChecks {
 
     public LawChecks impacts(Map<Double, Set<String>> impacts) { this.impacts = impacts; return this; }
 
-    public LawChecks noise(Map<String, double[]> noise) { this.noise = noise; return this; }
-
     private double[] noiseOf(Symbol symbol, int count) { double[] own = noise.get(symbol.id()); return own == null ? new double[count] : own; }
 
     /** The catalogues of several strands as one: their roles, kinds, attributes, constants and laws together. */
