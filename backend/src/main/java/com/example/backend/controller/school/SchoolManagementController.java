@@ -32,7 +32,7 @@ public class SchoolManagementController {
         requireSchool(schoolId);
         return users.findBySchoolId(schoolId).stream().map(user -> new UserStatusResponse(
                 user.getId(), user.getEmail(), user.getFullName(), user.getRole().getName(),
-                !Boolean.FALSE.equals(user.getActive()), schoolId.toString(), user.getLastLogin(), null,
+                !Boolean.FALSE.equals(user.getActive()), schoolId.toString(), user.getLastLogin(), user.getDateOfBirth(),
                 user.permissionCodes(), user.isMustChangePassword())).toList();
     }
 
@@ -41,7 +41,8 @@ public class SchoolManagementController {
                                      @Valid @RequestBody CreateManagedUserRequest request) {
         requireSchool(schoolId);
         return adminService.createUser(new CreateManagedUserRequest(request.email(), request.password(),
-                request.fullName(), request.role(), schoolId.toString(), request.permissions()));
+                request.fullName(), request.role(), schoolId.toString(), request.dateOfBirth(),
+                request.avatarUrl(), request.permissions()));
     }
 
     @PutMapping("/{userId}")
