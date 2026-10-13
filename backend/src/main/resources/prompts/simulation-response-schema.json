@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "visualProgram"
+  ],
+  "properties": {
+    "visualProgram": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "design",
+        "description",
+        "code",
+        "playbackRate"
+      ],
+      "properties": {
+        "design": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "concept",
+            "objects",
+            "layout",
+            "animation",
+            "palette"
+          ],
+          "properties": {
+            "concept": {
+              "type": "string",
+              "description": "What the learner should notice and the representation chosen for it."
+            },
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "object",
+                  "representation"
+                ],
+                "properties": {
+                  "object": {
+                    "type": "string",
+                    "description": "An object of confirmedPlan.objects."
+                  },
+                  "representation": {
+                    "type": "string",
+                    "description": "How the described object looks and how its exact solver fields are shown by generated visuals."
+                  }
+                }
+              }
+            },
+            "layout": {
+              "type": "string",
+              "description": "Composition and framing."
+            },
+            "animation": {
+              "type": "string",
+              "description": "Which field moves what."
+            },
+            "palette": {
+              "type": "string",
+              "description": "Colours readable on light and dark backgrounds."
+            }
+          }
+        },
+        "description": {
+          "type": "string",
+          "description": "One or two sentences in the user's language describing the scene."
+        },
+        "code": {
+          "type": "string",
+          "description": "A complete async function(PIXI, app, api) returning update(frame), with optional setData(), resize(width,height), pointer(event), destroy(). All artwork, layout, labels and animation are authored here; no StageKit or scene template API."
+        },
+        "playbackRate": {
+          "type": "number",
+          "description": "Positive simulated seconds per real second at playback 1x. Choose a suitable scale for the phenomenon; use 1 for real time. The frontend does not infer a scale."
+        }
+      }
+    }
+  }
+}
