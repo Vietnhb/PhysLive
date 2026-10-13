@@ -2,7 +2,9 @@ package com.example.backend.service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.math.BigDecimal;
 import java.util.HexFormat;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,6 +19,8 @@ import com.example.backend.dto.problem.CreateProblemRequest;
 import com.example.backend.dto.problem.PageResponse;
 import com.example.backend.dto.problem.ProblemResponse;
 import com.example.backend.dto.problem.ProblemSummaryResponse;
+import com.example.backend.dto.problem.ResolveAmbiguityRequest;
+import com.example.backend.dto.problem.UpdateSpecificationRequest;
 import com.example.backend.entity.AmbiguityCase;
 import com.example.backend.entity.AmbiguityStatus;
 import com.example.backend.entity.AssetType;
@@ -33,12 +37,14 @@ import com.example.backend.entity.Specification;
 import com.example.backend.entity.SubmissionStatus;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ApiException;
+import com.example.backend.exception.InvalidPhysicsInputException;
 import com.example.backend.extraction.AmbiguityItem;
 import com.example.backend.extraction.ExtractionCoordinator;
 import com.example.backend.extraction.ExtractionResult;
 import com.example.backend.extraction.OcrProvider;
 import com.example.backend.extraction.OcrResult;
 import com.example.backend.extraction.SpecificationDocument;
+import com.example.backend.physics.simulation.EndConditionResolver;
 import com.example.backend.repository.ExtractionRunRepository;
 import com.example.backend.repository.LessonRepository;
 import com.example.backend.repository.ProblemSubmissionRepository;
@@ -65,6 +71,95 @@ public class ProblemService {
     private final ExtractionCoordinator extractionCoordinator;
     private final OcrProvider ocrProvider;
     private final ObjectMapper objectMapper;
+    private final SpecificationService specificationService;
+    private final EndConditionResolver endConditionResolver;
+
+    @Transactional
+    public ProblemResponse confirm(UUID id, Map<String, String> answers) {
+        ProblemSubmission problem = requireOwnedProblem(id);
+        Specification specification = requireCurrentSpecification(problem);
+        var safeAnswers = answers == null ? Map.<String, String>of() : answers;
+        var openCases = specification.getAmbiguityCases().stream()
+                .filter(item -> item.getStatus() == AmbiguityStatus.OPEN).toList();
+        // Check all answers before recording any decision.
+        for (AmbiguityCase item : openCases) {
+            if (!StringUtils.hasText(safeAnswers.get(item.getCode()))) {
+                throw new ApiException(HttpStatus.CONFLICT, "Answer every ambiguity before confirming");
+            }
+        }
+        for (AmbiguityCase item : openCases) {
+            specificationService.resolve(specification.getId(), item.getId(),
+                    new ResolveAmbiguityRequest(safeAnswers.get(item.getCode()), null));
+        }
+        if (openCases.isEmpty() && specification.getConfirmationState() == ConfirmationState.UNRESOLVED) {
+            throw new ApiException(HttpStatus.CONFLICT, "Extract the problem again to resolve missing ambiguity data");
+        }
+        problem.setStatus(SubmissionStatus.READY_FOR_VALIDATION);
+        return mapper.toResponse(problem);
+    }
+
+    @Transactional
+    public ProblemResponse updateSpecification(UUID id, UpdateSpecificationRequest request) {
+        ProblemSubmission problem = requireOwnedProblem(id);
+        Specification previous = requireCurrentSpecification(problem);
+        if (request == null || request.objects() == null || !request.objects().isArray()
+                || request.quantities() == null || !request.quantities().isArray()
+                || request.relations() == null || !request.relations().isArray()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Objects, quantities and relations must be arrays");
+        }
+        for (var quantity : request.quantities()) {
+            if (!StringUtils.hasText(quantity.path("name").asText())
+                    || !quantity.path("normalizedValue").isNumber()
+                    || !Double.isFinite(quantity.path("normalizedValue").asDouble())
+                    || !StringUtils.hasText(quantity.path("normalizedUnit").asText())) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "Each quantity needs a name, finite value and unit");
+            }
+        }
+        try {
+            endConditionResolver.requestedHorizon(request.endCondition(), BigDecimal.ONE);
+        } catch (InvalidPhysicsInputException exception) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, exception.getMessage());
+        }
+        // Keep earlier validation and replay attached to the original facts.
+        Specification revision = new Specification();
+        revision.setSubmission(problem);
+        revision.setExtractionRun(previous.getExtractionRun());
+        revision.setContractVersion(previous.getContractVersion());
+        revision.setSchemaVersion(previous.getSchemaVersion());
+        revision.setSchemaId(previous.getSchemaId());
+        revision.setTopic(previous.getTopic());
+        revision.setConfidence(previous.getConfidence());
+        revision.setObjects(request.objects().deepCopy());
+        revision.setQuantities(request.quantities().deepCopy());
+        revision.setRelations(request.relations().deepCopy());
+        var endCondition = request.endCondition() == null ? previous.getEndCondition() : request.endCondition();
+        revision.setEndCondition(endCondition == null ? null : endCondition.deepCopy());
+        revision.setAmbiguity(previous.getAmbiguity() == null ? objectMapper.createArrayNode() : previous.getAmbiguity().deepCopy());
+        revision.setConfirmationState(previous.getConfirmationState());
+        revision.setValidationStatus("NOT_VALIDATED");
+        for (AmbiguityCase item : previous.getAmbiguityCases()) {
+            if (item.getStatus() != AmbiguityStatus.OPEN) continue;
+            AmbiguityCase copy = new AmbiguityCase();
+            copy.setCode(item.getCode());
+            copy.setFieldPath(item.getFieldPath());
+            copy.setQuestion(item.getQuestion());
+            copy.setOptions(item.getOptions() == null ? null : item.getOptions().deepCopy());
+            copy.setStatus(AmbiguityStatus.OPEN);
+            revision.addAmbiguityCase(copy);
+            revision.setConfirmationState(ConfirmationState.UNRESOLVED);
+        }
+        problem.setCurrentSpecification(specificationRepository.save(revision));
+        problem.setStatus(revision.getConfirmationState() == ConfirmationState.UNRESOLVED
+                ? SubmissionStatus.NEEDS_CONFIRMATION : SubmissionStatus.READY_FOR_VALIDATION);
+        return mapper.toResponse(problem);
+    }
+
+    private Specification requireCurrentSpecification(ProblemSubmission problem) {
+        if (problem.getCurrentSpecification() == null) {
+            throw new ApiException(HttpStatus.CONFLICT, "Extract a specification first");
+        }
+        return problem.getCurrentSpecification();
+    }
 
     @Transactional
     public ProblemResponse create(CreateProblemRequest request) {
@@ -191,6 +286,7 @@ public class ProblemService {
         specification.setSubmission(problem);
         specification.setExtractionRun(run);
         specification.setSchemaVersion(SpecificationDocument.CURRENT_SCHEMA_VERSION);
+        specification.setContractVersion(SpecificationDocument.CURRENT_SCHEMA_VERSION);
         specification.setTopic(document.topic());
         specification.setConfidence(document.confidence());
         specification.setObjects(objectMapper.valueToTree(document.objects()));

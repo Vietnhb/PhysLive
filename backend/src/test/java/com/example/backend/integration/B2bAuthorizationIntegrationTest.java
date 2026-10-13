@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(properties = {
+        "spring.flyway.enabled=false", // H2 schema is created by Hibernate for this test.
         "spring.config.import=",
         "physlive.database.external-enabled=false",
         "SUPABASE_DB_URL=", "DATABASE_URL=", "DIRECT_URL=",
