@@ -1,0 +1,2013 @@
+{
+  "id": "modern",
+  "title": "Vật lí hạt nhân, phóng xạ, lượng tử và ứng dụng chẩn đoán y học (Vật lí 12)",
+  "source": "Chương trình GDPT môn Vật lí 2018, mục V.2, lớp 12: Vật lí hạt nhân và phóng xạ; Chuyên đề 12.2; Chuyên đề 12.3",
+  "contents": [
+    {
+      "name": "Cấu trúc hạt nhân",
+      "level": "qualitative",
+      "requirement": "Rút ra sự tồn tại và đánh giá kích thước hạt nhân từ thí nghiệm tán xạ hạt α; biểu diễn kí hiệu hạt nhân bằng số nucleon và số proton; mô tả mô hình đơn giản của nguyên tử."
+    },
+    {
+      "name": "Độ hụt khối và năng lượng liên kết hạt nhân",
+      "level": "quantitative",
+      "requirement": "Viết đúng phương trình phân rã hạt nhân đơn giản; thảo luận hệ thức E = mc², liên hệ giữa khối lượng và năng lượng; liên hệ giữa năng lượng liên kết riêng và độ bền vững; nêu sự phân hạch và tổng hợp hạt nhân."
+    },
+    {
+      "name": "Sự phóng xạ và chu kì bán rã",
+      "level": "quantitative",
+      "requirement": "Vận dụng được liên hệ H = λN; vận dụng được công thức x = x₀e^(−λt) với x là độ phóng xạ, số hạt chưa phân rã hoặc tốc độ số hạt đếm được; định nghĩa chu kì bán rã."
+    },
+    {
+      "name": "Bản chất và cách tạo ra tia X",
+      "level": "qualitative",
+      "requirement": "Nêu được cách tạo ra tia X, cách điều khiển tia X, sự suy giảm tia X."
+    },
+    {
+      "name": "Chẩn đoán bằng tia X",
+      "level": "qualitative",
+      "requirement": "Mô tả sơ lược cách chụp ảnh bằng tia X; cách cải thiện ảnh chụp."
+    },
+    {
+      "name": "Chẩn đoán bằng siêu âm",
+      "level": "qualitative",
+      "requirement": "Nêu sơ lược cách tạo siêu âm và cách tạo hình ảnh siêu âm các cấu trúc bên trong cơ thể."
+    },
+    {
+      "name": "Chụp cắt lớp, cộng hưởng từ",
+      "level": "qualitative",
+      "requirement": "Mô tả sơ lược cách chụp ảnh cắt lớp; nêu sơ lược nguyên lí chụp cộng hưởng từ."
+    },
+    {
+      "name": "Hiệu ứng quang điện và năng lượng của photon",
+      "level": "quantitative",
+      "requirement": "Vận dụng được công thức E = hf; giới hạn quang điện, công thoát; vận dụng được phương trình Einstein; dòng quang điện bão hoà tỉ lệ với cường độ chùm sáng, động năng ban đầu cực đại không phụ thuộc cường độ."
+    },
+    {
+      "name": "Lưỡng tính sóng hạt",
+      "level": "quantitative",
+      "requirement": "Vận dụng được công thức bước sóng de Broglie λ = h/p."
+    },
+    {
+      "name": "Quang phổ vạch của nguyên tử",
+      "level": "quantitative",
+      "requirement": "Vận dụng được biểu thức chuyển mức năng lượng hf = E₁ − E₂."
+    },
+    {
+      "name": "Vùng năng lượng",
+      "level": "qualitative",
+      "requirement": "Nêu các vùng năng lượng trong chất rắn; giải thích sự phụ thuộc nhiệt độ của điện trở kim loại, bán dẫn và của LDR vào cường độ sáng."
+    }
+  ],
+  "roles": {
+    "nucleon_number": "số nucleon (số khối) A của hạt nhân hoặc hạt (of; trong phản ứng hạt nhân thêm kind = reactant cho hạt trước phản ứng, product cho hạt sau phản ứng; in = tên phản ứng khi mô hình có nhiều phản ứng)",
+    "proton_number": "số proton, cũng là số điện tích Z của hạt (of; electron có Z = −1, positron +1; kind = reactant/product và in như nucleon_number)",
+    "neutron_number": "số neutron N của hạt nhân (of)",
+    "proton_mass": "khối lượng proton dùng để tính độ hụt khối (hằng số chung, không có of)",
+    "neutron_mass": "khối lượng neutron dùng để tính độ hụt khối (hằng số chung, không có of)",
+    "mass_defect": "độ hụt khối của hạt nhân (of)",
+    "rest_energy": "năng lượng nghỉ E = mc² của hạt (of)",
+    "binding_energy": "năng lượng liên kết của hạt nhân (of; trong phản ứng thêm kind = reactant/product, khai báo cho mọi hạt nhân tham gia phản ứng)",
+    "binding_energy_per_nucleon": "năng lượng liên kết riêng của hạt nhân (of)",
+    "reaction_energy": "năng lượng toả ra (dương) hoặc thu vào (âm) của một phản ứng hạt nhân; khối lượng (mass) của mọi hạt tham gia phải mang kind = reactant hoặc product (in = tên phản ứng khi có nhiều phản ứng)",
+    "undecayed_count": "số hạt nhân chưa phân rã của một chất phóng xạ (of)",
+    "decayed_count": "số hạt nhân đã phân rã của chất phóng xạ tính từ lúc đầu (of = chất phóng xạ đó)",
+    "decay_constant": "hằng số phóng xạ λ của chất (of)",
+    "half_life": "chu kì bán rã của chất (of)",
+    "activity": "độ phóng xạ H của chất (of; khi chất này phân rã thành chất con có trong mô hình thì thêm in = tên bước phân rã đó)",
+    "count_rate": "tốc độ số hạt đếm được bởi máy đếm từ chất phóng xạ (of = chất phóng xạ)",
+    "radioactive_mass": "khối lượng chất phóng xạ còn lại chưa phân rã (of)",
+    "production_rate": "tốc độ hạt nhân của chất được tạo ra thêm mỗi giây, ví dụ do chất mẹ phân rã (of = chất được tạo ra; in = tên bước phân rã, trùng với in của độ phóng xạ chất mẹ; nhiều nhánh con của cùng một chất mẹ dùng chung một in)",
+    "frequency": "tần số: của dao động hay đại lượng xoay chiều của một vật, linh kiện (of); của sóng trong một môi trường (in); của một bức xạ (of = bức xạ đó)",
+    "wavelength": "bước sóng: của sóng trong một môi trường (in), hoặc của một bức xạ (of = bức xạ đó)",
+    "wave_speed": "tốc độ truyền sóng (in; kind = electromagnetic cho sóng điện từ trong chân không hoặc không khí, electromagnetic_medium cho sóng điện từ trong môi trường khác); hoặc of = bức xạ khi mô hình mô tả từng bức xạ",
+    "photon_energy": "năng lượng một photon của bức xạ (of = bức xạ; in = tên thí nghiệm hoặc tên sự chuyển mức khi mô hình có nhiều)",
+    "work_function": "công thoát của kim loại (of = kim loại; in như photon_energy)",
+    "threshold_frequency": "tần số giới hạn quang điện của kim loại (of)",
+    "threshold_wavelength": "giới hạn quang điện λ₀ của kim loại (of)",
+    "max_kinetic_energy": "động năng ban đầu cực đại của quang điện tử (of = quang điện tử; in như photon_energy)",
+    "stopping_voltage": "độ lớn hiệu điện thế hãm (of = quang điện tử, cùng of với max_kinetic_energy)",
+    "radiant_power": "công suất của chùm bức xạ (of = bức xạ)",
+    "photon_rate": "số photon của chùm bức xạ tới mỗi giây (of = bức xạ; in như photon_energy)",
+    "photoelectron_rate": "số quang điện tử bật ra mỗi giây (of = catôt; in như photon_energy)",
+    "quantum_efficiency": "hiệu suất lượng tử: số quang điện tử trên số photon tới (of = catôt; in như photon_energy)",
+    "saturation_current": "cường độ dòng quang điện bão hoà (of = catôt, cùng of với photoelectron_rate)",
+    "de_broglie_wavelength": "bước sóng de Broglie của hạt (of = hạt, cùng of với động lượng hoặc khối lượng và tốc độ của hạt)",
+    "energy_level": "mức năng lượng dừng của nguyên tử (of = nguyên tử; kind = upper cho mức cao, lower cho mức thấp của một sự chuyển mức; in = tên sự chuyển mức khi có nhiều, mức dùng chung cho mọi sự chuyển mức thì không ghi in)",
+    "incident_intensity": "cường độ chùm tia (tia X, siêu âm) tới lớp vật chất (of = lớp vật chất)",
+    "transmitted_intensity": "cường độ chùm tia sau khi đi qua lớp vật chất (of = lớp vật chất)",
+    "attenuation_coefficient": "hệ số suy giảm tuyến tính μ của vật chất (of = lớp vật chất)",
+    "thickness": "bề dày lớp vật chất mà chùm tia đi qua (of = lớp vật chất)",
+    "half_value_thickness": "bề dày làm cường độ chùm tia giảm một nửa (of = lớp vật chất)",
+    "tube_voltage": "hiệu điện thế giữa anôt và catôt của ống tia X (of = ống tia X)",
+    "max_photon_energy": "năng lượng lớn nhất của photon tia X do ống phát ra (of = ống tia X)",
+    "min_wavelength": "bước sóng ngắn nhất của tia X do ống phát ra (of = ống tia X)",
+    "echo_time": "thời gian từ lúc phát xung siêu âm đến lúc nhận xung phản xạ (of = môi trường truyền)",
+    "echo_depth": "khoảng cách từ đầu dò đến mặt phản xạ (of = môi trường truyền)"
+  },
+  "forceKinds": {},
+  "constants": {
+    "h": {
+      "value": 6.62607015e-34,
+      "unit": "J*s",
+      "label": "hằng số Planck"
+    },
+    "e": {
+      "value": 1.602176634e-19,
+      "unit": "C",
+      "label": "điện tích nguyên tố"
+    }
+  },
+  "laws": [
+    {
+      "id": "nucleon_count",
+      "title": "Số nucleon A = Z + N",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Cấu trúc hạt nhân",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "nucleon_number"
+        },
+        "Z": {
+          "role": "proton_number"
+        },
+        "Nn": {
+          "role": "neutron_number"
+        }
+      },
+      "equal": [
+        "A",
+        [
+          "add",
+          "Z",
+          "Nn"
+        ]
+      ]
+    },
+    {
+      "id": "proton_number_limit",
+      "title": "Số proton không vượt quá số nucleon",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Cấu trúc hạt nhân",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "nucleon_number"
+        },
+        "Z": {
+          "role": "proton_number"
+        }
+      },
+      "atMost": [
+        "Z",
+        "A"
+      ]
+    },
+    {
+      "id": "mass_defect",
+      "title": "Độ hụt khối Δm = Z·mp + (A − Z)·mn − m",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "dm": {
+          "role": "mass_defect"
+        },
+        "A": {
+          "role": "nucleon_number"
+        },
+        "Z": {
+          "role": "proton_number"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "mp": {
+          "role": "proton_mass"
+        },
+        "mn": {
+          "role": "neutron_mass"
+        }
+      },
+      "equal": [
+        "dm",
+        [
+          "sub",
+          [
+            "add",
+            [
+              "mul",
+              [
+                "exp",
+                [
+                  "log",
+                  "Z"
+                ]
+              ],
+              "mp"
+            ],
+            [
+              "mul",
+              [
+                "exp",
+                [
+                  "log",
+                  [
+                    "sub",
+                    "A",
+                    "Z"
+                  ]
+                ]
+              ],
+              "mn"
+            ]
+          ],
+          "m"
+        ]
+      ]
+    },
+    {
+      "id": "rest_energy",
+      "title": "Hệ thức Einstein E = m·c²",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "rest_energy"
+        },
+        "m": {
+          "role": "mass"
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "mul",
+          "m",
+          [
+            "pow",
+            "c",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "binding_energy",
+      "title": "Năng lượng liên kết Wlk = Δm·c²",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "W": {
+          "role": "binding_energy"
+        },
+        "dm": {
+          "role": "mass_defect"
+        }
+      },
+      "equal": [
+        "W",
+        [
+          "mul",
+          "dm",
+          [
+            "pow",
+            "c",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "binding_energy_per_nucleon",
+      "title": "Năng lượng liên kết riêng = Wlk / A",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "e": {
+          "role": "binding_energy_per_nucleon"
+        },
+        "W": {
+          "role": "binding_energy"
+        },
+        "A": {
+          "role": "nucleon_number"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "e",
+          [
+            "exp",
+            [
+              "log",
+              "A"
+            ]
+          ]
+        ],
+        "W"
+      ]
+    },
+    {
+      "id": "binding_energy_positive",
+      "title": "Hạt nhân bền có năng lượng liên kết không âm",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "W": {
+          "role": "binding_energy"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "W"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "nucleon_conservation",
+      "title": "Phản ứng hạt nhân bảo toàn số nucleon",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân (phương trình phân rã, phản ứng)",
+      "scope": [],
+      "bind": {
+        "a": {
+          "role": "nucleon_number",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "reactant",
+            "in": null
+          }
+        },
+        "b": {
+          "role": "nucleon_number",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "product",
+            "in": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "sub",
+          [
+            "sum",
+            "a"
+          ],
+          [
+            "sum",
+            "b"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "nucleon_conservation_in",
+      "title": "Phản ứng hạt nhân bảo toàn số nucleon (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân (phương trình phân rã, phản ứng)",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "a": {
+          "role": "nucleon_number",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "reactant"
+          }
+        },
+        "b": {
+          "role": "nucleon_number",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "product"
+          }
+        }
+      },
+      "equal": [
+        [
+          "sub",
+          [
+            "sum",
+            "a"
+          ],
+          [
+            "sum",
+            "b"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "charge_conservation",
+      "title": "Phản ứng hạt nhân bảo toàn điện tích (số Z)",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân (phương trình phân rã, phản ứng)",
+      "scope": [],
+      "bind": {
+        "a": {
+          "role": "proton_number",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "reactant",
+            "in": null
+          }
+        },
+        "b": {
+          "role": "proton_number",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "product",
+            "in": null
+          }
+        }
+      },
+      "equal": [
+        [
+          "sub",
+          [
+            "sum",
+            "a"
+          ],
+          [
+            "sum",
+            "b"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "charge_conservation_in",
+      "title": "Phản ứng hạt nhân bảo toàn điện tích (số Z) (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân (phương trình phân rã, phản ứng)",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "a": {
+          "role": "proton_number",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "reactant"
+          }
+        },
+        "b": {
+          "role": "proton_number",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "product"
+          }
+        }
+      },
+      "equal": [
+        [
+          "sub",
+          [
+            "sum",
+            "a"
+          ],
+          [
+            "sum",
+            "b"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "reaction_energy",
+      "title": "Năng lượng phản ứng hạt nhân W = (m trước − m sau)·c²",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân (E = mc², phân hạch, tổng hợp)",
+      "scope": [],
+      "bind": {
+        "W": {
+          "role": "reaction_energy",
+          "where": {
+            "in": null
+          }
+        },
+        "a": {
+          "role": "mass",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "reactant",
+            "in": null
+          }
+        },
+        "b": {
+          "role": "mass",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "product",
+            "in": null
+          }
+        }
+      },
+      "equal": [
+        "W",
+        [
+          "mul",
+          [
+            "sub",
+            [
+              "sum",
+              "a"
+            ],
+            [
+              "sum",
+              "b"
+            ]
+          ],
+          [
+            "pow",
+            "c",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "reaction_energy_in",
+      "title": "Năng lượng phản ứng hạt nhân W = (m trước − m sau)·c² (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân (E = mc², phân hạch, tổng hợp)",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "W": {
+          "role": "reaction_energy"
+        },
+        "a": {
+          "role": "mass",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "reactant"
+          }
+        },
+        "b": {
+          "role": "mass",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "product"
+          }
+        }
+      },
+      "equal": [
+        "W",
+        [
+          "mul",
+          [
+            "sub",
+            [
+              "sum",
+              "a"
+            ],
+            [
+              "sum",
+              "b"
+            ]
+          ],
+          [
+            "pow",
+            "c",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "reaction_energy_binding",
+      "title": "Năng lượng phản ứng bằng tổng năng lượng liên kết sau trừ trước",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân (phân hạch, tổng hợp)",
+      "scope": [],
+      "bind": {
+        "W": {
+          "role": "reaction_energy",
+          "where": {
+            "in": null
+          }
+        },
+        "a": {
+          "role": "binding_energy",
+          "many": true,
+          "where": {
+            "kind": "reactant",
+            "in": null
+          }
+        },
+        "b": {
+          "role": "binding_energy",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "product",
+            "in": null
+          }
+        }
+      },
+      "equal": [
+        "W",
+        [
+          "sub",
+          [
+            "sum",
+            "b"
+          ],
+          [
+            "sum",
+            "a"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "reaction_energy_binding_in",
+      "title": "Năng lượng phản ứng bằng tổng năng lượng liên kết sau trừ trước (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Độ hụt khối và năng lượng liên kết hạt nhân (phân hạch, tổng hợp)",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "W": {
+          "role": "reaction_energy"
+        },
+        "a": {
+          "role": "binding_energy",
+          "many": true,
+          "where": {
+            "kind": "reactant"
+          }
+        },
+        "b": {
+          "role": "binding_energy",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "product"
+          }
+        }
+      },
+      "equal": [
+        "W",
+        [
+          "sub",
+          [
+            "sum",
+            "b"
+          ],
+          [
+            "sum",
+            "a"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "decay_law",
+      "title": "Định luật phóng xạ: dN/dt = −λ·N (cộng tốc độ được tạo ra, nếu có)",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "N": {
+          "role": "undecayed_count"
+        },
+        "l": {
+          "role": "decay_constant"
+        },
+        "P": {
+          "role": "production_rate",
+          "many": true
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "ddt",
+            "N"
+          ],
+          "l"
+        ],
+        [
+          "sub",
+          [
+            "div",
+            [
+              "sum",
+              "P"
+            ],
+            "l"
+          ],
+          "N"
+        ]
+      ]
+    },
+    {
+      "id": "activity",
+      "title": "Độ phóng xạ H = λ·N",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "H": {
+          "role": "activity"
+        },
+        "l": {
+          "role": "decay_constant"
+        },
+        "N": {
+          "role": "undecayed_count"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "H",
+          "l"
+        ],
+        "N"
+      ]
+    },
+    {
+      "id": "activity_decay",
+      "title": "Độ phóng xạ của một chất giảm theo dH/dt = −λ·H",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "H": {
+          "role": "activity"
+        },
+        "l": {
+          "role": "decay_constant"
+        }
+      },
+      "unless": {
+        "role": "production_rate"
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "ddt",
+            "H"
+          ],
+          "l"
+        ],
+        [
+          "neg",
+          "H"
+        ]
+      ]
+    },
+    {
+      "id": "half_life",
+      "title": "Chu kì bán rã T = ln2 / λ",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "T": {
+          "role": "half_life"
+        },
+        "l": {
+          "role": "decay_constant"
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "div",
+          0.6931471805599453,
+          "l"
+        ]
+      ]
+    },
+    {
+      "id": "count_rate_decay",
+      "title": "Tốc độ đếm giảm theo dn/dt = −λ·n",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "n": {
+          "role": "count_rate"
+        },
+        "l": {
+          "role": "decay_constant"
+        }
+      },
+      "unless": {
+        "role": "production_rate"
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "ddt",
+            "n"
+          ],
+          "l"
+        ],
+        [
+          "neg",
+          "n"
+        ]
+      ]
+    },
+    {
+      "id": "count_rate_limit",
+      "title": "Tốc độ đếm không vượt quá độ phóng xạ",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "n": {
+          "role": "count_rate"
+        },
+        "H": {
+          "role": "activity"
+        }
+      },
+      "atMost": [
+        "n",
+        "H"
+      ]
+    },
+    {
+      "id": "radioactive_mass_decay",
+      "title": "Khối lượng chất phóng xạ còn lại giảm theo dm/dt = −λ·m",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "m": {
+          "role": "radioactive_mass"
+        },
+        "l": {
+          "role": "decay_constant"
+        }
+      },
+      "unless": {
+        "role": "production_rate"
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "ddt",
+            "m"
+          ],
+          "l"
+        ],
+        [
+          "neg",
+          "m"
+        ]
+      ]
+    },
+    {
+      "id": "decayed_count",
+      "title": "Số hạt đã phân rã tăng với tốc độ λ·N",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "D": {
+          "role": "decayed_count"
+        },
+        "l": {
+          "role": "decay_constant"
+        },
+        "N": {
+          "role": "undecayed_count"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "ddt",
+            "D"
+          ],
+          "l"
+        ],
+        "N"
+      ]
+    },
+    {
+      "id": "decay_step",
+      "title": "Mỗi hạt nhân mẹ phân rã tạo ra một hạt nhân con: tổng tốc độ tạo ra các chất con bằng độ phóng xạ của chất mẹ",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "P": {
+          "role": "production_rate",
+          "many": true,
+          "min": 1,
+          "where": {
+            "in": "*"
+          }
+        },
+        "H": {
+          "role": "activity",
+          "where": {
+            "in": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "sum",
+          "P"
+        ],
+        "H"
+      ]
+    },
+    {
+      "id": "undecayed_count_not_negative",
+      "title": "Số hạt chưa phân rã không âm",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "undecayed_count"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "x"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "count_rate_not_negative",
+      "title": "Tốc độ đếm không âm",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "count_rate"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "x"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "radioactive_mass_not_negative",
+      "title": "Khối lượng chất phóng xạ còn lại không âm",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "radioactive_mass"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "x"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "decay_constant_positive",
+      "title": "Hằng số phóng xạ dương",
+      "curriculum": "Vật lí hạt nhân và phóng xạ – Sự phóng xạ và chu kì bán rã",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "l": {
+          "role": "decay_constant"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "l"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "photon_energy",
+      "title": "Năng lượng photon ε = h·f",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "photon_energy"
+        },
+        "f": {
+          "role": "frequency"
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "mul",
+          "h",
+          "f"
+        ]
+      ]
+    },
+    {
+      "id": "photon_wavelength",
+      "title": "Năng lượng photon ε = h·c/λ (bước sóng trong chân không)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "photon_energy"
+        },
+        "l": {
+          "role": "wavelength"
+        }
+      },
+      "unless": {
+        "role": "wave_speed"
+      },
+      "equal": [
+        "E",
+        [
+          "div",
+          [
+            "mul",
+            "h",
+            "c"
+          ],
+          "l"
+        ]
+      ]
+    },
+    {
+      "id": "photon_wavelength_medium",
+      "title": "Năng lượng photon ε = h·v/λ khi bức xạ truyền với tốc độ v (ε = h·f, v = λ·f)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "photon_energy"
+        },
+        "l": {
+          "role": "wavelength"
+        },
+        "v": {
+          "role": "wave_speed"
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "div",
+          [
+            "mul",
+            "h",
+            "v"
+          ],
+          "l"
+        ]
+      ]
+    },
+    {
+      "id": "photon_speed_limit",
+      "title": "Bức xạ điện từ truyền không nhanh hơn c",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "photon_energy"
+        },
+        "v": {
+          "role": "wave_speed"
+        }
+      },
+      "atMost": [
+        "v",
+        "c"
+      ]
+    },
+    {
+      "id": "photon_speed_positive",
+      "title": "Tốc độ truyền của bức xạ là đại lượng dương",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "photon_energy"
+        },
+        "v": {
+          "role": "wave_speed"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "v"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "threshold_frequency",
+      "title": "Công thoát A = h·f₀",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "work_function"
+        },
+        "f": {
+          "role": "threshold_frequency"
+        }
+      },
+      "equal": [
+        "A",
+        [
+          "mul",
+          "h",
+          "f"
+        ]
+      ]
+    },
+    {
+      "id": "threshold_wavelength",
+      "title": "Giới hạn quang điện λ₀ = h·c/A",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "A": {
+          "role": "work_function"
+        },
+        "l": {
+          "role": "threshold_wavelength"
+        }
+      },
+      "equal": [
+        "A",
+        [
+          "div",
+          [
+            "mul",
+            "h",
+            "c"
+          ],
+          "l"
+        ]
+      ]
+    },
+    {
+      "id": "einstein_photoelectric",
+      "title": "Phương trình Einstein: Wđmax = h·f − A (bằng 0 khi h·f < A)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [],
+      "bind": {
+        "K": {
+          "role": "max_kinetic_energy",
+          "where": {
+            "in": null
+          }
+        },
+        "E": {
+          "role": "photon_energy",
+          "where": {
+            "in": null
+          }
+        },
+        "A": {
+          "role": "work_function",
+          "where": {
+            "in": null
+          }
+        }
+      },
+      "equal": [
+        "K",
+        [
+          "max",
+          [
+            "sub",
+            "E",
+            "A"
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "id": "einstein_photoelectric_in",
+      "title": "Phương trình Einstein: Wđmax = h·f − A (bằng 0 khi h·f < A) (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "K": {
+          "role": "max_kinetic_energy"
+        },
+        "E": {
+          "role": "photon_energy"
+        },
+        "A": {
+          "role": "work_function"
+        }
+      },
+      "equal": [
+        "K",
+        [
+          "max",
+          [
+            "sub",
+            "E",
+            "A"
+          ],
+          0
+        ]
+      ]
+    },
+    {
+      "id": "stopping_voltage",
+      "title": "Hiệu điện thế hãm: e·Uh = Wđmax",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "stopping_voltage"
+        },
+        "K": {
+          "role": "max_kinetic_energy"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "e",
+          "U"
+        ],
+        "K"
+      ]
+    },
+    {
+      "id": "max_kinetic_energy_speed",
+      "title": "Động năng ban đầu cực đại Wđmax = ½·m·v²max",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "K": {
+          "role": "max_kinetic_energy"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "v": {
+          "role": "speed"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "mul",
+            2,
+            "K"
+          ],
+          [
+            "pow",
+            "v",
+            2
+          ]
+        ],
+        "m"
+      ]
+    },
+    {
+      "id": "photon_rate",
+      "title": "Công suất chùm sáng P = n·ε (n photon mỗi giây)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "P": {
+          "role": "radiant_power"
+        },
+        "n": {
+          "role": "photon_rate"
+        },
+        "E": {
+          "role": "photon_energy"
+        }
+      },
+      "equal": [
+        "P",
+        [
+          "mul",
+          "n",
+          "E"
+        ]
+      ]
+    },
+    {
+      "id": "saturation_current",
+      "title": "Dòng quang điện bão hoà I = e·nₑ",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "I": {
+          "role": "saturation_current"
+        },
+        "n": {
+          "role": "photoelectron_rate"
+        }
+      },
+      "equal": [
+        "I",
+        [
+          "mul",
+          "e",
+          "n"
+        ]
+      ]
+    },
+    {
+      "id": "quantum_efficiency",
+      "title": "Số quang điện tử mỗi giây tỉ lệ với số photon tới: nₑ = H·n",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [],
+      "bind": {
+        "ne": {
+          "role": "photoelectron_rate",
+          "where": {
+            "in": null
+          }
+        },
+        "n": {
+          "role": "photon_rate",
+          "where": {
+            "in": null
+          }
+        },
+        "H": {
+          "role": "quantum_efficiency",
+          "where": {
+            "in": null
+          }
+        }
+      },
+      "when": "ne",
+      "equal": [
+        "ne",
+        [
+          "mul",
+          "H",
+          "n"
+        ]
+      ]
+    },
+    {
+      "id": "quantum_efficiency_in",
+      "title": "Số quang điện tử mỗi giây tỉ lệ với số photon tới: nₑ = H·n (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "ne": {
+          "role": "photoelectron_rate"
+        },
+        "n": {
+          "role": "photon_rate"
+        },
+        "H": {
+          "role": "quantum_efficiency"
+        }
+      },
+      "when": "ne",
+      "equal": [
+        "ne",
+        [
+          "mul",
+          "H",
+          "n"
+        ]
+      ]
+    },
+    {
+      "id": "photoelectron_limit",
+      "title": "Mỗi photon giải phóng nhiều nhất một quang điện tử",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [],
+      "bind": {
+        "ne": {
+          "role": "photoelectron_rate",
+          "where": {
+            "in": null
+          }
+        },
+        "n": {
+          "role": "photon_rate",
+          "where": {
+            "in": null
+          }
+        }
+      },
+      "atMost": [
+        "ne",
+        "n"
+      ]
+    },
+    {
+      "id": "photoelectron_limit_in",
+      "title": "Mỗi photon giải phóng nhiều nhất một quang điện tử (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "ne": {
+          "role": "photoelectron_rate"
+        },
+        "n": {
+          "role": "photon_rate"
+        }
+      },
+      "atMost": [
+        "ne",
+        "n"
+      ]
+    },
+    {
+      "id": "photoelectric_threshold",
+      "title": "Không có quang điện tử khi năng lượng photon nhỏ hơn công thoát",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [],
+      "bind": {
+        "ne": {
+          "role": "photoelectron_rate",
+          "where": {
+            "in": null
+          }
+        },
+        "E": {
+          "role": "photon_energy",
+          "where": {
+            "in": null
+          }
+        },
+        "A": {
+          "role": "work_function",
+          "where": {
+            "in": null
+          }
+        }
+      },
+      "atMost": [
+        [
+          "mul",
+          "ne",
+          [
+            "sub",
+            "A",
+            "E"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "photoelectric_threshold_in",
+      "title": "Không có quang điện tử khi năng lượng photon nhỏ hơn công thoát (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Hiệu ứng quang điện và năng lượng của photon",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "ne": {
+          "role": "photoelectron_rate"
+        },
+        "E": {
+          "role": "photon_energy"
+        },
+        "A": {
+          "role": "work_function"
+        }
+      },
+      "atMost": [
+        [
+          "mul",
+          "ne",
+          [
+            "sub",
+            "A",
+            "E"
+          ]
+        ],
+        0
+      ]
+    },
+    {
+      "id": "de_broglie",
+      "title": "Bước sóng de Broglie λ = h/p",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Lưỡng tính sóng hạt",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "l": {
+          "role": "de_broglie_wavelength"
+        },
+        "p": {
+          "role": "momentum",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "p",
+              2
+            ]
+          ]
+        ],
+        [
+          "div",
+          "h",
+          "l"
+        ]
+      ]
+    },
+    {
+      "id": "de_broglie_speed",
+      "title": "Bước sóng de Broglie λ = h/(m·v)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Lưỡng tính sóng hạt",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "l": {
+          "role": "de_broglie_wavelength"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "v": {
+          "role": "speed"
+        }
+      },
+      "unless": {
+        "role": "momentum"
+      },
+      "equal": [
+        "m",
+        [
+          "div",
+          "h",
+          [
+            "mul",
+            "l",
+            "v"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "level_transition",
+      "title": "Chuyển mức năng lượng: h·f = E cao − E thấp",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Quang phổ vạch của nguyên tử",
+      "scope": [],
+      "bind": {
+        "E": {
+          "role": "photon_energy",
+          "where": {
+            "in": null
+          }
+        },
+        "U": {
+          "role": "energy_level",
+          "where": {
+            "kind": "upper",
+            "in": null
+          }
+        },
+        "L": {
+          "role": "energy_level",
+          "where": {
+            "kind": "lower",
+            "in": null
+          }
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "sub",
+          "U",
+          "L"
+        ]
+      ]
+    },
+    {
+      "id": "level_transition_in",
+      "title": "Chuyển mức năng lượng: h·f = E cao − E thấp (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Quang phổ vạch của nguyên tử",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "E": {
+          "role": "photon_energy"
+        },
+        "U": {
+          "role": "energy_level",
+          "where": {
+            "kind": "upper"
+          }
+        },
+        "L": {
+          "role": "energy_level",
+          "where": {
+            "kind": "lower"
+          }
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "sub",
+          "U",
+          "L"
+        ]
+      ]
+    },
+    {
+      "id": "level_order",
+      "title": "Mức năng lượng cao không thấp hơn mức thấp",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Quang phổ vạch của nguyên tử",
+      "scope": [],
+      "bind": {
+        "U": {
+          "role": "energy_level",
+          "where": {
+            "kind": "upper",
+            "in": null
+          }
+        },
+        "L": {
+          "role": "energy_level",
+          "where": {
+            "kind": "lower",
+            "in": null
+          }
+        }
+      },
+      "atMost": [
+        "L",
+        "U"
+      ]
+    },
+    {
+      "id": "level_order_in",
+      "title": "Mức năng lượng cao không thấp hơn mức thấp (từng thí nghiệm/quá trình theo «in»)",
+      "curriculum": "Chuyên đề 12.3 Vật lí lượng tử – Quang phổ vạch của nguyên tử",
+      "scope": [
+        "in"
+      ],
+      "bind": {
+        "U": {
+          "role": "energy_level",
+          "where": {
+            "kind": "upper"
+          }
+        },
+        "L": {
+          "role": "energy_level",
+          "where": {
+            "kind": "lower"
+          }
+        }
+      },
+      "atMost": [
+        "L",
+        "U"
+      ]
+    },
+    {
+      "id": "attenuation",
+      "title": "Sự suy giảm chùm tia qua lớp vật chất: I = I₀·e^(−μ·d)",
+      "curriculum": "Chuyên đề 12.2 Chẩn đoán y học (mở rộng định lượng) – Bản chất và cách tạo ra tia X",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "I": {
+          "role": "transmitted_intensity"
+        },
+        "I0": {
+          "role": "incident_intensity"
+        },
+        "mu": {
+          "role": "attenuation_coefficient"
+        },
+        "d": {
+          "role": "thickness"
+        }
+      },
+      "equal": [
+        "I",
+        [
+          "mul",
+          "I0",
+          [
+            "exp",
+            [
+              "neg",
+              [
+                "mul",
+                "mu",
+                "d"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "attenuation_direction",
+      "title": "Chùm tia ló không mạnh hơn chùm tia tới",
+      "curriculum": "Chuyên đề 12.2 Chẩn đoán y học (mở rộng định lượng) – Bản chất và cách tạo ra tia X",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "I": {
+          "role": "transmitted_intensity"
+        },
+        "I0": {
+          "role": "incident_intensity"
+        }
+      },
+      "atMost": [
+        "I",
+        "I0"
+      ]
+    },
+    {
+      "id": "half_value_thickness",
+      "title": "Bề dày hấp thụ một nửa d½ = ln2 / μ",
+      "curriculum": "Chuyên đề 12.2 Chẩn đoán y học (mở rộng định lượng) – Bản chất và cách tạo ra tia X",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "d": {
+          "role": "half_value_thickness"
+        },
+        "mu": {
+          "role": "attenuation_coefficient"
+        }
+      },
+      "equal": [
+        "d",
+        [
+          "div",
+          0.6931471805599453,
+          "mu"
+        ]
+      ]
+    },
+    {
+      "id": "xray_max_photon_energy",
+      "title": "Ống tia X: năng lượng photon lớn nhất bằng e·U",
+      "curriculum": "Chuyên đề 12.2 Chẩn đoán y học (mở rộng định lượng) – Bản chất và cách tạo ra tia X",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "max_photon_energy"
+        },
+        "U": {
+          "role": "tube_voltage"
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "mul",
+          "e",
+          "U"
+        ]
+      ]
+    },
+    {
+      "id": "xray_min_wavelength",
+      "title": "Ống tia X: bước sóng ngắn nhất λmin = h·c/εmax",
+      "curriculum": "Chuyên đề 12.2 Chẩn đoán y học (mở rộng định lượng) – Bản chất và cách tạo ra tia X",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "E": {
+          "role": "max_photon_energy"
+        },
+        "l": {
+          "role": "min_wavelength"
+        }
+      },
+      "equal": [
+        "E",
+        [
+          "div",
+          [
+            "mul",
+            "h",
+            "c"
+          ],
+          "l"
+        ]
+      ]
+    },
+    {
+      "id": "echo_depth",
+      "title": "Siêu âm phản xạ: độ sâu d = v·Δt/2",
+      "curriculum": "Chuyên đề 12.2 Chẩn đoán y học (mở rộng định lượng) – Chẩn đoán bằng siêu âm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "d": {
+          "role": "echo_depth"
+        },
+        "v": {
+          "role": "wave_speed"
+        },
+        "T": {
+          "role": "echo_time"
+        }
+      },
+      "when": "d",
+      "equal": [
+        [
+          "exp",
+          [
+            "log",
+            [
+              "div",
+              [
+                "mul",
+                "v",
+                "T"
+              ],
+              [
+                "mul",
+                2,
+                "d"
+              ]
+            ]
+          ]
+        ],
+        1
+      ]
+    },
+    {
+      "id": "echo_depth_not_negative",
+      "title": "Độ sâu mặt phản xạ không âm",
+      "curriculum": "Chuyên đề 12.2 Chẩn đoán y học (mở rộng định lượng) – Chẩn đoán bằng siêu âm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "echo_depth"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "x"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "echo_time_not_negative",
+      "title": "Thời gian nhận xung phản xạ không âm",
+      "curriculum": "Chuyên đề 12.2 Chẩn đoán y học (mở rộng định lượng) – Chẩn đoán bằng siêu âm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "echo_time"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "x"
+        ],
+        0
+      ]
+    },
+    {
+      "id": "thickness_not_negative",
+      "title": "Bề dày lớp vật chất không âm",
+      "curriculum": "Chuyên đề 12.2 Chẩn đoán y học (mở rộng định lượng) – Bản chất và cách tạo ra tia X",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "x": {
+          "role": "thickness"
+        }
+      },
+      "atMost": [
+        [
+          "neg",
+          "x"
+        ],
+        0
+      ]
+    }
+  ]
+}

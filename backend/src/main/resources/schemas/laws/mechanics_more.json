@@ -1,0 +1,1915 @@
+{
+  "id": "mechanics_more",
+  "title": "Cơ học bổ sung: moment lực, áp suất chất lỏng, hiệu suất, chuyển động tròn, lò xo, vật nối dây, trường hấp dẫn",
+  "source": "Chương trình giáo dục phổ thông môn Vật lí 2018, mục V.2, lớp 10 (Động lực học; Công, năng lượng, công suất; Chuyển động tròn; Biến dạng của vật rắn; Chuyên đề 10.2) và lớp 11 (Chuyên đề 11.1 Trường hấp dẫn)",
+  "contents": [
+    {
+      "name": "Động lực học – Cân bằng lực, moment lực",
+      "level": "quantitative",
+      "requirement": "Phát biểu và vận dụng được quy tắc moment cho một số trường hợp đơn giản; điều kiện cân bằng: lực tổng hợp bằng không và tổng moment lực bằng không; tổng hợp, phân tích lực."
+    },
+    {
+      "name": "Động lực học – Khối lượng riêng, áp suất chất lỏng",
+      "level": "quantitative",
+      "requirement": "Nêu được khối lượng riêng là khối lượng của một đơn vị thể tích; thành lập và vận dụng được phương trình Δp = ρgΔh."
+    },
+    {
+      "name": "Động lực học – Một số lực trong thực tiễn (lực căng dây nối các vật)",
+      "level": "quantitative",
+      "requirement": "Mô tả và biểu diễn được lực căng dây; các vật nối bằng dây căng hoặc thanh cứng chuyển động cùng tốc độ dọc theo dây."
+    },
+    {
+      "name": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "level": "quantitative",
+      "requirement": "Nêu định nghĩa công suất; vận dụng mối liên hệ công suất với tích của lực và vận tốc; nêu định nghĩa hiệu suất, vận dụng được hiệu suất trong một số trường hợp thực tế."
+    },
+    {
+      "name": "Chuyển động tròn – Động học của chuyển động tròn đều",
+      "level": "quantitative",
+      "requirement": "Biểu diễn được độ dịch chuyển góc theo radian; vận dụng được khái niệm tốc độ góc."
+    },
+    {
+      "name": "Chuyển động tròn – Gia tốc hướng tâm và lực hướng tâm",
+      "level": "quantitative",
+      "requirement": "Vận dụng được a = rω², a = v²/r; F = mrω², F = mv²/r."
+    },
+    {
+      "name": "Chuyển động tròn – Giải pháp an toàn cho chuyển động tròn trong thực tế",
+      "level": "qualitative",
+      "requirement": "Thảo luận và đề xuất giải pháp an toàn cho một số tình huống chuyển động tròn trong thực tế."
+    },
+    {
+      "name": "Biến dạng của vật rắn – Biến dạng kéo và biến dạng nén; Đặc tính của lò xo",
+      "level": "qualitative",
+      "requirement": "Nêu được biến dạng kéo, biến dạng nén; mô tả được giới hạn đàn hồi, độ dãn, độ cứng (chỉ kiểm được: độ biến dạng không vượt giới hạn đàn hồi khi còn dùng định luật Hooke)."
+    },
+    {
+      "name": "Biến dạng của vật rắn – Định luật Hooke (chu kì dao động của vật gắn lò xo)",
+      "level": "quantitative",
+      "requirement": "Vận dụng được định luật Hooke trong một số trường hợp đơn giản."
+    },
+    {
+      "name": "Chuyên đề 10.2 – Xác định phương hướng",
+      "level": "qualitative",
+      "requirement": "Xác định được vị trí các chòm sao Gấu lớn, Gấu nhỏ, Thiên Hậu và sao Bắc Cực trên nền trời sao."
+    },
+    {
+      "name": "Chuyên đề 10.2 – Đặc điểm chuyển động nhìn thấy của một số thiên thể trên nền trời sao",
+      "level": "qualitative",
+      "requirement": "Dùng mô hình nhật tâm của Copernic giải thích được một số đặc điểm quan sát được của Mặt Trời, Mặt Trăng, Kim Tinh và Thuỷ Tinh."
+    },
+    {
+      "name": "Chuyên đề 10.2 – Một số hiện tượng thiên văn",
+      "level": "qualitative",
+      "requirement": "Giải thích được một cách định tính và sơ lược các hiện tượng: nhật thực, nguyệt thực, thuỷ triều."
+    },
+    {
+      "name": "Chuyên đề 11.1 – Khái niệm trường hấp dẫn",
+      "level": "qualitative",
+      "requirement": "Nêu được mọi vật có khối lượng đều tạo ra một trường hấp dẫn xung quanh nó."
+    },
+    {
+      "name": "Chuyên đề 11.1 – Lực hấp dẫn",
+      "level": "quantitative",
+      "requirement": "Vận dụng được định luật Newton về hấp dẫn F = Gm₁m₂/r² cho một số trường hợp chuyển động đơn giản trong trường hấp dẫn."
+    },
+    {
+      "name": "Chuyên đề 11.1 – Cường độ trường hấp dẫn",
+      "level": "quantitative",
+      "requirement": "Vận dụng được phương trình g = GM/r²; gần bề mặt Trái Đất g là hằng số."
+    },
+    {
+      "name": "Chuyên đề 11.1 – Thế hấp dẫn và thế năng hấp dẫn",
+      "level": "quantitative",
+      "requirement": "Vận dụng được phương trình φ = –GM/r; giải thích sơ lược chuyển động của vệ tinh địa tĩnh, rút ra được công thức tính tốc độ vũ trụ cấp 1."
+    }
+  ],
+  "roles": {
+    "torque": "moment của một lực đối với trục quay của vật, dương khi làm vật quay ngược chiều kim đồng hồ (of = vật rắn, kind của lực đó, by = vật gây ra lực khi có nhiều lực cùng loại)",
+    "lever_arm": "cánh tay đòn của một lực: khoảng cách từ trục quay đến giá của lực, dương (of, kind, by như moment của lực đó)",
+    "density": "khối lượng riêng của chất làm nên vật (of)",
+    "body_volume": "thể tích của cả vật (of)",
+    "depth": "độ sâu của một điểm hoặc một vật dưới mặt thoáng chất lỏng, dương (of)",
+    "liquid_pressure": "áp suất tại điểm ở độ sâu đó trong chất lỏng (of)",
+    "surface_pressure": "áp suất trên mặt thoáng chất lỏng, ví dụ áp suất khí quyển (of, hoặc không có of nếu chung cho mọi điểm)",
+    "height_difference": "độ chênh lệch độ sâu Δh giữa hai điểm trong chất lỏng (of)",
+    "pressure_difference": "độ chênh lệch áp suất Δp giữa hai điểm đó, cùng dấu với Δh (of)",
+    "input_power": "công suất đưa vào: công suất toàn phần cấp cho máy hoặc quá trình, hoặc công suất tín hiệu ở đầu vào đường truyền (of)",
+    "useful_power": "công suất có ích (of; kind = loại lực sinh công có ích nếu lực đó được khai báo)",
+    "wasted_power": "công suất hao phí (of)",
+    "input_energy": "năng lượng toàn phần đã cấp tính từ lúc bắt đầu (of)",
+    "useful_energy": "năng lượng có ích đã nhận được tính từ lúc bắt đầu (of)",
+    "wasted_energy": "năng lượng hao phí tính từ lúc bắt đầu (of)",
+    "efficiency": "hiệu suất của máy, nguồn điện hoặc thiết bị, từ 0 đến 1 (of)",
+    "average_power": "công suất trung bình: của một lực tính từ lúc bắt đầu (of, kind của lực đó), hoặc trong một chu kì của linh kiện hay đoạn mạch xoay chiều (of; với máy biến áp kind = primary là công suất đưa vào cuộn sơ cấp, kind = secondary là công suất lấy ra ở cuộn thứ cấp)",
+    "angular_position": "góc quay (độ dịch chuyển góc) của vật trên quỹ đạo tròn, rad (of)",
+    "centripetal_force": "độ lớn lực hướng tâm (hợp lực hướng vào tâm) của vật chuyển động tròn (of)",
+    "elastic_limit": "độ biến dạng lớn nhất mà lò xo còn đàn hồi (of)",
+    "velocity_along_string": "vận tốc của vật dọc theo dây căng hoặc thanh cứng nối các vật, dương theo một chiều chung của dây (of, inString = tên dây hoặc thanh)",
+    "tension_magnitude": "độ lớn lực căng của dây nhẹ tại đầu nối với vật (of, inString)",
+    "source_mass": "khối lượng của thiên thể hoặc vật tạo ra trường hấp dẫn mà vật đang ở trong (of = vật chịu lực; bỏ of nếu chung cho mọi vật)",
+    "source_radius": "bán kính của thiên thể tạo ra trường hấp dẫn (of như source_mass)",
+    "center_distance": "khoảng cách từ vật đến tâm của vật tạo ra trường hấp dẫn (of)",
+    "altitude": "độ cao của vật so với bề mặt thiên thể (of)",
+    "gravitational_field_strength": "cường độ trường hấp dẫn tại vị trí của vật, độ lớn (of)",
+    "gravitational_potential": "thế hấp dẫn tại vị trí của vật, mốc ở vô cực (of)",
+    "first_cosmic_velocity": "tốc độ vũ trụ cấp 1 của thiên thể tạo ra trường hấp dẫn"
+  },
+  "forceKinds": {
+    "gravitation": "lực hấp dẫn giữa hai vật có khối lượng (tính theo định luật vạn vật hấp dẫn; thế năng tương ứng có kind = gravitation; bán kính quỹ đạo (radius) của vật chuyển động tròn quanh thiên thể mà chỉ chịu lực hấp dẫn, như vệ tinh, cũng ghi kind = gravitation, còn vật quay cùng thiên thể hay xe vào cua thì không)"
+  },
+  "constants": {
+    "G": {
+      "value": 6.674e-11,
+      "unit": "N*m2/kg2",
+      "label": "hằng số hấp dẫn"
+    }
+  },
+  "laws": [
+    {
+      "id": "torque_of_force",
+      "title": "Độ lớn moment lực M = F·d",
+      "curriculum": "Động lực học – Cân bằng lực, moment lực",
+      "scope": [
+        "of",
+        "kind",
+        "by"
+      ],
+      "bind": {
+        "Mo": {
+          "role": "torque"
+        },
+        "F": {
+          "role": "force_magnitude"
+        },
+        "d": {
+          "role": "lever_arm"
+        }
+      },
+      "equal": [
+        [
+          "abs",
+          "Mo"
+        ],
+        [
+          "mul",
+          "F",
+          "d"
+        ]
+      ]
+    },
+    {
+      "id": "moment_rule",
+      "title": "Quy tắc moment: vật có trục quay cân bằng khi tổng moment lực bằng không",
+      "curriculum": "Động lực học – Cân bằng lực, moment lực",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Mo": {
+          "role": "torque",
+          "many": true,
+          "min": 2
+        }
+      },
+      "unless": {
+        "role": "angular_velocity"
+      },
+      "equal": [
+        [
+          "add",
+          [
+            "sum",
+            "Mo"
+          ],
+          [
+            "sum",
+            [
+              "abs",
+              "Mo"
+            ]
+          ]
+        ],
+        [
+          "sum",
+          [
+            "abs",
+            "Mo"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "density_definition",
+      "title": "Khối lượng riêng: m = ρ·V",
+      "curriculum": "Động lực học – Khối lượng riêng, áp suất chất lỏng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "m": {
+          "role": "mass"
+        },
+        "rho": {
+          "role": "density"
+        },
+        "V": {
+          "role": "body_volume"
+        }
+      },
+      "equal": [
+        "m",
+        [
+          "mul",
+          "rho",
+          "V"
+        ]
+      ]
+    },
+    {
+      "id": "liquid_pressure",
+      "title": "Áp suất ở độ sâu h: p = p₀ + ρ·g·h",
+      "curriculum": "Động lực học – Khối lượng riêng, áp suất chất lỏng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "p": {
+          "role": "liquid_pressure"
+        },
+        "h": {
+          "role": "depth"
+        },
+        "rho": {
+          "role": "fluid_density"
+        },
+        "g": {
+          "role": "gravitational_acceleration",
+          "global": true
+        },
+        "p0": {
+          "role": "surface_pressure",
+          "many": true
+        }
+      },
+      "equal": [
+        "p",
+        [
+          "add",
+          [
+            "sum",
+            "p0"
+          ],
+          [
+            "mul",
+            [
+              "mul",
+              "rho",
+              "g"
+            ],
+            "h"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "pressure_difference",
+      "title": "Chênh lệch áp suất Δp = ρ·g·Δh",
+      "curriculum": "Động lực học – Khối lượng riêng, áp suất chất lỏng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "dp": {
+          "role": "pressure_difference"
+        },
+        "dh": {
+          "role": "height_difference"
+        },
+        "rho": {
+          "role": "fluid_density"
+        },
+        "g": {
+          "role": "gravitational_acceleration",
+          "global": true
+        }
+      },
+      "equal": [
+        "dp",
+        [
+          "mul",
+          [
+            "mul",
+            "rho",
+            "g"
+          ],
+          "dh"
+        ]
+      ]
+    },
+    {
+      "id": "submerged_volume_limit",
+      "title": "Phần chìm không lớn hơn thể tích của vật",
+      "curriculum": "Động lực học – Khối lượng riêng, áp suất chất lỏng",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Vc": {
+          "role": "volume"
+        },
+        "V": {
+          "role": "body_volume"
+        }
+      },
+      "atMost": [
+        "Vc",
+        "V"
+      ]
+    },
+    {
+      "id": "string_common_speed",
+      "title": "Các vật nối bằng dây căng hoặc thanh cứng có cùng vận tốc dọc theo dây",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn (lực căng dây nối các vật)",
+      "scope": [
+        "inString"
+      ],
+      "bind": {
+        "u": {
+          "role": "velocity_along_string",
+          "many": true,
+          "min": 2,
+          "where": {
+            "inString": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "add",
+          [
+            "sqrt",
+            [
+              "max",
+              0,
+              [
+                "sub",
+                [
+                  "mul",
+                  [
+                    "sum",
+                    [
+                      "pow",
+                      "u",
+                      0
+                    ]
+                  ],
+                  [
+                    "sum",
+                    [
+                      "pow",
+                      "u",
+                      2
+                    ]
+                  ]
+                ],
+                [
+                  "pow",
+                  [
+                    "sum",
+                    "u"
+                  ],
+                  2
+                ]
+              ]
+            ]
+          ],
+          [
+            "sum",
+            [
+              "abs",
+              "u"
+            ]
+          ]
+        ],
+        [
+          "sum",
+          [
+            "abs",
+            "u"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "string_velocity_component",
+      "title": "Vận tốc dọc theo dây không lớn hơn tốc độ của vật",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn (lực căng dây nối các vật)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "u": {
+          "role": "velocity_along_string"
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "u"
+        ],
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "v",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "string_same_tension",
+      "title": "Dây nhẹ: lực căng ở hai đầu dây có cùng độ lớn",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn (lực căng dây nối các vật)",
+      "scope": [
+        "inString"
+      ],
+      "bind": {
+        "T": {
+          "role": "tension_magnitude",
+          "many": true,
+          "min": 2,
+          "where": {
+            "inString": "*"
+          }
+        }
+      },
+      "equal": [
+        [
+          "add",
+          [
+            "sqrt",
+            [
+              "max",
+              0,
+              [
+                "sub",
+                [
+                  "mul",
+                  [
+                    "sum",
+                    [
+                      "pow",
+                      "T",
+                      0
+                    ]
+                  ],
+                  [
+                    "sum",
+                    [
+                      "pow",
+                      "T",
+                      2
+                    ]
+                  ]
+                ],
+                [
+                  "pow",
+                  [
+                    "sum",
+                    "T"
+                  ],
+                  2
+                ]
+              ]
+            ]
+          ],
+          [
+            "sum",
+            "T"
+          ]
+        ],
+        [
+          "sum",
+          "T"
+        ]
+      ]
+    },
+    {
+      "id": "tension_magnitude",
+      "title": "Độ lớn lực căng bằng căn tổng bình phương các thành phần lực căng",
+      "curriculum": "Động lực học – Một số lực trong thực tiễn (lực căng dây nối các vật)",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "T": {
+          "role": "tension_magnitude"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "tension"
+          }
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "F",
+              2
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "efficiency_power",
+      "title": "Hiệu suất: P có ích = H·P toàn phần",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "H": {
+          "role": "efficiency"
+        },
+        "Pi": {
+          "role": "input_power"
+        },
+        "Pu": {
+          "role": "useful_power",
+          "anyKind": true
+        }
+      },
+      "equal": [
+        "Pu",
+        [
+          "mul",
+          "H",
+          "Pi"
+        ]
+      ]
+    },
+    {
+      "id": "efficiency_energy",
+      "title": "Hiệu suất: năng lượng có ích = H·năng lượng toàn phần",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "H": {
+          "role": "efficiency"
+        },
+        "Ei": {
+          "role": "input_energy"
+        },
+        "Eu": {
+          "role": "useful_energy"
+        }
+      },
+      "unless": {
+        "role": "input_power"
+      },
+      "equal": [
+        "Eu",
+        [
+          "mul",
+          "H",
+          "Ei"
+        ]
+      ]
+    },
+    {
+      "id": "efficiency_range",
+      "title": "Hiệu suất không lớn hơn 1",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "H": {
+          "role": "efficiency"
+        }
+      },
+      "atMost": [
+        "H",
+        1
+      ]
+    },
+    {
+      "id": "efficiency_positive",
+      "title": "Hiệu suất không âm",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "H": {
+          "role": "efficiency"
+        }
+      },
+      "atMost": [
+        0,
+        "H"
+      ]
+    },
+    {
+      "id": "useful_power_limit",
+      "title": "Công suất có ích không lớn hơn công suất toàn phần",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Pi": {
+          "role": "input_power"
+        },
+        "Pu": {
+          "role": "useful_power",
+          "anyKind": true
+        }
+      },
+      "atMost": [
+        "Pu",
+        "Pi"
+      ]
+    },
+    {
+      "id": "useful_energy_limit",
+      "title": "Năng lượng có ích không lớn hơn năng lượng toàn phần",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Ei": {
+          "role": "input_energy"
+        },
+        "Eu": {
+          "role": "useful_energy"
+        }
+      },
+      "atMost": [
+        "Eu",
+        "Ei"
+      ]
+    },
+    {
+      "id": "input_energy_rate",
+      "title": "Năng lượng toàn phần tăng theo công suất toàn phần",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Ei": {
+          "role": "input_energy"
+        },
+        "Pi": {
+          "role": "input_power"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "Ei"
+        ],
+        "Pi"
+      ]
+    },
+    {
+      "id": "useful_energy_rate",
+      "title": "Năng lượng có ích tăng theo công suất có ích",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Eu": {
+          "role": "useful_energy"
+        },
+        "Pu": {
+          "role": "useful_power",
+          "anyKind": true
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "Eu"
+        ],
+        "Pu"
+      ]
+    },
+    {
+      "id": "wasted_power",
+      "title": "Công suất toàn phần = công suất có ích + công suất hao phí",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Pi": {
+          "role": "input_power"
+        },
+        "Pu": {
+          "role": "useful_power",
+          "anyKind": true
+        },
+        "Pw": {
+          "role": "wasted_power"
+        }
+      },
+      "equal": [
+        "Pi",
+        [
+          "add",
+          "Pu",
+          "Pw"
+        ]
+      ]
+    },
+    {
+      "id": "wasted_energy",
+      "title": "Năng lượng toàn phần = năng lượng có ích + năng lượng hao phí",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Ei": {
+          "role": "input_energy"
+        },
+        "Eu": {
+          "role": "useful_energy"
+        },
+        "Ew": {
+          "role": "wasted_energy"
+        }
+      },
+      "equal": [
+        "Ei",
+        [
+          "add",
+          "Eu",
+          "Ew"
+        ]
+      ]
+    },
+    {
+      "id": "wasted_energy_rate",
+      "title": "Năng lượng hao phí tăng theo công suất hao phí",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "Ew": {
+          "role": "wasted_energy"
+        },
+        "Pw": {
+          "role": "wasted_power"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "Ew"
+        ],
+        "Pw"
+      ]
+    },
+    {
+      "id": "useful_power_of_force",
+      "title": "Công suất có ích bằng F·v của lực sinh công có ích",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of",
+        "kind"
+      ],
+      "bind": {
+        "Pu": {
+          "role": "useful_power",
+          "where": {
+            "kind": "*"
+          }
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1,
+          "anyKind": true
+        }
+      },
+      "equal": [
+        "Pu",
+        [
+          "sum",
+          [
+            "mul",
+            "F",
+            "v"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "average_power",
+      "title": "Công suất trung bình: P·t = A",
+      "curriculum": "Công, năng lượng, công suất – Công suất và hiệu suất",
+      "scope": [
+        "of",
+        "kind"
+      ],
+      "bind": {
+        "P": {
+          "role": "average_power"
+        },
+        "A": {
+          "role": "work"
+        }
+      },
+      "equal": [
+        [
+          "mul",
+          "P",
+          "t"
+        ],
+        "A"
+      ]
+    },
+    {
+      "id": "angular_velocity_definition",
+      "title": "Tốc độ góc là tốc độ biến thiên của góc quay",
+      "curriculum": "Chuyển động tròn – Động học của chuyển động tròn đều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "th": {
+          "role": "angular_position"
+        },
+        "w": {
+          "role": "angular_velocity"
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "th"
+        ],
+        "w"
+      ]
+    },
+    {
+      "id": "circular_speed_scalar",
+      "title": "Chuyển động tròn: tốc độ v = |ω|·r",
+      "curriculum": "Chuyển động tròn – Động học của chuyển động tròn đều",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "s": {
+          "role": "speed"
+        },
+        "w": {
+          "role": "angular_velocity"
+        },
+        "r": {
+          "role": "radius"
+        }
+      },
+      "equal": [
+        "s",
+        [
+          "mul",
+          [
+            "abs",
+            "w"
+          ],
+          "r"
+        ]
+      ]
+    },
+    {
+      "id": "centripetal_acceleration_omega",
+      "title": "Gia tốc hướng tâm a = r·ω²",
+      "curriculum": "Chuyển động tròn – Gia tốc hướng tâm và lực hướng tâm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "a": {
+          "role": "centripetal_acceleration"
+        },
+        "w": {
+          "role": "angular_velocity"
+        },
+        "r": {
+          "role": "radius"
+        }
+      },
+      "equal": [
+        "a",
+        [
+          "mul",
+          "r",
+          [
+            "pow",
+            "w",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "centripetal_acceleration_speed",
+      "title": "Gia tốc hướng tâm a = v²/r (theo tốc độ)",
+      "curriculum": "Chuyển động tròn – Gia tốc hướng tâm và lực hướng tâm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "a": {
+          "role": "centripetal_acceleration"
+        },
+        "s": {
+          "role": "speed"
+        },
+        "r": {
+          "role": "radius"
+        }
+      },
+      "equal": [
+        "a",
+        [
+          "div",
+          [
+            "pow",
+            "s",
+            2
+          ],
+          "r"
+        ]
+      ]
+    },
+    {
+      "id": "centripetal_force",
+      "title": "Lực hướng tâm F = m·a hướng tâm",
+      "curriculum": "Chuyển động tròn – Gia tốc hướng tâm và lực hướng tâm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "centripetal_force"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "a": {
+          "role": "centripetal_acceleration"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "F",
+          "m"
+        ],
+        "a"
+      ]
+    },
+    {
+      "id": "centripetal_force_omega",
+      "title": "Lực hướng tâm F = m·r·ω²",
+      "curriculum": "Chuyển động tròn – Gia tốc hướng tâm và lực hướng tâm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "centripetal_force"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "w": {
+          "role": "angular_velocity"
+        },
+        "r": {
+          "role": "radius"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "F",
+          "m"
+        ],
+        [
+          "mul",
+          "r",
+          [
+            "pow",
+            "w",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "centripetal_force_speed",
+      "title": "Lực hướng tâm F = m·v²/r (theo tốc độ)",
+      "curriculum": "Chuyển động tròn – Gia tốc hướng tâm và lực hướng tâm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "centripetal_force"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "s": {
+          "role": "speed"
+        },
+        "r": {
+          "role": "radius"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "F",
+          "m"
+        ],
+        [
+          "div",
+          [
+            "pow",
+            "s",
+            2
+          ],
+          "r"
+        ]
+      ]
+    },
+    {
+      "id": "centripetal_force_velocity",
+      "title": "Lực hướng tâm F = m·v²/r (theo các thành phần vận tốc)",
+      "curriculum": "Chuyển động tròn – Gia tốc hướng tâm và lực hướng tâm",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "centripetal_force"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 2
+        },
+        "r": {
+          "role": "radius"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "F",
+          "m"
+        ],
+        [
+          "div",
+          [
+            "sum",
+            [
+              "pow",
+              "v",
+              2
+            ]
+          ],
+          "r"
+        ]
+      ]
+    },
+    {
+      "id": "elastic_limit",
+      "title": "Độ biến dạng của lò xo không vượt quá giới hạn đàn hồi",
+      "curriculum": "Biến dạng của vật rắn – Đặc tính của lò xo; Định luật Hooke",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "d": {
+          "role": "deformation"
+        },
+        "lim": {
+          "role": "elastic_limit"
+        }
+      },
+      "atMost": [
+        [
+          "abs",
+          "d"
+        ],
+        "lim"
+      ]
+    },
+    {
+      "id": "deformation_rate",
+      "title": "Lò xo có một đầu cố định: độ biến dạng thay đổi theo vận tốc của vật gắn ở đầu kia",
+      "curriculum": "Biến dạng của vật rắn – Đặc tính của lò xo; Định luật Hooke",
+      "scope": [
+        "of",
+        "axis"
+      ],
+      "bind": {
+        "d": {
+          "role": "deformation"
+        },
+        "v": {
+          "role": "velocity"
+        }
+      },
+      "unless": {
+        "role": "force",
+        "where": {
+          "kind": "spring",
+          "by": "*"
+        }
+      },
+      "when": "d",
+      "equal": [
+        [
+          "ddt",
+          "d"
+        ],
+        "v"
+      ]
+    },
+    {
+      "id": "spring_period",
+      "title": "Chu kì dao động của vật gắn lò xo: T = 2π·√(m/k)",
+      "curriculum": "Biến dạng của vật rắn – Đặc tính của lò xo; Định luật Hooke",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "T": {
+          "role": "period"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "k": {
+          "role": "stiffness"
+        }
+      },
+      "unless": {
+        "role": "angular_velocity"
+      },
+      "equal": [
+        "T",
+        [
+          "mul",
+          6.283185307179586,
+          [
+            "sqrt",
+            [
+              "div",
+              "m",
+              "k"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "universal_gravitation",
+      "title": "Định luật vạn vật hấp dẫn: F = G·M·m/r²",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Lực hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "M": {
+          "role": "source_mass"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "r": {
+          "role": "center_distance"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "sqrt",
+            [
+              "sum",
+              [
+                "pow",
+                "F",
+                2
+              ]
+            ]
+          ],
+          "m"
+        ],
+        [
+          "div",
+          [
+            "mul",
+            "G",
+            "M"
+          ],
+          [
+            "pow",
+            "r",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "gravitation_magnitude",
+      "title": "Độ lớn lực hấp dẫn F = G·M·m/r²",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Lực hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force_magnitude",
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "M": {
+          "role": "source_mass"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "r": {
+          "role": "center_distance"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "F",
+          "m"
+        ],
+        [
+          "div",
+          [
+            "mul",
+            "G",
+            "M"
+          ],
+          [
+            "pow",
+            "r",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "gravitation_attracts",
+      "title": "Lực hấp dẫn là lực hút: công suất của nó bằng −F·dr/dt",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Lực hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        },
+        "M": {
+          "role": "source_mass"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "r": {
+          "role": "center_distance"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "sum",
+            [
+              "mul",
+              "F",
+              "v"
+            ]
+          ],
+          "m"
+        ],
+        [
+          "neg",
+          [
+            "mul",
+            [
+              "div",
+              [
+                "mul",
+                "G",
+                "M"
+              ],
+              [
+                "pow",
+                "r",
+                2
+              ]
+            ],
+            [
+              "ddt",
+              "r"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "altitude",
+      "title": "Khoảng cách đến tâm r = R + h",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Lực hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "r": {
+          "role": "center_distance"
+        },
+        "Rs": {
+          "role": "source_radius"
+        },
+        "h": {
+          "role": "altitude"
+        }
+      },
+      "equal": [
+        "r",
+        [
+          "add",
+          "Rs",
+          "h"
+        ]
+      ]
+    },
+    {
+      "id": "orbit_radius_altitude",
+      "title": "Bán kính quỹ đạo tròn quanh thiên thể r = R + h",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Lực hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "r": {
+          "role": "radius",
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "Rs": {
+          "role": "source_radius"
+        },
+        "h": {
+          "role": "altitude"
+        }
+      },
+      "equal": [
+        "r",
+        [
+          "add",
+          "Rs",
+          "h"
+        ]
+      ]
+    },
+    {
+      "id": "circular_orbit_distance",
+      "title": "Trên quỹ đạo tròn quanh thiên thể, khoảng cách đến tâm bằng bán kính quỹ đạo",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Lực hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "d": {
+          "role": "center_distance"
+        },
+        "r": {
+          "role": "radius",
+          "where": {
+            "kind": "gravitation"
+          }
+        }
+      },
+      "equal": [
+        "d",
+        "r"
+      ]
+    },
+    {
+      "id": "center_distance_positive",
+      "title": "Khoảng cách đến tâm là số dương",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Lực hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "r": {
+          "role": "center_distance"
+        }
+      },
+      "atMost": [
+        0,
+        "r"
+      ]
+    },
+    {
+      "id": "gravitational_field_strength",
+      "title": "Cường độ trường hấp dẫn g = G·M/r²",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Cường độ trường hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "gf": {
+          "role": "gravitational_field_strength"
+        },
+        "M": {
+          "role": "source_mass"
+        },
+        "r": {
+          "role": "center_distance"
+        }
+      },
+      "equal": [
+        "gf",
+        [
+          "div",
+          [
+            "mul",
+            "G",
+            "M"
+          ],
+          [
+            "pow",
+            "r",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "field_strength_force",
+      "title": "Lực hấp dẫn F = m·g (g là cường độ trường tại chỗ vật)",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Cường độ trường hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "gf": {
+          "role": "gravitational_field_strength"
+        },
+        "m": {
+          "role": "mass"
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "gravitation"
+          }
+        }
+      },
+      "equal": [
+        [
+          "div",
+          [
+            "sqrt",
+            [
+              "sum",
+              [
+                "pow",
+                "F",
+                2
+              ]
+            ]
+          ],
+          "m"
+        ],
+        "gf"
+      ]
+    },
+    {
+      "id": "surface_gravity",
+      "title": "Gia tốc rơi tự do ở bề mặt thiên thể g = G·M/R²",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Cường độ trường hấp dẫn",
+      "scope": [],
+      "bind": {
+        "g": {
+          "role": "gravitational_acceleration",
+          "global": true
+        },
+        "M": {
+          "role": "source_mass"
+        },
+        "Rs": {
+          "role": "source_radius"
+        }
+      },
+      "equal": [
+        "g",
+        [
+          "div",
+          [
+            "mul",
+            "G",
+            "M"
+          ],
+          [
+            "pow",
+            "Rs",
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "gravitational_potential",
+      "title": "Thế hấp dẫn φ = −G·M/r",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Thế hấp dẫn và thế năng hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "phi": {
+          "role": "gravitational_potential"
+        },
+        "M": {
+          "role": "source_mass"
+        },
+        "r": {
+          "role": "center_distance"
+        }
+      },
+      "equal": [
+        "phi",
+        [
+          "neg",
+          [
+            "div",
+            [
+              "mul",
+              "G",
+              "M"
+            ],
+            "r"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "gravitational_potential_energy_field",
+      "title": "Thế năng hấp dẫn Wt = m·φ",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Thế hấp dẫn và thế năng hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "potential_energy",
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "m": {
+          "role": "mass"
+        },
+        "phi": {
+          "role": "gravitational_potential"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "U",
+          "m"
+        ],
+        "phi"
+      ]
+    },
+    {
+      "id": "gravitational_potential_energy_formula",
+      "title": "Thế năng hấp dẫn Wt = −G·M·m/r",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Thế hấp dẫn và thế năng hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "potential_energy",
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "m": {
+          "role": "mass"
+        },
+        "M": {
+          "role": "source_mass"
+        },
+        "r": {
+          "role": "center_distance"
+        }
+      },
+      "equal": [
+        [
+          "div",
+          "U",
+          "m"
+        ],
+        [
+          "neg",
+          [
+            "div",
+            [
+              "mul",
+              "G",
+              "M"
+            ],
+            "r"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "gravitational_potential_energy_work",
+      "title": "Thế năng hấp dẫn giảm đúng bằng công của lực hấp dẫn",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Thế hấp dẫn và thế năng hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "U": {
+          "role": "potential_energy",
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "F": {
+          "role": "force",
+          "many": true,
+          "min": 1,
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 1
+        }
+      },
+      "equal": [
+        [
+          "ddt",
+          "U"
+        ],
+        [
+          "neg",
+          [
+            "sum",
+            [
+              "mul",
+              "F",
+              "v"
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "orbital_speed",
+      "title": "Vật chuyển động tròn chỉ dưới tác dụng của lực hấp dẫn: v = √(G·M/r)",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Thế hấp dẫn và thế năng hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "s": {
+          "role": "speed"
+        },
+        "r": {
+          "role": "radius",
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "M": {
+          "role": "source_mass"
+        }
+      },
+      "equal": [
+        "s",
+        [
+          "sqrt",
+          [
+            "div",
+            [
+              "mul",
+              "G",
+              "M"
+            ],
+            "r"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "orbital_velocity",
+      "title": "Vật chuyển động tròn chỉ dưới tác dụng của lực hấp dẫn: độ lớn vận tốc bằng √(G·M/r)",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Thế hấp dẫn và thế năng hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "v": {
+          "role": "velocity",
+          "many": true,
+          "min": 2
+        },
+        "r": {
+          "role": "radius",
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "M": {
+          "role": "source_mass"
+        }
+      },
+      "equal": [
+        [
+          "sqrt",
+          [
+            "sum",
+            [
+              "pow",
+              "v",
+              2
+            ]
+          ]
+        ],
+        [
+          "sqrt",
+          [
+            "div",
+            [
+              "mul",
+              "G",
+              "M"
+            ],
+            "r"
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "orbital_period",
+      "title": "Chu kì của vật chuyển động tròn chỉ dưới tác dụng của lực hấp dẫn: T = 2π·√(r³/(G·M))",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Thế hấp dẫn và thế năng hấp dẫn",
+      "scope": [
+        "of"
+      ],
+      "bind": {
+        "T": {
+          "role": "period"
+        },
+        "r": {
+          "role": "radius",
+          "where": {
+            "kind": "gravitation"
+          }
+        },
+        "M": {
+          "role": "source_mass"
+        }
+      },
+      "equal": [
+        "T",
+        [
+          "mul",
+          6.283185307179586,
+          [
+            "sqrt",
+            [
+              "div",
+              [
+                "pow",
+                "r",
+                3
+              ],
+              [
+                "mul",
+                "G",
+                "M"
+              ]
+            ]
+          ]
+        ]
+      ]
+    },
+    {
+      "id": "first_cosmic_velocity",
+      "title": "Tốc độ vũ trụ cấp 1: v₁ = √(G·M/R)",
+      "curriculum": "Chuyên đề 11.1 Trường hấp dẫn – Thế hấp dẫn và thế năng hấp dẫn",
+      "scope": [],
+      "bind": {
+        "v1": {
+          "role": "first_cosmic_velocity"
+        },
+        "M": {
+          "role": "source_mass"
+        },
+        "Rs": {
+          "role": "source_radius"
+        }
+      },
+      "equal": [
+        "v1",
+        [
+          "sqrt",
+          [
+            "div",
+            [
+              "mul",
+              "G",
+              "M"
+            ],
+            "Rs"
+          ]
+        ]
+      ]
+    }
+  ]
+}

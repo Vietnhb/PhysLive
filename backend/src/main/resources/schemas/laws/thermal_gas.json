@@ -1,0 +1,1202 @@
+{
+ "id": "thermal_gas",
+ "title": "Vật lí nhiệt và Khí lí tưởng (Vật lí 12)",
+ "source": "Chương trình giáo dục phổ thông môn Vật lí 2018, mục V.2, lớp 12: Vật lí nhiệt; Khí lí tưởng",
+ "contents": [
+  {
+   "name": "Vật lí nhiệt – Sự chuyển thể",
+   "level": "qualitative",
+   "requirement": "Nêu được sơ lược cấu trúc của chất rắn, chất lỏng, chất khí; giải thích được sơ lược sự nóng chảy, sự hoá hơi."
+  },
+  {
+   "name": "Vật lí nhiệt – Nội năng, định luật 1 của nhiệt động lực học",
+   "level": "quantitative",
+   "requirement": "Vận dụng được định luật 1 của nhiệt động lực học trong một số trường hợp đơn giản."
+  },
+  {
+   "name": "Vật lí nhiệt – Thang nhiệt độ, nhiệt kế",
+   "level": "quantitative",
+   "requirement": "Chênh lệch nhiệt độ cho biết chiều truyền năng lượng nhiệt; hai vật cùng nhiệt độ không truyền nhiệt cho nhau; chuyển đổi được nhiệt độ giữa thang Celsius và thang Kelvin."
+  },
+  {
+   "name": "Vật lí nhiệt – Nhiệt dung riêng, nhiệt nóng chảy riêng, nhiệt hoá hơi riêng",
+   "level": "quantitative",
+   "requirement": "Nêu được định nghĩa nhiệt dung riêng, nhiệt nóng chảy riêng, nhiệt hoá hơi riêng; đo được các đại lượng này bằng dụng cụ thực hành."
+  },
+  {
+   "name": "Khí lí tưởng – Mô hình động học phân tử chất khí",
+   "level": "qualitative",
+   "requirement": "Nêu được các phân tử khí chuyển động hỗn loạn (chuyển động Brown) và các giả thuyết của thuyết động học phân tử chất khí."
+  },
+  {
+   "name": "Khí lí tưởng – Phương trình trạng thái",
+   "level": "quantitative",
+   "requirement": "Định luật Boyle, định luật Charles; vận dụng được phương trình trạng thái của khí lí tưởng."
+  },
+  {
+   "name": "Khí lí tưởng – Áp suất khí theo mô hình động học phân tử",
+   "level": "quantitative",
+   "requirement": "Rút ra được hệ thức p = (1/3)·n·m·v² với n là số phân tử trong một đơn vị thể tích."
+  },
+  {
+   "name": "Khí lí tưởng – Động năng phân tử",
+   "level": "quantitative",
+   "requirement": "Nêu được k = R/N_A; so sánh pV = (1/3)N·m·v² với pV = nRT, rút ra động năng tịnh tiến trung bình của phân tử tỉ lệ với nhiệt độ T."
+  }
+ ],
+ "roles": {
+  "temperature": "nhiệt độ tuyệt đối của vật hoặc khối khí, đơn vị K (of). Không dùng cho nhiệt độ theo °C",
+  "celsius_temperature": "nhiệt độ của vật theo thang Celsius, đơn vị degC (of); trong phương trình nó mang đúng con số °C, muốn có kelvin phải cộng hằng số 273,15 K",
+  "source_temperature": "nhiệt độ tuyệt đối (K) của vật hoặc môi trường đang trao đổi nhiệt với vật (of = vật nhận nhiệt lượng, by = vật hoặc môi trường kia); phải bằng nhiệt độ của vật kia",
+  "internal_energy": "nội năng của vật hoặc khối khí (of)",
+  "heat": "nhiệt lượng vật nhận được tính từ lúc bắt đầu, dương khi nhận, âm khi toả (of; by = vật hoặc môi trường trao đổi nhiệt với nó; in = tên nhóm các vật trao đổi nhiệt lượng này chỉ với nhau, ví dụ các vật trong một bình cách nhiệt; khi đó mọi vật của nhóm đều phải khai báo nhiệt lượng của mình với cùng in, còn nhiệt lượng nhận từ bên ngoài nhóm như bếp, dây đun, môi trường thì không có in). Mọi nhiệt lượng vật nhận phải được khai báo: các định luật coi đó là toàn bộ",
+  "specific_heat_capacity": "nhiệt dung riêng của chất làm vật ở trạng thái hiện tại (of); với khối khí là nhiệt dung riêng đẳng tích",
+  "specific_latent_heat": "nhiệt nóng chảy riêng (kind = fusion) hoặc nhiệt hoá hơi riêng (kind = vaporization) của chất làm vật (of, kind)",
+  "transformed_mass": "khối lượng của vật đã nóng chảy (kind = fusion) hoặc đã hoá hơi (kind = vaporization) tính từ lúc bắt đầu; giảm khi đông đặc hoặc ngưng tụ (of, kind)",
+  "pressure": "áp suất tuyệt đối của khối khí (of); thể tích của khối khí dùng vai trò volume, khối lượng của nó dùng vai trò mass",
+  "amount_of_substance": "số mol của khối khí (of)",
+  "molecule_count": "số phân tử của khối khí (of)",
+  "number_density": "mật độ phân tử: số phân tử trong một đơn vị thể tích (of)",
+  "molecule_mass": "khối lượng một phân tử khí (of)",
+  "rms_speed": "tốc độ căn quân phương của phân tử khí, căn của trung bình bình phương tốc độ (of)",
+  "mean_kinetic_energy": "động năng tịnh tiến trung bình của một phân tử khí (of)"
+ },
+ "reusedRoles": {
+  "mass": "khối lượng của vật hoặc khối khí; với chất lỏng đang hoá hơi là khối lượng phần còn lại (of)",
+  "volume": "thể tích của khối khí (of)",
+  "work": "với kind = thermodynamic: công mà vật hoặc khối khí nhận được từ bên ngoài tính từ lúc bắt đầu, dương khi nhận công (bị nén, bị khuấy, bị cọ xát), âm khi sinh công (of)",
+  "power": "với kind = heat: công suất nhiệt vật nhận được, ví dụ công suất của bếp hoặc dây đun (of; by giống nhiệt lượng tương ứng)"
+ },
+ "kinds": {
+  "thermodynamic": "công mà vật hoặc khối khí nhận được từ bên ngoài, dương khi nhận công, âm khi sinh công (dùng cho work)",
+  "heat": "công suất nhiệt vật nhận được, ví dụ từ bếp hoặc dây đun (dùng cho power; of và by phải giống nhiệt lượng tương ứng)",
+  "fusion": "nóng chảy (dùng cho specific_latent_heat, transformed_mass)",
+  "vaporization": "hoá hơi (dùng cho specific_latent_heat, transformed_mass)"
+ },
+ "forceKinds": {},
+ "constants": {
+  "R": {
+   "value": 8.314462618,
+   "unit": "J/(mol*K)",
+   "label": "hằng số khí lí tưởng"
+  },
+  "kB": {
+   "value": 1.380649e-23,
+   "unit": "J/K",
+   "label": "hằng số Boltzmann k = R/N_A"
+  },
+  "T0": {
+   "value": 273.15,
+   "unit": "K",
+   "label": "nhiệt độ tuyệt đối ứng với 0 °C"
+  }
+ },
+ "laws": [
+  {
+   "id": "celsius_kelvin",
+   "title": "Đổi thang nhiệt độ: T(K) = t(°C) + 273,15",
+   "curriculum": "Vật lí nhiệt – Thang nhiệt độ, nhiệt kế",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "T": {
+     "role": "temperature"
+    },
+    "tc": {
+     "role": "celsius_temperature"
+    }
+   },
+   "equal": [
+    "T",
+    [
+     "add",
+     "tc",
+     "T0"
+    ]
+   ]
+  },
+  {
+   "id": "absolute_temperature_positive",
+   "title": "Nhiệt độ tuyệt đối không âm",
+   "curriculum": "Vật lí nhiệt – Thang nhiệt độ, nhiệt kế",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "T": {
+     "role": "temperature"
+    }
+   },
+   "atMost": [
+    [
+     "neg",
+     "T"
+    ],
+    0
+   ]
+  },
+  {
+   "id": "celsius_above_absolute_zero",
+   "title": "Nhiệt độ Celsius không thấp hơn −273,15 °C",
+   "curriculum": "Vật lí nhiệt – Thang nhiệt độ, nhiệt kế",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "tc": {
+     "role": "celsius_temperature"
+    }
+   },
+   "atMost": [
+    [
+     "neg",
+     [
+      "add",
+      "tc",
+      "T0"
+     ]
+    ],
+    0
+   ]
+  },
+  {
+   "id": "first_law",
+   "title": "Định luật 1 nhiệt động lực học: ΔU = A + Q",
+   "curriculum": "Vật lí nhiệt – Nội năng, định luật 1 của nhiệt động lực học",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "U": {
+     "role": "internal_energy"
+    },
+    "Q": {
+     "role": "heat",
+     "many": true
+    },
+    "A": {
+     "role": "work",
+     "many": true,
+     "where": {
+      "kind": "thermodynamic"
+     }
+    }
+   },
+   "equal": [
+    [
+     "ddt",
+     "U"
+    ],
+    [
+     "add",
+     [
+      "ddt",
+      "Q"
+     ],
+     [
+      "ddt",
+      "A"
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "gas_work",
+   "title": "Công khối khí nhận được khi thể tích thay đổi: dA = −p·dV",
+   "curriculum": "Vật lí nhiệt – Nội năng, định luật 1 của nhiệt động lực học",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "A": {
+     "role": "work",
+     "where": {
+      "kind": "thermodynamic"
+     }
+    },
+    "p": {
+     "role": "pressure"
+    },
+    "V": {
+     "role": "volume"
+    }
+   },
+   "equal": [
+    [
+     "ddt",
+     "A"
+    ],
+    [
+     "neg",
+     [
+      "mul",
+      "p",
+      [
+       "ddt",
+       "V"
+      ]
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "heat_capacity",
+   "title": "Nhiệt lượng (và công) vật nhận được làm vật nóng lên hoặc chuyển thể: Q = m·c·ΔT + λ·Δm(nóng chảy) + L·Δm(hoá hơi)",
+   "curriculum": "Vật lí nhiệt – Nhiệt dung riêng, nhiệt nóng chảy riêng, nhiệt hoá hơi riêng",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "m": {
+     "role": "mass"
+    },
+    "c": {
+     "role": "specific_heat_capacity"
+    },
+    "T": {
+     "role": "temperature"
+    },
+    "Q": {
+     "role": "heat",
+     "many": true
+    },
+    "A": {
+     "role": "work",
+     "many": true,
+     "where": {
+      "kind": "thermodynamic"
+     }
+    },
+    "lf": {
+     "role": "specific_latent_heat",
+     "many": true,
+     "where": {
+      "kind": "fusion"
+     }
+    },
+    "mf": {
+     "role": "transformed_mass",
+     "many": true,
+     "where": {
+      "kind": "fusion"
+     }
+    },
+    "lv": {
+     "role": "specific_latent_heat",
+     "many": true,
+     "where": {
+      "kind": "vaporization"
+     }
+    },
+    "mv": {
+     "role": "transformed_mass",
+     "many": true,
+     "where": {
+      "kind": "vaporization"
+     }
+    }
+   },
+   "equal": [
+    [
+     "add",
+     [
+      "ddt",
+      "Q"
+     ],
+     [
+      "ddt",
+      "A"
+     ]
+    ],
+    [
+     "add",
+     [
+      "mul",
+      [
+       "mul",
+       "m",
+       "c"
+      ],
+      [
+       "ddt",
+       "T"
+      ]
+     ],
+     [
+      "add",
+      [
+       "sum",
+       [
+        "mul",
+        "lf",
+        [
+         "ddt",
+         "mf"
+        ]
+       ]
+      ],
+      [
+       "sum",
+       [
+        "mul",
+        "lv",
+        [
+         "ddt",
+         "mv"
+        ]
+       ]
+      ]
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "heat_capacity_celsius",
+   "title": "Nhiệt lượng (và công) vật nhận được làm vật nóng lên hoặc chuyển thể (nhiệt độ theo °C)",
+   "curriculum": "Vật lí nhiệt – Nhiệt dung riêng, nhiệt nóng chảy riêng, nhiệt hoá hơi riêng",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "m": {
+     "role": "mass"
+    },
+    "c": {
+     "role": "specific_heat_capacity"
+    },
+    "T": {
+     "role": "celsius_temperature"
+    },
+    "Q": {
+     "role": "heat",
+     "many": true
+    },
+    "A": {
+     "role": "work",
+     "many": true,
+     "where": {
+      "kind": "thermodynamic"
+     }
+    },
+    "lf": {
+     "role": "specific_latent_heat",
+     "many": true,
+     "where": {
+      "kind": "fusion"
+     }
+    },
+    "mf": {
+     "role": "transformed_mass",
+     "many": true,
+     "where": {
+      "kind": "fusion"
+     }
+    },
+    "lv": {
+     "role": "specific_latent_heat",
+     "many": true,
+     "where": {
+      "kind": "vaporization"
+     }
+    },
+    "mv": {
+     "role": "transformed_mass",
+     "many": true,
+     "where": {
+      "kind": "vaporization"
+     }
+    }
+   },
+   "equal": [
+    [
+     "add",
+     [
+      "ddt",
+      "Q"
+     ],
+     [
+      "ddt",
+      "A"
+     ]
+    ],
+    [
+     "add",
+     [
+      "mul",
+      [
+       "mul",
+       "m",
+       "c"
+      ],
+      [
+       "ddt",
+       "T"
+      ]
+     ],
+     [
+      "add",
+      [
+       "sum",
+       [
+        "mul",
+        "lf",
+        [
+         "ddt",
+         "mf"
+        ]
+       ]
+      ],
+      [
+       "sum",
+       [
+        "mul",
+        "lv",
+        [
+         "ddt",
+         "mv"
+        ]
+       ]
+      ]
+     ]
+    ]
+   ],
+   "unless": {
+    "role": "temperature"
+   }
+  },
+  {
+   "id": "heat_power",
+   "title": "Công suất nhiệt là tốc độ nhận nhiệt lượng (nhiệt lượng không nêu vật trao đổi)",
+   "curriculum": "Vật lí nhiệt – Nhiệt dung riêng, nhiệt nóng chảy riêng, nhiệt hoá hơi riêng",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "P": {
+     "role": "power",
+     "many": true,
+     "min": 1,
+     "where": {
+      "kind": "heat",
+      "by": null
+     }
+    },
+    "Q": {
+     "role": "heat",
+     "many": true,
+     "min": 1,
+     "where": {
+      "by": null
+     }
+    }
+   },
+   "equal": [
+    [
+     "ddt",
+     "Q"
+    ],
+    "P"
+   ]
+  },
+  {
+   "id": "heat_power_exchange",
+   "title": "Công suất nhiệt vật nhận từ một vật khác là tốc độ nhận nhiệt lượng từ vật đó",
+   "curriculum": "Vật lí nhiệt – Nhiệt dung riêng, nhiệt nóng chảy riêng, nhiệt hoá hơi riêng",
+   "scope": [
+    "of",
+    "by"
+   ],
+   "bind": {
+    "P": {
+     "role": "power",
+     "many": true,
+     "min": 1,
+     "where": {
+      "kind": "heat",
+      "by": "*"
+     }
+    },
+    "Q": {
+     "role": "heat",
+     "many": true,
+     "min": 1,
+     "where": {
+      "by": "*"
+     }
+    }
+   },
+   "equal": [
+    [
+     "ddt",
+     "Q"
+    ],
+    "P"
+   ]
+  },
+  {
+   "id": "heat_balance",
+   "title": "Cân bằng nhiệt: tổng nhiệt lượng các vật trao đổi riêng với nhau trong một hệ bằng 0",
+   "curriculum": "Vật lí nhiệt – Thang nhiệt độ, nhiệt kế; Nhiệt dung riêng",
+   "scope": [
+    "in"
+   ],
+   "bind": {
+    "Q": {
+     "role": "heat",
+     "many": true,
+     "min": 2,
+     "where": {
+      "in": "*"
+     }
+    }
+   },
+   "equal": [
+    [
+     "ddt",
+     "Q"
+    ],
+    0
+   ]
+  },
+  {
+   "id": "heat_flows_hot_to_cold",
+   "title": "Nhiệt chỉ tự truyền từ vật nóng hơn sang vật lạnh hơn",
+   "curriculum": "Vật lí nhiệt – Thang nhiệt độ, nhiệt kế",
+   "scope": [
+    "of",
+    "by"
+   ],
+   "bind": {
+    "Q": {
+     "role": "heat"
+    },
+    "T": {
+     "role": "temperature"
+    },
+    "Ts": {
+     "role": "source_temperature"
+    }
+   },
+   "atMost": [
+    [
+     "mul",
+     [
+      "ddt",
+      "Q"
+     ],
+     [
+      "sub",
+      "T",
+      "Ts"
+     ]
+    ],
+    0
+   ]
+  },
+  {
+   "id": "heat_flows_hot_to_cold_celsius",
+   "title": "Nhiệt chỉ tự truyền từ vật nóng hơn sang vật lạnh hơn (nhiệt độ theo °C)",
+   "curriculum": "Vật lí nhiệt – Thang nhiệt độ, nhiệt kế",
+   "scope": [
+    "of",
+    "by"
+   ],
+   "bind": {
+    "Q": {
+     "role": "heat"
+    },
+    "tc": {
+     "role": "celsius_temperature"
+    },
+    "Ts": {
+     "role": "source_temperature"
+    }
+   },
+   "unless": {
+    "role": "temperature"
+   },
+   "atMost": [
+    [
+     "mul",
+     [
+      "ddt",
+      "Q"
+     ],
+     [
+      "sub",
+      [
+       "add",
+       "tc",
+       "T0"
+      ],
+      "Ts"
+     ]
+    ],
+    0
+   ]
+  },
+  {
+   "id": "ideal_gas_state",
+   "title": "Phương trình trạng thái khí lí tưởng: p·V = n·R·T (bao gồm định luật Boyle và Charles)",
+   "curriculum": "Khí lí tưởng – Phương trình trạng thái",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "p": {
+     "role": "pressure"
+    },
+    "V": {
+     "role": "volume"
+    },
+    "n": {
+     "role": "amount_of_substance"
+    },
+    "T": {
+     "role": "temperature"
+    }
+   },
+   "equal": [
+    [
+     "mul",
+     "p",
+     "V"
+    ],
+    [
+     "mul",
+     [
+      "mul",
+      "n",
+      "R"
+     ],
+     "T"
+    ]
+   ]
+  },
+  {
+   "id": "ideal_gas_state_celsius",
+   "title": "Phương trình trạng thái khí lí tưởng: p·V = n·R·T (bao gồm định luật Boyle và Charles) (nhiệt độ theo °C)",
+   "curriculum": "Khí lí tưởng – Phương trình trạng thái",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "p": {
+     "role": "pressure"
+    },
+    "V": {
+     "role": "volume"
+    },
+    "n": {
+     "role": "amount_of_substance"
+    },
+    "tc": {
+     "role": "celsius_temperature"
+    }
+   },
+   "equal": [
+    [
+     "mul",
+     "p",
+     "V"
+    ],
+    [
+     "mul",
+     [
+      "mul",
+      "n",
+      "R"
+     ],
+     [
+      "add",
+      "tc",
+      "T0"
+     ]
+    ]
+   ],
+   "unless": {
+    "role": "temperature"
+   }
+  },
+  {
+   "id": "ideal_gas_state_molecules",
+   "title": "Phương trình trạng thái theo số phân tử: p·V = N·k·T",
+   "curriculum": "Khí lí tưởng – Động năng phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "p": {
+     "role": "pressure"
+    },
+    "V": {
+     "role": "volume"
+    },
+    "N": {
+     "role": "molecule_count"
+    },
+    "T": {
+     "role": "temperature"
+    }
+   },
+   "equal": [
+    [
+     "mul",
+     "p",
+     "V"
+    ],
+    [
+     "mul",
+     [
+      "mul",
+      "N",
+      "kB"
+     ],
+     "T"
+    ]
+   ]
+  },
+  {
+   "id": "ideal_gas_state_molecules_celsius",
+   "title": "Phương trình trạng thái theo số phân tử: p·V = N·k·T (nhiệt độ theo °C)",
+   "curriculum": "Khí lí tưởng – Động năng phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "p": {
+     "role": "pressure"
+    },
+    "V": {
+     "role": "volume"
+    },
+    "N": {
+     "role": "molecule_count"
+    },
+    "tc": {
+     "role": "celsius_temperature"
+    }
+   },
+   "equal": [
+    [
+     "mul",
+     "p",
+     "V"
+    ],
+    [
+     "mul",
+     [
+      "mul",
+      "N",
+      "kB"
+     ],
+     [
+      "add",
+      "tc",
+      "T0"
+     ]
+    ]
+   ],
+   "unless": {
+    "role": "temperature"
+   }
+  },
+  {
+   "id": "molecule_count",
+   "title": "Số phân tử N = n·N_A (k = R/N_A nên N·k = n·R)",
+   "curriculum": "Khí lí tưởng – Động năng phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "N": {
+     "role": "molecule_count"
+    },
+    "n": {
+     "role": "amount_of_substance"
+    }
+   },
+   "equal": [
+    [
+     "mul",
+     "N",
+     "kB"
+    ],
+    [
+     "mul",
+     "n",
+     "R"
+    ]
+   ]
+  },
+  {
+   "id": "number_density",
+   "title": "Mật độ phân tử: số phân tử trong một đơn vị thể tích",
+   "curriculum": "Khí lí tưởng – Áp suất khí theo mô hình động học phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "n0": {
+     "role": "number_density"
+    },
+    "N": {
+     "role": "molecule_count"
+    },
+    "V": {
+     "role": "volume"
+    }
+   },
+   "equal": [
+    [
+     "mul",
+     "n0",
+     "V"
+    ],
+    "N"
+   ]
+  },
+  {
+   "id": "kinetic_pressure",
+   "title": "Áp suất khí theo mô hình động học phân tử: p = ⅓·n·m·v²",
+   "curriculum": "Khí lí tưởng – Áp suất khí theo mô hình động học phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "p": {
+     "role": "pressure"
+    },
+    "n0": {
+     "role": "number_density"
+    },
+    "m0": {
+     "role": "molecule_mass"
+    },
+    "v": {
+     "role": "rms_speed"
+    }
+   },
+   "equal": [
+    [
+     "div",
+     [
+      "mul",
+      3,
+      "p"
+     ],
+     "m0"
+    ],
+    [
+     "mul",
+     "n0",
+     [
+      "pow",
+      "v",
+      2
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "kinetic_pressure_volume",
+   "title": "Mô hình động học phân tử: p·V = ⅓·N·m·v²",
+   "curriculum": "Khí lí tưởng – Động năng phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "p": {
+     "role": "pressure"
+    },
+    "V": {
+     "role": "volume"
+    },
+    "N": {
+     "role": "molecule_count"
+    },
+    "m0": {
+     "role": "molecule_mass"
+    },
+    "v": {
+     "role": "rms_speed"
+    }
+   },
+   "equal": [
+    [
+     "div",
+     [
+      "mul",
+      3,
+      [
+       "mul",
+       "p",
+       "V"
+      ]
+     ],
+     "m0"
+    ],
+    [
+     "mul",
+     "N",
+     [
+      "pow",
+      "v",
+      2
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "mean_kinetic_energy",
+   "title": "Động năng tịnh tiến trung bình của phân tử: Wđ = ½·m·v²",
+   "curriculum": "Khí lí tưởng – Động năng phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "E": {
+     "role": "mean_kinetic_energy"
+    },
+    "m0": {
+     "role": "molecule_mass"
+    },
+    "v": {
+     "role": "rms_speed"
+    }
+   },
+   "equal": [
+    "E",
+    [
+     "mul",
+     [
+      "mul",
+      0.5,
+      "m0"
+     ],
+     [
+      "pow",
+      "v",
+      2
+     ]
+    ]
+   ]
+  },
+  {
+   "id": "mean_kinetic_energy_temperature",
+   "title": "Động năng tịnh tiến trung bình của phân tử tỉ lệ với nhiệt độ tuyệt đối: Wđ = 3/2·k·T",
+   "curriculum": "Khí lí tưởng – Động năng phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "E": {
+     "role": "mean_kinetic_energy"
+    },
+    "T": {
+     "role": "temperature"
+    }
+   },
+   "equal": [
+    "E",
+    [
+     "mul",
+     [
+      "mul",
+      1.5,
+      "kB"
+     ],
+     "T"
+    ]
+   ]
+  },
+  {
+   "id": "mean_kinetic_energy_temperature_celsius",
+   "title": "Động năng tịnh tiến trung bình của phân tử tỉ lệ với nhiệt độ tuyệt đối: Wđ = 3/2·k·T (nhiệt độ theo °C)",
+   "curriculum": "Khí lí tưởng – Động năng phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "E": {
+     "role": "mean_kinetic_energy"
+    },
+    "tc": {
+     "role": "celsius_temperature"
+    }
+   },
+   "equal": [
+    "E",
+    [
+     "mul",
+     [
+      "mul",
+      1.5,
+      "kB"
+     ],
+     [
+      "add",
+      "tc",
+      "T0"
+     ]
+    ]
+   ],
+   "unless": {
+    "role": "temperature"
+   }
+  },
+  {
+   "id": "rms_speed_temperature",
+   "title": "Tốc độ căn quân phương của phân tử: m·v² = 3·k·T",
+   "curriculum": "Khí lí tưởng – Động năng phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "m0": {
+     "role": "molecule_mass"
+    },
+    "v": {
+     "role": "rms_speed"
+    },
+    "T": {
+     "role": "temperature"
+    }
+   },
+   "equal": [
+    [
+     "pow",
+     "v",
+     2
+    ],
+    [
+     "div",
+     [
+      "mul",
+      [
+       "mul",
+       3,
+       "kB"
+      ],
+      "T"
+     ],
+     "m0"
+    ]
+   ]
+  },
+  {
+   "id": "rms_speed_temperature_celsius",
+   "title": "Tốc độ căn quân phương của phân tử: m·v² = 3·k·T (nhiệt độ theo °C)",
+   "curriculum": "Khí lí tưởng – Động năng phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "m0": {
+     "role": "molecule_mass"
+    },
+    "v": {
+     "role": "rms_speed"
+    },
+    "tc": {
+     "role": "celsius_temperature"
+    }
+   },
+   "equal": [
+    [
+     "pow",
+     "v",
+     2
+    ],
+    [
+     "div",
+     [
+      "mul",
+      [
+       "mul",
+       3,
+       "kB"
+      ],
+      [
+       "add",
+       "tc",
+       "T0"
+      ]
+     ],
+     "m0"
+    ]
+   ],
+   "unless": {
+    "role": "temperature"
+   }
+  },
+  {
+   "id": "gas_mass",
+   "title": "Khối lượng khối khí bằng số phân tử nhân khối lượng một phân tử",
+   "curriculum": "Khí lí tưởng – Áp suất khí theo mô hình động học phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "m": {
+     "role": "mass"
+    },
+    "N": {
+     "role": "molecule_count"
+    },
+    "m0": {
+     "role": "molecule_mass"
+    }
+   },
+   "equal": [
+    [
+     "div",
+     "m",
+     "m0"
+    ],
+    "N"
+   ]
+  },
+  {
+   "id": "pressure_positive",
+   "title": "Áp suất của khối khí không âm",
+   "curriculum": "Khí lí tưởng – Phương trình trạng thái",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "p": {
+     "role": "pressure"
+    }
+   },
+   "atMost": [
+    [
+     "neg",
+     "p"
+    ],
+    0
+   ]
+  },
+  {
+   "id": "rms_speed_positive",
+   "title": "Tốc độ căn quân phương là một độ lớn, không âm",
+   "curriculum": "Khí lí tưởng – Áp suất khí theo mô hình động học phân tử",
+   "scope": [
+    "of"
+   ],
+   "bind": {
+    "v": {
+     "role": "rms_speed"
+    }
+   },
+   "atMost": [
+    [
+     "neg",
+     "v"
+    ],
+    0
+   ]
+  }
+ ]
+}
