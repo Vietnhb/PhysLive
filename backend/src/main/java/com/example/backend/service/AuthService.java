@@ -81,6 +81,7 @@ public class AuthService {
                 user.getUpdatedAt());
 
         userInfo.setSchoolId(user.getSchool() == null ? null : user.getSchool().getId());
+        userInfo.setPermissions(user.permissionCodes());
         return new LoginResponse(token, userInfo);
     }
 
