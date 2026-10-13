@@ -1,0 +1,792 @@
+{
+  "capabilityId": "applied_force_with_friction",
+  "title": "Vật chịu lực kéo (ngang hoặc xiên góc) và ma sát (định luật II Newton)",
+  "version": "3.0",
+  "applicability": {
+    "objectTypes": [
+      "body",
+      "surface",
+      "force_source"
+    ],
+    "quantities": [
+      "mass",
+      "applied_force",
+      "force_angle",
+      "friction_coefficient",
+      "gravitational_acceleration",
+      "initial_position",
+      "initial_velocity"
+    ]
+  },
+  "canonicalInputs": [
+    {
+      "key": "mass",
+      "unit": "kg",
+      "min": 1e-06
+    },
+    {
+      "key": "applied_force",
+      "unit": "N",
+      "timeVarying": true
+    },
+    {
+      "key": "force_angle",
+      "unit": "rad",
+      "min": -1.5707963267948966,
+      "max": 1.5707963267948966,
+      "defaultValue": 0,
+      "timeVarying": true
+    },
+    {
+      "key": "friction_coefficient",
+      "unit": "1",
+      "min": 0,
+      "max": 5,
+      "defaultValue": 0,
+      "timeVarying": true
+    },
+    {
+      "key": "gravitational_acceleration",
+      "unit": "m/s^2",
+      "min": 1e-06,
+      "defaultValue": 9.80665
+    },
+    {
+      "key": "initial_position",
+      "unit": "m",
+      "defaultValue": 0
+    },
+    {
+      "key": "initial_velocity",
+      "unit": "m/s",
+      "min": 0,
+      "defaultValue": 0
+    }
+  ],
+  "outputs": [
+    {
+      "key": "position",
+      "unit": "m"
+    },
+    {
+      "key": "velocity",
+      "unit": "m/s"
+    },
+    {
+      "key": "acceleration",
+      "unit": "m/s^2"
+    },
+    {
+      "key": "force",
+      "unit": "N"
+    },
+    {
+      "key": "kinetic_energy",
+      "unit": "J"
+    },
+    {
+      "key": "work",
+      "unit": "J"
+    },
+    {
+      "key": "power",
+      "unit": "W"
+    },
+    {
+      "key": "momentum",
+      "unit": "kg*m/s"
+    },
+    {
+      "key": "normal_force",
+      "unit": "N"
+    }
+  ],
+  "assumptions": [
+    "Vật chuyển động thẳng trên mặt phẳng ngang theo chiều của thành phần lực kéo nằm ngang trong suốt thời gian mô phỏng.",
+    "Lực kéo hợp với phương ngang một góc (0 khi kéo song song mặt phẳng, dương khi kéo chếch lên); hệ số ma sát trượt không đổi; vật không rời mặt phẳng."
+  ],
+  "equationSet": {
+    "canonical": [
+      "m*a = F*cos(alpha) - mu*N",
+      "N = m*g - F*sin(alpha)",
+      "Fms = mu*N"
+    ],
+    "derived": [
+      "A = F*s*cos(alpha)",
+      "P = F*v*cos(alpha)",
+      "Wd = m*v^2/2",
+      "F_hl = dp/dt"
+    ]
+  },
+  "execution": {
+    "primary": "analytical",
+    "numerical": {
+      "solverId": "schema_ast_rk4",
+      "method": "rk4"
+    },
+    "closedForm": {
+      "solverId": "schema_ast_reference",
+      "method": "approved_ast"
+    },
+    "math": {
+      "initial": {
+        "position": "initial_position",
+        "velocity": "initial_velocity",
+        "work": 0
+      },
+      "rates": {
+        "position": "velocity",
+        "velocity": [
+          "div",
+          [
+            "sub",
+            [
+              "mul",
+              "applied_force",
+              [
+                "cos",
+                "force_angle"
+              ]
+            ],
+            [
+              "mul",
+              "friction_coefficient",
+              [
+                "max",
+                0,
+                [
+                  "sub",
+                  [
+                    "mul",
+                    "mass",
+                    "gravitational_acceleration"
+                  ],
+                  [
+                    "mul",
+                    "applied_force",
+                    [
+                      "sin",
+                      "force_angle"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          "mass"
+        ],
+        "work": [
+          "mul",
+          [
+            "mul",
+            "applied_force",
+            [
+              "cos",
+              "force_angle"
+            ]
+          ],
+          "velocity"
+        ]
+      },
+      "outputs": {
+        "position": "position",
+        "velocity": "velocity",
+        "acceleration": [
+          "div",
+          [
+            "sub",
+            [
+              "mul",
+              "applied_force",
+              [
+                "cos",
+                "force_angle"
+              ]
+            ],
+            [
+              "mul",
+              "friction_coefficient",
+              [
+                "max",
+                0,
+                [
+                  "sub",
+                  [
+                    "mul",
+                    "mass",
+                    "gravitational_acceleration"
+                  ],
+                  [
+                    "mul",
+                    "applied_force",
+                    [
+                      "sin",
+                      "force_angle"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          "mass"
+        ],
+        "force": [
+          "sub",
+          [
+            "mul",
+            "applied_force",
+            [
+              "cos",
+              "force_angle"
+            ]
+          ],
+          [
+            "mul",
+            "friction_coefficient",
+            [
+              "max",
+              0,
+              [
+                "sub",
+                [
+                  "mul",
+                  "mass",
+                  "gravitational_acceleration"
+                ],
+                [
+                  "mul",
+                  "applied_force",
+                  [
+                    "sin",
+                    "force_angle"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        "kinetic_energy": [
+          "mul",
+          [
+            "mul",
+            0.5,
+            "mass"
+          ],
+          [
+            "pow",
+            "velocity",
+            2
+          ]
+        ],
+        "work": "work",
+        "power": [
+          "mul",
+          [
+            "mul",
+            "applied_force",
+            [
+              "cos",
+              "force_angle"
+            ]
+          ],
+          "velocity"
+        ],
+        "momentum": [
+          "mul",
+          "mass",
+          "velocity"
+        ],
+        "normal_force": [
+          "max",
+          0,
+          [
+            "sub",
+            [
+              "mul",
+              "mass",
+              "gravitational_acceleration"
+            ],
+            [
+              "mul",
+              "applied_force",
+              [
+                "sin",
+                "force_angle"
+              ]
+            ]
+          ]
+        ]
+      },
+      "closedForm": {
+        "position": [
+          "add",
+          "initial_position",
+          [
+            "add",
+            [
+              "mul",
+              "initial_velocity",
+              "t"
+            ],
+            [
+              "mul",
+              [
+                "mul",
+                0.5,
+                [
+                  "div",
+                  [
+                    "sub",
+                    [
+                      "mul",
+                      "applied_force",
+                      [
+                        "cos",
+                        "force_angle"
+                      ]
+                    ],
+                    [
+                      "mul",
+                      "friction_coefficient",
+                      [
+                        "max",
+                        0,
+                        [
+                          "sub",
+                          [
+                            "mul",
+                            "mass",
+                            "gravitational_acceleration"
+                          ],
+                          [
+                            "mul",
+                            "applied_force",
+                            [
+                              "sin",
+                              "force_angle"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ],
+                  "mass"
+                ]
+              ],
+              [
+                "pow",
+                "t",
+                2
+              ]
+            ]
+          ]
+        ],
+        "velocity": [
+          "add",
+          "initial_velocity",
+          [
+            "mul",
+            [
+              "div",
+              [
+                "sub",
+                [
+                  "mul",
+                  "applied_force",
+                  [
+                    "cos",
+                    "force_angle"
+                  ]
+                ],
+                [
+                  "mul",
+                  "friction_coefficient",
+                  [
+                    "max",
+                    0,
+                    [
+                      "sub",
+                      [
+                        "mul",
+                        "mass",
+                        "gravitational_acceleration"
+                      ],
+                      [
+                        "mul",
+                        "applied_force",
+                        [
+                          "sin",
+                          "force_angle"
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              "mass"
+            ],
+            "t"
+          ]
+        ],
+        "acceleration": [
+          "div",
+          [
+            "sub",
+            [
+              "mul",
+              "applied_force",
+              [
+                "cos",
+                "force_angle"
+              ]
+            ],
+            [
+              "mul",
+              "friction_coefficient",
+              [
+                "max",
+                0,
+                [
+                  "sub",
+                  [
+                    "mul",
+                    "mass",
+                    "gravitational_acceleration"
+                  ],
+                  [
+                    "mul",
+                    "applied_force",
+                    [
+                      "sin",
+                      "force_angle"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          ],
+          "mass"
+        ],
+        "force": [
+          "sub",
+          [
+            "mul",
+            "applied_force",
+            [
+              "cos",
+              "force_angle"
+            ]
+          ],
+          [
+            "mul",
+            "friction_coefficient",
+            [
+              "max",
+              0,
+              [
+                "sub",
+                [
+                  "mul",
+                  "mass",
+                  "gravitational_acceleration"
+                ],
+                [
+                  "mul",
+                  "applied_force",
+                  [
+                    "sin",
+                    "force_angle"
+                  ]
+                ]
+              ]
+            ]
+          ]
+        ],
+        "kinetic_energy": [
+          "mul",
+          [
+            "mul",
+            0.5,
+            "mass"
+          ],
+          [
+            "pow",
+            [
+              "add",
+              "initial_velocity",
+              [
+                "mul",
+                [
+                  "div",
+                  [
+                    "sub",
+                    [
+                      "mul",
+                      "applied_force",
+                      [
+                        "cos",
+                        "force_angle"
+                      ]
+                    ],
+                    [
+                      "mul",
+                      "friction_coefficient",
+                      [
+                        "max",
+                        0,
+                        [
+                          "sub",
+                          [
+                            "mul",
+                            "mass",
+                            "gravitational_acceleration"
+                          ],
+                          [
+                            "mul",
+                            "applied_force",
+                            [
+                              "sin",
+                              "force_angle"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ],
+                  "mass"
+                ],
+                "t"
+              ]
+            ],
+            2
+          ]
+        ],
+        "work": [
+          "mul",
+          [
+            "mul",
+            "applied_force",
+            [
+              "cos",
+              "force_angle"
+            ]
+          ],
+          [
+            "add",
+            [
+              "mul",
+              "initial_velocity",
+              "t"
+            ],
+            [
+              "mul",
+              [
+                "mul",
+                0.5,
+                [
+                  "div",
+                  [
+                    "sub",
+                    [
+                      "mul",
+                      "applied_force",
+                      [
+                        "cos",
+                        "force_angle"
+                      ]
+                    ],
+                    [
+                      "mul",
+                      "friction_coefficient",
+                      [
+                        "max",
+                        0,
+                        [
+                          "sub",
+                          [
+                            "mul",
+                            "mass",
+                            "gravitational_acceleration"
+                          ],
+                          [
+                            "mul",
+                            "applied_force",
+                            [
+                              "sin",
+                              "force_angle"
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ],
+                  "mass"
+                ]
+              ],
+              [
+                "pow",
+                "t",
+                2
+              ]
+            ]
+          ]
+        ],
+        "power": [
+          "mul",
+          [
+            "mul",
+            "applied_force",
+            [
+              "cos",
+              "force_angle"
+            ]
+          ],
+          [
+            "add",
+            "initial_velocity",
+            [
+              "mul",
+              [
+                "div",
+                [
+                  "sub",
+                  [
+                    "mul",
+                    "applied_force",
+                    [
+                      "cos",
+                      "force_angle"
+                    ]
+                  ],
+                  [
+                    "mul",
+                    "friction_coefficient",
+                    [
+                      "max",
+                      0,
+                      [
+                        "sub",
+                        [
+                          "mul",
+                          "mass",
+                          "gravitational_acceleration"
+                        ],
+                        [
+                          "mul",
+                          "applied_force",
+                          [
+                            "sin",
+                            "force_angle"
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                "mass"
+              ],
+              "t"
+            ]
+          ]
+        ],
+        "momentum": [
+          "mul",
+          "mass",
+          [
+            "add",
+            "initial_velocity",
+            [
+              "mul",
+              [
+                "div",
+                [
+                  "sub",
+                  [
+                    "mul",
+                    "applied_force",
+                    [
+                      "cos",
+                      "force_angle"
+                    ]
+                  ],
+                  [
+                    "mul",
+                    "friction_coefficient",
+                    [
+                      "max",
+                      0,
+                      [
+                        "sub",
+                        [
+                          "mul",
+                          "mass",
+                          "gravitational_acceleration"
+                        ],
+                        [
+                          "mul",
+                          "applied_force",
+                          [
+                            "sin",
+                            "force_angle"
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ],
+                "mass"
+              ],
+              "t"
+            ]
+          ]
+        ],
+        "normal_force": [
+          "max",
+          0,
+          [
+            "sub",
+            [
+              "mul",
+              "mass",
+              "gravitational_acceleration"
+            ],
+            [
+              "mul",
+              "applied_force",
+              [
+                "sin",
+                "force_angle"
+              ]
+            ]
+          ]
+        ]
+      }
+    }
+  },
+  "validation": {
+    "absoluteTolerance": 0.0001,
+    "relativeTolerance": 0.0001,
+    "strategy": "closed_form_checkpoints",
+    "invariants": [
+      "finite_output"
+    ],
+    "benchmarks": []
+  },
+  "validityDomain": {
+    "durationPositive": true
+  },
+  "rendererBindings": [
+    {
+      "source": "position",
+      "role": "position"
+    },
+    {
+      "source": "velocity",
+      "role": "velocity"
+    },
+    {
+      "source": "force",
+      "role": "force"
+    }
+  ]
+}
