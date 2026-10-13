@@ -7,11 +7,10 @@
 -- 1. Seed roles (idempotent)
 INSERT INTO public.roles (name) VALUES
     ('ADMIN'),
-    ('TEACHER'),
+    ('MANAGER'),
     ('REVIEWER'),
-    ('CONTENT_REVIEWER'),
-    ('SCHOOL_MANAGER'),
-    ('STUDENT'),
-    ('GUEST')
+    ('SCHOOL'),
+    ('STAFF'),
+    ('STUDENT')
 ON CONFLICT (name) DO NOTHING;
 

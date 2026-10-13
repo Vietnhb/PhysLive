@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** One row of {@code user_permissions}: the user-permission junction with its grant audit. */
+/** One audited row in the user_permissions junction. */
 @Embeddable
 @Getter
 @Setter
@@ -20,7 +20,6 @@ public class PermissionGrant {
     @JoinColumn(name = "permission_id", nullable = false)
     private Permission permission;
 
-    /** User ID of the SCHOOL or MANAGER account that granted the permission; null for migrated rows. */
     @Column(name = "granted_by")
     private Integer grantedBy;
 
@@ -37,7 +36,6 @@ public class PermissionGrant {
         return permission == null ? null : permission.getCode();
     }
 
-    /** A user holds a permission at most once, so identity is the permission code. */
     @Override
     public boolean equals(Object other) {
         return other instanceof PermissionGrant grant && Objects.equals(code(), grant.code());

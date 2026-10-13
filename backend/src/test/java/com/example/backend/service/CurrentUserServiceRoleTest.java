@@ -34,7 +34,7 @@ class CurrentUserServiceRoleTest {
         User reviewer = authenticate("reviewer@example.com", "REVIEWER");
         CurrentUserService service = new CurrentUserService(userRepository);
 
-        assertThat(service.requireAnyRole("REVIEWER", "ADMIN")).isSameAs(reviewer);
+        assertThat(service.requireAnyRole("REVIEWER", "MANAGER")).isSameAs(reviewer);
     }
 
     @Test
@@ -42,7 +42,7 @@ class CurrentUserServiceRoleTest {
         authenticate("guest@example.com", "GUEST");
         CurrentUserService service = new CurrentUserService(userRepository);
 
-        assertThatThrownBy(() -> service.requireAnyRole("REVIEWER", "ADMIN"))
+        assertThatThrownBy(() -> service.requireAnyRole("REVIEWER", "MANAGER"))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("REVIEWER");
     }

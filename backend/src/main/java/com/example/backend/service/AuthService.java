@@ -90,10 +90,7 @@ public class AuthService {
     // ------------------------------------------------------------------ //
 
     /**
-     * Registers a new user with role {@code GUEST} and a BCrypt-hashed password.
-     *
-     * @throws ApiException 400 if email is already in use
-     * @throws ApiException 500 if the GUEST role is missing from the database
+     * Personal signup is disabled; school and platform accounts are provisioned by managers.
      */
     public void signup(SignupRequest request) {
         throw new ApiException(HttpStatus.FORBIDDEN,

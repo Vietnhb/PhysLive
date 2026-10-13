@@ -59,7 +59,7 @@ public class AuthController {
 
     @Operation(
         summary = "Đăng ký",
-        description = "Tạo tài khoản mới với role GUEST. Password được mã hoá BCrypt trước khi lưu."
+        description = "Đăng ký cá nhân đã tắt; tài khoản do quản lý hệ thống hoặc nhà trường cấp."
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Đăng ký thành công"),

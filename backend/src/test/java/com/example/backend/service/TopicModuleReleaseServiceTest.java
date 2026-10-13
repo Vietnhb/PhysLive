@@ -69,7 +69,7 @@ class TopicModuleReleaseServiceTest {
                 schemaVersionRepository, solverVersionRepository, currentUserService,
                 numericalRegistry, referenceRegistry);
         reviewer = user(10, "REVIEWER");
-        admin = user(11, "ADMIN");
+        admin = user(11, "MANAGER");
         topic = new Topic();
         topic.setId(UUID.randomUUID());
         topic.setName("KINEMATICS");
@@ -86,7 +86,7 @@ class TopicModuleReleaseServiceTest {
     @Test
     void createsDraftWithVersionBindingsAndActorAudit() {
         CreateTopicModuleReleaseRequest request = request();
-        when(currentUserService.requireAnyRole("REVIEWER", "ADMIN")).thenReturn(reviewer);
+        when(currentUserService.requireAnyRole("REVIEWER", "MANAGER")).thenReturn(reviewer);
         when(topicRepository.findById(topic.getId())).thenReturn(Optional.of(topic));
         when(releaseRepository.findByTopicAndReleaseVersion(topic, "uniform-v1")).thenReturn(Optional.empty());
         when(numericalRegistry.require(PhysicsArchetype.UNIFORM_MOTION)).thenReturn(numericalImplementation);
@@ -116,7 +116,7 @@ class TopicModuleReleaseServiceTest {
 
     @Test
     void bootstrapsSchemaAndSolverCatalogOnFreshDatabase() {
-        when(currentUserService.requireAnyRole("REVIEWER", "ADMIN")).thenReturn(reviewer);
+        when(currentUserService.requireAnyRole("REVIEWER", "MANAGER")).thenReturn(reviewer);
         when(topicRepository.findById(topic.getId())).thenReturn(Optional.of(topic));
         when(releaseRepository.findByTopicAndReleaseVersion(topic, "uniform-v1")).thenReturn(Optional.empty());
         when(numericalRegistry.require(PhysicsArchetype.UNIFORM_MOTION)).thenReturn(numericalImplementation);
@@ -150,7 +150,7 @@ class TopicModuleReleaseServiceTest {
     @Test
     void transitionsDraftToApprovedAsReviewer() {
         TopicModuleRelease release = release(ModuleReleaseStatus.DRAFT);
-        when(currentUserService.requireAnyRole("REVIEWER", "ADMIN")).thenReturn(reviewer);
+        when(currentUserService.requireAnyRole("REVIEWER", "MANAGER")).thenReturn(reviewer);
         when(releaseRepository.findByIdForUpdate(release.getId())).thenReturn(Optional.of(release));
         when(topicRepository.findByIdForReleaseApproval(topic.getId())).thenReturn(Optional.of(topic));
         when(releaseRepository.existsByTopicAndStatusAndNumericalSolverVersionArchetype(
@@ -167,7 +167,7 @@ class TopicModuleReleaseServiceTest {
     @Test
     void transitionsApprovedToRetiredOnlyAsAdmin() {
         TopicModuleRelease release = release(ModuleReleaseStatus.APPROVED);
-        when(currentUserService.requireAnyRole("ADMIN")).thenReturn(admin);
+        when(currentUserService.requireAnyRole("MANAGER")).thenReturn(admin);
         when(releaseRepository.findByIdForUpdate(release.getId())).thenReturn(Optional.of(release));
         when(releaseRepository.save(release)).thenReturn(release);
 
@@ -182,7 +182,7 @@ class TopicModuleReleaseServiceTest {
     @EnumSource(value = ModuleReleaseStatus.class, names = {"APPROVED", "RETIRED"})
     void rejectsApproveUnlessCurrentStateIsDraft(ModuleReleaseStatus status) {
         TopicModuleRelease release = release(status);
-        when(currentUserService.requireAnyRole("REVIEWER", "ADMIN")).thenReturn(reviewer);
+        when(currentUserService.requireAnyRole("REVIEWER", "MANAGER")).thenReturn(reviewer);
         when(releaseRepository.findByIdForUpdate(release.getId())).thenReturn(Optional.of(release));
 
         assertThatThrownBy(() -> service.approve(release.getId()))
@@ -195,7 +195,7 @@ class TopicModuleReleaseServiceTest {
     @EnumSource(value = ModuleReleaseStatus.class, names = {"DRAFT", "RETIRED"})
     void rejectsRetireUnlessCurrentStateIsApproved(ModuleReleaseStatus status) {
         TopicModuleRelease release = release(status);
-        when(currentUserService.requireAnyRole("ADMIN")).thenReturn(admin);
+        when(currentUserService.requireAnyRole("MANAGER")).thenReturn(admin);
         when(releaseRepository.findByIdForUpdate(release.getId())).thenReturn(Optional.of(release));
 
         assertThatThrownBy(() -> service.retire(release.getId()))
@@ -207,7 +207,7 @@ class TopicModuleReleaseServiceTest {
     @Test
     void refusesSecondApprovedReleaseForSameTopicAndArchetype() {
         TopicModuleRelease release = release(ModuleReleaseStatus.DRAFT);
-        when(currentUserService.requireAnyRole("REVIEWER", "ADMIN")).thenReturn(reviewer);
+        when(currentUserService.requireAnyRole("REVIEWER", "MANAGER")).thenReturn(reviewer);
         when(releaseRepository.findByIdForUpdate(release.getId())).thenReturn(Optional.of(release));
         when(topicRepository.findByIdForReleaseApproval(topic.getId())).thenReturn(Optional.of(topic));
         when(releaseRepository.existsByTopicAndStatusAndNumericalSolverVersionArchetype(
@@ -221,7 +221,7 @@ class TopicModuleReleaseServiceTest {
     @Test
     void retiredReleaseCannotReturnToApproved() {
         TopicModuleRelease retired = release(ModuleReleaseStatus.RETIRED);
-        when(currentUserService.requireAnyRole("REVIEWER", "ADMIN")).thenReturn(reviewer);
+        when(currentUserService.requireAnyRole("REVIEWER", "MANAGER")).thenReturn(reviewer);
         when(releaseRepository.findByIdForUpdate(retired.getId())).thenReturn(Optional.of(retired));
 
         assertThatThrownBy(() -> service.approve(retired.getId()))
@@ -244,12 +244,12 @@ class TopicModuleReleaseServiceTest {
     @Test
     void reviewerCannotRetireRelease() {
         UUID releaseId = UUID.randomUUID();
-        when(currentUserService.requireAnyRole("ADMIN"))
-                .thenThrow(new ApiException(HttpStatus.FORBIDDEN, "Required role: ADMIN"));
+        when(currentUserService.requireAnyRole("MANAGER"))
+                .thenThrow(new ApiException(HttpStatus.FORBIDDEN, "Required role: MANAGER"));
 
         assertThatThrownBy(() -> service.retire(releaseId))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining("ADMIN");
+                .hasMessageContaining("MANAGER");
         verify(releaseRepository, never()).findByIdForUpdate(any());
     }
 

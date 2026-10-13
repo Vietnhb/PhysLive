@@ -69,7 +69,7 @@ public class SchoolClassService {
                 .map(c -> new StudentClassSummary(c.getId(), c.getName(), c.getGradeLevel(), c.getSchoolYear(),
                         c.getSubject(), c.getSchool().getId(), c.getSchool().getName(),
                         teacherAssignments.findByClassIdAndIsActiveTrue(c.getId()).stream()
-                                .map(ClassTeacherAssignment::getTeacher).filter(u -> activeMember(u, c, "TEACHER"))
+                                .map(ClassTeacherAssignment::getTeacher).filter(u -> activeMember(u, c, "STAFF"))
                                 .map(u -> new ClassMember(u.getId(), u.getFullName())).toList(),
                         enrollments.findActiveStudentsByClassId(c.getId()).stream().map(ClassEnrollment::getStudent)
                                 .filter(u -> activeMember(u, c, "STUDENT") && !u.getId().equals(actor.getId()))
@@ -78,7 +78,7 @@ public class SchoolClassService {
 
     @Transactional(readOnly = true)
     public List<TeacherClassOption> classesForTeacher() {
-        User actor = currentUser.requireAnyRole("TEACHER", "ADMIN");
+        User actor = currentUser.requireAnyRole("STAFF", "MANAGER");
         return teacherAssignments.findActiveClassesByTeacherId(actor.getId()).stream()
                 .map(ClassTeacherAssignment::getSchoolClass).filter(c -> visibleClass(actor, c)).distinct()
                 .map(c -> new TeacherClassOption(c.getId(), c.getName(), c.getGradeLevel(), c.getSchoolYear(), c.getSubject(),
@@ -157,7 +157,7 @@ public class SchoolClassService {
     @Transactional
     public TeacherAssignment assignTeacher(UUID schoolId, UUID classId, Integer teacherId) {
         requireWriteAccess(schoolId); SchoolClass schoolClass = activeClassInSchool(schoolId, classId);
-        User teacher = userInSchool(schoolId, teacherId, RoleName.TEACHER.name());
+        User teacher = userInSchool(schoolId, teacherId, RoleName.STAFF.name());
         ClassTeacherAssignment assignment = teacherAssignments.findBySchoolClassIdAndTeacherId(classId, teacherId).orElseGet(ClassTeacherAssignment::new);
         assignment.setSchoolClass(schoolClass); assignment.setTeacher(teacher); assignment.setIsActive(true);
         assignment = teacherAssignments.save(assignment);
@@ -226,7 +226,7 @@ public class SchoolClassService {
 
     private User requireWriteAccess(UUID schoolId) {
         User actor = requireSchoolAccess(schoolId);
-        if (!RoleName.ADMIN.matches(actor.getRole() == null ? null : actor.getRole().getName())) licenseCheck.requireWriteAccess(actor);
+        if (!RoleName.MANAGER.matches(actor.getRole() == null ? null : actor.getRole().getName())) licenseCheck.requireWriteAccess(actor);
         return actor;
     }
 

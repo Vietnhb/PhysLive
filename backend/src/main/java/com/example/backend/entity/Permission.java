@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Catalog of grantable permissions. Each permission is available to accounts of one role. */
+/** Catalog entry for a permission that can be granted to an account. */
 @Entity
 @Table(name = "permissions")
 @Getter
@@ -22,11 +22,14 @@ public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     @Column(nullable = false, unique = true, length = 40)
     private String code;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
+
     @Column(nullable = false, length = 120)
     private String label;
 

@@ -52,9 +52,9 @@ public class AssignmentService {
         List<Assignment> list;
         if ("STUDENT".equalsIgnoreCase(roleName)) {
             list = assignmentRepository.findAssignmentsForStudent(user.getId());
-        } else if ("TEACHER".equalsIgnoreCase(roleName)) {
+        } else if ("STAFF".equalsIgnoreCase(roleName)) {
             list = assignmentRepository.findByTeacherIdOrderByCreatedAtDesc(user.getId());
-        } else if ("ADMIN".equalsIgnoreCase(roleName)) {
+        } else if ("MANAGER".equalsIgnoreCase(roleName)) {
             list = assignmentRepository.findAll();
         } else {
             throw new ApiException(HttpStatus.FORBIDDEN, "Teaching role is required");
@@ -122,7 +122,7 @@ public class AssignmentService {
         Assignment assignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy bài tập với ID: " + id));
 
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        boolean isAdmin = user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
         if (!assignment.getTeacherId().equals(user.getId()) && !isAdmin) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền cập nhật bài tập này");
         }
@@ -164,7 +164,7 @@ public class AssignmentService {
         Assignment assignment = assignmentRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy bài tập với ID: " + id));
 
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        boolean isAdmin = user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
         if (!assignment.getTeacherId().equals(user.getId()) && !isAdmin) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền thay đổi trạng thái bài tập này");
         }
@@ -212,7 +212,7 @@ public class AssignmentService {
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy bài tập với ID: " + assignmentId));
 
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        boolean isAdmin = user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
         if (!assignment.getTeacherId().equals(user.getId()) && !isAdmin) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền xem danh sách bài nộp của bài tập này");
         }
@@ -238,11 +238,11 @@ public class AssignmentService {
     }
 
     private boolean isAdmin(User user) {
-        return user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        return user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
     }
 
     private void requireTeacher(User user) {
-        if (!isAdmin(user) && (user.getRole() == null || !"TEACHER".equalsIgnoreCase(user.getRole().getName())))
+        if (!isAdmin(user) && (user.getRole() == null || !"STAFF".equalsIgnoreCase(user.getRole().getName())))
             throw new ApiException(HttpStatus.FORBIDDEN, "Teacher role is required");
     }
 

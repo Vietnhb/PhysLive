@@ -55,9 +55,9 @@ public class SchoolReportService {
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Summary summary(UUID schoolId) {
         requireAccess(schoolId); School school = school(schoolId);
-        long teachers = users.findBySchoolIdAndRoleName(schoolId, RoleName.TEACHER.name()).size();
+        long teachers = users.findBySchoolIdAndRoleName(schoolId, RoleName.STAFF.name()).size();
         long students = users.countActiveStudents(schoolId);
-        long managers = users.findBySchoolIdAndRoleName(schoolId, RoleName.SCHOOL_MANAGER.name()).size();
+        long managers = users.findBySchoolIdAndRoleName(schoolId, RoleName.SCHOOL.name()).size();
         long enrolled = enrollments.countActiveStudentsBySchoolId(schoolId);
         return new Summary(schoolId, school.getName(), students, teachers, managers,
                 classes.findBySchoolIdAndIsActiveTrue(schoolId).size(), enrolled,
@@ -96,8 +96,8 @@ public class SchoolReportService {
                 String email = value(columns, values, "email");
                 try {
                     String role = value(columns, values, "role").toUpperCase(Locale.ROOT);
-                    if (!RoleName.TEACHER.matches(role) && !RoleName.STUDENT.matches(role))
-                        throw new ApiException(HttpStatus.BAD_REQUEST, "Role phải là TEACHER hoặc STUDENT");
+                    if (!RoleName.STAFF.matches(role) && !RoleName.STUDENT.matches(role))
+                        throw new ApiException(HttpStatus.BAD_REQUEST, "Role phải là STAFF hoặc STUDENT");
                     admin.createUser(new CreateManagedUserRequest(email, value(columns, values, "password"), value(columns, values, "fullname"), role, schoolId.toString()));
                     rows.add(new ImportRow(rowNumber, email, "IMPORTED", "Tạo tài khoản thành công")); imported++;
                 } catch (RuntimeException ex) {

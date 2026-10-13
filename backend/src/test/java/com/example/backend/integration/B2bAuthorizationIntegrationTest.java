@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.assertj.core.api.Assertions.*;
 
 import com.example.backend.entity.Role;
+import com.example.backend.entity.Permission;
 import com.example.backend.entity.User;
 import com.example.backend.entity.school.School;
 import com.example.backend.repository.RoleRepository;
@@ -41,6 +42,7 @@ class B2bAuthorizationIntegrationTest {
     @Autowired MockMvc http;
     @Autowired UserRepository users;
     @Autowired RoleRepository roles;
+    @Autowired com.example.backend.repository.PermissionRepository permissions;
     @Autowired SchoolRepository schools;
     @Autowired JwtUtil jwt;
     @Autowired javax.sql.DataSource dataSource;
@@ -54,8 +56,12 @@ class B2bAuthorizationIntegrationTest {
             assertThat(connection.getMetaData().getURL()).startsWith("jdbc:h2:mem:b2b-security");
         }
         school = school("A");
-        manager = user("SCHOOL_MANAGER", school);
-        role("TEACHER"); role("STUDENT"); role("ADMIN");
+        manager = user("SCHOOL", school);
+        Role staff = role("STAFF"); role("STUDENT"); role("MANAGER");
+        if (permissions.findByCodeIn(java.util.List.of("TEACH")).isEmpty()) {
+            Permission permission = new Permission("TEACH"); permission.setLabel("Teacher"); permission.setRole(staff);
+            permissions.saveAndFlush(permission);
+        }
     }
     private School school(String label) {
         School s = new School(); String code = label + UUID.randomUUID();
@@ -69,6 +75,10 @@ class B2bAuthorizationIntegrationTest {
     private User user(String name, School s) {
         User u = new User(); u.setEmail(UUID.randomUUID() + "@test.example"); u.setPassword("unused");
         u.setFullName(name); u.setRole(role(name)); u.setSchool(s); u.setInstitutionId(s == null ? null : s.getId().toString());
+        if ("STAFF".equals(name)) {
+            Permission permission = permissions.findByCodeIn(java.util.List.of("TEACH")).stream().findFirst().orElseThrow();
+            u.grantPermission(permission, null);
+        }
         return users.saveAndFlush(u);
     }
     private String token(User u) { return "Bearer " + jwt.generateToken(u.getEmail(), u.getRole().getName()); }
@@ -79,7 +89,7 @@ class B2bAuthorizationIntegrationTest {
         http.perform(get(path(school("B"))).header("Authorization", token(manager))).andExpect(status().isForbidden());
     }
     @Test void teacherCannotUseManagementApi() throws Exception {
-        http.perform(get(path(school)).header("Authorization", token(user("TEACHER", school))))
+        http.perform(get(path(school)).header("Authorization", token(user("STAFF", school))))
                 .andExpect(status().isForbidden());
     }
     @Test void accountDisableInvalidatesAlreadyIssuedJwt() throws Exception {
@@ -94,7 +104,7 @@ class B2bAuthorizationIntegrationTest {
         school.setLicenseEnd(LocalDate.now().minusDays(1)); schools.saveAndFlush(school);
         http.perform(get(path(school)).header("Authorization", token(manager))).andExpect(status().isOk());
         http.perform(post(path(school)).header("Authorization", token(manager)).contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"teacher@test.example\",\"password\":\"password123\",\"fullName\":\"Teacher\",\"role\":\"TEACHER\"}"))
+                .content("{\"email\":\"teacher@test.example\",\"password\":\"password123\",\"fullName\":\"Teacher\",\"role\":\"STAFF\"}"))
                 .andExpect(status().isForbidden());
         http.perform(get("/api/user/me/license").header("Authorization", token(manager)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.canPerformWriteOperations").value(false));
@@ -107,11 +117,11 @@ class B2bAuthorizationIntegrationTest {
     }
     @Test void managerCannotCreateAdminOrOverrideTargetSchool() throws Exception {
         http.perform(post(path(school)).header("Authorization", token(manager)).contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"intruder@test.example\",\"password\":\"password123\",\"fullName\":\"Intruder\",\"role\":\"ADMIN\"}"))
+                .content("{\"email\":\"intruder@test.example\",\"password\":\"password123\",\"fullName\":\"Intruder\",\"role\":\"MANAGER\"}"))
                 .andExpect(status().isBadRequest());
         School other = school("B");
         http.perform(post(path(school)).header("Authorization", token(manager)).contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"teacher@test.example\",\"password\":\"password123\",\"fullName\":\"Teacher\",\"role\":\"TEACHER\",\"institutionId\":\"" + other.getId() + "\"}"))
+                .content("{\"email\":\"teacher@test.example\",\"password\":\"password123\",\"fullName\":\"Teacher\",\"role\":\"STAFF\",\"institutionId\":\"" + other.getId() + "\"}"))
                 .andExpect(status().isOk());
         assertThat(users.findByEmail("teacher@test.example").orElseThrow().getSchool().getId()).isEqualTo(school.getId());
     }
@@ -121,7 +131,7 @@ class B2bAuthorizationIntegrationTest {
                 .andExpect(status().isForbidden());
     }
     @Test void reviewerAliasCanAccessModuleReleasesButNotCreateProblems() throws Exception {
-        User reviewer = user("CONTENT_REVIEWER", null);
+        User reviewer = user("REVIEWER", null);
         http.perform(get("/api/module-releases/" + UUID.randomUUID()).header("Authorization", token(reviewer))).andExpect(status().isNotFound());
         http.perform(post("/api/problems").header("Authorization", token(reviewer)).contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isForbidden());
@@ -162,7 +172,7 @@ class B2bAuthorizationIntegrationTest {
     @Test void classOverviewsAreRoleAndSchoolScoped() throws Exception {
         String root = "/api/schools/" + school.getId() + "/classes";
         String id = createClass(root, "10A1");
-        User teacher = user("TEACHER", school);
+        User teacher = user("STAFF", school);
         User student = user("STUDENT", school);
         http.perform(post(root + "/" + id + "/teachers").header("Authorization", token(manager))
                 .contentType(MediaType.APPLICATION_JSON).content("{\"teacherId\":" + teacher.getId() + "}"))
@@ -200,7 +210,7 @@ class B2bAuthorizationIntegrationTest {
         assertThat(totals.getPendingTransactions()).isEqualTo(1L);
         assertThat(totals.getReviewTransactions()).isEqualTo(1L);
         assertThat(totals.getGrossPaidVnd()).isEqualTo(200L);
-        http.perform(get("/api/admin/payment-report").header("Authorization", token(user("ADMIN", null))))
+        http.perform(get("/api/admin/payment-report").header("Authorization", token(user("MANAGER", null))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.grossPaidVnd").value(200));
     }
 

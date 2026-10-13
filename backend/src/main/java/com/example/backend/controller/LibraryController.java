@@ -62,7 +62,7 @@ public class LibraryController {
 
     @Operation(summary = "Lưu một mô phỏng mới vào thư viện", description = "Dành cho Giáo viên hoặc Admin lưu một đặc tả mô phỏng (Specification) vào kho tài nguyên.")
     @PostMapping
-    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER')")
     public ResponseEntity<LibraryItemResponse> createLibraryItem(
             @Valid @RequestBody CreateLibraryItemRequest request,
             Authentication authentication) {
@@ -71,7 +71,7 @@ public class LibraryController {
 
     @Operation(summary = "Cập nhật thông tin mô phỏng trong thư viện", description = "Chủ sở hữu hoặc Admin có thể đổi tiêu đề, quyền riêng tư (SHARED/PERSONAL) hoặc ẩn mô phỏng.")
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER')")
     public ResponseEntity<LibraryItemResponse> updateLibraryItem(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateLibraryItemRequest request,
@@ -81,7 +81,7 @@ public class LibraryController {
 
     @Operation(summary = "Xoá mô phỏng khỏi thư viện (Soft Delete)", description = "Ẩn mô phỏng khỏi thư viện hiển thị.")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER')")
     public ResponseEntity<Void> deleteLibraryItem(
             @PathVariable UUID id,
             Authentication authentication) {
@@ -91,7 +91,7 @@ public class LibraryController {
 
     @Operation(summary = "Nhân bản (Clone) mô phỏng vào kho cá nhân", description = "Giáo viên sao chép một mô phỏng dùng chung vào kho cá nhân của mình để tuỳ biến.")
     @PostMapping("/{id}/clone")
-    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER')")
     public ResponseEntity<LibraryItemResponse> cloneLibraryItem(
             @PathVariable UUID id,
             Authentication authentication) {
