@@ -31,7 +31,8 @@ public class SchoolManagementController {
         requireSchool(schoolId);
         return users.findBySchoolId(schoolId).stream().map(user -> new UserStatusResponse(
                 user.getId(), user.getEmail(), user.getFullName(), user.getRole().getName(),
-                !Boolean.FALSE.equals(user.getActive()), schoolId.toString(), user.getLastLogin(), null)).toList();
+                !Boolean.FALSE.equals(user.getActive()), schoolId.toString(), user.getLastLogin(), null,
+                user.permissionCodes())).toList();
     }
 
     @PostMapping
@@ -39,7 +40,7 @@ public class SchoolManagementController {
                                      @Valid @RequestBody CreateManagedUserRequest request) {
         requireSchool(schoolId);
         return adminService.createUser(new CreateManagedUserRequest(request.email(), request.password(),
-                request.fullName(), request.role(), schoolId.toString()));
+                request.fullName(), request.role(), schoolId.toString(), request.permissions()));
     }
 
     @PutMapping("/{userId}")
@@ -47,7 +48,7 @@ public class SchoolManagementController {
                                     @Valid @RequestBody AdminService.UpdateUserRequest request) {
         requireTarget(schoolId, userId);
         return adminService.updateUser(userId,
-                new AdminService.UpdateUserRequest(request.fullName(), request.role(), schoolId.toString()));
+                new AdminService.UpdateUserRequest(request.fullName(), request.role(), schoolId.toString(), request.permissions()));
     }
 
     @PutMapping("/{userId}/suspend")

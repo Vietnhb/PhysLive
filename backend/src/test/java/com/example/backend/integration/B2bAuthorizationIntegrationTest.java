@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.assertj.core.api.Assertions.*;
 
 import com.example.backend.entity.Role;
+import com.example.backend.entity.Permission;
 import com.example.backend.entity.User;
 import com.example.backend.entity.school.School;
 import com.example.backend.repository.RoleRepository;
@@ -40,6 +41,7 @@ class B2bAuthorizationIntegrationTest {
     @Autowired MockMvc http;
     @Autowired UserRepository users;
     @Autowired RoleRepository roles;
+    @Autowired com.example.backend.repository.PermissionRepository permissions;
     @Autowired SchoolRepository schools;
     @Autowired JwtUtil jwt;
     @Autowired javax.sql.DataSource dataSource;
@@ -54,7 +56,11 @@ class B2bAuthorizationIntegrationTest {
         }
         school = school("A");
         manager = user("SCHOOL", school);
-        role("STAFF"); role("STUDENT"); role("MANAGER");
+        Role staff = role("STAFF"); role("STUDENT"); role("MANAGER");
+        if (permissions.findByCodeIn(java.util.List.of("TEACH")).isEmpty()) {
+            Permission permission = new Permission("TEACH"); permission.setLabel("Teacher"); permission.setRole(staff);
+            permissions.saveAndFlush(permission);
+        }
     }
     private School school(String label) {
         School s = new School(); String code = label + UUID.randomUUID();
@@ -68,6 +74,10 @@ class B2bAuthorizationIntegrationTest {
     private User user(String name, School s) {
         User u = new User(); u.setEmail(UUID.randomUUID() + "@test.example"); u.setPassword("unused");
         u.setFullName(name); u.setRole(role(name)); u.setSchool(s); u.setInstitutionId(s == null ? null : s.getId().toString());
+        if ("STAFF".equals(name)) {
+            Permission permission = permissions.findByCodeIn(java.util.List.of("TEACH")).stream().findFirst().orElseThrow();
+            u.grantPermission(permission, null);
+        }
         return users.saveAndFlush(u);
     }
     private String token(User u) { return "Bearer " + jwt.generateToken(u.getEmail(), u.getRole().getName()); }

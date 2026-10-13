@@ -1,9 +1,19 @@
 package com.example.backend.entity;
 
 import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.example.backend.entity.enums.PermissionCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -88,6 +98,26 @@ public class User {
     @ManyToOne(optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
+
+    /** Individual capabilities for STAFF accounts, persisted through user_permissions. */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_permissions", joinColumns = @JoinColumn(name = "user_id"))
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
+    private Set<PermissionGrant> permissions = new LinkedHashSet<>();
+
+    public boolean hasPermission(PermissionCode code) {
+        return permissions.stream().anyMatch(grant -> code.name().equals(grant.code()));
+    }
+
+    public List<String> permissionCodes() {
+        return Arrays.stream(PermissionCode.values()).filter(this::hasPermission).map(Enum::name).toList();
+    }
+
+    public void grantPermission(Permission permission, Integer grantedBy) {
+        permissions.add(new PermissionGrant(permission, grantedBy,
+                Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)));
+    }
 
     @jakarta.persistence.PrePersist
     protected void onCreate() {

@@ -8,5 +8,9 @@ public record CreateManagedUserRequest(
         @NotBlank String password,
         @NotBlank String fullName,
         @NotBlank String role,
-        String institutionId) {
+        String institutionId,
+        java.util.List<String> permissions) {
+    public CreateManagedUserRequest(String email, String password, String fullName, String role, String institutionId) {
+        this(email, password, fullName, role, institutionId, null);
+    }
 }

@@ -4,6 +4,7 @@ import com.example.backend.entity.school.School;
 import com.example.backend.repository.school.SchoolRepository;
 import com.example.backend.service.CurrentUserService;
 import com.example.backend.service.account.RoleValidationService;
+import com.example.backend.service.account.AccountAccessService;
 import com.example.backend.service.school.LicenseCheckService;
 
 import com.example.backend.dto.admin.CreateManagedUserRequest;
@@ -31,6 +32,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final CurrentUserService currentUserService;
     private final RoleValidationService roleValidationService;
+    private final AccountAccessService accountAccessService;
     private final LicenseCheckService licenseCheckService;
     private final com.example.backend.repository.school.SchoolRepository schoolRepository;
     private final jakarta.persistence.EntityManager entityManager;
@@ -62,6 +64,7 @@ public class AdminService {
         user.setFullName(request.fullName().trim());
         user.setRole(role);
         user.setSchool(school); user.setInstitutionId(school == null ? null : school.getId().toString());
+        accountAccessService.applyPermissions(user, role.getName(), request.permissions(), currentUserService.requireCurrentUser());
         if (RoleName.SCHOOL.matches(role.getName()))
             roleValidationService.validateSingleSchoolManager(school.getId(), null);
         user.setActive(true);
@@ -90,11 +93,16 @@ public class AdminService {
     private UserStatusResponse toUser(User user) {
         return new UserStatusResponse(user.getId(), user.getEmail(), user.getFullName(),
                 user.getRole() == null ? "UNKNOWN" : user.getRole().getName(), !Boolean.FALSE.equals(user.getActive()),
-                user.getInstitutionId(), user.getLastLogin(), null);
+                user.getInstitutionId(), user.getLastLogin(), null, user.permissionCodes());
     }
 
     public record UpdateUserRequest(@jakarta.validation.constraints.NotBlank String fullName,
-            @jakarta.validation.constraints.NotBlank String role, String institutionId) { }
+            @jakarta.validation.constraints.NotBlank String role, String institutionId,
+            java.util.List<String> permissions) {
+        public UpdateUserRequest(String fullName, String role, String institutionId) {
+            this(fullName, role, institutionId, null);
+        }
+    }
 
     @Transactional
     public UserStatusResponse updateUser(Integer id, @jakarta.validation.Valid UpdateUserRequest request) {
@@ -125,6 +133,7 @@ public class AdminService {
             enrollments.flush(); teacherAssignments.flush();
         }
         user.setFullName(request.fullName().trim()); user.setRole(role); user.setSchool(school); user.setInstitutionId(school == null ? null : school.getId().toString());
+        accountAccessService.applyPermissions(user, role.getName(), request.permissions(), currentUserService.requireCurrentUser());
         return toUser(userRepository.save(user));
     }
 
