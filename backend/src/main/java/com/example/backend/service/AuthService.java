@@ -15,6 +15,7 @@ import com.example.backend.exception.ApiException;
 import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.security.JwtUtil;
+import com.example.backend.security.PasswordPolicy;
 
 import lombok.AllArgsConstructor;
 
@@ -49,8 +50,14 @@ public class AuthService {
                 .orElseThrow(() -> new ApiException(
                         HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng"));
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        if (!PasswordPolicy.matches(password, user.getPassword(), passwordEncoder)) {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng");
+        }
+
+        // Upgrade legacy plain-text credentials on their next successful login.
+        if (user.getPassword() != null && !user.getPassword().startsWith("$2")) {
+            user.setPassword(passwordEncoder.encode(password));
+            user.setMustChangePassword(true);
         }
 
         if (!user.isEnabled() || !Boolean.TRUE.equals(user.getActive())
@@ -82,6 +89,7 @@ public class AuthService {
 
         userInfo.setSchoolId(user.getSchool() == null ? null : user.getSchool().getId());
         userInfo.setPermissions(user.permissionCodes());
+        userInfo.setMustChangePassword(user.isMustChangePassword());
         return new LoginResponse(token, userInfo);
     }
 

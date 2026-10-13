@@ -43,4 +43,6 @@ public class UserResponse {
     private java.util.UUID schoolId;
     @lombok.Setter
     private java.util.List<String> permissions = java.util.List.of();
+    @lombok.Setter
+    private boolean mustChangePassword;
 }

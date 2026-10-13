@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.example.backend.dto.admin.CreateManagedUserRequest;
 import com.example.backend.dto.admin.UserStatusResponse;
+import com.example.backend.dto.admin.ResetManagedPasswordRequest;
 import com.example.backend.exception.ApiException;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.admin.AdminService;
@@ -32,7 +33,7 @@ public class SchoolManagementController {
         return users.findBySchoolId(schoolId).stream().map(user -> new UserStatusResponse(
                 user.getId(), user.getEmail(), user.getFullName(), user.getRole().getName(),
                 !Boolean.FALSE.equals(user.getActive()), schoolId.toString(), user.getLastLogin(), null,
-                user.permissionCodes())).toList();
+                user.permissionCodes(), user.isMustChangePassword())).toList();
     }
 
     @PostMapping
@@ -49,6 +50,13 @@ public class SchoolManagementController {
         requireTarget(schoolId, userId);
         return adminService.updateUser(userId,
                 new AdminService.UpdateUserRequest(request.fullName(), request.role(), schoolId.toString(), request.permissions()));
+    }
+
+    @PostMapping("/{userId}/reset-password")
+    public UserStatusResponse resetPassword(@PathVariable UUID schoolId, @PathVariable Integer userId,
+                                            @Valid @RequestBody ResetManagedPasswordRequest request) {
+        requireTarget(schoolId, userId);
+        return adminService.resetPassword(userId, request.newPassword());
     }
 
     @PutMapping("/{userId}/suspend")

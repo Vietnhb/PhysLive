@@ -5,6 +5,7 @@ import com.example.backend.repository.school.SchoolRepository;
 import com.example.backend.service.CurrentUserService;
 import com.example.backend.service.account.RoleValidationService;
 import com.example.backend.service.account.AccountAccessService;
+import com.example.backend.security.PasswordPolicy;
 import com.example.backend.service.school.LicenseCheckService;
 
 import com.example.backend.dto.admin.CreateManagedUserRequest;
@@ -56,11 +57,11 @@ public class AdminService {
         roleValidationService.validateRoleSchoolConsistency(role.getName(), school);
         requireManage(role.getName(), school);
         requireStudentSeat(role.getName(), school);
-        if (request.password().length() < 8 || request.password().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Password must have at least 8 characters and at most 72 UTF-8 bytes");
+        PasswordPolicy.requireValid(request.password());
         User user = new User();
         user.setEmail(request.email().trim().toLowerCase());
         user.setPassword(passwordEncoder.encode(request.password()));
+        user.setMustChangePassword(true);
         user.setFullName(request.fullName().trim());
         user.setRole(role);
         user.setSchool(school); user.setInstitutionId(school == null ? null : school.getId().toString());
@@ -93,7 +94,18 @@ public class AdminService {
     private UserStatusResponse toUser(User user) {
         return new UserStatusResponse(user.getId(), user.getEmail(), user.getFullName(),
                 user.getRole() == null ? "UNKNOWN" : user.getRole().getName(), !Boolean.FALSE.equals(user.getActive()),
-                user.getInstitutionId(), user.getLastLogin(), null, user.permissionCodes());
+                user.getInstitutionId(), user.getLastLogin(), null, user.permissionCodes(), user.isMustChangePassword());
+    }
+
+    @Transactional
+    public UserStatusResponse resetPassword(Integer id, String newPassword) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found"));
+        requireManage(user.getRole().getName(), user.getSchool());
+        PasswordPolicy.requireValid(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setMustChangePassword(true);
+        return toUser(userRepository.save(user));
     }
 
     public record UpdateUserRequest(@jakarta.validation.constraints.NotBlank String fullName,

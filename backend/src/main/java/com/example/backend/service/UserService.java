@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.CreateUserRequest;
+import com.example.backend.dto.ChangePasswordRequest;
 import com.example.backend.dto.UpdateProfileRequest;
 import com.example.backend.dto.UpdateUserRequest;
 import com.example.backend.dto.UserResponse;
@@ -18,6 +19,7 @@ import com.example.backend.entity.User;
 import com.example.backend.exception.ApiException;
 import com.example.backend.repository.RoleRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.security.PasswordPolicy;
 
 import lombok.AllArgsConstructor;
 
@@ -74,11 +76,25 @@ public class UserService {
         }
 
         if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Use /api/user/me/password to change the password");
         }
 
         userRepository.save(user);
         return toResponse(user);
+    }
+
+    @Transactional
+    public UserResponse changePassword(String email, ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng"));
+        if (!PasswordPolicy.matches(request.currentPassword(), user.getPassword(), passwordEncoder))
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
+        PasswordPolicy.requireValid(request.newPassword());
+        if (PasswordPolicy.matches(request.newPassword(), user.getPassword(), passwordEncoder))
+            throw new ApiException(HttpStatus.BAD_REQUEST, "New password must differ from the current password");
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setMustChangePassword(false);
+        return toResponse(userRepository.save(user));
     }
 
     /**
@@ -178,7 +194,9 @@ public class UserService {
         }
 
         if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+            PasswordPolicy.requireValid(request.getPassword());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
+            user.setMustChangePassword(true);
         }
 
         // Role update - ADMIN only
@@ -259,6 +277,7 @@ public class UserService {
                 user.getUpdatedAt());
         response.setSchoolId(user.getSchool() == null ? null : user.getSchool().getId());
         response.setPermissions(user.permissionCodes());
+        response.setMustChangePassword(user.isMustChangePassword());
         return response;
     }
 }
