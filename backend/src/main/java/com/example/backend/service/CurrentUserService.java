@@ -35,6 +35,8 @@ public class CurrentUserService {
         String role = user.getRole() == null ? null : user.getRole().getName();
         boolean allowed = role != null && Arrays.stream(allowedRoles)
                 .anyMatch(candidate -> candidate.equalsIgnoreCase(role)
+                        || ("TEACHER".equalsIgnoreCase(candidate) && "STAFF".equals(role)
+                            && com.example.backend.security.StaffAccess.canTeach(user))
                         || (com.example.backend.entity.enums.RoleName.CONTENT_REVIEWER.matches(candidate)
                         && com.example.backend.entity.enums.RoleName.CONTENT_REVIEWER.matches(role)));
         if (!allowed) {

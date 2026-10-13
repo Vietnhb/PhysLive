@@ -86,6 +86,8 @@ public class JwtFilter extends OncePerRequestFilter {
             }
             var authorities = new java.util.ArrayList<SimpleGrantedAuthority>();
             authorities.add(new SimpleGrantedAuthority("ROLE_" + (role == null ? user.getRole().getName() : role.name())));
+            if (role == com.example.backend.entity.enums.RoleName.STAFF && StaffAccess.canTeach(user))
+                authorities.add(new SimpleGrantedAuthority("ROLE_TEACHER"));
             if (role == com.example.backend.entity.enums.RoleName.CONTENT_REVIEWER)
                 authorities.add(new SimpleGrantedAuthority("ROLE_REVIEWER"));
             UsernamePasswordAuthenticationToken auth =
