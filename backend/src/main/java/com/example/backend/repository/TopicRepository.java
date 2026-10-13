@@ -16,6 +16,7 @@ import jakarta.persistence.LockModeType;
 
 @Repository
 public interface TopicRepository extends JpaRepository<Topic, UUID> {
+    List<Topic> findByEnabledTrueOrderBySortOrderAsc();
     Optional<Topic> findBySlug(String slug);
 
     boolean existsBySlug(String slug);

@@ -11,6 +11,8 @@ import com.example.backend.entity.SchemaVersion;
 
 @Repository
 public interface SchemaVersionRepository extends JpaRepository<SchemaVersion, UUID> {
+    List<SchemaVersion> findAllByLifecycleStatusAndTopicInOrderByTopicAscSchemaIdAscCreatedAtDesc(
+            String lifecycleStatus, List<String> topics);
     List<SchemaVersion> findByTopic(String topic);
     List<SchemaVersion> findByLifecycleStatus(String lifecycleStatus);
     Optional<SchemaVersion> findBySchemaIdAndVersion(String schemaId, String version);
