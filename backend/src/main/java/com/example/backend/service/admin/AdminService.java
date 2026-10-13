@@ -63,6 +63,8 @@ public class AdminService {
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setMustChangePassword(true);
         user.setFullName(request.fullName().trim());
+        user.setDateOfBirth(request.dateOfBirth());
+        user.setAvatarUrl(request.avatarUrl());
         user.setRole(role);
         user.setSchool(school); user.setInstitutionId(school == null ? null : school.getId().toString());
         accountAccessService.applyPermissions(user, role.getName(), request.permissions(), currentUserService.requireCurrentUser());
@@ -94,7 +96,7 @@ public class AdminService {
     private UserStatusResponse toUser(User user) {
         return new UserStatusResponse(user.getId(), user.getEmail(), user.getFullName(),
                 user.getRole() == null ? "UNKNOWN" : user.getRole().getName(), !Boolean.FALSE.equals(user.getActive()),
-                user.getInstitutionId(), user.getLastLogin(), null, user.permissionCodes(), user.isMustChangePassword());
+                user.getInstitutionId(), user.getLastLogin(), user.getDateOfBirth(), user.permissionCodes(), user.isMustChangePassword());
     }
 
     @Transactional
