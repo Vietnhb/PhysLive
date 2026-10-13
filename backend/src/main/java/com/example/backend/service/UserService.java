@@ -258,6 +258,7 @@ public class UserService {
                 user.getCreatedAt(),
                 user.getUpdatedAt());
         response.setSchoolId(user.getSchool() == null ? null : user.getSchool().getId());
+        response.setPermissions(user.permissionCodes());
         return response;
     }
 }

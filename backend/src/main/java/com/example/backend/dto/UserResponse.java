@@ -41,4 +41,6 @@ public class UserResponse {
     private final OffsetDateTime updatedAt;
     @lombok.Setter
     private java.util.UUID schoolId;
+    @lombok.Setter
+    private java.util.List<String> permissions = java.util.List.of();
 }
