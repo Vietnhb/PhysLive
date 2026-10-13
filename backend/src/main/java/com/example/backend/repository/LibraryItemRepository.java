@@ -14,6 +14,10 @@ import com.example.backend.entity.LibraryItem;
 @Repository
 public interface LibraryItemRepository extends JpaRepository<LibraryItem, UUID> {
 
+    boolean existsByFolderIdAndActiveTrue(UUID folderId);
+
+    long countByFolderIdAndActiveTrue(UUID folderId);
+
     List<LibraryItem> findByVisibilityAndActiveOrderByCreatedAtDesc(String visibility, boolean active);
 
     List<LibraryItem> findByOwnerIdAndActiveOrderByCreatedAtDesc(Integer ownerId, boolean active);

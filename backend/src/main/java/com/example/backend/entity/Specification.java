@@ -43,6 +43,9 @@ public class Specification extends AuditedEntity {
     @Column(nullable = false, length = 16)
     private String schemaVersion = "v1.0";
 
+    @Column(name = "contract_version", length = 16)
+    private String contractVersion;
+
     @Column(length = 64)
     private String schemaId;
 

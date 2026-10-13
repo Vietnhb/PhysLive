@@ -84,6 +84,7 @@ import com.example.backend.service.TopicModuleReleaseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @DataJpaTest(showSql = false, properties = {
+        "spring.flyway.enabled=false", // H2 schema is created by Hibernate for this test.
         "spring.datasource.url=jdbc:h2:mem:physics-workflow;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;INIT=CREATE DOMAIN IF NOT EXISTS JSONB AS JSON",
         "spring.datasource.driver-class-name=org.h2.Driver",
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
