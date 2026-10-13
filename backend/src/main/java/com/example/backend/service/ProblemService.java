@@ -98,7 +98,8 @@ public class ProblemService {
         problem.setLesson(resolveLesson(lessonId));
         problem.setSourceMode(StringUtils.hasText(suppliedText) ? SourceMode.MIXED : SourceMode.IMAGE);
         problem.setOriginalText(trimToNull(suppliedText));
-        problem.setEditableText(ocr.status() == OcrStatus.SUCCEEDED ? ocr.text() : trimToNull(suppliedText));
+        String ocrText = ocr.status() == OcrStatus.SUCCEEDED ? trimToNull(ocr.text()) : null;
+        problem.setEditableText(joinSourceText(trimToNull(suppliedText), ocrText));
         problem.setStatus(ocr.status() == OcrStatus.SUCCEEDED
                 ? SubmissionStatus.OCR_PREVIEW_READY
                 : SubmissionStatus.DRAFT);
@@ -274,5 +275,11 @@ public class ProblemService {
 
     private String trimToNull(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private String joinSourceText(String first, String second) {
+        if (!StringUtils.hasText(first)) return second;
+        if (!StringUtils.hasText(second)) return first;
+        return first + "\n\n" + second;
     }
 }

@@ -12,14 +12,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Component
 public class OpenRouterOcrProvider implements OcrProvider {
 
-    private static final String DEFAULT_MODEL = "nex-agi/nex-n2.5-pro:free";
-
     private final OpenRouterClient client;
     private final String model;
 
     public OpenRouterOcrProvider(OpenRouterClient client, Environment environment) {
         this.client = client;
-        this.model = environment.getProperty("OPENROUTER_OCR_MODEL", DEFAULT_MODEL).trim();
+        String configuredModel = environment.getProperty("OPENROUTER_MODEL");
+        this.model = configuredModel == null ? null : configuredModel.trim();
     }
 
     @Override
