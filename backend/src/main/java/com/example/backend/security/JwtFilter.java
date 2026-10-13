@@ -72,6 +72,13 @@ public class JwtFilter extends OncePerRequestFilter {
             }
             var role = com.example.backend.entity.enums.RoleName.from(user.getRole().getName()).orElse(null);
             String path = request.getRequestURI().substring(request.getContextPath().length());
+            boolean passwordLifecycle = ("GET".equals(request.getMethod()) && "/api/user/me".equals(path))
+                    || ("PUT".equals(request.getMethod()) && "/api/user/me/password".equals(path));
+            if (user.isMustChangePassword() && !passwordLifecycle) {
+                SecurityContextHolder.clearContext();
+                sendPasswordChangeRequired(response);
+                return;
+            }
             boolean write = !java.util.List.of("GET", "HEAD", "OPTIONS").contains(request.getMethod());
             boolean profile = "/api/user/me".equals(path) || path.startsWith("/api/user/me/");
             boolean renewal = role == com.example.backend.entity.enums.RoleName.SCHOOL
@@ -116,5 +123,14 @@ public class JwtFilter extends OncePerRequestFilter {
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(
                 "{\"status\":401,\"message\":\"" + message + "\"}");
+    }
+
+    private void sendPasswordChangeRequired(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(
+                "{\"status\":403,\"error\":\"PASSWORD_CHANGE_REQUIRED\","
+                        + "\"message\":\"Password change is required before continuing\"}");
     }
 }

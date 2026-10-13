@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.annotation.StandardApiResponses;
 import com.example.backend.dto.UpdateProfileRequest;
+import com.example.backend.dto.ChangePasswordRequest;
 import com.example.backend.dto.UserResponse;
 import com.example.backend.service.UserService;
 
@@ -70,5 +71,12 @@ public class UserController {
             @Valid @RequestBody UpdateProfileRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(userService.updateMyProfile(authentication.getName(), request));
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<UserResponse> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication authentication) {
+        return ResponseEntity.ok(userService.changePassword(authentication.getName(), request));
     }
 }

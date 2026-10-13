@@ -83,6 +83,9 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Column(name = "must_change_password", nullable = false)
+    private boolean mustChangePassword;
+
     /**
      * Creation timestamp (auto-set on insert).
      */
