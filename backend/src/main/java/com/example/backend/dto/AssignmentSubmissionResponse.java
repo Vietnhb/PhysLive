@@ -1,6 +1,7 @@
 package com.example.backend.dto;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,6 +35,14 @@ public class AssignmentSubmissionResponse {
 
     @Schema(description = "Thời điểm nộp bài")
     private OffsetDateTime submittedAt;
+
+    private OffsetDateTime completedAt;
+    private BigDecimal score;
+    private BigDecimal maxScore;
+    private String feedback;
+    private String gradingStatus;
+    private OffsetDateTime gradedAt;
+    private boolean retryAllowed;
 
     @Schema(description = "Thời điểm tạo")
     private OffsetDateTime createdAt;

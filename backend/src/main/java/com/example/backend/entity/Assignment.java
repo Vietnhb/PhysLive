@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -56,6 +57,16 @@ public class Assignment {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "questions", columnDefinition = "jsonb", nullable = false)
     private java.util.Map<String, Object> questions;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "grading_criteria", columnDefinition = "jsonb")
+    private java.util.Map<String, Object> gradingCriteria;
+
+    @Column(name = "max_score", precision = 8, scale = 3, nullable = false)
+    private BigDecimal maxScore = BigDecimal.TEN;
+
+    @Column(name = "auto_grade", nullable = false)
+    private boolean autoGrade;
 
     @Column(name = "teacher_id", nullable = false)
     private Integer teacherId;

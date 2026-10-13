@@ -1,9 +1,12 @@
 package com.example.backend.service;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -16,6 +19,7 @@ import com.example.backend.dto.AssignmentSubmissionResponse;
 import com.example.backend.dto.CreateAssignmentRequest;
 import com.example.backend.dto.SubmitAssignmentRequest;
 import com.example.backend.dto.UpdateAssignmentRequest;
+import com.example.backend.dto.assignment.AssignmentReportResponse;
 import com.example.backend.entity.Assignment;
 import com.example.backend.entity.AssignmentStudent;
 import com.example.backend.entity.AssignmentSubmission;
@@ -60,7 +64,7 @@ public class AssignmentService {
             throw new ApiException(HttpStatus.FORBIDDEN, "Teaching role is required");
         }
 
-        return list.stream().map(this::toResponse).collect(Collectors.toList());
+        return list.stream().map(item -> toResponse(item, user)).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -70,7 +74,7 @@ public class AssignmentService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy bài tập với ID: " + id));
 
         requireReadAccess(user, assignment);
-        return toResponse(assignment);
+        return toResponse(assignment, user);
     }
 
     @Transactional
@@ -98,6 +102,10 @@ public class AssignmentService {
         assignment.setAssignedAt(OffsetDateTime.now());
         assignment.setDueAt(request.getDueAt());
         assignment.setQuestions(request.getQuestions() != null ? request.getQuestions() : Collections.emptyMap());
+        assignment.setGradingCriteria(request.getGradingCriteria());
+        assignment.setMaxScore(request.getMaxScore() == null ? BigDecimal.TEN : request.getMaxScore());
+        assignment.setAutoGrade(Boolean.TRUE.equals(request.getAutoGrade()));
+        validateGrading(assignment);
         assignment.setTeacherId(teacher.getId());
         assignment.setTeacher(teacher);
         assignment.setSpecificationId(spec.getId());
@@ -113,7 +121,7 @@ public class AssignmentService {
             assignmentStudentRepository.saveAll(students);
         }
 
-        return toResponse(saved);
+        return toResponse(saved, teacher);
     }
 
     @Transactional
@@ -155,7 +163,7 @@ public class AssignmentService {
         }
 
         Assignment updated = assignmentRepository.save(assignment);
-        return toResponse(updated);
+        return toResponse(updated, user);
     }
 
     @Transactional
@@ -172,7 +180,7 @@ public class AssignmentService {
         licenses.requireWriteAccess(user);
         assignment.setStatus(status.toUpperCase());
         Assignment updated = assignmentRepository.save(assignment);
-        return toResponse(updated);
+        return toResponse(updated, user);
     }
 
     @Transactional
@@ -195,12 +203,30 @@ public class AssignmentService {
                 .findByAssignmentIdAndStudentId(assignmentId, student.getId())
                 .orElse(new AssignmentSubmission());
 
+        if (submission.getId() != null && submission.getCompletedAt() != null && !submission.isRetryAllowed()) {
+            throw new ApiException(HttpStatus.CONFLICT, "The assignment has already been submitted");
+        }
+
         submission.setAssignmentId(assignment.getId());
         submission.setAssignment(assignment);
         submission.setStudentId(student.getId());
         submission.setStudent(student);
         submission.setPredictions(request.getPredictions());
-        submission.setSubmittedAt(OffsetDateTime.now());
+        OffsetDateTime now = OffsetDateTime.now();
+        submission.setSubmittedAt(now);
+        submission.setCompletedAt(now);
+        submission.setMaxScore(assignment.getMaxScore());
+        submission.setRetryAllowed(false);
+        submission.setGradedBy(null);
+        submission.setGradedAt(null);
+        submission.setFeedback(null);
+        if (assignment.isAutoGrade()) {
+            submission.setScore(autoGrade(assignment, request.getPredictions()));
+            submission.setGradingStatus("AI_GRADED");
+        } else {
+            submission.setScore(null);
+            submission.setGradingStatus("PENDING");
+        }
 
         AssignmentSubmission saved = assignmentSubmissionRepository.save(submission);
         return toSubmissionResponse(saved);
@@ -228,6 +254,105 @@ public class AssignmentService {
         return assignmentSubmissionRepository.findByStudentIdOrderBySubmittedAtDesc(student.getId()).stream()
                 .map(this::toSubmissionResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public AssignmentSubmissionResponse gradeSubmission(UUID assignmentId, UUID submissionId,
+            BigDecimal score, String feedback, boolean confirm, String userEmail) {
+        User teacher = getUserByEmail(userEmail);
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Assignment not found"));
+        requireOwnerOrManager(teacher, assignment);
+        licenses.requireWriteAccess(teacher);
+        AssignmentSubmission submission = assignmentSubmissionRepository.findById(submissionId)
+                .filter(item -> assignmentId.equals(item.getAssignmentId()))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Submission not found"));
+        BigDecimal maxScore = assignment.getMaxScore() == null ? BigDecimal.TEN : assignment.getMaxScore();
+        if (score == null || score.signum() < 0 || score.compareTo(maxScore) > 0) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Score must be between 0 and " + maxScore);
+        }
+        submission.setScore(score);
+        submission.setMaxScore(maxScore);
+        submission.setFeedback(feedback);
+        submission.setGradingStatus(confirm ? "TEACHER_CONFIRMED" : "AI_GRADED");
+        submission.setGradedAt(OffsetDateTime.now());
+        submission.setGradedBy(teacher.getId());
+        submission.setRetryAllowed(false);
+        return toSubmissionResponse(assignmentSubmissionRepository.save(submission));
+    }
+
+    @Transactional
+    public AssignmentSubmissionResponse reopenSubmission(UUID assignmentId, UUID submissionId, String userEmail) {
+        User teacher = getUserByEmail(userEmail);
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Assignment not found"));
+        requireOwnerOrManager(teacher, assignment);
+        licenses.requireWriteAccess(teacher);
+        AssignmentSubmission submission = assignmentSubmissionRepository.findById(submissionId)
+                .filter(item -> assignmentId.equals(item.getAssignmentId()))
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Submission not found"));
+        submission.setRetryAllowed(true);
+        submission.setGradingStatus("RETURNED");
+        submission.setGradedAt(OffsetDateTime.now());
+        submission.setGradedBy(teacher.getId());
+        return toSubmissionResponse(assignmentSubmissionRepository.save(submission));
+    }
+
+    @Transactional(readOnly = true)
+    public AssignmentReportResponse report(UUID assignmentId, String userEmail) {
+        User teacher = getUserByEmail(userEmail);
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Assignment not found"));
+        requireOwnerOrManager(teacher, assignment);
+        List<AssignmentSubmission> rows = assignmentSubmissionRepository
+                .findByAssignmentIdOrderBySubmittedAtDesc(assignmentId);
+        long completed = rows.stream().filter(row -> row.getCompletedAt() != null).count();
+        List<AssignmentSubmission> scored = rows.stream().filter(row -> row.getScore() != null).toList();
+        BigDecimal total = scored.stream().map(AssignmentSubmission::getScore)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        long confirmed = rows.stream().filter(row -> "TEACHER_CONFIRMED".equals(row.getGradingStatus())).count();
+        int assigned = assignmentStudentRepository.findByIdAssignmentId(assignmentId).size();
+        return new AssignmentReportResponse(assigned, completed, Math.max(0, assigned - completed),
+                scored.size(), confirmed, rows.stream().filter(AssignmentSubmission::isRetryAllowed).count(),
+                scored.isEmpty() ? null : total.divide(BigDecimal.valueOf(scored.size()), 3, RoundingMode.HALF_UP),
+                assignment.getMaxScore() == null ? BigDecimal.TEN : assignment.getMaxScore());
+    }
+
+    private void requireOwnerOrManager(User user, Assignment assignment) {
+        if (!isAdmin(user) && !assignment.getTeacherId().equals(user.getId())) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Only the assigning teacher can manage submissions");
+        }
+    }
+
+    private void validateGrading(Assignment assignment) {
+        if (assignment.getMaxScore() == null || assignment.getMaxScore().signum() <= 0) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Maximum score must be greater than zero");
+        }
+        if (!assignment.isAutoGrade()) return;
+        Map<String, Object> criteria = assignment.getGradingCriteria();
+        if (criteria == null || number(criteria.get("expectedValue")) == null
+                || number(criteria.get("tolerance")) == null || number(criteria.get("tolerance")) < 0) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "Auto grading requires a numeric expectedValue and a non-negative tolerance");
+        }
+    }
+
+    private BigDecimal autoGrade(Assignment assignment, Map<String, Object> predictions) {
+        Double expected = number(assignment.getGradingCriteria().get("expectedValue"));
+        Double tolerance = number(assignment.getGradingCriteria().get("tolerance"));
+        Double actual = number(predictions == null ? null : predictions.get("estimatedValue"));
+        if (actual == null && predictions != null) actual = number(predictions.get("answerText"));
+        return actual != null && Math.abs(actual - expected) <= tolerance
+                ? assignment.getMaxScore() : BigDecimal.ZERO;
+    }
+
+    private static Double number(Object value) {
+        if (value instanceof Number number) return number.doubleValue();
+        if (value instanceof String text) {
+            try { return Double.valueOf(text.trim().replace(',', '.')); }
+            catch (NumberFormatException ignored) { return null; }
+        }
+        return null;
     }
 
     private User getUserByEmail(String email) {
@@ -294,10 +419,15 @@ public class AssignmentService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Every selected student must belong to the selected class");
     }
 
-    private AssignmentResponse toResponse(Assignment assignment) {
+    private AssignmentResponse toResponse(Assignment assignment, User viewer) {
         List<AssignmentStudent> assigned = assignmentStudentRepository.findByIdAssignmentId(assignment.getId());
         List<Integer> studentIds = assigned.stream().map(as -> as.getId().getStudentId()).collect(Collectors.toList());
         List<AssignmentSubmission> submissions = assignmentSubmissionRepository.findByAssignmentIdOrderBySubmittedAtDesc(assignment.getId());
+        boolean studentViewer = viewer != null && viewer.getRole() != null
+                && "STUDENT".equalsIgnoreCase(viewer.getRole().getName());
+        AssignmentSubmission own = studentViewer
+                ? assignmentSubmissionRepository.findByAssignmentIdAndStudentId(assignment.getId(), viewer.getId()).orElse(null)
+                : null;
 
         return AssignmentResponse.builder()
                 .classId(assignment.getSchoolClass() == null ? null : assignment.getSchoolClass().getId())
@@ -316,6 +446,17 @@ public class AssignmentService {
                 .assignedStudentCount(studentIds.size())
                 .assignedStudentIds(studentIds)
                 .submissionCount(submissions.size())
+                .predictionSubmitted(own != null)
+                .submissionCompleted(own != null && own.getCompletedAt() != null)
+                .completedAt(own == null ? null : own.getCompletedAt())
+                .gradingCriteria(studentViewer ? null : assignment.getGradingCriteria())
+                .maxScore(assignment.getMaxScore())
+                .autoGrade(assignment.isAutoGrade())
+                .score(own == null ? null : own.getScore())
+                .feedback(own == null ? null : own.getFeedback())
+                .gradingStatus(own == null ? null : own.getGradingStatus())
+                .retryAllowed(own != null && own.isRetryAllowed())
+                .predictions(own == null ? null : own.getPredictions())
                 .createdAt(assignment.getCreatedAt())
                 .updatedAt(assignment.getUpdatedAt())
                 .build();
@@ -331,6 +472,13 @@ public class AssignmentService {
                 .studentEmail(sub.getStudent() != null ? sub.getStudent().getEmail() : null)
                 .predictions(sub.getPredictions())
                 .submittedAt(sub.getSubmittedAt())
+                .completedAt(sub.getCompletedAt())
+                .score(sub.getScore())
+                .maxScore(sub.getMaxScore())
+                .feedback(sub.getFeedback())
+                .gradingStatus(sub.getGradingStatus())
+                .gradedAt(sub.getGradedAt())
+                .retryAllowed(sub.isRetryAllowed())
                 .createdAt(sub.getCreatedAt())
                 .build();
     }
