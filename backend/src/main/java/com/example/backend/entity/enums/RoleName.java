@@ -9,6 +9,7 @@ public enum RoleName {
     CONTENT_REVIEWER(Scope.PLATFORM),
     SCHOOL_MANAGER(Scope.SCHOOL),
     TEACHER(Scope.SCHOOL),
+    STAFF(Scope.SCHOOL),
     STUDENT(Scope.SCHOOL);
 
     private final Scope scope;

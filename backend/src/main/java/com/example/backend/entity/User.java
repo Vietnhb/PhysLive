@@ -16,6 +16,23 @@ import lombok.Data;
 @Table(name = "users")
 @Data
 public class User {
+    @jakarta.persistence.ElementCollection(fetch = jakarta.persistence.FetchType.EAGER)
+    @jakarta.persistence.CollectionTable(name = "user_permissions", joinColumns = @JoinColumn(name = "user_id"))
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
+    private java.util.Set<PermissionGrant> permissions = new java.util.LinkedHashSet<>();
+
+    public boolean hasPermission(String code) {
+        return permissions.stream().anyMatch(grant -> code.equals(grant.code())
+                && grant.getPermission().getRole() != null && role != null
+                && role.getName().equals(grant.getPermission().getRole().getName()));
+    }
+
+    public java.util.List<String> permissionCodes() {
+        return permissions.stream().map(PermissionGrant::code).filter(java.util.Objects::nonNull)
+                .filter(this::hasPermission).distinct().sorted().toList();
+    }
+
 
     @ManyToOne
     @JoinColumn(name = "school_id")
