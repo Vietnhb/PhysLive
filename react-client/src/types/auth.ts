@@ -5,6 +5,7 @@ export interface User {
     email: string;
     fullName: string;
     role: RoleType;
+    permissions?: string[];
     schoolId?: string | null; // UUID for school users, null for platform users
     schoolName?: string | null;
     dateOfBirth?: string | null;

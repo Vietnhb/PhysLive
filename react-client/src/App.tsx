@@ -7,11 +7,10 @@ import { usePhysliveStore } from "./store/usePhysliveStore";
 import { clearToken, getToken } from "./utils/token";
 import { isTokenExpired } from "./utils/jwt";
 import {
-  canManageLearning,
+  canTeach,
   hasRole,
   isStudentRole,
   ROLE_NAMES,
-  LEARNING_MANAGER_ROLES,
   CONTENT_REVIEW_ROLES,
 } from "./types/roles";
 import "./styles/app.css";
@@ -105,7 +104,7 @@ function App() {
       active = false;
     };
   }, [setUser]);
-  const canAccessWorkspace = canManageLearning(user?.role);
+  const canAccessWorkspace = canTeach(user);
   const workspaceElement = (element: ReactElement) =>
     !authReady
       ? <main className="route-loading" aria-busy="true" />
@@ -123,11 +122,11 @@ function App() {
   const assignmentsElement =
     !authReady
       ? <main className="route-loading" aria-busy="true" />
-      : user && !hasRole(user.role, [ROLE_NAMES.TEACHER, ROLE_NAMES.STUDENT, ROLE_NAMES.ADMIN])
+      : user && !hasRole(user.role, [ROLE_NAMES.STAFF, ROLE_NAMES.TEACHER, ROLE_NAMES.STUDENT, ROLE_NAMES.ADMIN])
         ? <Navigate to="/" replace />
         : isStudentRole(user?.role)
           ? <StudentAssignments />
-          : <Assignments />;
+          : workspaceElement(<Assignments />);
   return (
     <div
       className={
@@ -169,7 +168,7 @@ function App() {
               />
             }
           />
-          <Route path="/lab" element={roleElement(LEARNING_MANAGER_ROLES, <Lab />)} />
+          <Route path="/lab" element={workspaceElement(<Lab />)} />
           <Route path="/library" element={<Library />} />
           <Route path="/assignments" element={assignmentsElement} />
           <Route path="/school" element={roleElement([ROLE_NAMES.SCHOOL_MANAGER], user?.schoolId ? <SchoolLayout /> : <Navigate to="/" replace />)}>
