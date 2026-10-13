@@ -8,6 +8,7 @@
 **/.vite/
 **/coverage/
 *.class
+backend/logs/
 
 # Local IDE files
 **/.idea/
