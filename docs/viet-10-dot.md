@@ -6,7 +6,7 @@
 - Mốc tham chiếu: preview HEAD `cbf2856`, gồm cả thay đổi local hiện có khi đối chiếu. Thay đổi local chưa commit không được coi là bản phát hành đã kiểm thử.
 - Mỗi đợt có một branch, commit ngắn và kiểm thử riêng. Không lấy toàn bộ preview đè lên main.
 - Tạo branch đợt tiếp theo từ kết quả đợt trước đã được kiểm tra/tích hợp, tránh dùng lại main cũ.
-- Chỉ thực hiện đợt 1 trong ngày 13/10/2026. Các đợt 2–10 là kế hoạch, chưa triển khai và chưa tạo branch rỗng.
+- Theo yêu cầu tiếp theo ngày 13/10/2026: tiếp tục từng phần đến nhánh 4, dùng commit message/comment tiếng Anh ngắn gọn. Đợt 5–10 chưa triển khai.
 - Không thay đổi phần của Hùng, Minh, Kiệt ngoài dependency tối thiểu; ghi rõ phần cần phối hợp.
 
 ## Các branch và phạm vi
@@ -41,3 +41,13 @@
 - Không bỏ kiểm tra quyền hoặc trả dữ liệu giả để làm test pass.
 - Ghi rõ chức năng đã chuyển, phần tương thích tạm và phần còn thiếu.
 - Không tự merge các đợt chưa nghiệm thu vào main.
+
+## Incremental delivery through branch 04
+
+Read [Staff port notes](staff-port-notes.md) before enabling the new pipeline.
+
+- Branch 02: audited Staff grants, teaching checks, permission responses and route guards. Legacy Teacher/Admin access remains until the shared account migration is ready. No existing account is converted automatically.
+- Branch 03: provider configuration, transport, OCR/planning contracts and prompts. Endpoints are connected on branch 04 because understanding uses the physics runtime.
+- Branch 04: preview physics runtime, law catalogues, schema compiler, approved-schema adapter, signed planning/generation/computation APIs and typed web client.
+- These are incremental code deliveries, not a claim that 40% of the product is accepted. The preview workspace is not connected yet. Saved simulations, department UI, account conversion and database rollout remain pending.
+- Branches are stacked: 01 → 02 → 03 → 04. Branch 04 contains all earlier commits. No new changes have been merged into main.
