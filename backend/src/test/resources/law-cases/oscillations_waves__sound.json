@@ -1,0 +1,303 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Âm truyền đẳng hướng từ nguồn nhỏ, bỏ qua hấp thụ âm; cột khí một đầu kín một đầu hở và ống hở hai đầu.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 2,
+  "parameters": [
+   {
+    "name": "fk",
+    "label": "Tần số âm thoa",
+    "value": 440,
+    "unit": "Hz",
+    "min": 200,
+    "max": 1000,
+    "step": 10,
+    "role": "frequency",
+    "in": "ong_kin"
+   },
+   {
+    "name": "Lk",
+    "label": "Chiều dài cột khí",
+    "value": 58,
+    "unit": "cm",
+    "min": 10,
+    "max": 100,
+    "step": 1,
+    "role": "medium_length",
+    "kind": "one_free_end",
+    "in": "ong_kin"
+   },
+   {
+    "name": "nk",
+    "label": "Số bụng trong ống kín",
+    "value": 2,
+    "unit": "1",
+    "min": 1,
+    "max": 5,
+    "step": 1,
+    "role": "antinode_count",
+    "in": "ong_kin"
+   },
+   {
+    "name": "Lh",
+    "label": "Chiều dài ống hở hai đầu",
+    "value": 0.8,
+    "unit": "m",
+    "min": 0.2,
+    "max": 2,
+    "step": 0.1,
+    "role": "medium_length",
+    "kind": "free_ends",
+    "in": "ong_ho"
+   },
+   {
+    "name": "nh",
+    "label": "Số bụng trong ống hở",
+    "value": 3,
+    "unit": "1",
+    "min": 2,
+    "max": 6,
+    "step": 1,
+    "role": "antinode_count",
+    "in": "ong_ho"
+   },
+   {
+    "name": "va",
+    "label": "Tốc độ truyền âm",
+    "value": 340,
+    "unit": "m/s",
+    "min": 300,
+    "max": 360,
+    "step": 1,
+    "role": "wave_speed",
+    "in": "ong_ho"
+   },
+   {
+    "name": "Pn",
+    "label": "Công suất nguồn âm",
+    "value": 2,
+    "unit": "W",
+    "min": 0.1,
+    "max": 10,
+    "step": 0.1,
+    "role": "wave_power",
+    "in": "am"
+   },
+   {
+    "name": "rN",
+    "label": "Khoảng cách từ nguồn tới N",
+    "value": 5,
+    "unit": "m",
+    "min": 1,
+    "max": 50,
+    "step": 1,
+    "role": "source_distance",
+    "of": "N",
+    "in": "am"
+   },
+   {
+    "name": "Imic",
+    "label": "Cường độ âm tại micro",
+    "value": 0.01,
+    "unit": "W/m2",
+    "min": 0.001,
+    "max": 0.1,
+    "step": 0.001,
+    "role": "intensity",
+    "of": "mic"
+   },
+   {
+    "name": "Smic",
+    "label": "Diện tích màng micro",
+    "value": 2,
+    "unit": "cm2",
+    "min": 0.5,
+    "max": 5,
+    "step": 0.5,
+    "role": "area",
+    "of": "mic"
+   }
+  ],
+  "objects": [
+   {
+    "id": "ong_kin",
+    "label": "ong_kin",
+    "count": 1
+   },
+   {
+    "id": "ong_ho",
+    "label": "ong_ho",
+    "count": 1
+   },
+   {
+    "id": "N",
+    "label": "N",
+    "count": 1
+   },
+   {
+    "id": "mic",
+    "label": "mic",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "lamk",
+    "label": "Bước sóng trong ống kín"
+   },
+   {
+    "quantity": "vk",
+    "label": "Tốc độ truyền âm đo được"
+   },
+   {
+    "quantity": "lamh",
+    "label": "Bước sóng trong ống hở"
+   },
+   {
+    "quantity": "fh",
+    "label": "Tần số âm trong ống hở"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "lamk",
+     "label": "Bước sóng trong ống kín",
+     "unit": "m",
+     "role": "wavelength",
+     "in": "ong_kin",
+     "value": [
+      "div",
+      [
+       "mul",
+       4,
+       "Lk"
+      ],
+      [
+       "sub",
+       [
+        "mul",
+        2,
+        "nk"
+       ],
+       1
+      ]
+     ]
+    },
+    {
+     "id": "vk",
+     "label": "Tốc độ truyền âm đo được",
+     "unit": "m/s",
+     "role": "wave_speed",
+     "in": "ong_kin",
+     "value": [
+      "mul",
+      "lamk",
+      "fk"
+     ]
+    },
+    {
+     "id": "lamh",
+     "label": "Bước sóng trong ống hở",
+     "unit": "m",
+     "role": "wavelength",
+     "in": "ong_ho",
+     "value": [
+      "div",
+      [
+       "mul",
+       2,
+       "Lh"
+      ],
+      [
+       "sub",
+       "nh",
+       1
+      ]
+     ]
+    },
+    {
+     "id": "fh",
+     "label": "Tần số âm trong ống hở",
+     "unit": "Hz",
+     "role": "frequency",
+     "in": "ong_ho",
+     "value": [
+      "div",
+      "va",
+      "lamh"
+     ]
+    },
+    {
+     "id": "dnh",
+     "label": "Khoảng cách hai nút liên tiếp",
+     "unit": "m",
+     "role": "node_spacing",
+     "in": "ong_ho",
+     "value": [
+      "div",
+      "lamh",
+      2
+     ]
+    },
+    {
+     "id": "vam",
+     "label": "Tốc độ truyền âm trong không khí",
+     "unit": "m/s",
+     "role": "wave_speed",
+     "in": "am",
+     "value": "va"
+    },
+    {
+     "id": "sam",
+     "label": "Quãng đường âm đã truyền",
+     "unit": "m",
+     "role": "wave_travel_distance",
+     "in": "am",
+     "initial": 0,
+     "rate": "vam"
+    },
+    {
+     "id": "Pmic",
+     "label": "Công suất âm tới màng micro",
+     "unit": "W",
+     "role": "wave_power",
+     "of": "mic",
+     "value": [
+      "mul",
+      "Imic",
+      "Smic"
+     ]
+    },
+    {
+     "id": "IN",
+     "label": "Cường độ âm tại N",
+     "unit": "W/m2",
+     "role": "intensity",
+     "of": "N",
+     "in": "am",
+     "value": [
+      "div",
+      "Pn",
+      [
+       "mul",
+       12.566370614359172,
+       [
+        "pow",
+        "rN",
+        2
+       ]
+      ]
+     ]
+    }
+   ],
+   "assumptions": [
+    "Âm truyền đẳng hướng từ nguồn nhỏ, bỏ qua hấp thụ âm; cột khí một đầu kín một đầu hở và ống hở hai đầu."
+   ]
+  }
+ }
+}

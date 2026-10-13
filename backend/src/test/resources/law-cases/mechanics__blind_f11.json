@@ -1,0 +1,264 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Động cơ điện của cần cẩu tiêu thụ 5 kW điện, nhưng chỉ 80% trong đó (4 kW) thành công có ích để nâng kiện gạch 200 kg. Kiện gạch đi lên đều nên lực kéo của dây cáp cân bằng với trọng lực, và vận tốc nâng bằng công suất có ích chia cho trọng lượng. Công có ích tăng dần theo độ cao và đúng bằng thế năng kiện gạch nhận được; điện năng tiêu thụ tăng nhanh hơn, phần chênh lệch là năng lượng hao phí. Mô phỏng dừng khi kiện gạch lên tới tầng 4 cao 12 m, lúc đó đồng hồ cho biết thời gian nâng. Em có thể đổi công suất động cơ, hiệu suất, khối lượng và độ cao để xem thời gian nâng và điện năng thay đổi thế nào.",
+ "defaults": [
+  "Lấy gia tốc rơi tự do g = 9,8 m/s².",
+  "Coi kiện gạch được nâng đều ngay từ đầu, động cơ luôn chạy đúng công suất 5 kW."
+ ],
+ "simulationSpec": {
+  "durationSeconds": 150,
+  "parameters": [
+   {
+    "name": "Pdc",
+    "label": "Công suất điện của động cơ",
+    "value": 5,
+    "unit": "kW",
+    "min": 2,
+    "max": 10,
+    "step": 0.5,
+    "role": "other"
+   },
+   {
+    "name": "H",
+    "label": "Hiệu suất của động cơ",
+    "value": 80,
+    "unit": "%",
+    "min": 50,
+    "max": 100,
+    "step": 1,
+    "role": "other"
+   },
+   {
+    "name": "m",
+    "label": "Khối lượng kiện gạch",
+    "value": 200,
+    "unit": "kg",
+    "min": 50,
+    "max": 500,
+    "step": 10,
+    "role": "mass",
+    "of": "gach"
+   },
+   {
+    "name": "h",
+    "label": "Độ cao cần nâng",
+    "value": 12,
+    "unit": "m",
+    "min": 3,
+    "max": 30,
+    "step": 1,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "gach",
+    "label": "Kiện gạch",
+    "count": 1
+   },
+   {
+    "id": "cau",
+    "label": "Cần cẩu",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "Aci",
+    "label": "Công có ích"
+   },
+   {
+    "quantity": "Adien",
+    "label": "Điện năng tiêu thụ"
+   },
+   {
+    "quantity": "tn",
+    "label": "Thời gian nâng"
+   },
+   {
+    "quantity": "y",
+    "label": "Độ cao kiện gạch"
+   },
+   {
+    "quantity": "v",
+    "label": "Vận tốc nâng"
+   },
+   {
+    "quantity": "Ahp",
+    "label": "Năng lượng hao phí"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "Fg",
+     "label": "Trọng lực tác dụng lên kiện gạch",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "gach",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "Fk",
+     "label": "Lực kéo của dây cáp",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "gach",
+     "axis": "y",
+     "value": [
+      "mul",
+      "m",
+      "g"
+     ]
+    },
+    {
+     "id": "a",
+     "label": "Gia tốc của kiện gạch",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "gach",
+     "axis": "y",
+     "value": [
+      "div",
+      [
+       "add",
+       "Fk",
+       "Fg"
+      ],
+      "m"
+     ]
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc nâng",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "gach",
+     "axis": "y",
+     "initial": [
+      "div",
+      [
+       "mul",
+       "H",
+       "Pdc"
+      ],
+      [
+       "mul",
+       "m",
+       "g"
+      ]
+     ],
+     "rate": "a"
+    },
+    {
+     "id": "y",
+     "label": "Độ cao của kiện gạch",
+     "unit": "m",
+     "role": "position",
+     "of": "gach",
+     "axis": "y",
+     "initial": 0,
+     "rate": "v"
+    },
+    {
+     "id": "Pci",
+     "label": "Công suất có ích (công suất của lực kéo)",
+     "unit": "W",
+     "role": "power",
+     "kind": "tension",
+     "of": "gach",
+     "value": [
+      "mul",
+      "Fk",
+      "v"
+     ]
+    },
+    {
+     "id": "Aci",
+     "label": "Công có ích",
+     "unit": "J",
+     "role": "work",
+     "kind": "tension",
+     "of": "gach",
+     "initial": 0,
+     "rate": "Pci"
+    },
+    {
+     "id": "Adien",
+     "label": "Điện năng tiêu thụ",
+     "unit": "J",
+     "role": "other",
+     "initial": 0,
+     "rate": "Pdc"
+    },
+    {
+     "id": "Ahp",
+     "label": "Năng lượng hao phí",
+     "unit": "J",
+     "role": "other",
+     "value": [
+      "sub",
+      "Adien",
+      "Aci"
+     ]
+    },
+    {
+     "id": "Wt",
+     "label": "Thế năng trọng trường của kiện gạch",
+     "unit": "J",
+     "role": "potential_energy",
+     "kind": "gravity",
+     "of": "gach",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "m",
+       "g"
+      ],
+      "y"
+     ]
+    },
+    {
+     "id": "tn",
+     "label": "Thời gian nâng",
+     "unit": "s",
+     "role": "time",
+     "value": "t"
+    }
+   ],
+   "until": {
+    "quantity": "y",
+    "direction": "rising",
+    "value": "h"
+   },
+   "assumptions": [
+    "Kiện gạch được coi là một chất điểm và đi lên thẳng đứng với vận tốc không đổi; bỏ qua giai đoạn tăng tốc lúc đầu và hãm lại lúc cuối.",
+    "Bỏ qua lực cản không khí và khối lượng dây cáp.",
+    "Mọi hao phí của động cơ và hệ ròng rọc được gộp vào hiệu suất 80%.",
+    "Động cơ luôn tiêu thụ đúng công suất điện đã cho trong suốt thời gian nâng."
+   ]
+  }
+ }
+}

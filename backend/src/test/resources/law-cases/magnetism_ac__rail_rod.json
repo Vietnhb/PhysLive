@@ -1,0 +1,234 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Thanh kim loại trượt trên hai ray trong từ trường: từ thông qua mạch tăng nên xuất hiện dòng điện cảm ứng, lực từ lên thanh hãm chuyển động lại (định luật Lenz).",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 10,
+  "parameters": [
+   {
+    "name": "B",
+    "label": "Cảm ứng từ",
+    "value": 0.5,
+    "unit": "T",
+    "min": 0.1,
+    "max": 2,
+    "step": 0.1,
+    "role": "magnetic_field",
+    "of": "thanh",
+    "axis": "z"
+   },
+   {
+    "name": "l",
+    "label": "Khoảng cách hai ray",
+    "value": 0.5,
+    "unit": "m",
+    "min": 0.1,
+    "max": 1,
+    "step": 0.1,
+    "role": "conductor_vector",
+    "of": "thanh",
+    "axis": "y"
+   },
+   {
+    "name": "m",
+    "label": "Khối lượng thanh",
+    "value": 0.1,
+    "unit": "kg",
+    "min": 0.05,
+    "max": 1,
+    "step": 0.05,
+    "role": "mass",
+    "of": "thanh"
+   },
+   {
+    "name": "R",
+    "label": "Điện trở của mạch",
+    "value": 0.5,
+    "unit": "ohm",
+    "min": 0.1,
+    "max": 5,
+    "step": 0.1,
+    "role": "resistance",
+    "of": "mach"
+   },
+   {
+    "name": "v0",
+    "label": "Vận tốc ban đầu",
+    "value": 2,
+    "unit": "m/s",
+    "min": 0.5,
+    "max": 5,
+    "step": 0.5,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "thanh",
+    "label": "Thanh kim loại",
+    "count": 1
+   },
+   {
+    "id": "mach",
+    "label": "Mạch kín",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "v",
+    "label": "v"
+   },
+   {
+    "quantity": "ic",
+    "label": "ic"
+   },
+   {
+    "quantity": "F",
+    "label": "F"
+   },
+   {
+    "quantity": "Phi",
+    "label": "Phi"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "x0",
+     "label": "Vị trí ban đầu của thanh",
+     "value": 0.2,
+     "unit": "m",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "x",
+     "label": "Vị trí của thanh",
+     "unit": "m",
+     "role": "position",
+     "of": "thanh",
+     "axis": "x",
+     "initial": "x0",
+     "rate": "v"
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc của thanh",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "thanh",
+     "axis": "x",
+     "initial": "v0",
+     "rate": [
+      "div",
+      "F",
+      "m"
+     ]
+    },
+    {
+     "id": "Phi",
+     "label": "Từ thông qua mạch",
+     "unit": "Wb",
+     "role": "magnetic_flux",
+     "of": "mach",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "B",
+       "l"
+      ],
+      "x"
+     ]
+    },
+    {
+     "id": "e",
+     "label": "Suất điện động cảm ứng",
+     "unit": "V",
+     "role": "induced_emf",
+     "of": "mach",
+     "value": [
+      "neg",
+      [
+       "mul",
+       [
+        "mul",
+        "B",
+        "l"
+       ],
+       "v"
+      ]
+     ]
+    },
+    {
+     "id": "ic",
+     "label": "Dòng điện cảm ứng",
+     "unit": "A",
+     "role": "induced_current",
+     "of": "mach",
+     "in_series": "mach",
+     "in_series_total": "mach",
+     "value": [
+      "div",
+      "e",
+      "R"
+     ]
+    },
+    {
+     "id": "it",
+     "label": "Dòng điện trong thanh",
+     "unit": "A",
+     "role": "current",
+     "of": "thanh",
+     "in_series": "mach",
+     "value": "ic"
+    },
+    {
+     "id": "F",
+     "label": "Lực từ lên thanh",
+     "unit": "N",
+     "role": "force",
+     "of": "thanh",
+     "axis": "x",
+     "kind": "magnetic",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "it",
+       "l"
+      ],
+      "B"
+     ]
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng của thanh",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "thanh",
+     "value": [
+      "mul",
+      [
+       "mul",
+       0.5,
+       "m"
+      ],
+      [
+       "pow",
+       "v",
+       2
+      ]
+     ]
+    }
+   ],
+   "assumptions": [
+    "Bỏ qua ma sát và điện trở của ray; từ trường đều hướng theo trục z, pháp tuyến dương của mạch cũng theo trục z; chiều dương của dòng điện trong thanh là chiều trục y."
+   ]
+  }
+ }
+}

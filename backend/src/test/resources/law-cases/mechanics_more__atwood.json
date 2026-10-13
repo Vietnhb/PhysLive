@@ -1,0 +1,295 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Mô hình kiểm thử.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 10,
+  "parameters": [
+   {
+    "name": "m1",
+    "label": "Khối lượng vật 1",
+    "value": 1,
+    "unit": "kg",
+    "min": 0.5,
+    "max": 5,
+    "step": 0.1,
+    "role": "mass",
+    "of": "vat1"
+   },
+   {
+    "name": "m2",
+    "label": "Khối lượng vật 2",
+    "value": 1.5,
+    "unit": "kg",
+    "min": 0.5,
+    "max": 5,
+    "step": 0.1,
+    "role": "mass",
+    "of": "vat2"
+   },
+   {
+    "name": "h0",
+    "label": "Độ cao ban đầu của vật 2",
+    "value": 2,
+    "unit": "m",
+    "min": 0.5,
+    "max": 5,
+    "step": 0.5,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "vat1",
+    "label": "Vật 1",
+    "count": 1
+   },
+   {
+    "id": "vat2",
+    "label": "Vật 2",
+    "count": 1
+   },
+   {
+    "id": "day",
+    "label": "Dây",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "y1",
+    "label": "y1"
+   },
+   {
+    "quantity": "y2",
+    "label": "y2"
+   },
+   {
+    "quantity": "v1",
+    "label": "v1"
+   },
+   {
+    "quantity": "T1",
+    "label": "T1"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "y1",
+     "label": "Độ cao vật 1",
+     "unit": "m",
+     "role": "position",
+     "of": "vat1",
+     "axis": "y",
+     "initial": 0,
+     "rate": "v1"
+    },
+    {
+     "id": "v1",
+     "label": "Vận tốc vật 1",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "vat1",
+     "axis": "y",
+     "initial": 0,
+     "rate": "a1"
+    },
+    {
+     "id": "y2",
+     "label": "Độ cao vật 2",
+     "unit": "m",
+     "role": "position",
+     "of": "vat2",
+     "axis": "y",
+     "initial": "h0",
+     "rate": "v2"
+    },
+    {
+     "id": "v2",
+     "label": "Vận tốc vật 2",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "vat2",
+     "axis": "y",
+     "initial": 0,
+     "rate": "a2"
+    },
+    {
+     "id": "P1",
+     "label": "Trọng lực vật 1",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "vat1",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m1",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "P2",
+     "label": "Trọng lực vật 2",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "vat2",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m2",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "T1",
+     "label": "Lực căng dây lên vật 1",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "vat1",
+     "axis": "y",
+     "value": [
+      "div",
+      [
+       "mul",
+       2,
+       [
+        "mul",
+        "m1",
+        [
+         "mul",
+         "m2",
+         "g"
+        ]
+       ]
+      ],
+      [
+       "add",
+       "m1",
+       "m2"
+      ]
+     ]
+    },
+    {
+     "id": "T2",
+     "label": "Lực căng dây lên vật 2",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "vat2",
+     "axis": "y",
+     "value": "T1"
+    },
+    {
+     "id": "Tm1",
+     "label": "Độ lớn lực căng ở vật 1",
+     "unit": "N",
+     "role": "tension_magnitude",
+     "of": "vat1",
+     "inString": "day",
+     "value": [
+      "abs",
+      "T1"
+     ]
+    },
+    {
+     "id": "Tm2",
+     "label": "Độ lớn lực căng ở vật 2",
+     "unit": "N",
+     "role": "tension_magnitude",
+     "of": "vat2",
+     "inString": "day",
+     "value": [
+      "abs",
+      "T2"
+     ]
+    },
+    {
+     "id": "a1",
+     "label": "Gia tốc vật 1",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "vat1",
+     "axis": "y",
+     "value": [
+      "div",
+      [
+       "add",
+       "T1",
+       "P1"
+      ],
+      "m1"
+     ]
+    },
+    {
+     "id": "a2",
+     "label": "Gia tốc vật 2",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "vat2",
+     "axis": "y",
+     "value": [
+      "div",
+      [
+       "add",
+       "T2",
+       "P2"
+      ],
+      "m2"
+     ]
+    },
+    {
+     "id": "u1",
+     "label": "Vận tốc vật 1 dọc theo dây",
+     "unit": "m/s",
+     "role": "velocity_along_string",
+     "of": "vat1",
+     "inString": "day",
+     "value": "v1"
+    },
+    {
+     "id": "u2",
+     "label": "Vận tốc vật 2 dọc theo dây",
+     "unit": "m/s",
+     "role": "velocity_along_string",
+     "of": "vat2",
+     "inString": "day",
+     "value": [
+      "neg",
+      "v2"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Dây nhẹ, không dãn; ròng rọc nhẹ, không ma sát. Chiều dương dọc dây: vật 1 đi lên, vật 2 đi xuống."
+   ],
+   "until": [
+    {
+     "quantity": "y2",
+     "direction": "falling",
+     "value": 0
+    }
+   ]
+  }
+ }
+}

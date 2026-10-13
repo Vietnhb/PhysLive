@@ -1,0 +1,365 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Mô hình kiểm thử.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 20000,
+  "parameters": [
+   {
+    "name": "h",
+    "label": "Độ cao ban đầu của vệ tinh",
+    "value": 400,
+    "unit": "km",
+    "min": 200,
+    "max": 36000,
+    "step": 100,
+    "role": "other"
+   },
+   {
+    "name": "v0",
+    "label": "Vận tốc ban đầu",
+    "value": 9,
+    "unit": "km/s",
+    "min": 7.7,
+    "max": 10,
+    "step": 0.1,
+    "role": "other"
+   },
+   {
+    "name": "m",
+    "label": "Khối lượng vệ tinh",
+    "value": 500,
+    "unit": "kg",
+    "min": 100,
+    "max": 5000,
+    "step": 100,
+    "role": "mass",
+    "of": "vt"
+   }
+  ],
+  "objects": [
+   {
+    "id": "vt",
+    "label": "Vệ tinh",
+    "count": 1
+   },
+   {
+    "id": "td",
+    "label": "Trái Đất",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "x",
+    "label": "x"
+   },
+   {
+    "quantity": "y",
+    "label": "y"
+   },
+   {
+    "quantity": "r",
+    "label": "r"
+   },
+   {
+    "quantity": "gh",
+    "label": "gh"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "G",
+     "label": "Hằng số hấp dẫn",
+     "value": 6.674e-11,
+     "unit": "N*m2/kg2",
+     "role": "other"
+    },
+    {
+     "id": "M",
+     "label": "Khối lượng Trái Đất",
+     "value": 5.972e+24,
+     "unit": "kg",
+     "role": "source_mass"
+    },
+    {
+     "id": "Rd",
+     "label": "Bán kính Trái Đất",
+     "value": 6371,
+     "unit": "km",
+     "role": "source_radius"
+    },
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do ở mặt đất",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "x",
+     "label": "Tọa độ x",
+     "unit": "m",
+     "role": "position",
+     "of": "vt",
+     "axis": "x",
+     "initial": [
+      "add",
+      "Rd",
+      "h"
+     ],
+     "rate": "vx"
+    },
+    {
+     "id": "y",
+     "label": "Tọa độ y",
+     "unit": "m",
+     "role": "position",
+     "of": "vt",
+     "axis": "y",
+     "initial": 0,
+     "rate": "vy"
+    },
+    {
+     "id": "vx",
+     "label": "Vận tốc x",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "vt",
+     "axis": "x",
+     "initial": 0,
+     "rate": [
+      "div",
+      "Fx",
+      "m"
+     ]
+    },
+    {
+     "id": "vy",
+     "label": "Vận tốc y",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "vt",
+     "axis": "y",
+     "initial": "v0",
+     "rate": [
+      "div",
+      "Fy",
+      "m"
+     ]
+    },
+    {
+     "id": "r",
+     "label": "Khoảng cách đến tâm Trái Đất",
+     "unit": "m",
+     "role": "center_distance",
+     "of": "vt",
+     "value": [
+      "sqrt",
+      [
+       "add",
+       [
+        "pow",
+        "x",
+        2
+       ],
+       [
+        "pow",
+        "y",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Fhd",
+     "label": "Độ lớn lực hấp dẫn",
+     "unit": "N",
+     "role": "force_magnitude",
+     "kind": "gravitation",
+     "of": "vt",
+     "value": [
+      "mul",
+      "m",
+      [
+       "div",
+       [
+        "mul",
+        "G",
+        "M"
+       ],
+       [
+        "pow",
+        "r",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Fx",
+     "label": "Lực hấp dẫn theo x",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravitation",
+     "of": "vt",
+     "axis": "x",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "Fhd",
+       [
+        "div",
+        "x",
+        "r"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Fy",
+     "label": "Lực hấp dẫn theo y",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravitation",
+     "of": "vt",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "Fhd",
+       [
+        "div",
+        "y",
+        "r"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "gh",
+     "label": "Cường độ trường hấp dẫn",
+     "unit": "m/s2",
+     "role": "gravitational_field_strength",
+     "of": "vt",
+     "value": [
+      "div",
+      [
+       "mul",
+       "G",
+       "M"
+      ],
+      [
+       "pow",
+       "r",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "phi",
+     "label": "Thế hấp dẫn",
+     "unit": "J/kg",
+     "role": "gravitational_potential",
+     "of": "vt",
+     "value": [
+      "neg",
+      [
+       "div",
+       [
+        "mul",
+        "G",
+        "M"
+       ],
+       [
+        "pow",
+        "r",
+        1
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Wt",
+     "label": "Thế năng hấp dẫn",
+     "unit": "J",
+     "role": "potential_energy",
+     "kind": "gravitation",
+     "of": "vt",
+     "value": [
+      "mul",
+      "m",
+      "phi"
+     ]
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "vt",
+     "value": [
+      "mul",
+      0.5,
+      [
+       "mul",
+       "m",
+       [
+        "add",
+        [
+         "pow",
+         "vx",
+         2
+        ],
+        [
+         "pow",
+         "vy",
+         2
+        ]
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "W",
+     "label": "Cơ năng",
+     "unit": "J",
+     "role": "other",
+     "value": [
+      "add",
+      "Wd",
+      "Wt"
+     ]
+    },
+    {
+     "id": "v1",
+     "label": "Tốc độ vũ trụ cấp 1",
+     "unit": "m/s",
+     "role": "first_cosmic_velocity",
+     "value": [
+      "sqrt",
+      [
+       "div",
+       [
+        "mul",
+        "G",
+        "M"
+       ],
+       "Rd"
+      ]
+     ]
+    }
+   ],
+   "assumptions": [
+    "Gốc tọa độ ở tâm Trái Đất, Trái Đất đứng yên."
+   ]
+  }
+ }
+}

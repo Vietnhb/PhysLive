@@ -1,0 +1,415 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Xe A chạy trên đệm khí tới va vào xe B đang đứng yên. Trên đệm khí hầu như không có ma sát nên trong lúc va chạm chỉ có hai xe đẩy nhau: hai lực này cùng độ lớn, ngược chiều (định luật III Newton), vì vậy tổng động lượng của hai xe không đổi. Kéo thanh trượt hệ số đàn hồi từ 1 (va chạm đàn hồi) về 0 (va chạm mềm, hai xe dính vào nhau và đi cùng vận tốc) để so sánh. Tổng động lượng luôn giữ nguyên, còn tổng động năng chỉ giữ nguyên khi va chạm đàn hồi và giảm nhiều nhất khi va chạm mềm. Bạn có thể đổi khối lượng hai xe và vận tốc ban đầu của xe A, rồi quan sát vận tốc từng xe sau va chạm.",
+ "defaults": [
+  "Thanh trượt hệ số đàn hồi đi từ 0 (va chạm mềm) đến 1 (va chạm đàn hồi), ban đầu đặt ở 1.",
+  "Lúc đầu xe B cách xe A 0,4 m.",
+  "Hai xe đẩy nhau trong 0,02 giây.",
+  "Mô phỏng chạy trong 2,5 giây."
+ ],
+ "simulationSpec": {
+  "durationSeconds": 2.5,
+  "parameters": [
+   {
+    "name": "e",
+    "label": "Hệ số đàn hồi (1: đàn hồi, 0: va chạm mềm)",
+    "value": 1,
+    "unit": "1",
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "role": "other"
+   },
+   {
+    "name": "mA",
+    "label": "Khối lượng xe A",
+    "value": 300,
+    "unit": "g",
+    "min": 100,
+    "max": 1000,
+    "step": 50,
+    "role": "mass",
+    "of": "A"
+   },
+   {
+    "name": "mB",
+    "label": "Khối lượng xe B",
+    "value": 500,
+    "unit": "g",
+    "min": 100,
+    "max": 1000,
+    "step": 50,
+    "role": "mass",
+    "of": "B"
+   },
+   {
+    "name": "v0",
+    "label": "Vận tốc ban đầu của xe A",
+    "value": 0.8,
+    "unit": "m/s",
+    "min": 0.4,
+    "max": 2,
+    "step": 0.1,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "A",
+    "label": "Xe A",
+    "count": 1
+   },
+   {
+    "id": "B",
+    "label": "Xe B",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "vA",
+    "label": "Vận tốc xe A"
+   },
+   {
+    "quantity": "vB",
+    "label": "Vận tốc xe B"
+   },
+   {
+    "quantity": "ptot",
+    "label": "Tổng động lượng hai xe"
+   },
+   {
+    "quantity": "Ktot",
+    "label": "Tổng động năng hai xe"
+   },
+   {
+    "quantity": "Kloss",
+    "label": "Động năng đã mất"
+   },
+   {
+    "quantity": "pA",
+    "label": "Động lượng xe A"
+   },
+   {
+    "quantity": "pB",
+    "label": "Động lượng xe B"
+   },
+   {
+    "quantity": "xA",
+    "label": "Vị trí xe A"
+   },
+   {
+    "quantity": "xB",
+    "label": "Vị trí xe B"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "d",
+     "label": "Khoảng cách ban đầu giữa hai xe",
+     "value": 0.4,
+     "unit": "m",
+     "role": "other"
+    },
+    {
+     "id": "tau",
+     "label": "Thời gian hai xe đẩy nhau",
+     "value": 0.02,
+     "unit": "s",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "t1",
+     "label": "Thời điểm bắt đầu va chạm",
+     "unit": "s",
+     "role": "other",
+     "value": [
+      "sub",
+      [
+       "div",
+       "d",
+       "v0"
+      ],
+      [
+       "div",
+       "tau",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "Fc",
+     "label": "Độ lớn lực hai xe đẩy nhau khi va chạm",
+     "unit": "N",
+     "role": "other",
+     "value": [
+      "div",
+      [
+       "mul",
+       [
+        "add",
+        1,
+        "e"
+       ],
+       [
+        "mul",
+        [
+         "div",
+         [
+          "mul",
+          "mA",
+          "mB"
+         ],
+         [
+          "add",
+          "mA",
+          "mB"
+         ]
+        ],
+        "v0"
+       ]
+      ],
+      "tau"
+     ]
+    },
+    {
+     "id": "FB",
+     "label": "Lực xe A đẩy xe B",
+     "unit": "N",
+     "role": "force",
+     "kind": "contact",
+     "of": "B",
+     "by": "A",
+     "axis": "x",
+     "value": [
+      "if",
+      [
+       "sub",
+       "t",
+       "t1"
+      ],
+      [
+       "if",
+       [
+        "sub",
+        [
+         "add",
+         "t1",
+         "tau"
+        ],
+        "t"
+       ],
+       "Fc",
+       0
+      ],
+      0
+     ]
+    },
+    {
+     "id": "FA",
+     "label": "Lực xe B đẩy xe A",
+     "unit": "N",
+     "role": "force",
+     "kind": "contact",
+     "of": "A",
+     "by": "B",
+     "axis": "x",
+     "value": [
+      "neg",
+      "FB"
+     ]
+    },
+    {
+     "id": "aA",
+     "label": "Gia tốc xe A",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "A",
+     "axis": "x",
+     "value": [
+      "div",
+      "FA",
+      "mA"
+     ]
+    },
+    {
+     "id": "aB",
+     "label": "Gia tốc xe B",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "B",
+     "axis": "x",
+     "value": [
+      "div",
+      "FB",
+      "mB"
+     ]
+    },
+    {
+     "id": "vA",
+     "label": "Vận tốc xe A",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "A",
+     "axis": "x",
+     "initial": "v0",
+     "rate": "aA"
+    },
+    {
+     "id": "vB",
+     "label": "Vận tốc xe B",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "B",
+     "axis": "x",
+     "initial": 0,
+     "rate": "aB"
+    },
+    {
+     "id": "xA",
+     "label": "Vị trí xe A",
+     "unit": "m",
+     "role": "position",
+     "of": "A",
+     "axis": "x",
+     "initial": 0,
+     "rate": "vA"
+    },
+    {
+     "id": "xB",
+     "label": "Vị trí xe B",
+     "unit": "m",
+     "role": "position",
+     "of": "B",
+     "axis": "x",
+     "initial": "d",
+     "rate": "vB"
+    },
+    {
+     "id": "pA",
+     "label": "Động lượng xe A",
+     "unit": "kg*m/s",
+     "role": "momentum",
+     "of": "A",
+     "axis": "x",
+     "value": [
+      "mul",
+      "mA",
+      "vA"
+     ]
+    },
+    {
+     "id": "pB",
+     "label": "Động lượng xe B",
+     "unit": "kg*m/s",
+     "role": "momentum",
+     "of": "B",
+     "axis": "x",
+     "value": [
+      "mul",
+      "mB",
+      "vB"
+     ]
+    },
+    {
+     "id": "ptot",
+     "label": "Tổng động lượng hai xe",
+     "unit": "kg*m/s",
+     "role": "total_momentum",
+     "axis": "x",
+     "value": [
+      "add",
+      "pA",
+      "pB"
+     ]
+    },
+    {
+     "id": "KA",
+     "label": "Động năng xe A",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "A",
+     "value": [
+      "mul",
+      0.5,
+      [
+       "mul",
+       "mA",
+       [
+        "pow",
+        "vA",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "KB",
+     "label": "Động năng xe B",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "B",
+     "value": [
+      "mul",
+      0.5,
+      [
+       "mul",
+       "mB",
+       [
+        "pow",
+        "vB",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Ktot",
+     "label": "Tổng động năng hai xe",
+     "unit": "J",
+     "role": "total_kinetic_energy",
+     "value": [
+      "add",
+      "KA",
+      "KB"
+     ]
+    },
+    {
+     "id": "Kloss",
+     "label": "Động năng đã mất",
+     "unit": "J",
+     "role": "other",
+     "value": [
+      "sub",
+      [
+       "mul",
+       0.5,
+       [
+        "mul",
+        "mA",
+        [
+         "pow",
+         "v0",
+         2
+        ]
+       ]
+      ],
+      "Ktot"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Bỏ qua ma sát và lực cản không khí trên đệm khí.",
+    "Mỗi xe được coi như một điểm đặt ở đầu va chạm của nó; chỉ xét chuyển động theo phương ngang.",
+    "Trong lúc va chạm, hai xe đẩy nhau bằng một lực không đổi trong 0,02 giây; độ lớn lực được chọn theo hệ số đàn hồi để vận tốc tách ra bằng hệ số đàn hồi nhân vận tốc lại gần.",
+    "Khi hệ số đàn hồi bằng 0, hai xe dính vào nhau và đi cùng vận tốc sau va chạm.",
+    "Với hệ số đàn hồi ở giữa 0 và 1, va chạm đàn hồi một phần: hai xe tách ra nhưng mất bớt động năng."
+   ]
+  }
+ }
+}

@@ -1,0 +1,124 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "x",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 20,
+  "parameters": [
+   {
+    "name": "T",
+    "label": "Chu kì bán rã",
+    "value": 5,
+    "unit": "s",
+    "min": 1,
+    "max": 20,
+    "step": 1,
+    "role": "half_life",
+    "of": "mau"
+   }
+  ],
+  "objects": [
+   {
+    "id": "mau",
+    "label": "mẫu chất"
+   },
+   {
+    "id": "hat",
+    "label": "hạt nhân",
+    "members": 200
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "Nr",
+    "label": "Số hạt còn lại"
+   }
+  ],
+  "model": {
+   "seed": 7,
+   "quantities": [
+    {
+     "id": "lam",
+     "label": "Hằng số phóng xạ",
+     "unit": "1/s",
+     "role": "decay_constant",
+     "of": "mau",
+     "value": [
+      "div",
+      0.6931471805599453,
+      "T"
+     ]
+    },
+    {
+     "id": "life",
+     "label": "Thời điểm phân rã",
+     "unit": "s",
+     "role": "other",
+     "of": "hat",
+     "value": [
+      "div",
+      [
+       "neg",
+       [
+        "log",
+        [
+         "random",
+         0
+        ]
+       ]
+      ],
+      "lam"
+     ]
+    },
+    {
+     "id": "alive",
+     "label": "Còn chưa phân rã",
+     "unit": "1",
+     "role": "other",
+     "of": "hat",
+     "value": [
+      "if",
+      [
+       "sub",
+       "life",
+       "t"
+      ],
+      1,
+      0
+     ]
+    },
+    {
+     "id": "Nr",
+     "label": "Số hạt còn lại (đếm)",
+     "unit": "1",
+     "role": "other",
+     "of": "mau",
+     "value": [
+      "total",
+      "alive"
+     ],
+     "expected": "N"
+    },
+    {
+     "id": "N",
+     "label": "Số hạt chưa phân rã (kỳ vọng)",
+     "unit": "1",
+     "role": "undecayed_count",
+     "of": "mau",
+     "initial": 200,
+     "rate": [
+      "neg",
+      [
+       "mul",
+       "lam",
+       "N"
+      ]
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

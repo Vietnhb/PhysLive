@@ -1,0 +1,211 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "isothermal_compression",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 10,
+  "parameters": [
+   {
+    "name": "n",
+    "label": "Số mol khí",
+    "value": 0.2,
+    "unit": "mol",
+    "min": 0.05,
+    "max": 1,
+    "step": 0.05,
+    "role": "amount_of_substance",
+    "of": "khi"
+   },
+   {
+    "name": "tc",
+    "label": "Nhiệt độ khí",
+    "value": 27,
+    "unit": "degC",
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "role": "celsius_temperature",
+    "of": "khi"
+   },
+   {
+    "name": "V0",
+    "label": "Thể tích ban đầu",
+    "value": 5,
+    "unit": "L",
+    "min": 2,
+    "max": 10,
+    "step": 0.5
+   },
+   {
+    "name": "u",
+    "label": "Tốc độ giảm thể tích",
+    "value": 0.3,
+    "unit": "l/s",
+    "min": 0.1,
+    "max": 0.5,
+    "step": 0.05
+   }
+  ],
+  "objects": [
+   {
+    "id": "khi",
+    "label": "Khối khí trong xilanh",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "T",
+    "label": "Nhiệt độ tuyệt đối"
+   },
+   {
+    "quantity": "V",
+    "label": "Thể tích"
+   },
+   {
+    "quantity": "p",
+    "label": "Áp suất"
+   },
+   {
+    "quantity": "A",
+    "label": "Công khí nhận"
+   },
+   {
+    "quantity": "Q",
+    "label": "Nhiệt lượng khí nhận"
+   },
+   {
+    "quantity": "U",
+    "label": "Nội năng"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "R",
+     "label": "Hằng số khí",
+     "value": 8.314462618,
+     "unit": "J/(mol*K)",
+     "role": "other"
+    },
+    {
+     "id": "T0",
+     "label": "273,15 K",
+     "value": 273.15,
+     "unit": "K",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "T",
+     "label": "Nhiệt độ tuyệt đối",
+     "unit": "K",
+     "role": "temperature",
+     "value": [
+      "add",
+      "tc",
+      "T0"
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "V",
+     "label": "Thể tích",
+     "unit": "m3",
+     "role": "volume",
+     "initial": "V0",
+     "rate": [
+      "neg",
+      "u"
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "p",
+     "label": "Áp suất",
+     "unit": "Pa",
+     "role": "pressure",
+     "value": [
+      "div",
+      [
+       "mul",
+       "n",
+       [
+        "mul",
+        "R",
+        "T"
+       ]
+      ],
+      "V"
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "A",
+     "label": "Công khí nhận",
+     "unit": "J",
+     "role": "work",
+     "kind": "thermodynamic",
+     "initial": 0,
+     "rate": [
+      "mul",
+      "p",
+      "u"
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "Q",
+     "label": "Nhiệt lượng khí nhận",
+     "unit": "J",
+     "role": "heat",
+     "initial": 0,
+     "rate": [
+      "neg",
+      [
+       "mul",
+       "p",
+       "u"
+      ]
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "U",
+     "label": "Nội năng",
+     "unit": "J",
+     "role": "internal_energy",
+     "value": [
+      "mul",
+      1.5,
+      [
+       "mul",
+       "n",
+       [
+        "mul",
+        "R",
+        "T"
+       ]
+      ]
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "pV",
+     "label": "Tích p·V",
+     "unit": "J",
+     "role": "other",
+     "value": [
+      "mul",
+      "p",
+      "V"
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

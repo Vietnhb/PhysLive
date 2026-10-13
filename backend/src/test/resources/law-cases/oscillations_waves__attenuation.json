@@ -1,0 +1,175 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Tín hiệu truyền trong cáp suy giảm đều theo chiều dài; sóng mang truyền trong không khí.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 2,
+  "parameters": [
+   {
+    "name": "Pin",
+    "label": "Công suất vào",
+    "value": 50,
+    "unit": "mW",
+    "min": 1,
+    "max": 100,
+    "step": 1,
+    "role": "input_power",
+    "of": "cap"
+   },
+   {
+    "name": "al",
+    "label": "Độ suy giảm trên mét",
+    "value": 0.02,
+    "unit": "dB/m",
+    "min": 0.005,
+    "max": 0.1,
+    "step": 0.005,
+    "role": "attenuation_per_length",
+    "of": "cap"
+   },
+   {
+    "name": "Lc",
+    "label": "Chiều dài cáp",
+    "value": 400,
+    "unit": "m",
+    "min": 50,
+    "max": 1000,
+    "step": 50,
+    "role": "transmission_length",
+    "of": "cap"
+   },
+   {
+    "name": "fc",
+    "label": "Tần số sóng mang",
+    "value": 100,
+    "unit": "MHz",
+    "min": 50,
+    "max": 200,
+    "step": 1,
+    "role": "frequency",
+    "in": "songmang"
+   }
+  ],
+  "objects": [
+   {
+    "id": "cap",
+    "label": "cap",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "att",
+    "label": "Độ suy giảm"
+   },
+   {
+    "quantity": "Pout",
+    "label": "Công suất ra"
+   },
+   {
+    "quantity": "vc",
+    "label": "Tốc độ sóng mang"
+   },
+   {
+    "quantity": "lamc",
+    "label": "Bước sóng của sóng mang"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "cc",
+     "label": "Tốc độ sóng điện từ",
+     "value": 299792458,
+     "unit": "m/s",
+     "role": "other"
+    },
+    {
+     "id": "ln10",
+     "label": "ln 10",
+     "value": 2.302585092994046,
+     "unit": "1",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "att",
+     "label": "Độ suy giảm",
+     "unit": "1",
+     "role": "attenuation",
+     "of": "cap",
+     "value": [
+      "mul",
+      "al",
+      "Lc"
+     ]
+    },
+    {
+     "id": "Pout",
+     "label": "Công suất ra",
+     "unit": "W",
+     "role": "output_power",
+     "of": "cap",
+     "value": [
+      "mul",
+      "Pin",
+      [
+       "exp",
+       [
+        "neg",
+        [
+         "div",
+         [
+          "mul",
+          "att",
+          "ln10"
+         ],
+         10
+        ]
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "vc",
+     "label": "Tốc độ sóng mang",
+     "unit": "m/s",
+     "role": "wave_speed",
+     "kind": "electromagnetic",
+     "in": "songmang",
+     "value": "cc"
+    },
+    {
+     "id": "lamc",
+     "label": "Bước sóng của sóng mang",
+     "unit": "m",
+     "role": "wavelength",
+     "in": "songmang",
+     "value": [
+      "div",
+      "vc",
+      "fc"
+     ]
+    },
+    {
+     "id": "Tc",
+     "label": "Chu kì sóng mang",
+     "unit": "s",
+     "role": "period",
+     "in": "songmang",
+     "value": [
+      "div",
+      1,
+      "fc"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Tín hiệu truyền trong cáp suy giảm đều theo chiều dài; sóng mang truyền trong không khí."
+   ]
+  }
+ }
+}

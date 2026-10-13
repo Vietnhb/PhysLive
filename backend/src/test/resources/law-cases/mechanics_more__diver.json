@@ -1,0 +1,263 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Mô hình kiểm thử.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 30,
+  "parameters": [
+   {
+    "name": "vd",
+    "label": "Tốc độ lặn",
+    "value": 0.5,
+    "unit": "m/s",
+    "min": 0.1,
+    "max": 2,
+    "step": 0.1,
+    "role": "other"
+   },
+   {
+    "name": "rho",
+    "label": "Khối lượng riêng của nước",
+    "value": 1000,
+    "unit": "kg/m3",
+    "min": 800,
+    "max": 1100,
+    "step": 10,
+    "role": "fluid_density",
+    "of": "hop"
+   },
+   {
+    "name": "rv",
+    "label": "Khối lượng riêng của hộp",
+    "value": 2500,
+    "unit": "kg/m3",
+    "min": 1500,
+    "max": 8000,
+    "step": 100,
+    "role": "density",
+    "of": "hop"
+   },
+   {
+    "name": "V",
+    "label": "Thể tích của hộp",
+    "value": 2,
+    "unit": "dm3",
+    "min": 0.5,
+    "max": 10,
+    "step": 0.5,
+    "role": "body_volume",
+    "of": "hop"
+   }
+  ],
+  "objects": [
+   {
+    "id": "hop",
+    "label": "Hộp kín",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "h",
+    "label": "h"
+   },
+   {
+    "quantity": "p",
+    "label": "p"
+   },
+   {
+    "quantity": "dp",
+    "label": "dp"
+   },
+   {
+    "quantity": "T",
+    "label": "T"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    },
+    {
+     "id": "p0",
+     "label": "Áp suất khí quyển",
+     "value": 101325,
+     "unit": "Pa",
+     "role": "surface_pressure"
+    },
+    {
+     "id": "hmax",
+     "label": "Độ sâu đáy bể",
+     "value": 10,
+     "unit": "m",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "h",
+     "label": "Độ sâu",
+     "unit": "m",
+     "role": "depth",
+     "of": "hop",
+     "initial": 0,
+     "rate": "vd"
+    },
+    {
+     "id": "y",
+     "label": "Tọa độ thẳng đứng",
+     "unit": "m",
+     "role": "position",
+     "of": "hop",
+     "axis": "y",
+     "value": [
+      "neg",
+      "h"
+     ]
+    },
+    {
+     "id": "vy",
+     "label": "Vận tốc",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "hop",
+     "axis": "y",
+     "value": [
+      "neg",
+      "vd"
+     ]
+    },
+    {
+     "id": "p",
+     "label": "Áp suất tại hộp",
+     "unit": "Pa",
+     "role": "liquid_pressure",
+     "of": "hop",
+     "value": [
+      "add",
+      "p0",
+      [
+       "mul",
+       "rho",
+       [
+        "mul",
+        "g",
+        "h"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "dh",
+     "label": "Độ chênh độ sâu so với mặt nước",
+     "unit": "m",
+     "role": "height_difference",
+     "of": "hop",
+     "value": "h"
+    },
+    {
+     "id": "dp",
+     "label": "Độ tăng áp suất so với mặt nước",
+     "unit": "Pa",
+     "role": "pressure_difference",
+     "of": "hop",
+     "value": [
+      "sub",
+      "p",
+      "p0"
+     ]
+    },
+    {
+     "id": "m",
+     "label": "Khối lượng hộp",
+     "unit": "kg",
+     "role": "mass",
+     "of": "hop",
+     "value": [
+      "mul",
+      "rv",
+      "V"
+     ]
+    },
+    {
+     "id": "Vc",
+     "label": "Thể tích phần chìm",
+     "unit": "m3",
+     "role": "volume",
+     "of": "hop",
+     "value": "V"
+    },
+    {
+     "id": "P",
+     "label": "Trọng lực",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "hop",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "FA",
+     "label": "Lực đẩy Archimedes",
+     "unit": "N",
+     "role": "force",
+     "kind": "buoyancy",
+     "of": "hop",
+     "axis": "y",
+     "value": [
+      "mul",
+      "rho",
+      [
+       "mul",
+       "g",
+       "Vc"
+      ]
+     ]
+    },
+    {
+     "id": "T",
+     "label": "Lực căng dây giữ",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "hop",
+     "axis": "y",
+     "value": [
+      "sub",
+      [
+       "mul",
+       "m",
+       "g"
+      ],
+      "FA"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Hộp được dây thả xuống đều, bỏ qua lực cản của nước."
+   ],
+   "until": [
+    {
+     "quantity": "h",
+     "direction": "rising",
+     "value": "hmax"
+    }
+   ]
+  }
+ }
+}

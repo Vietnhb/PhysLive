@@ -1,0 +1,221 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "kinetic_model",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 60,
+  "parameters": [
+   {
+    "name": "n",
+    "label": "Số mol khí",
+    "value": 1,
+    "unit": "mol",
+    "min": 0.1,
+    "max": 3,
+    "step": 0.1,
+    "role": "amount_of_substance",
+    "of": "khi"
+   },
+   {
+    "name": "V",
+    "label": "Thể tích bình",
+    "value": 20,
+    "unit": "L",
+    "min": 5,
+    "max": 50,
+    "step": 1,
+    "role": "volume",
+    "of": "khi"
+   },
+   {
+    "name": "t0",
+    "label": "Nhiệt độ ban đầu",
+    "value": 20,
+    "unit": "degC",
+    "min": -50,
+    "max": 100,
+    "step": 5
+   },
+   {
+    "name": "r",
+    "label": "Tốc độ tăng nhiệt độ",
+    "value": 2,
+    "unit": "K/s",
+    "min": 0.5,
+    "max": 5,
+    "step": 0.5
+   }
+  ],
+  "objects": [
+   {
+    "id": "khi",
+    "label": "Khối khí nitơ trong bình kín",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "T",
+    "label": "Nhiệt độ tuyệt đối"
+   },
+   {
+    "quantity": "N",
+    "label": "Số phân tử"
+   },
+   {
+    "quantity": "n0",
+    "label": "Mật độ phân tử"
+   },
+   {
+    "quantity": "Wd",
+    "label": "Động năng tịnh tiến trung bình của phân tử"
+   },
+   {
+    "quantity": "vq",
+    "label": "Tốc độ căn quân phương"
+   },
+   {
+    "quantity": "p",
+    "label": "Áp suất"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "R",
+     "label": "Hằng số khí",
+     "value": 8.314462618,
+     "unit": "J/(mol*K)",
+     "role": "other"
+    },
+    {
+     "id": "k",
+     "label": "Hằng số Boltzmann",
+     "value": 1.380649e-23,
+     "unit": "J/K",
+     "role": "other"
+    },
+    {
+     "id": "T0",
+     "label": "273,15 K",
+     "value": 273.15,
+     "unit": "K",
+     "role": "other"
+    },
+    {
+     "id": "m0",
+     "label": "Khối lượng một phân tử nitơ",
+     "value": 4.65e-26,
+     "unit": "kg",
+     "role": "molecule_mass",
+     "of": "khi"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "T",
+     "label": "Nhiệt độ tuyệt đối",
+     "unit": "K",
+     "role": "temperature",
+     "initial": [
+      "add",
+      "t0",
+      "T0"
+     ],
+     "rate": "r",
+     "of": "khi"
+    },
+    {
+     "id": "N",
+     "label": "Số phân tử",
+     "unit": "1",
+     "role": "molecule_count",
+     "value": [
+      "div",
+      [
+       "mul",
+       "n",
+       "R"
+      ],
+      "k"
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "n0",
+     "label": "Mật độ phân tử",
+     "unit": "1/m3",
+     "role": "number_density",
+     "value": [
+      "div",
+      "N",
+      "V"
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng tịnh tiến trung bình của phân tử",
+     "unit": "J",
+     "role": "mean_kinetic_energy",
+     "value": [
+      "mul",
+      1.5,
+      [
+       "mul",
+       "k",
+       "T"
+      ]
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "vq",
+     "label": "Tốc độ căn quân phương",
+     "unit": "m/s",
+     "role": "rms_speed",
+     "value": [
+      "sqrt",
+      [
+       "div",
+       [
+        "mul",
+        2,
+        "Wd"
+       ],
+       "m0"
+      ]
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "p",
+     "label": "Áp suất",
+     "unit": "Pa",
+     "role": "pressure",
+     "value": [
+      "div",
+      [
+       "mul",
+       "n0",
+       [
+        "mul",
+        "m0",
+        [
+         "pow",
+         "vq",
+         2
+        ]
+       ]
+      ],
+      3
+     ],
+     "of": "khi"
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

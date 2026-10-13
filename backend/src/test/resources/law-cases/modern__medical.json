@@ -1,0 +1,219 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Ống tia X có hiệu điện thế 60 kV. Chùm tia đi qua lớp mô dày dần đến 10 cm với hệ số suy giảm 20 m⁻¹. Một xung siêu âm phản xạ ở mặt sau lớp mô.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 10,
+  "parameters": [
+   {
+    "name": "U",
+    "label": "Hiệu điện thế ống tia X",
+    "value": 60,
+    "unit": "kV",
+    "min": 20,
+    "max": 150,
+    "step": 5,
+    "role": "tube_voltage",
+    "of": "ong"
+   },
+   {
+    "name": "mu",
+    "label": "Hệ số suy giảm",
+    "value": 20,
+    "unit": "1/m",
+    "min": 5,
+    "max": 100,
+    "step": 5,
+    "role": "attenuation_coefficient",
+    "of": "mo"
+   },
+   {
+    "name": "I0",
+    "label": "Cường độ chùm tia tới",
+    "value": 100,
+    "unit": "W/m2",
+    "min": 10,
+    "max": 500,
+    "step": 10,
+    "role": "incident_intensity",
+    "of": "mo"
+   },
+   {
+    "name": "vs",
+    "label": "Tốc độ siêu âm trong mô",
+    "value": 1540,
+    "unit": "m/s",
+    "min": 1400,
+    "max": 1600,
+    "step": 10,
+    "role": "wave_speed",
+    "of": "mo"
+   }
+  ],
+  "objects": [
+   {
+    "id": "ong",
+    "label": "ong",
+    "count": 1
+   },
+   {
+    "id": "mo",
+    "label": "mo",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "emax",
+    "label": "emax"
+   },
+   {
+    "quantity": "lmin",
+    "label": "lmin"
+   },
+   {
+    "quantity": "d",
+    "label": "d"
+   },
+   {
+    "quantity": "I",
+    "label": "I"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "h",
+     "label": "Hằng số Planck",
+     "value": 6.626e-34,
+     "unit": "J*s",
+     "role": "other"
+    },
+    {
+     "id": "c",
+     "label": "Tốc độ ánh sáng",
+     "value": 299800000.0,
+     "unit": "m/s",
+     "role": "other"
+    },
+    {
+     "id": "qe",
+     "label": "Điện tích nguyên tố",
+     "value": 1.602e-19,
+     "unit": "C",
+     "role": "other"
+    },
+    {
+     "id": "vq",
+     "label": "Tốc độ tăng bề dày",
+     "value": 0.01,
+     "unit": "m/s",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "emax",
+     "label": "Năng lượng photon lớn nhất",
+     "unit": "J",
+     "role": "max_photon_energy",
+     "of": "ong",
+     "value": [
+      "mul",
+      "qe",
+      "U"
+     ]
+    },
+    {
+     "id": "lmin",
+     "label": "Bước sóng ngắn nhất",
+     "unit": "m",
+     "role": "min_wavelength",
+     "of": "ong",
+     "value": [
+      "div",
+      [
+       "mul",
+       "h",
+       "c"
+      ],
+      "emax"
+     ]
+    },
+    {
+     "id": "d",
+     "label": "Bề dày lớp mô",
+     "unit": "m",
+     "role": "thickness",
+     "of": "mo",
+     "value": [
+      "mul",
+      "vq",
+      "t"
+     ]
+    },
+    {
+     "id": "I",
+     "label": "Cường độ chùm tia ló",
+     "unit": "W/m2",
+     "role": "transmitted_intensity",
+     "of": "mo",
+     "value": [
+      "mul",
+      "I0",
+      [
+       "exp",
+       [
+        "neg",
+        [
+         "mul",
+         "mu",
+         "d"
+        ]
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "dh",
+     "label": "Bề dày giảm một nửa",
+     "unit": "m",
+     "role": "half_value_thickness",
+     "of": "mo",
+     "value": [
+      "div",
+      0.6931471805599453,
+      "mu"
+     ]
+    },
+    {
+     "id": "ds",
+     "label": "Độ sâu mặt phản xạ",
+     "unit": "m",
+     "role": "echo_depth",
+     "of": "mo",
+     "value": "d"
+    },
+    {
+     "id": "te",
+     "label": "Thời gian nhận xung phản xạ",
+     "unit": "s",
+     "role": "echo_time",
+     "of": "mo",
+     "value": [
+      "div",
+      [
+       "mul",
+       2,
+       "ds"
+      ],
+      "vs"
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

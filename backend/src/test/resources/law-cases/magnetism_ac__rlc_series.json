@@ -1,0 +1,482 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Đoạn mạch RLC nối tiếp mắc vào điện áp xoay chiều: dòng điện cùng tần số nhưng lệch pha so với điện áp.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1,
+  "parameters": [
+   {
+    "name": "U0",
+    "label": "Điện áp cực đại của nguồn",
+    "value": 100,
+    "unit": "V",
+    "min": 10,
+    "max": 300,
+    "step": 10,
+    "role": "voltage_amplitude",
+    "of": "mach"
+   },
+   {
+    "name": "f",
+    "label": "Tần số",
+    "value": 50,
+    "unit": "Hz",
+    "min": 10,
+    "max": 200,
+    "step": 5,
+    "role": "frequency",
+    "of": "mach"
+   },
+   {
+    "name": "R",
+    "label": "Điện trở",
+    "value": 40,
+    "unit": "ohm",
+    "min": 5,
+    "max": 200,
+    "step": 5,
+    "role": "resistance",
+    "of": "dientro"
+   },
+   {
+    "name": "L",
+    "label": "Độ tự cảm",
+    "value": 0.2,
+    "unit": "H",
+    "min": 0.01,
+    "max": 1,
+    "step": 0.01,
+    "role": "inductance",
+    "of": "cuon"
+   },
+   {
+    "name": "C",
+    "label": "Điện dung",
+    "value": 100,
+    "unit": "uF",
+    "min": 10,
+    "max": 500,
+    "step": 10,
+    "role": "capacitance",
+    "of": "tu"
+   }
+  ],
+  "objects": [
+   {
+    "id": "mach",
+    "label": "Đoạn mạch",
+    "count": 1
+   },
+   {
+    "id": "dientro",
+    "label": "Điện trở",
+    "count": 1
+   },
+   {
+    "id": "cuon",
+    "label": "Cuộn cảm thuần",
+    "count": 1
+   },
+   {
+    "id": "tu",
+    "label": "Tụ điện",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "u",
+    "label": "u"
+   },
+   {
+    "quantity": "i",
+    "label": "i"
+   },
+   {
+    "quantity": "uR",
+    "label": "uR"
+   },
+   {
+    "quantity": "uL",
+    "label": "uL"
+   },
+   {
+    "quantity": "uC",
+    "label": "uC"
+   },
+   {
+    "quantity": "Z",
+    "label": "Z"
+   },
+   {
+    "quantity": "Ptb",
+    "label": "Ptb"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "w",
+     "label": "Tần số góc",
+     "unit": "rad/s",
+     "role": "angular_frequency",
+     "of": "mach",
+     "value": [
+      "mul",
+      6.283185307179586,
+      "f"
+     ]
+    },
+    {
+     "id": "T",
+     "label": "Chu kì",
+     "unit": "s",
+     "role": "period",
+     "of": "mach",
+     "value": [
+      "div",
+      1,
+      "f"
+     ]
+    },
+    {
+     "id": "wL",
+     "label": "Tần số góc (cuộn cảm)",
+     "unit": "rad/s",
+     "role": "angular_frequency",
+     "of": "cuon",
+     "value": "w"
+    },
+    {
+     "id": "wC",
+     "label": "Tần số góc (tụ điện)",
+     "unit": "rad/s",
+     "role": "angular_frequency",
+     "of": "tu",
+     "value": "w"
+    },
+    {
+     "id": "ZLc",
+     "label": "Cảm kháng của cuộn cảm",
+     "unit": "ohm",
+     "role": "inductive_reactance",
+     "of": "cuon",
+     "value": [
+      "mul",
+      "wL",
+      "L"
+     ]
+    },
+    {
+     "id": "ZCt",
+     "label": "Dung kháng của tụ điện",
+     "unit": "ohm",
+     "role": "capacitive_reactance",
+     "of": "tu",
+     "value": [
+      "div",
+      1,
+      [
+       "mul",
+       "wC",
+       "C"
+      ]
+     ]
+    },
+    {
+     "id": "Rm",
+     "label": "Điện trở của đoạn mạch",
+     "unit": "ohm",
+     "role": "resistance",
+     "of": "mach",
+     "value": "R"
+    },
+    {
+     "id": "ZL",
+     "label": "Cảm kháng của đoạn mạch",
+     "unit": "ohm",
+     "role": "inductive_reactance",
+     "of": "mach",
+     "value": "ZLc"
+    },
+    {
+     "id": "ZC",
+     "label": "Dung kháng của đoạn mạch",
+     "unit": "ohm",
+     "role": "capacitive_reactance",
+     "of": "mach",
+     "value": "ZCt"
+    },
+    {
+     "id": "Z",
+     "label": "Tổng trở",
+     "unit": "ohm",
+     "role": "impedance",
+     "of": "mach",
+     "value": [
+      "sqrt",
+      [
+       "add",
+       [
+        "pow",
+        "Rm",
+        2
+       ],
+       [
+        "pow",
+        [
+         "sub",
+         "ZL",
+         "ZC"
+        ],
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "phi",
+     "label": "Độ lệch pha giữa điện áp và dòng điện",
+     "unit": "rad",
+     "role": "phase_difference",
+     "of": "mach",
+     "value": [
+      "atan2",
+      [
+       "sub",
+       "ZL",
+       "ZC"
+      ],
+      "Rm"
+     ]
+    },
+    {
+     "id": "I0",
+     "label": "Cường độ cực đại",
+     "unit": "A",
+     "role": "current_amplitude",
+     "of": "mach",
+     "value": [
+      "div",
+      "U0",
+      "Z"
+     ]
+    },
+    {
+     "id": "u",
+     "label": "Điện áp của nguồn",
+     "unit": "V",
+     "role": "voltage",
+     "of": "mach",
+     "in_series": "mach",
+     "in_series_total": "mach",
+     "value": [
+      "mul",
+      "U0",
+      [
+       "cos",
+       [
+        "mul",
+        "w",
+        "t"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "i",
+     "label": "Cường độ dòng điện",
+     "unit": "A",
+     "role": "current",
+     "of": "mach",
+     "in_series": "mach",
+     "in_series_total": "mach",
+     "initial": [
+      "mul",
+      "I0",
+      [
+       "cos",
+       "phi"
+      ]
+     ],
+     "rate": [
+      "div",
+      "uL",
+      "L"
+     ]
+    },
+    {
+     "id": "qt",
+     "label": "Điện tích của tụ điện",
+     "unit": "C",
+     "role": "charge",
+     "of": "tu",
+     "initial": [
+      "neg",
+      [
+       "mul",
+       [
+        "div",
+        "I0",
+        "w"
+       ],
+       [
+        "sin",
+        "phi"
+       ]
+      ]
+     ],
+     "rate": "i"
+    },
+    {
+     "id": "iR",
+     "label": "Dòng điện qua điện trở",
+     "unit": "A",
+     "role": "current",
+     "of": "dientro",
+     "in_series": "mach",
+     "value": "i"
+    },
+    {
+     "id": "iL",
+     "label": "Dòng điện qua cuộn cảm",
+     "unit": "A",
+     "role": "current",
+     "of": "cuon",
+     "in_series": "mach",
+     "value": "i"
+    },
+    {
+     "id": "uR",
+     "label": "Điện áp trên điện trở",
+     "unit": "V",
+     "role": "voltage",
+     "of": "dientro",
+     "in_series": "mach",
+     "value": [
+      "mul",
+      "iR",
+      "R"
+     ]
+    },
+    {
+     "id": "uC",
+     "label": "Điện áp trên tụ điện",
+     "unit": "V",
+     "role": "voltage",
+     "of": "tu",
+     "in_series": "mach",
+     "value": [
+      "div",
+      "qt",
+      "C"
+     ]
+    },
+    {
+     "id": "uL",
+     "label": "Điện áp trên cuộn cảm",
+     "unit": "V",
+     "role": "voltage",
+     "of": "cuon",
+     "in_series": "mach",
+     "value": [
+      "sub",
+      [
+       "sub",
+       "u",
+       "uR"
+      ],
+      "uC"
+     ]
+    },
+    {
+     "id": "U0L",
+     "label": "Điện áp cực đại trên cuộn cảm",
+     "unit": "V",
+     "role": "voltage_amplitude",
+     "of": "cuon",
+     "value": [
+      "mul",
+      "I0",
+      "ZLc"
+     ]
+    },
+    {
+     "id": "U0C",
+     "label": "Điện áp cực đại trên tụ điện",
+     "unit": "V",
+     "role": "voltage_amplitude",
+     "of": "tu",
+     "value": [
+      "mul",
+      "I0",
+      "ZCt"
+     ]
+    },
+    {
+     "id": "U",
+     "label": "Điện áp hiệu dụng",
+     "unit": "V",
+     "role": "voltage_rms",
+     "of": "mach",
+     "value": [
+      "div",
+      "U0",
+      1.4142135623730951
+     ]
+    },
+    {
+     "id": "I",
+     "label": "Cường độ hiệu dụng",
+     "unit": "A",
+     "role": "current_rms",
+     "of": "mach",
+     "value": [
+      "div",
+      "I0",
+      1.4142135623730951
+     ]
+    },
+    {
+     "id": "k",
+     "label": "Hệ số công suất",
+     "unit": "1",
+     "role": "power_factor",
+     "of": "mach",
+     "value": [
+      "div",
+      "Rm",
+      "Z"
+     ]
+    },
+    {
+     "id": "Ptb",
+     "label": "Công suất trung bình",
+     "unit": "W",
+     "role": "average_power",
+     "of": "mach",
+     "value": [
+      "mul",
+      [
+       "mul",
+       "U",
+       "I"
+      ],
+      "k"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Cuộn cảm thuần, dây nối không có điện trở; mạch đã ở chế độ ổn định ngay từ đầu."
+   ],
+   "duration": [
+    "mul",
+    3,
+    "T"
+   ]
+  }
+ }
+}

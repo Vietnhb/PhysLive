@@ -1,0 +1,194 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Diode chỉ cho dòng điện đi qua theo một chiều nên điện trở tải chỉ có dòng điện trong nửa chu kì dương của điện áp nguồn.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1,
+  "parameters": [
+   {
+    "name": "U0",
+    "label": "Điện áp cực đại của nguồn",
+    "value": 12,
+    "unit": "V",
+    "min": 1,
+    "max": 50,
+    "step": 1,
+    "role": "voltage_amplitude",
+    "of": "nguon"
+   },
+   {
+    "name": "f",
+    "label": "Tần số",
+    "value": 50,
+    "unit": "Hz",
+    "min": 10,
+    "max": 100,
+    "step": 5,
+    "role": "frequency",
+    "of": "nguon"
+   },
+   {
+    "name": "R",
+    "label": "Điện trở tải",
+    "value": 100,
+    "unit": "ohm",
+    "min": 10,
+    "max": 1000,
+    "step": 10,
+    "role": "resistance",
+    "of": "tai"
+   }
+  ],
+  "objects": [
+   {
+    "id": "nguon",
+    "label": "Nguồn xoay chiều",
+    "count": 1
+   },
+   {
+    "id": "diode",
+    "label": "Diode",
+    "count": 1
+   },
+   {
+    "id": "tai",
+    "label": "Điện trở tải",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "u",
+    "label": "u"
+   },
+   {
+    "quantity": "ut",
+    "label": "ut"
+   },
+   {
+    "quantity": "it",
+    "label": "it"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "w",
+     "label": "Tần số góc",
+     "unit": "rad/s",
+     "role": "angular_frequency",
+     "of": "nguon",
+     "value": [
+      "mul",
+      6.283185307179586,
+      "f"
+     ]
+    },
+    {
+     "id": "T",
+     "label": "Chu kì",
+     "unit": "s",
+     "role": "period",
+     "of": "nguon",
+     "value": [
+      "div",
+      1,
+      "f"
+     ]
+    },
+    {
+     "id": "u",
+     "label": "Điện áp nguồn",
+     "unit": "V",
+     "role": "voltage",
+     "of": "nguon",
+     "in_series": "mach",
+     "in_series_total": "mach",
+     "value": [
+      "mul",
+      "U0",
+      [
+       "sin",
+       [
+        "mul",
+        "w",
+        "t"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "ut",
+     "label": "Điện áp trên tải",
+     "unit": "V",
+     "role": "voltage",
+     "of": "tai",
+     "in_series": "mach",
+     "value": [
+      "max",
+      "u",
+      0
+     ]
+    },
+    {
+     "id": "it",
+     "label": "Dòng điện qua tải",
+     "unit": "A",
+     "role": "current",
+     "of": "tai",
+     "in_series": "mach",
+     "value": [
+      "div",
+      "ut",
+      "R"
+     ]
+    },
+    {
+     "id": "i",
+     "label": "Dòng điện qua nguồn",
+     "unit": "A",
+     "role": "current",
+     "of": "nguon",
+     "in_series": "mach",
+     "in_series_total": "mach",
+     "value": "it"
+    },
+    {
+     "id": "id",
+     "label": "Dòng điện qua diode",
+     "unit": "A",
+     "role": "current",
+     "of": "diode",
+     "kind": "diode",
+     "in_series": "mach",
+     "value": "i"
+    },
+    {
+     "id": "ud",
+     "label": "Điện áp trên diode",
+     "unit": "V",
+     "role": "voltage",
+     "of": "diode",
+     "kind": "diode",
+     "in_series": "mach",
+     "value": [
+      "sub",
+      "u",
+      "ut"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Diode lí tưởng: dẫn hoàn toàn khi phân cực thuận, không dẫn khi phân cực ngược."
+   ],
+   "duration": [
+    "mul",
+    3,
+    "T"
+   ]
+  }
+ }
+}

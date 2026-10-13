@@ -1,0 +1,185 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "charles_celsius",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 60,
+  "parameters": [
+   {
+    "name": "n",
+    "label": "Số mol khí",
+    "value": 0.1,
+    "unit": "mol",
+    "min": 0.05,
+    "max": 1,
+    "step": 0.05,
+    "role": "amount_of_substance",
+    "of": "khi"
+   },
+   {
+    "name": "p",
+    "label": "Áp suất khí",
+    "value": 100,
+    "unit": "kPa",
+    "min": 50,
+    "max": 300,
+    "step": 10,
+    "role": "pressure",
+    "of": "khi"
+   },
+   {
+    "name": "t0",
+    "label": "Nhiệt độ ban đầu",
+    "value": 20,
+    "unit": "degC",
+    "min": -50,
+    "max": 100,
+    "step": 5
+   },
+   {
+    "name": "r",
+    "label": "Tốc độ tăng nhiệt độ",
+    "value": 1,
+    "unit": "K/s",
+    "min": 0.5,
+    "max": 5,
+    "step": 0.5
+   }
+  ],
+  "objects": [
+   {
+    "id": "khi",
+    "label": "Khối khí trong xilanh có pit-tông tự do",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "tc",
+    "label": "Nhiệt độ khí"
+   },
+   {
+    "quantity": "V",
+    "label": "Thể tích"
+   },
+   {
+    "quantity": "Wd",
+    "label": "Động năng tịnh tiến trung bình của phân tử"
+   },
+   {
+    "quantity": "vq",
+    "label": "Tốc độ căn quân phương"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "R",
+     "label": "Hằng số khí",
+     "value": 8.314462618,
+     "unit": "J/(mol*K)",
+     "role": "other"
+    },
+    {
+     "id": "k",
+     "label": "Hằng số Boltzmann",
+     "value": 1.380649e-23,
+     "unit": "J/K",
+     "role": "other"
+    },
+    {
+     "id": "T0",
+     "label": "273,15 K",
+     "value": 273.15,
+     "unit": "K",
+     "role": "other"
+    },
+    {
+     "id": "m0",
+     "label": "Khối lượng một phân tử nitơ",
+     "value": 4.65e-26,
+     "unit": "kg",
+     "role": "molecule_mass",
+     "of": "khi"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "tc",
+     "label": "Nhiệt độ khí",
+     "unit": "degC",
+     "role": "celsius_temperature",
+     "initial": "t0",
+     "rate": "r",
+     "of": "khi"
+    },
+    {
+     "id": "V",
+     "label": "Thể tích",
+     "unit": "m3",
+     "role": "volume",
+     "value": [
+      "div",
+      [
+       "mul",
+       "n",
+       [
+        "mul",
+        "R",
+        [
+         "add",
+         "tc",
+         "T0"
+        ]
+       ]
+      ],
+      "p"
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng tịnh tiến trung bình của phân tử",
+     "unit": "J",
+     "role": "mean_kinetic_energy",
+     "value": [
+      "mul",
+      1.5,
+      [
+       "mul",
+       "k",
+       [
+        "add",
+        "tc",
+        "T0"
+       ]
+      ]
+     ],
+     "of": "khi"
+    },
+    {
+     "id": "vq",
+     "label": "Tốc độ căn quân phương",
+     "unit": "m/s",
+     "role": "rms_speed",
+     "value": [
+      "sqrt",
+      [
+       "div",
+       [
+        "mul",
+        2,
+        "Wd"
+       ],
+       "m0"
+      ]
+     ],
+     "of": "khi"
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

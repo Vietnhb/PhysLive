@@ -1,0 +1,283 @@
+{
+ "status": "EXPLAIN",
+ "question": null,
+ "choices": [],
+ "explanation": "Em bé ngồi trên ghế ngoài cùng nên chuyển động tròn đều trên đường tròn bán kính 3 m, mỗi vòng hết 10 giây. Vectơ vận tốc luôn tiếp tuyến với đường tròn và có độ lớn không đổi, bằng tốc độ góc nhân bán kính. Vectơ gia tốc hướng tâm luôn chỉ vào tâm đu quay, độ lớn bằng bình phương tốc độ chia bán kính. Theo định luật II Newton, lực hướng tâm do ghế giữ em bé bằng khối lượng nhân gia tốc hướng tâm và cũng chỉ vào tâm. Bạn có thể đổi bán kính, số vòng mỗi phút và khối lượng em bé để xem tốc độ, gia tốc hướng tâm và lực hướng tâm thay đổi thế nào.",
+ "defaults": [
+  "Mô phỏng chạy 20 giây, tức là hai vòng quay.",
+  "Lúc bắt đầu em bé ở bên phải tâm đu quay và quay ngược chiều kim đồng hồ khi nhìn từ trên xuống."
+ ],
+ "simulationSpec": {
+  "durationSeconds": 20,
+  "parameters": [
+   {
+    "name": "R",
+    "label": "Bán kính đu quay",
+    "value": 3,
+    "unit": "m",
+    "min": 1,
+    "max": 5,
+    "step": 0.1,
+    "role": "radius",
+    "of": "child"
+   },
+   {
+    "name": "omega",
+    "label": "Tốc độ quay",
+    "value": 6,
+    "unit": "vòng/phút",
+    "min": 1,
+    "max": 20,
+    "step": 1,
+    "role": "angular_velocity",
+    "of": "child"
+   },
+   {
+    "name": "m",
+    "label": "Khối lượng em bé",
+    "value": 25,
+    "unit": "kg",
+    "min": 10,
+    "max": 60,
+    "step": 1,
+    "role": "mass",
+    "of": "child"
+   }
+  ],
+  "objects": [
+   {
+    "id": "ride",
+    "label": "Đu quay",
+    "count": 1
+   },
+   {
+    "id": "child",
+    "label": "Em bé",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "Fht",
+    "label": "Độ lớn lực hướng tâm"
+   },
+   {
+    "quantity": "aht",
+    "label": "Độ lớn gia tốc hướng tâm"
+   },
+   {
+    "quantity": "v",
+    "label": "Tốc độ của em bé"
+   },
+   {
+    "quantity": "vx",
+    "label": "Vận tốc theo trục x"
+   },
+   {
+    "quantity": "vz",
+    "label": "Vận tốc theo trục z"
+   },
+   {
+    "quantity": "ax",
+    "label": "Gia tốc theo trục x"
+   },
+   {
+    "quantity": "az",
+    "label": "Gia tốc theo trục z"
+   },
+   {
+    "quantity": "T",
+    "label": "Chu kì quay"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "x",
+     "label": "Tọa độ ngang x của em bé",
+     "unit": "m",
+     "role": "position",
+     "of": "child",
+     "axis": "x",
+     "initial": "R",
+     "rate": "vx"
+    },
+    {
+     "id": "z",
+     "label": "Tọa độ ngang z của em bé",
+     "unit": "m",
+     "role": "position",
+     "of": "child",
+     "axis": "z",
+     "initial": 0,
+     "rate": "vz"
+    },
+    {
+     "id": "vx",
+     "label": "Vận tốc theo trục x",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "child",
+     "axis": "x",
+     "initial": 0,
+     "rate": "ax"
+    },
+    {
+     "id": "vz",
+     "label": "Vận tốc theo trục z",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "child",
+     "axis": "z",
+     "initial": [
+      "mul",
+      "omega",
+      "R"
+     ],
+     "rate": "az"
+    },
+    {
+     "id": "v",
+     "label": "Tốc độ của em bé",
+     "unit": "m/s",
+     "role": "speed",
+     "of": "child",
+     "value": [
+      "sqrt",
+      [
+       "add",
+       [
+        "mul",
+        "vx",
+        "vx"
+       ],
+       [
+        "mul",
+        "vz",
+        "vz"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "aht",
+     "label": "Độ lớn gia tốc hướng tâm",
+     "unit": "m/s2",
+     "role": "centripetal_acceleration",
+     "of": "child",
+     "value": [
+      "div",
+      [
+       "mul",
+       "v",
+       "v"
+      ],
+      "R"
+     ]
+    },
+    {
+     "id": "Fht",
+     "label": "Độ lớn lực hướng tâm",
+     "unit": "N",
+     "role": "force_magnitude",
+     "kind": "contact",
+     "of": "child",
+     "value": [
+      "mul",
+      "m",
+      "aht"
+     ]
+    },
+    {
+     "id": "Fx",
+     "label": "Lực hướng tâm theo trục x",
+     "unit": "N",
+     "role": "force",
+     "kind": "contact",
+     "of": "child",
+     "axis": "x",
+     "value": [
+      "neg",
+      [
+       "div",
+       [
+        "mul",
+        "Fht",
+        "x"
+       ],
+       "R"
+      ]
+     ]
+    },
+    {
+     "id": "Fz",
+     "label": "Lực hướng tâm theo trục z",
+     "unit": "N",
+     "role": "force",
+     "kind": "contact",
+     "of": "child",
+     "axis": "z",
+     "value": [
+      "neg",
+      [
+       "div",
+       [
+        "mul",
+        "Fht",
+        "z"
+       ],
+       "R"
+      ]
+     ]
+    },
+    {
+     "id": "ax",
+     "label": "Gia tốc theo trục x",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "child",
+     "axis": "x",
+     "value": [
+      "div",
+      "Fx",
+      "m"
+     ]
+    },
+    {
+     "id": "az",
+     "label": "Gia tốc theo trục z",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "child",
+     "axis": "z",
+     "value": [
+      "div",
+      "Fz",
+      "m"
+     ]
+    },
+    {
+     "id": "T",
+     "label": "Chu kì quay",
+     "unit": "s",
+     "role": "period",
+     "of": "child",
+     "value": [
+      "div",
+      6.283185307179586,
+      "omega"
+     ]
+    }
+   ],
+   "until": null,
+   "assumptions": [
+    "Em bé được coi là một chất điểm cách tâm đu quay đúng bằng bán kính.",
+    "Chuyển động được nhìn từ trên xuống: trục x và trục z nằm ngang, gốc tọa độ ở tâm đu quay.",
+    "Theo phương thẳng đứng trọng lực và lực đỡ của ghế cân bằng nhau nên không đưa vào mô hình.",
+    "Lực hướng tâm là tổng các lực nằm ngang mà ghế tác dụng lên em bé; bỏ qua lực cản của không khí.",
+    "Đu quay đã quay đều ngay từ đầu, không xét giai đoạn tăng tốc."
+   ]
+  }
+ }
+}

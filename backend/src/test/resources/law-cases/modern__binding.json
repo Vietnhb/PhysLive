@@ -1,0 +1,168 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Tính độ hụt khối, năng lượng liên kết và năng lượng liên kết riêng của hạt nhân heli 4.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1,
+  "parameters": [],
+  "objects": [
+   {
+    "id": "He",
+    "label": "He",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "Nn",
+    "label": "Nn"
+   },
+   {
+    "quantity": "dm",
+    "label": "dm"
+   },
+   {
+    "quantity": "Wlk",
+    "label": "Wlk"
+   },
+   {
+    "quantity": "wr",
+    "label": "wr"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "mp",
+     "label": "Khối lượng proton",
+     "value": 1.672622e-27,
+     "unit": "kg",
+     "role": "proton_mass"
+    },
+    {
+     "id": "mn",
+     "label": "Khối lượng neutron",
+     "value": 1.674927e-27,
+     "unit": "kg",
+     "role": "neutron_mass"
+    },
+    {
+     "id": "c",
+     "label": "Tốc độ ánh sáng",
+     "value": 299800000.0,
+     "unit": "m/s",
+     "role": "other"
+    },
+    {
+     "id": "A",
+     "label": "Số nucleon",
+     "value": 4,
+     "unit": "1",
+     "role": "nucleon_number",
+     "of": "He"
+    },
+    {
+     "id": "Z",
+     "label": "Số proton",
+     "value": 2,
+     "unit": "1",
+     "role": "proton_number",
+     "of": "He"
+    },
+    {
+     "id": "mHe",
+     "label": "Khối lượng hạt nhân heli",
+     "value": 6.644657e-27,
+     "unit": "kg",
+     "role": "mass",
+     "of": "He"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "Nn",
+     "label": "Số neutron",
+     "unit": "1",
+     "role": "neutron_number",
+     "of": "He",
+     "value": [
+      "sub",
+      "A",
+      "Z"
+     ]
+    },
+    {
+     "id": "dm",
+     "label": "Độ hụt khối",
+     "unit": "kg",
+     "role": "mass_defect",
+     "of": "He",
+     "value": [
+      "sub",
+      [
+       "add",
+       [
+        "mul",
+        "Z",
+        "mp"
+       ],
+       [
+        "mul",
+        "Nn",
+        "mn"
+       ]
+      ],
+      "mHe"
+     ]
+    },
+    {
+     "id": "Wlk",
+     "label": "Năng lượng liên kết",
+     "unit": "J",
+     "role": "binding_energy",
+     "of": "He",
+     "value": [
+      "mul",
+      "dm",
+      [
+       "pow",
+       "c",
+       2
+      ]
+     ]
+    },
+    {
+     "id": "wr",
+     "label": "Năng lượng liên kết riêng",
+     "unit": "J",
+     "role": "binding_energy_per_nucleon",
+     "of": "He",
+     "value": [
+      "div",
+      "Wlk",
+      "A"
+     ]
+    },
+    {
+     "id": "E0",
+     "label": "Năng lượng nghỉ",
+     "unit": "J",
+     "role": "rest_energy",
+     "of": "He",
+     "value": [
+      "mul",
+      "mHe",
+      [
+       "pow",
+       "c",
+       2
+      ]
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

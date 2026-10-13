@@ -1,0 +1,215 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "ice_melting",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 400,
+  "parameters": [
+   {
+    "name": "m",
+    "label": "Khối lượng nước đá",
+    "value": 100,
+    "unit": "g",
+    "min": 50,
+    "max": 500,
+    "step": 10,
+    "role": "mass",
+    "of": "da"
+   },
+   {
+    "name": "Pn",
+    "label": "Công suất bếp",
+    "value": 200,
+    "unit": "W",
+    "min": 50,
+    "max": 500,
+    "step": 10,
+    "role": "power",
+    "kind": "heat",
+    "of": "da"
+   },
+   {
+    "name": "t0",
+    "label": "Nhiệt độ ban đầu",
+    "value": -10,
+    "unit": "degC",
+    "min": -30,
+    "max": -1,
+    "step": 1
+   }
+  ],
+  "objects": [
+   {
+    "id": "da",
+    "label": "Nước đá",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "c",
+    "label": "Nhiệt dung riêng hiện tại"
+   },
+   {
+    "quantity": "tc",
+    "label": "Nhiệt độ"
+   },
+   {
+    "quantity": "mf",
+    "label": "Khối lượng đá đã tan"
+   },
+   {
+    "quantity": "Q",
+    "label": "Nhiệt lượng đã nhận"
+   },
+   {
+    "quantity": "mcon",
+    "label": "Khối lượng đá còn lại"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "cda",
+     "label": "Nhiệt dung riêng của nước đá",
+     "value": 2100,
+     "unit": "J/(kg*K)",
+     "role": "other"
+    },
+    {
+     "id": "cn",
+     "label": "Nhiệt dung riêng của nước",
+     "value": 4200,
+     "unit": "J/(kg*K)",
+     "role": "other"
+    },
+    {
+     "id": "lam",
+     "label": "Nhiệt nóng chảy riêng của nước đá",
+     "value": 334000,
+     "unit": "J/kg",
+     "role": "specific_latent_heat",
+     "kind": "fusion",
+     "of": "da"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "c",
+     "label": "Nhiệt dung riêng hiện tại",
+     "unit": "J/(kg*K)",
+     "role": "specific_heat_capacity",
+     "value": [
+      "if",
+      [
+       "sub",
+       "m",
+       "mf"
+      ],
+      "cda",
+      "cn"
+     ],
+     "of": "da"
+    },
+    {
+     "id": "tc",
+     "label": "Nhiệt độ",
+     "unit": "degC",
+     "role": "celsius_temperature",
+     "initial": "t0",
+     "rate": [
+      "if",
+      [
+       "neg",
+       "tc"
+      ],
+      [
+       "div",
+       "Pn",
+       [
+        "mul",
+        "m",
+        "c"
+       ]
+      ],
+      [
+       "if",
+       [
+        "sub",
+        "m",
+        "mf"
+       ],
+       0,
+       [
+        "div",
+        "Pn",
+        [
+         "mul",
+         "m",
+         "c"
+        ]
+       ]
+      ]
+     ],
+     "of": "da"
+    },
+    {
+     "id": "mf",
+     "label": "Khối lượng đá đã tan",
+     "unit": "kg",
+     "role": "transformed_mass",
+     "kind": "fusion",
+     "initial": 0,
+     "rate": [
+      "if",
+      [
+       "neg",
+       "tc"
+      ],
+      0,
+      [
+       "if",
+       [
+        "sub",
+        "m",
+        "mf"
+       ],
+       [
+        "div",
+        "Pn",
+        "lam"
+       ],
+       0
+      ]
+     ],
+     "of": "da"
+    },
+    {
+     "id": "Q",
+     "label": "Nhiệt lượng đã nhận",
+     "unit": "J",
+     "role": "heat",
+     "initial": 0,
+     "rate": "Pn",
+     "of": "da"
+    },
+    {
+     "id": "mcon",
+     "label": "Khối lượng đá còn lại",
+     "unit": "kg",
+     "role": "other",
+     "value": [
+      "sub",
+      "m",
+      "mf"
+     ]
+    }
+   ],
+   "assumptions": [
+    "Toàn bộ nhiệt của bếp truyền cho nước đá, nhiệt độ của khối chất đồng đều."
+   ]
+  }
+ }
+}

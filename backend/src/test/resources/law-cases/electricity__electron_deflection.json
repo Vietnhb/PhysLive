@@ -1,0 +1,329 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Electron bay vào giữa hai bản phẳng theo phương vuông góc với đường sức và bị lệch theo quỹ đạo parabol.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 1e-08,
+  "parameters": [
+   {
+    "name": "U",
+    "label": "Hiệu điện thế giữa hai bản",
+    "value": 50,
+    "unit": "V",
+    "min": 10,
+    "max": 200,
+    "step": 10,
+    "role": "voltage",
+    "in": "ban"
+   },
+   {
+    "name": "d",
+    "label": "Khoảng cách hai bản",
+    "value": 2,
+    "unit": "cm",
+    "min": 1,
+    "max": 5,
+    "step": 0.5,
+    "role": "plate_distance",
+    "in": "ban"
+   },
+   {
+    "name": "L",
+    "label": "Chiều dài bản",
+    "value": 5,
+    "unit": "cm",
+    "min": 2,
+    "max": 10,
+    "step": 1,
+    "role": "other"
+   },
+   {
+    "name": "v0",
+    "label": "Tốc độ ban đầu",
+    "value": 10000000.0,
+    "unit": "m/s",
+    "min": 5000000.0,
+    "max": 30000000.0,
+    "step": 1000000.0,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "hat",
+    "label": "Electron",
+    "count": 1
+   },
+   {
+    "id": "ban",
+    "label": "Hai bản phẳng",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "x",
+    "label": "Tọa độ ngang"
+   },
+   {
+    "quantity": "y",
+    "label": "Độ lệch"
+   },
+   {
+    "quantity": "vx",
+    "label": "Vận tốc ngang"
+   },
+   {
+    "quantity": "vy",
+    "label": "Vận tốc theo phương đường sức"
+   },
+   {
+    "quantity": "Es",
+    "label": "Cường độ điện trường"
+   },
+   {
+    "quantity": "Ey",
+    "label": "Điện trường (hướng xuống)"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "q",
+     "label": "Điện tích electron",
+     "value": -1.602e-19,
+     "unit": "C",
+     "role": "charge",
+     "of": "hat"
+    },
+    {
+     "id": "m",
+     "label": "Khối lượng electron",
+     "value": 9.109e-31,
+     "unit": "kg",
+     "role": "mass",
+     "of": "hat"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "x",
+     "label": "Tọa độ ngang",
+     "unit": "m",
+     "role": "position",
+     "of": "hat",
+     "axis": "x",
+     "initial": 0,
+     "rate": "vx"
+    },
+    {
+     "id": "y",
+     "label": "Độ lệch",
+     "unit": "m",
+     "role": "position",
+     "of": "hat",
+     "axis": "y",
+     "initial": 0,
+     "rate": "vy"
+    },
+    {
+     "id": "vx",
+     "label": "Vận tốc ngang",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "hat",
+     "axis": "x",
+     "value": "v0"
+    },
+    {
+     "id": "vy",
+     "label": "Vận tốc theo phương đường sức",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "hat",
+     "axis": "y",
+     "initial": 0,
+     "rate": "ay"
+    },
+    {
+     "id": "Es",
+     "label": "Cường độ điện trường",
+     "unit": "V/m",
+     "role": "electric_field_strength",
+     "in": "ban",
+     "value": [
+      "div",
+      "U",
+      "d"
+     ]
+    },
+    {
+     "id": "Ey",
+     "label": "Điện trường (hướng xuống)",
+     "unit": "V/m",
+     "role": "electric_field",
+     "axis": "y",
+     "in": "ban",
+     "value": [
+      "neg",
+      "Es"
+     ]
+    },
+    {
+     "id": "Fy",
+     "label": "Lực điện",
+     "unit": "N",
+     "role": "force",
+     "kind": "electric",
+     "of": "hat",
+     "axis": "y",
+     "value": [
+      "mul",
+      "q",
+      "Ey"
+     ]
+    },
+    {
+     "id": "Fm",
+     "label": "Độ lớn lực điện",
+     "unit": "N",
+     "role": "force_magnitude",
+     "kind": "electric",
+     "of": "hat",
+     "value": [
+      "mul",
+      [
+       "abs",
+       "q"
+      ],
+      "Es"
+     ]
+    },
+    {
+     "id": "ay",
+     "label": "Gia tốc",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "hat",
+     "axis": "y",
+     "value": [
+      "div",
+      "Fy",
+      "m"
+     ]
+    },
+    {
+     "id": "V",
+     "label": "Điện thế tại chỗ electron",
+     "unit": "V",
+     "role": "electric_potential",
+     "of": "hat",
+     "value": [
+      "mul",
+      "Es",
+      "y"
+     ]
+    },
+    {
+     "id": "Wt",
+     "label": "Thế năng điện",
+     "unit": "J",
+     "role": "potential_energy",
+     "kind": "electric",
+     "of": "hat",
+     "value": [
+      "mul",
+      "q",
+      "V"
+     ]
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "hat",
+     "value": [
+      "mul",
+      [
+       "mul",
+       0.5,
+       "m"
+      ],
+      [
+       "add",
+       [
+        "pow",
+        "vx",
+        2
+       ],
+       [
+        "pow",
+        "vy",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "W",
+     "label": "Cơ năng",
+     "unit": "J",
+     "role": "mechanical_energy",
+     "of": "hat",
+     "value": [
+      "add",
+      "Wd",
+      "Wt"
+     ]
+    },
+    {
+     "id": "sp",
+     "label": "Tốc độ",
+     "unit": "m/s",
+     "role": "speed",
+     "of": "hat",
+     "value": [
+      "sqrt",
+      [
+       "add",
+       [
+        "pow",
+        "vx",
+        2
+       ],
+       [
+        "pow",
+        "vy",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "ymax",
+     "label": "Nửa khoảng cách hai bản",
+     "unit": "m",
+     "role": "other",
+     "value": [
+      "div",
+      "d",
+      2
+     ]
+    }
+   ],
+   "assumptions": [
+    "Bỏ qua trọng lực; bản trên tích điện dương nên điện trường hướng xuống; mốc điện thế tại đường bay vào."
+   ],
+   "until": [
+    {
+     "quantity": "x",
+     "direction": "rising",
+     "value": "L"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,346 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Khi thả tay, trọng lực của vật treo kéo cả hệ chuyển động: vật treo đi xuống, vật trên bàn trượt về phía ròng rọc. Lực ma sát trượt của mặt bàn cản vật trên bàn lại. Áp dụng định luật II Newton cho từng vật, hai vật có cùng độ lớn gia tốc vì dây không dãn, từ đó tìm được gia tốc và lực căng dây. Vì các lực không đổi nên hệ chuyển động nhanh dần đều, gia tốc và lực căng dây giữ nguyên trong suốt quá trình. Em có thể đổi khối lượng hai vật và hệ số ma sát để xem gia tốc và lực căng thay đổi thế nào; nếu ma sát đủ lớn thì hệ đứng yên.",
+ "defaults": [
+  "Lấy gia tốc rơi tự do là 9,8 m/s².",
+  "Lúc đầu vật treo ở cách mặt sàn 1 m; mô phỏng dừng khi vật treo chạm sàn."
+ ],
+ "simulationSpec": {
+  "durationSeconds": 5,
+  "parameters": [
+   {
+    "name": "m1",
+    "label": "Khối lượng vật trên bàn",
+    "value": 3,
+    "unit": "kg",
+    "min": 0.5,
+    "max": 10,
+    "step": 0.1,
+    "role": "mass",
+    "of": "A"
+   },
+   {
+    "name": "m2",
+    "label": "Khối lượng vật treo",
+    "value": 2,
+    "unit": "kg",
+    "min": 0.5,
+    "max": 10,
+    "step": 0.1,
+    "role": "mass",
+    "of": "B"
+   },
+   {
+    "name": "mu",
+    "label": "Hệ số ma sát giữa vật và mặt bàn",
+    "value": 0.2,
+    "unit": "1",
+    "min": 0,
+    "max": 1,
+    "step": 0.01,
+    "role": "friction_coefficient",
+    "of": "A"
+   },
+   {
+    "name": "h",
+    "label": "Độ cao ban đầu của vật treo so với sàn",
+    "value": 1,
+    "unit": "m",
+    "min": 0.2,
+    "max": 3,
+    "step": 0.1,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "A",
+    "label": "Vật 3 kg trên mặt bàn",
+    "count": 1
+   },
+   {
+    "id": "B",
+    "label": "Vật 2 kg treo thẳng xuống",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "aA",
+    "label": "Gia tốc của hệ"
+   },
+   {
+    "quantity": "TA",
+    "label": "Lực căng dây"
+   },
+   {
+    "quantity": "vA",
+    "label": "Vận tốc của vật trên bàn"
+   },
+   {
+    "quantity": "xA",
+    "label": "Quãng đường vật trên bàn đã trượt"
+   },
+   {
+    "quantity": "yB",
+    "label": "Độ cao của vật treo"
+   },
+   {
+    "quantity": "FmsA",
+    "label": "Lực ma sát của mặt bàn"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "PA",
+     "label": "Trọng lực của vật trên bàn",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "A",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m1",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "NA",
+     "label": "Phản lực của mặt bàn",
+     "unit": "N",
+     "role": "force",
+     "kind": "normal",
+     "of": "A",
+     "axis": "y",
+     "value": [
+      "mul",
+      "m1",
+      "g"
+     ]
+    },
+    {
+     "id": "TA",
+     "label": "Lực căng dây kéo vật trên bàn",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "A",
+     "axis": "x",
+     "value": [
+      "if",
+      [
+       "sub",
+       [
+        "mul",
+        "m2",
+        "g"
+       ],
+       [
+        "mul",
+        "mu",
+        "NA"
+       ]
+      ],
+      [
+       "div",
+       [
+        "mul",
+        [
+         "mul",
+         "m1",
+         "m2"
+        ],
+        [
+         "mul",
+         "g",
+         [
+          "add",
+          1,
+          "mu"
+         ]
+        ]
+       ],
+       [
+        "add",
+        "m1",
+        "m2"
+       ]
+      ],
+      [
+       "mul",
+       "m2",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "FmsA",
+     "label": "Lực ma sát của mặt bàn",
+     "unit": "N",
+     "role": "force",
+     "kind": "friction",
+     "of": "A",
+     "axis": "x",
+     "value": [
+      "if",
+      [
+       "sub",
+       [
+        "mul",
+        "m2",
+        "g"
+       ],
+       [
+        "mul",
+        "mu",
+        "NA"
+       ]
+      ],
+      [
+       "neg",
+       [
+        "mul",
+        "mu",
+        "NA"
+       ]
+      ],
+      [
+       "neg",
+       "TA"
+      ]
+     ]
+    },
+    {
+     "id": "aA",
+     "label": "Gia tốc của vật trên bàn",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "A",
+     "axis": "x",
+     "value": [
+      "div",
+      [
+       "add",
+       "TA",
+       "FmsA"
+      ],
+      "m1"
+     ]
+    },
+    {
+     "id": "vA",
+     "label": "Vận tốc của vật trên bàn",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "A",
+     "axis": "x",
+     "initial": 0,
+     "rate": "aA"
+    },
+    {
+     "id": "xA",
+     "label": "Tọa độ của vật trên bàn",
+     "unit": "m",
+     "role": "position",
+     "of": "A",
+     "axis": "x",
+     "initial": 0,
+     "rate": "vA"
+    },
+    {
+     "id": "PB",
+     "label": "Trọng lực của vật treo",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "B",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m2",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "TB",
+     "label": "Lực căng dây kéo vật treo",
+     "unit": "N",
+     "role": "force",
+     "kind": "tension",
+     "of": "B",
+     "axis": "y",
+     "value": "TA"
+    },
+    {
+     "id": "aB",
+     "label": "Gia tốc của vật treo",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "B",
+     "axis": "y",
+     "value": [
+      "div",
+      [
+       "add",
+       "TB",
+       "PB"
+      ],
+      "m2"
+     ]
+    },
+    {
+     "id": "vB",
+     "label": "Vận tốc của vật treo",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "B",
+     "axis": "y",
+     "initial": 0,
+     "rate": "aB"
+    },
+    {
+     "id": "yB",
+     "label": "Độ cao của vật treo so với sàn",
+     "unit": "m",
+     "role": "position",
+     "of": "B",
+     "axis": "y",
+     "initial": "h",
+     "rate": "vB"
+    }
+   ],
+   "until": {
+    "quantity": "yB",
+    "direction": "falling",
+    "value": 0
+   },
+   "assumptions": [
+    "Dây không dãn và có khối lượng không đáng kể, nên hai vật có cùng độ lớn gia tốc và lực căng như nhau ở hai đầu dây.",
+    "Ròng rọc nhẹ và quay không ma sát.",
+    "Hai vật được coi là chất điểm, bỏ qua lực cản của không khí.",
+    "Ròng rọc ở mép bàn bên phải: vật trên bàn trượt sang phải, vật treo đi xuống.",
+    "Mặt bàn đủ dài để vật trên bàn chưa tới ròng rọc khi vật treo chạm sàn.",
+    "Hệ số ma sát nghỉ cực đại lấy bằng hệ số ma sát trượt; nếu trọng lực của vật treo không thắng nổi ma sát thì hệ đứng yên."
+   ]
+  }
+ }
+}

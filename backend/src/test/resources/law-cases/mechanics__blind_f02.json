@@ -1,0 +1,149 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "An và Bình xuất phát cùng lúc từ hai đầu đoạn đường 120 m và đi ngược chiều về phía nhau. Mỗi bạn chuyển động thẳng đều nên tọa độ thay đổi đều theo thời gian: An từ 0 đi theo chiều dương với 18 km/h (tức 5 m/s), Bình từ 120 m đi theo chiều âm với 1,5 m/s. Khoảng cách giữa hai bạn giảm đều với tốc độ bằng tổng hai tốc độ, và mô phỏng dừng lại đúng lúc khoảng cách bằng 0, tức là lúc hai bạn gặp nhau. Bạn đọc thời điểm gặp trên đồng hồ và vị trí gặp trên tọa độ của An. Có thể thay đổi khoảng cách ban đầu và tốc độ của từng bạn để xem điểm gặp dịch chuyển thế nào.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 60,
+  "parameters": [
+   {
+    "name": "d",
+    "label": "Khoảng cách ban đầu giữa An và Bình",
+    "value": 120,
+    "unit": "m",
+    "min": 10,
+    "max": 500,
+    "step": 1,
+    "role": "other"
+   },
+   {
+    "name": "vA",
+    "label": "Tốc độ đạp xe của An",
+    "value": 18,
+    "unit": "km/h",
+    "min": 1,
+    "max": 40,
+    "step": 0.5,
+    "role": "speed",
+    "of": "an"
+   },
+   {
+    "name": "vB",
+    "label": "Tốc độ đi bộ của Bình",
+    "value": 1.5,
+    "unit": "m/s",
+    "min": 0.1,
+    "max": 5,
+    "step": 0.1,
+    "role": "speed",
+    "of": "binh"
+   }
+  ],
+  "objects": [
+   {
+    "id": "an",
+    "label": "An (đi xe đạp)",
+    "count": 1
+   },
+   {
+    "id": "binh",
+    "label": "Bình (đi bộ)",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "xA",
+    "label": "Vị trí của An (tính từ chỗ An xuất phát)"
+   },
+   {
+    "quantity": "xB",
+    "label": "Vị trí của Bình (tính từ chỗ An xuất phát)"
+   },
+   {
+    "quantity": "gap",
+    "label": "Khoảng cách giữa hai bạn"
+   },
+   {
+    "quantity": "tg",
+    "label": "Thời gian đã trôi qua"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "vxA",
+     "label": "Vận tốc của An",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "an",
+     "axis": "x",
+     "value": "vA"
+    },
+    {
+     "id": "vxB",
+     "label": "Vận tốc của Bình",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "binh",
+     "axis": "x",
+     "value": [
+      "neg",
+      "vB"
+     ]
+    },
+    {
+     "id": "xA",
+     "label": "Tọa độ của An",
+     "unit": "m",
+     "role": "position",
+     "of": "an",
+     "axis": "x",
+     "initial": 0,
+     "rate": "vxA"
+    },
+    {
+     "id": "xB",
+     "label": "Tọa độ của Bình",
+     "unit": "m",
+     "role": "position",
+     "of": "binh",
+     "axis": "x",
+     "initial": "d",
+     "rate": "vxB"
+    },
+    {
+     "id": "gap",
+     "label": "Khoảng cách giữa hai bạn",
+     "unit": "m",
+     "role": "other",
+     "value": [
+      "sub",
+      "xB",
+      "xA"
+     ]
+    },
+    {
+     "id": "tg",
+     "label": "Thời gian đã trôi qua",
+     "unit": "s",
+     "role": "time",
+     "value": "t"
+    }
+   ],
+   "until": {
+    "quantity": "gap",
+    "direction": "falling",
+    "value": 0
+   },
+   "assumptions": [
+    "Coi An và Bình là hai chất điểm trên một đường thẳng nằm ngang.",
+    "Gốc tọa độ đặt tại chỗ An xuất phát, chiều dương hướng từ An sang Bình; Bình xuất phát ở tọa độ 120 m.",
+    "Hai bạn chuyển động thẳng đều suốt quãng đường: các lực tác dụng lên mỗi bạn cân bằng nhau nên không xét lực.",
+    "Hai bạn xuất phát cùng một lúc, và mô phỏng dừng khi hai bạn gặp nhau."
+   ]
+  }
+ }
+}

@@ -1,0 +1,277 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Trời tối dần nên điện trở của quang trở tăng, điện áp trên nó tăng; khi vượt điện áp ngưỡng thì op-amp bật đèn.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 20,
+  "parameters": [
+   {
+    "name": "Vc",
+    "label": "Điện áp nguồn",
+    "value": 9,
+    "unit": "V",
+    "min": 3,
+    "max": 15,
+    "step": 0.5,
+    "role": "emf",
+    "of": "pin"
+   },
+   {
+    "name": "R",
+    "label": "Điện trở cố định",
+    "value": 10,
+    "unit": "kohm",
+    "min": 1,
+    "max": 50,
+    "step": 1,
+    "role": "resistance",
+    "of": "dientro",
+    "in_series": "chia"
+   },
+   {
+    "name": "R0",
+    "label": "Điện trở quang trở lúc sáng",
+    "value": 1,
+    "unit": "kohm",
+    "min": 0.5,
+    "max": 5,
+    "step": 0.5,
+    "role": "other"
+   },
+   {
+    "name": "Vref",
+    "label": "Điện áp ngưỡng",
+    "value": 4.5,
+    "unit": "V",
+    "min": 1,
+    "max": 8,
+    "step": 0.5,
+    "role": "inverting_input_voltage",
+    "of": "opamp"
+   },
+   {
+    "name": "Vs",
+    "label": "Điện áp nguồn nuôi op-amp",
+    "value": 9,
+    "unit": "V",
+    "min": 5,
+    "max": 15,
+    "step": 1,
+    "role": "supply_voltage",
+    "of": "opamp"
+   }
+  ],
+  "objects": [
+   {
+    "id": "pin",
+    "label": "Nguồn",
+    "count": 1
+   },
+   {
+    "id": "dientro",
+    "label": "Điện trở cố định",
+    "count": 1
+   },
+   {
+    "id": "ldr",
+    "label": "Quang trở",
+    "count": 1
+   },
+   {
+    "id": "chia",
+    "label": "Mạch chia thế",
+    "count": 1
+   },
+   {
+    "id": "opamp",
+    "label": "Op-amp",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "Rl",
+    "label": "Điện trở quang trở"
+   },
+   {
+    "quantity": "Rt",
+    "label": "Điện trở mạch chia thế"
+   },
+   {
+    "quantity": "Un",
+    "label": "Hiệu điện thế hai cực nguồn"
+   },
+   {
+    "quantity": "Ut",
+    "label": "Hiệu điện thế mạch chia thế"
+   },
+   {
+    "quantity": "I",
+    "label": "Dòng điện qua mạch chia thế"
+   },
+   {
+    "quantity": "Il",
+    "label": "Dòng điện qua quang trở"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "tau",
+     "label": "Thời gian để điện trở quang trở tăng thêm một lần",
+     "value": 0.5,
+     "unit": "s",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "Rl",
+     "label": "Điện trở quang trở",
+     "unit": "ohm",
+     "role": "resistance",
+     "of": "ldr",
+     "in_series": "chia",
+     "value": [
+      "mul",
+      "R0",
+      [
+       "add",
+       1,
+       [
+        "div",
+        "t",
+        "tau"
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Rt",
+     "label": "Điện trở mạch chia thế",
+     "unit": "ohm",
+     "role": "resistance",
+     "of": "chia",
+     "in_series": "chia",
+     "in_series_total": "chia",
+     "value": [
+      "add",
+      "R",
+      "Rl"
+     ]
+    },
+    {
+     "id": "Un",
+     "label": "Hiệu điện thế hai cực nguồn",
+     "unit": "V",
+     "role": "terminal_voltage",
+     "of": "pin",
+     "in_loop": "vong",
+     "value": "Vc"
+    },
+    {
+     "id": "Ut",
+     "label": "Hiệu điện thế mạch chia thế",
+     "unit": "V",
+     "role": "voltage",
+     "of": "chia",
+     "in_loop": "vong",
+     "in_series": "chia",
+     "in_series_total": "chia",
+     "value": "Un"
+    },
+    {
+     "id": "I",
+     "label": "Dòng điện qua mạch chia thế",
+     "unit": "A",
+     "role": "current",
+     "of": "chia",
+     "in_series": "chia",
+     "in_series_total": "chia",
+     "value": [
+      "div",
+      "Ut",
+      "Rt"
+     ]
+    },
+    {
+     "id": "Il",
+     "label": "Dòng điện qua quang trở",
+     "unit": "A",
+     "role": "current",
+     "of": "ldr",
+     "in_series": "chia",
+     "value": "I"
+    },
+    {
+     "id": "Ifix",
+     "label": "Dòng điện qua điện trở cố định",
+     "unit": "A",
+     "role": "current",
+     "of": "dientro",
+     "in_series": "chia",
+     "value": "I"
+    },
+    {
+     "id": "Ul",
+     "label": "Điện áp trên quang trở",
+     "unit": "V",
+     "role": "voltage",
+     "of": "ldr",
+     "in_series": "chia",
+     "value": [
+      "mul",
+      "Il",
+      "Rl"
+     ]
+    },
+    {
+     "id": "Ufix",
+     "label": "Điện áp trên điện trở cố định",
+     "unit": "V",
+     "role": "voltage",
+     "of": "dientro",
+     "in_series": "chia",
+     "value": [
+      "mul",
+      "Ifix",
+      "R"
+     ]
+    },
+    {
+     "id": "Vp",
+     "label": "Điện áp lối vào không đảo",
+     "unit": "V",
+     "role": "noninverting_input_voltage",
+     "of": "opamp",
+     "value": "Ul"
+    },
+    {
+     "id": "Vout",
+     "label": "Điện áp ra của op-amp",
+     "unit": "V",
+     "role": "output_voltage",
+     "of": "opamp",
+     "value": [
+      "if",
+      [
+       "sub",
+       "Vp",
+       "Vref"
+      ],
+      "Vs",
+      [
+       "neg",
+       "Vs"
+      ]
+     ]
+    }
+   ],
+   "assumptions": [
+    "Op-amp lí tưởng, không lấy dòng từ mạch chia thế; nguồn không có điện trở trong."
+   ]
+  }
+ }
+}

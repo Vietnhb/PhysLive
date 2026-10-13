@@ -1,0 +1,358 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Trong 4 giây đầu, công nhân kéo thùng bằng dây chếch lên. Lực kéo vừa kéo thùng về phía trước, vừa nhấc bớt thùng lên nên phản lực của sàn và lực ma sát nhỏ hơn lúc không kéo. Theo định luật II Newton, thùng chuyển động nhanh dần đều. Khi buông tay chỉ còn lực ma sát, lúc này lớn hơn vì sàn đỡ toàn bộ trọng lượng, nên thùng chậm dần đều rồi dừng hẳn. Em có thể đổi lực kéo và góc của dây để xem vận tốc lớn nhất, quãng đường và công của các lực thay đổi thế nào; nếu lực kéo quá nhỏ thì ma sát giữ thùng đứng yên.",
+ "defaults": [
+  "Lấy gia tốc rơi tự do là 9,8 m/s²."
+ ],
+ "simulationSpec": {
+  "durationSeconds": 30,
+  "parameters": [
+   {
+    "name": "F",
+    "label": "Lực kéo khi đang kéo",
+    "value": 90,
+    "unit": "N",
+    "min": 0,
+    "max": 150,
+    "step": 5,
+    "role": "other"
+   },
+   {
+    "name": "goc",
+    "label": "Góc của dây so với phương ngang",
+    "value": 30,
+    "unit": "độ",
+    "min": 0,
+    "max": 60,
+    "step": 1,
+    "role": "angle",
+    "of": "thung"
+   },
+   {
+    "name": "g",
+    "label": "Gia tốc rơi tự do",
+    "value": 9.8,
+    "unit": "m/s2",
+    "min": 9.7,
+    "max": 10,
+    "step": 0.01,
+    "role": "gravitational_acceleration"
+   }
+  ],
+  "objects": [
+   {
+    "id": "thung",
+    "label": "Thùng hàng",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "x",
+    "label": "Quãng đường thùng trượt"
+   },
+   {
+    "quantity": "v",
+    "label": "Vận tốc của thùng"
+   },
+   {
+    "quantity": "a",
+    "label": "Gia tốc của thùng"
+   },
+   {
+    "quantity": "Fms",
+    "label": "Lực ma sát"
+   },
+   {
+    "quantity": "N",
+    "label": "Phản lực của sàn"
+   },
+   {
+    "quantity": "Wd",
+    "label": "Động năng"
+   },
+   {
+    "quantity": "Ak",
+    "label": "Công của lực kéo"
+   },
+   {
+    "quantity": "Ams",
+    "label": "Công của lực ma sát"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "m",
+     "label": "Khối lượng thùng",
+     "value": 20,
+     "unit": "kg",
+     "role": "mass",
+     "of": "thung"
+    },
+    {
+     "id": "mu",
+     "label": "Hệ số ma sát giữa thùng và sàn",
+     "value": 0.25,
+     "unit": "1",
+     "role": "friction_coefficient",
+     "of": "thung"
+    },
+    {
+     "id": "tk",
+     "label": "Thời gian kéo",
+     "value": 4,
+     "unit": "s",
+     "role": "other"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "Fk",
+     "label": "Độ lớn lực kéo lúc này",
+     "unit": "N",
+     "role": "force_magnitude",
+     "kind": "applied",
+     "of": "thung",
+     "value": [
+      "if",
+      [
+       "sub",
+       "tk",
+       "t"
+      ],
+      "F",
+      0
+     ]
+    },
+    {
+     "id": "Fx",
+     "label": "Thành phần nằm ngang của lực kéo",
+     "unit": "N",
+     "role": "force",
+     "kind": "applied",
+     "of": "thung",
+     "axis": "x",
+     "value": [
+      "if",
+      [
+       "sub",
+       "tk",
+       "t"
+      ],
+      [
+       "mul",
+       "Fk",
+       [
+        "cos",
+        "goc"
+       ]
+      ],
+      0
+     ]
+    },
+    {
+     "id": "Fy",
+     "label": "Thành phần thẳng đứng của lực kéo",
+     "unit": "N",
+     "role": "force",
+     "kind": "applied",
+     "of": "thung",
+     "axis": "y",
+     "value": [
+      "if",
+      [
+       "sub",
+       "tk",
+       "t"
+      ],
+      [
+       "mul",
+       "Fk",
+       [
+        "sin",
+        "goc"
+       ]
+      ],
+      0
+     ]
+    },
+    {
+     "id": "P",
+     "label": "Trọng lực",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "thung",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "N",
+     "label": "Phản lực của sàn",
+     "unit": "N",
+     "role": "force",
+     "kind": "normal",
+     "of": "thung",
+     "axis": "y",
+     "value": [
+      "max",
+      [
+       "sub",
+       [
+        "mul",
+        "m",
+        "g"
+       ],
+       "Fy"
+      ],
+      0
+     ]
+    },
+    {
+     "id": "Fms",
+     "label": "Lực ma sát",
+     "unit": "N",
+     "role": "force",
+     "kind": "friction",
+     "of": "thung",
+     "axis": "x",
+     "value": [
+      "if",
+      "v",
+      [
+       "neg",
+       [
+        "mul",
+        "mu",
+        "N"
+       ]
+      ],
+      [
+       "neg",
+       [
+        "min",
+        "Fx",
+        [
+         "mul",
+         "mu",
+         "N"
+        ]
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "a",
+     "label": "Gia tốc của thùng",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "thung",
+     "axis": "x",
+     "value": [
+      "div",
+      [
+       "add",
+       "Fx",
+       "Fms"
+      ],
+      "m"
+     ]
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc của thùng",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "thung",
+     "axis": "x",
+     "initial": 0,
+     "rate": "a"
+    },
+    {
+     "id": "x",
+     "label": "Quãng đường thùng đi được",
+     "unit": "m",
+     "role": "position",
+     "of": "thung",
+     "axis": "x",
+     "initial": 0,
+     "rate": "v"
+    },
+    {
+     "id": "Wd",
+     "label": "Động năng của thùng",
+     "unit": "J",
+     "role": "kinetic_energy",
+     "of": "thung",
+     "value": [
+      "mul",
+      [
+       "div",
+       1,
+       2
+      ],
+      [
+       "mul",
+       "m",
+       [
+        "pow",
+        "v",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "Ak",
+     "label": "Công của lực kéo",
+     "unit": "J",
+     "role": "work",
+     "kind": "applied",
+     "of": "thung",
+     "initial": 0,
+     "rate": [
+      "mul",
+      "Fx",
+      "v"
+     ]
+    },
+    {
+     "id": "Ams",
+     "label": "Công của lực ma sát",
+     "unit": "J",
+     "role": "work",
+     "kind": "friction",
+     "of": "thung",
+     "initial": 0,
+     "rate": [
+      "mul",
+      "Fms",
+      "v"
+     ]
+    }
+   ],
+   "until": {
+    "quantity": "v",
+    "direction": "falling",
+    "value": 0
+   },
+   "assumptions": [
+    "Coi thùng là chất điểm trượt trên sàn nằm ngang, không bị lật.",
+    "Bỏ qua lực cản của không khí và khối lượng của dây.",
+    "Lực kéo có độ lớn và góc không đổi trong suốt 4 giây rồi mất ngay khi buông tay.",
+    "Hệ số ma sát nghỉ coi như bằng hệ số ma sát trượt.",
+    "Thùng ban đầu đứng yên; mô phỏng kết thúc khi thùng dừng lại."
+   ]
+  }
+ }
+}

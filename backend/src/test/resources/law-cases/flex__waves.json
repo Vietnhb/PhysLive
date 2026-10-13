@@ -1,0 +1,244 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "x",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 0.2,
+  "parameters": [
+   {
+    "name": "f",
+    "label": "Tần số",
+    "value": 20,
+    "unit": "Hz",
+    "min": 5,
+    "max": 50,
+    "step": 1,
+    "role": "frequency",
+    "of": "song"
+   },
+   {
+    "name": "d",
+    "label": "Khoảng cách hai nguồn",
+    "value": 8,
+    "unit": "cm",
+    "min": 2,
+    "max": 16,
+    "step": 1
+   },
+   {
+    "name": "vs",
+    "label": "Tốc độ truyền sóng",
+    "value": 40,
+    "unit": "cm/s",
+    "min": 10,
+    "max": 100,
+    "step": 5,
+    "role": "wave_speed",
+    "of": "song"
+   }
+  ],
+  "objects": [
+   {
+    "id": "song",
+    "label": "sóng nước"
+   },
+   {
+    "id": "nguon",
+    "label": "nguồn",
+    "members": 2
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "lam",
+    "label": "Bước sóng"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "A",
+     "label": "Biên độ",
+     "value": 0.002,
+     "unit": "m"
+    },
+    {
+     "id": "W",
+     "label": "Nửa bề rộng",
+     "value": 0.1,
+     "unit": "m"
+    },
+    {
+     "id": "nW",
+     "label": "Nửa bề rộng âm",
+     "value": -0.1,
+     "unit": "m"
+    },
+    {
+     "id": "eps",
+     "label": "cỡ nguồn",
+     "value": 0.002,
+     "unit": "m"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "lam",
+     "label": "Bước sóng",
+     "unit": "m",
+     "role": "wavelength",
+     "of": "song",
+     "value": [
+      "div",
+      "vs",
+      "f"
+     ]
+    },
+    {
+     "id": "sx",
+     "label": "Vị trí nguồn",
+     "unit": "m",
+     "role": "other",
+     "of": "nguon",
+     "value": [
+      "mul",
+      [
+       "sub",
+       "index",
+       0.5
+      ],
+      "d"
+     ]
+    },
+    {
+     "id": "r",
+     "label": "Khoảng cách tới nguồn",
+     "unit": "m",
+     "role": "other",
+     "of": "nguon",
+     "along": [
+      {
+       "name": "px",
+       "unit": "m",
+       "from": "nW",
+       "to": "W",
+       "points": 41
+      },
+      {
+       "name": "py",
+       "unit": "m",
+       "from": 0,
+       "to": "W",
+       "points": 31
+      }
+     ],
+     "value": [
+      "sqrt",
+      [
+       "add",
+       [
+        "add",
+        [
+         "pow",
+         [
+          "sub",
+          "px",
+          "sx"
+         ],
+         2
+        ],
+        [
+         "pow",
+         "py",
+         2
+        ]
+       ],
+       [
+        "pow",
+        "eps",
+        2
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "u1",
+     "label": "Li độ do một nguồn",
+     "unit": "m",
+     "role": "other",
+     "of": "nguon",
+     "along": [
+      {
+       "name": "px",
+       "unit": "m",
+       "from": "nW",
+       "to": "W",
+       "points": 41
+      },
+      {
+       "name": "py",
+       "unit": "m",
+       "from": 0,
+       "to": "W",
+       "points": 31
+      }
+     ],
+     "value": [
+      "mul",
+      "A",
+      [
+       "cos",
+       [
+        "mul",
+        6.283185307179586,
+        [
+         "sub",
+         [
+          "mul",
+          "f",
+          "t"
+         ],
+         [
+          "div",
+          "r",
+          "lam"
+         ]
+        ]
+       ]
+      ]
+     ]
+    },
+    {
+     "id": "usum",
+     "label": "Li độ mặt nước",
+     "unit": "m",
+     "role": "other",
+     "of": "song",
+     "along": [
+      {
+       "name": "px",
+       "unit": "m",
+       "from": "nW",
+       "to": "W",
+       "points": 41
+      },
+      {
+       "name": "py",
+       "unit": "m",
+       "from": 0,
+       "to": "W",
+       "points": 31
+      }
+     ],
+     "value": [
+      "total",
+      "u1"
+     ]
+    }
+   ],
+   "assumptions": []
+  }
+ }
+}

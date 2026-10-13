@@ -1,0 +1,226 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Người nhảy dù chịu hai lực: trọng lực kéo xuống và lực cản không khí hướng lên, lực cản càng lớn khi rơi càng nhanh. Trong 10 giây đầu lực cản còn nhỏ nên người rơi nhanh dần và vận tốc tiến gần một giá trị giới hạn lớn. Khi bung dù, lực cản tăng lên gấp nhiều lần, lớn hơn trọng lực, nên người bị hãm lại rất nhanh rồi rơi gần như đều với vận tốc nhỏ cho đến khi chạm đất. Mọi lúc gia tốc đều tuân theo định luật II Newton: khối lượng nhân gia tốc bằng tổng trọng lực và lực cản. Bạn có thể đổi khối lượng, độ cao, thời điểm bung dù, hệ số lực cản và số lần lực cản tăng lên để xem đồ thị vận tốc thay đổi thế nào.",
+ "defaults": [
+  "Lực cản không khí được coi là tỉ lệ với vận tốc.",
+  "Hệ số lực cản khi chưa bung dù lấy là 16 kg/s (vận tốc giới hạn khoảng 49 m/s).",
+  "Khi bung dù, hệ số lực cản tăng lên 10 lần.",
+  "Gia tốc rơi tự do lấy là 9,8 m/s².",
+  "Người bắt đầu rơi từ trạng thái đứng yên."
+ ],
+ "simulationSpec": {
+  "durationSeconds": 300,
+  "parameters": [
+   {
+    "name": "m",
+    "label": "Khối lượng người nhảy dù",
+    "value": 80,
+    "unit": "kg",
+    "min": 40,
+    "max": 120,
+    "step": 1,
+    "role": "mass",
+    "of": "nguoi"
+   },
+   {
+    "name": "h",
+    "label": "Độ cao ban đầu",
+    "value": 1000,
+    "unit": "m",
+    "min": 500,
+    "max": 3000,
+    "step": 50,
+    "role": "other"
+   },
+   {
+    "name": "tmo",
+    "label": "Thời điểm bung dù",
+    "value": 10,
+    "unit": "s",
+    "min": 2,
+    "max": 20,
+    "step": 1,
+    "role": "other"
+   },
+   {
+    "name": "k1",
+    "label": "Hệ số lực cản khi chưa bung dù",
+    "value": 16,
+    "unit": "kg/s",
+    "min": 5,
+    "max": 40,
+    "step": 1,
+    "role": "other"
+   },
+   {
+    "name": "n",
+    "label": "Số lần lực cản tăng lên khi bung dù",
+    "value": 10,
+    "unit": "1",
+    "min": 2,
+    "max": 30,
+    "step": 1,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "nguoi",
+    "label": "Người nhảy dù",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "v",
+    "label": "Vận tốc của người nhảy dù"
+   },
+   {
+    "quantity": "td",
+    "label": "Tốc độ rơi"
+   },
+   {
+    "quantity": "y",
+    "label": "Độ cao"
+   },
+   {
+    "quantity": "Fc",
+    "label": "Lực cản không khí"
+   },
+   {
+    "quantity": "a",
+    "label": "Gia tốc"
+   }
+  ],
+  "model": {
+   "constants": [
+    {
+     "id": "g",
+     "label": "Gia tốc rơi tự do",
+     "value": 9.8,
+     "unit": "m/s2",
+     "role": "gravitational_acceleration"
+    }
+   ],
+   "quantities": [
+    {
+     "id": "k",
+     "label": "Hệ số lực cản lúc đang xét",
+     "unit": "kg/s",
+     "role": "drag_coefficient",
+     "of": "nguoi",
+     "value": [
+      "if",
+      [
+       "sub",
+       "tmo",
+       "t"
+      ],
+      "k1",
+      [
+       "mul",
+       "n",
+       "k1"
+      ]
+     ]
+    },
+    {
+     "id": "P",
+     "label": "Trọng lực",
+     "unit": "N",
+     "role": "force",
+     "kind": "gravity",
+     "of": "nguoi",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "m",
+       "g"
+      ]
+     ]
+    },
+    {
+     "id": "Fc",
+     "label": "Lực cản không khí",
+     "unit": "N",
+     "role": "force",
+     "kind": "drag",
+     "of": "nguoi",
+     "axis": "y",
+     "value": [
+      "neg",
+      [
+       "mul",
+       "k",
+       "v"
+      ]
+     ]
+    },
+    {
+     "id": "a",
+     "label": "Gia tốc",
+     "unit": "m/s2",
+     "role": "acceleration",
+     "of": "nguoi",
+     "axis": "y",
+     "value": [
+      "div",
+      [
+       "add",
+       "P",
+       "Fc"
+      ],
+      "m"
+     ]
+    },
+    {
+     "id": "v",
+     "label": "Vận tốc (dương là hướng lên)",
+     "unit": "m/s",
+     "role": "velocity",
+     "of": "nguoi",
+     "axis": "y",
+     "initial": 0,
+     "rate": "a"
+    },
+    {
+     "id": "y",
+     "label": "Độ cao so với mặt đất",
+     "unit": "m",
+     "role": "position",
+     "of": "nguoi",
+     "axis": "y",
+     "initial": "h",
+     "rate": "v"
+    },
+    {
+     "id": "td",
+     "label": "Tốc độ rơi",
+     "unit": "m/s",
+     "role": "speed",
+     "of": "nguoi",
+     "value": [
+      "abs",
+      "v"
+     ]
+    }
+   ],
+   "until": {
+    "quantity": "y",
+    "direction": "falling",
+    "value": 0
+   },
+   "assumptions": [
+    "Người và dù được coi là một chất điểm chỉ chuyển động theo phương thẳng đứng.",
+    "Trục thẳng đứng hướng lên, nên khi rơi vận tốc mang dấu âm.",
+    "Lực cản không khí tỉ lệ với vận tốc; dù bung ra tức thời nên hệ số lực cản tăng đột ngột.",
+    "Bỏ qua gió, lực đẩy của không khí và sự thay đổi của không khí theo độ cao.",
+    "Mô phỏng dừng khi người chạm đất."
+   ]
+  }
+ }
+}

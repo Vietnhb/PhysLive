@@ -1,0 +1,168 @@
+{
+ "status": "EXPLAIN",
+ "question": "",
+ "choices": [],
+ "explanation": "Chất mẹ X (chu kì bán rã 2 giờ) phân rã thành chất con Y cũng phóng xạ (chu kì bán rã 30 phút). Ban đầu chỉ có 10^12 hạt X.",
+ "defaults": [],
+ "simulationSpec": {
+  "durationSeconds": 40000,
+  "parameters": [
+   {
+    "name": "T1",
+    "label": "Chu kì bán rã của X",
+    "value": 2,
+    "unit": "h",
+    "min": 0.5,
+    "max": 10,
+    "step": 0.5,
+    "role": "half_life",
+    "of": "X"
+   },
+   {
+    "name": "T2",
+    "label": "Chu kì bán rã của Y",
+    "value": 30,
+    "unit": "phút",
+    "min": 5,
+    "max": 120,
+    "step": 5,
+    "role": "half_life",
+    "of": "Y"
+   },
+   {
+    "name": "N0",
+    "label": "Số hạt X ban đầu",
+    "value": 1000000000000.0,
+    "unit": "1",
+    "min": 100000000000.0,
+    "max": 10000000000000.0,
+    "step": 100000000000.0,
+    "role": "other"
+   }
+  ],
+  "objects": [
+   {
+    "id": "X",
+    "label": "X",
+    "count": 1
+   },
+   {
+    "id": "Y",
+    "label": "Y",
+    "count": 1
+   }
+  ],
+  "observables": [
+   {
+    "quantity": "l1",
+    "label": "l1"
+   },
+   {
+    "quantity": "l2",
+    "label": "l2"
+   },
+   {
+    "quantity": "N1",
+    "label": "N1"
+   },
+   {
+    "quantity": "H1",
+    "label": "H1"
+   }
+  ],
+  "model": {
+   "constants": [],
+   "quantities": [
+    {
+     "id": "l1",
+     "label": "Hằng số phóng xạ của X",
+     "unit": "1/s",
+     "role": "decay_constant",
+     "of": "X",
+     "value": [
+      "div",
+      0.6931471805599453,
+      "T1"
+     ]
+    },
+    {
+     "id": "l2",
+     "label": "Hằng số phóng xạ của Y",
+     "unit": "1/s",
+     "role": "decay_constant",
+     "of": "Y",
+     "value": [
+      "div",
+      0.6931471805599453,
+      "T2"
+     ]
+    },
+    {
+     "id": "N1",
+     "label": "Số hạt X",
+     "unit": "1",
+     "role": "undecayed_count",
+     "of": "X",
+     "initial": "N0",
+     "rate": [
+      "neg",
+      "H1"
+     ]
+    },
+    {
+     "id": "H1",
+     "label": "Độ phóng xạ của X",
+     "unit": "Bq",
+     "role": "activity",
+     "of": "X",
+     "in": "XY",
+     "value": [
+      "mul",
+      "l1",
+      "N1"
+     ]
+    },
+    {
+     "id": "R2",
+     "label": "Tốc độ tạo ra Y",
+     "unit": "1/s",
+     "role": "production_rate",
+     "of": "Y",
+     "in": "XY",
+     "value": "H1"
+    },
+    {
+     "id": "N2",
+     "label": "Số hạt Y",
+     "unit": "1",
+     "role": "undecayed_count",
+     "of": "Y",
+     "initial": 0,
+     "rate": [
+      "sub",
+      "R2",
+      "H2"
+     ]
+    },
+    {
+     "id": "H2",
+     "label": "Độ phóng xạ của Y",
+     "unit": "Bq",
+     "role": "activity",
+     "of": "Y",
+     "value": [
+      "mul",
+      "l2",
+      "N2"
+     ]
+    }
+   ],
+   "assumptions": [],
+   "duration": [
+    "mul",
+    4,
+    "T1"
+   ]
+  }
+ }
+}
