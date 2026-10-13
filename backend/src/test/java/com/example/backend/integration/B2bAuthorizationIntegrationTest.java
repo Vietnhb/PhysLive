@@ -92,6 +92,21 @@ class B2bAuthorizationIntegrationTest {
         http.perform(get(path(school)).header("Authorization", token(user("STAFF", school))))
                 .andExpect(status().isForbidden());
     }
+    @Test void departmentHeadCanManageOwnClassesButCannotCreateThem() throws Exception {
+        User head = user("STAFF", school);
+        Permission permission = new Permission("DEPARTMENT_HEAD_PHYSICS");
+        permission.setLabel("Department head"); permission.setRole(head.getRole());
+        permission = permissions.saveAndFlush(permission);
+        head.grantPermission(permission, null); users.saveAndFlush(head);
+        String root = "/api/schools/" + school.getId() + "/classes";
+
+        http.perform(get(root).header("Authorization", token(head))).andExpect(status().isOk());
+        http.perform(post(root).header("Authorization", token(head)).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"10A1\",\"gradeLevel\":10,\"schoolYear\":\"2026-2027\"}"))
+                .andExpect(status().isForbidden());
+        http.perform(get("/api/schools/" + school("B").getId() + "/classes")
+                .header("Authorization", token(head))).andExpect(status().isForbidden());
+    }
     @Test void accountDisableInvalidatesAlreadyIssuedJwt() throws Exception {
         String existing = token(manager); manager.setEnabled(false); users.saveAndFlush(manager);
         http.perform(get("/api/user/me").header("Authorization", existing)).andExpect(status().isUnauthorized());
