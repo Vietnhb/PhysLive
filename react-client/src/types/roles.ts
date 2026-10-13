@@ -15,6 +15,7 @@ export type RoleType =
   | 'ADMIN' 
   | 'CONTENT_REVIEWER' 
   | 'SCHOOL_MANAGER' 
+  | 'STAFF'
   | 'TEACHER' 
   | 'STUDENT';
 
@@ -22,15 +23,16 @@ export const ROLE_NAMES = {
   ADMIN: 'ADMIN',
   CONTENT_REVIEWER: 'CONTENT_REVIEWER',
   SCHOOL_MANAGER: 'SCHOOL_MANAGER',
+  STAFF: 'STAFF',
   TEACHER: 'TEACHER',
   STUDENT: 'STUDENT',
 } as const satisfies Record<RoleType, RoleType>;
 
 export const PLATFORM_ROLES: RoleType[] = [ROLE_NAMES.ADMIN, ROLE_NAMES.CONTENT_REVIEWER];
-export const SCHOOL_ROLES: RoleType[] = [ROLE_NAMES.SCHOOL_MANAGER, ROLE_NAMES.TEACHER, ROLE_NAMES.STUDENT];
+export const SCHOOL_ROLES: RoleType[] = [ROLE_NAMES.SCHOOL_MANAGER, ROLE_NAMES.STAFF, ROLE_NAMES.TEACHER, ROLE_NAMES.STUDENT];
 
 /** Roles that may create simulations and manage learning activities. */
-export const LEARNING_MANAGER_ROLES = [ROLE_NAMES.TEACHER, ROLE_NAMES.ADMIN] as const;
+export const LEARNING_MANAGER_ROLES = [ROLE_NAMES.STAFF, ROLE_NAMES.TEACHER, ROLE_NAMES.ADMIN] as const;
 
 /** Roles that may review shared simulation content. */
 export const CONTENT_REVIEW_ROLES = [ROLE_NAMES.CONTENT_REVIEWER, ROLE_NAMES.ADMIN] as const;
@@ -62,6 +64,7 @@ export const ROLE_LABELS: Record<RoleType, string> = {
   ADMIN: 'Quản trị viên hệ thống',
   CONTENT_REVIEWER: 'Kiểm duyệt nội dung',
   SCHOOL_MANAGER: 'Quản lý trường',
+  STAFF: 'Nhân sự trường',
   TEACHER: 'Giáo viên',
   STUDENT: 'Học sinh'
 };
@@ -85,4 +88,10 @@ export function isSchoolRole(role: string): boolean {
  */
 export function getRoleLabel(role: string): string {
   return ROLE_LABELS[role as RoleType] || role;
+}
+
+/** Staff needs an explicit teaching grant; legacy teachers keep their current access. */
+export function canTeach(user: { role: string; permissions?: readonly string[] } | null | undefined): boolean {
+  return user?.role === 'TEACHER' || user?.role === 'ADMIN'
+    || (user?.role === 'STAFF' && user.permissions?.includes('TEACH') === true);
 }
