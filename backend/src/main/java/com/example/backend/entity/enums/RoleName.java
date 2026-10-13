@@ -5,21 +5,30 @@ import java.util.Optional;
 
 /** Roles supported by the authorization and school-membership model. */
 public enum RoleName {
-    ADMIN(Scope.PLATFORM),
-    CONTENT_REVIEWER(Scope.PLATFORM),
-    SCHOOL_MANAGER(Scope.SCHOOL),
-    TEACHER(Scope.SCHOOL),
-    STUDENT(Scope.SCHOOL);
+    ADMIN(1, Scope.PLATFORM),
+    MANAGER(2, Scope.PLATFORM),
+    REVIEWER(3, Scope.PLATFORM, "CONTENT_REVIEWER"),
+    SCHOOL(4, Scope.SCHOOL, "SCHOOL_MANAGER"),
+    STAFF(5, Scope.SCHOOL, "TEACHER"),
+    STUDENT(6, Scope.SCHOOL);
 
+    private final int id;
     private final Scope scope;
+    private final String[] legacyNames;
 
-    RoleName(Scope scope) {
+    RoleName(int id, Scope scope, String... legacyNames) {
+        this.id = id;
         this.scope = scope;
+        this.legacyNames = legacyNames;
     }
 
+    public int id() { return id; }
+
     public boolean matches(String value) {
-        return value != null && (name().equalsIgnoreCase(value.trim())
-                || (this == CONTENT_REVIEWER && "REVIEWER".equalsIgnoreCase(value.trim())));
+        if (value == null) return false;
+        String normalized = value.trim();
+        return name().equalsIgnoreCase(normalized)
+                || Arrays.stream(legacyNames).anyMatch(name -> name.equalsIgnoreCase(normalized));
     }
 
     public boolean isPlatformRole() {

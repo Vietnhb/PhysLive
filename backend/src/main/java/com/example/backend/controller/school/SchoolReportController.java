@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/schools/{schoolId}/reports")
-@PreAuthorize("hasAnyRole('SCHOOL_MANAGER','ADMIN')")
+@PreAuthorize("hasAnyRole('SCHOOL','MANAGER')")
 @RequiredArgsConstructor
 public class SchoolReportController {
     private final SchoolReportService service;

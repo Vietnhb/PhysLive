@@ -94,7 +94,7 @@ public class SchoolPaymentService {
         schools.save(school);
         User manager = new User(); manager.setEmail(email); manager.setFullName(request.fullName().trim());
         manager.setPassword(passwords.encode(request.password())); manager.setSchool(school); manager.setActive(false); manager.setEnabled(false); manager.setInstitutionId(school.getId().toString());
-        manager.setRole(roles.findByName(RoleName.SCHOOL_MANAGER.name()).orElseThrow(() -> new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Role quản lý trường chưa được cấu hình.")));
+        manager.setRole(roles.findByName(RoleName.SCHOOL.name()).orElseThrow(() -> new ApiException(HttpStatus.SERVICE_UNAVAILABLE, "Role quản lý trường chưa được cấu hình.")));
         users.save(manager);
         SchoolPayment payment = new SchoolPayment(); payment.setSchool(school); payment.setManager(manager);
         payment.setPlanCode(plan.getCode()); payment.setAmountVnd(plan.getAnnualPriceVnd()); payment.setMonthlyTokenQuota(plan.getMonthlyTokenQuota());
@@ -190,7 +190,7 @@ public class SchoolPaymentService {
         var user = users.findByEmail(credentials.email().trim().toLowerCase(Locale.ROOT))
             .filter(u -> passwords.matches(credentials.password(), u.getPassword()))
             .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng."));
-        if (user.getSchool() == null || user.getRole() == null || !RoleName.SCHOOL_MANAGER.matches(user.getRole().getName()))
+        if (user.getSchool() == null || user.getRole() == null || !RoleName.SCHOOL.matches(user.getRole().getName()))
             throw new ApiException(HttpStatus.FORBIDDEN, "Tài khoản không có đăng ký trường cần thanh toán.");
         lockedSchool(user.getSchool().getId());
         var latest = payments.findFirstByManagerIdOrderByCreatedAtDesc(user.getId())
@@ -279,7 +279,7 @@ public class SchoolPaymentService {
     private User manager() {
         var user = currentUser.requireCurrentUser();
         if (user.getSchool() == null || user.getRole() == null
-                || !RoleName.SCHOOL_MANAGER.matches(user.getRole().getName()) || !user.getSchool().isActive())
+                || !RoleName.SCHOOL.matches(user.getRole().getName()) || !user.getSchool().isActive())
             throw new ApiException(HttpStatus.FORBIDDEN, "Chỉ quản lý trường đang hoạt động được quản lý gói.");
         return user;
     }

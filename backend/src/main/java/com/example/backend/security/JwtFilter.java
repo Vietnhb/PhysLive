@@ -74,7 +74,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String path = request.getRequestURI().substring(request.getContextPath().length());
             boolean write = !java.util.List.of("GET", "HEAD", "OPTIONS").contains(request.getMethod());
             boolean profile = "/api/user/me".equals(path) || path.startsWith("/api/user/me/");
-            boolean renewal = role == com.example.backend.entity.enums.RoleName.SCHOOL_MANAGER
+            boolean renewal = role == com.example.backend.entity.enums.RoleName.SCHOOL
                     && "POST".equals(request.getMethod())
                     && java.util.List.of("/api/school/billing/quote", "/api/school/billing/checkout").contains(path);
             if (write && path.startsWith("/api/") && !path.startsWith("/api/auth/")
@@ -86,8 +86,12 @@ public class JwtFilter extends OncePerRequestFilter {
             }
             var authorities = new java.util.ArrayList<SimpleGrantedAuthority>();
             authorities.add(new SimpleGrantedAuthority("ROLE_" + (role == null ? user.getRole().getName() : role.name())));
-            if (role == com.example.backend.entity.enums.RoleName.CONTENT_REVIEWER)
-                authorities.add(new SimpleGrantedAuthority("ROLE_REVIEWER"));
+            if (role == com.example.backend.entity.enums.RoleName.REVIEWER)
+                authorities.add(new SimpleGrantedAuthority("ROLE_CONTENT_REVIEWER"));
+            if (role == com.example.backend.entity.enums.RoleName.SCHOOL)
+                authorities.add(new SimpleGrantedAuthority("ROLE_SCHOOL_MANAGER"));
+            if (role == com.example.backend.entity.enums.RoleName.STAFF)
+                authorities.add(new SimpleGrantedAuthority("ROLE_TEACHER"));
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(email, null, authorities);
 

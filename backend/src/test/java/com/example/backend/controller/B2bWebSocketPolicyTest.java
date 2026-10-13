@@ -22,7 +22,7 @@ class B2bWebSocketPolicyTest {
         var users = mock(UserRepository.class); var runs = mock(PhysicsSimulationRunService.class);
         var controller = new SimulationWebSocketController(runs, new CurrentUserService(users), new LicenseCheckService());
         var school = new School(); school.setLicenseStart(LocalDate.now().minusDays(10)); school.setLicenseEnd(LocalDate.now().minusDays(1));
-        var role = new Role(); role.setName("TEACHER");
+        var role = new Role(); role.setName("STAFF");
         var user = new User(); user.setRole(role); user.setSchool(school);
         when(users.findByEmail("teacher@test.example")).thenReturn(Optional.of(user));
         var principal = new UsernamePasswordAuthenticationToken("teacher@test.example", null, List.of());

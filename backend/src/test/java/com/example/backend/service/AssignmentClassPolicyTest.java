@@ -35,7 +35,7 @@ class AssignmentClassPolicyTest {
 
     @BeforeEach void setup() {
         School school = new School(); school.setId(UUID.randomUUID()); school.setActive(true);
-        Role role = new Role(); role.setName("TEACHER");
+        Role role = new Role(); role.setName("STAFF");
         teacher = new User(); teacher.setId(1); teacher.setRole(role); teacher.setSchool(school);
         target = new SchoolClass(); target.setId(UUID.randomUUID()); target.setSchool(school); target.setIsActive(true);
         request = new CreateAssignmentRequest(); request.setClassId(target.getId()); request.setTitle("Test");

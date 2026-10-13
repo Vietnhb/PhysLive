@@ -45,7 +45,7 @@ public class TopicModuleReleaseService {
 
     @Transactional
     public TopicModuleReleaseResponse createDraft(CreateTopicModuleReleaseRequest request) {
-        User actor = currentUserService.requireAnyRole("REVIEWER", "ADMIN");
+        User actor = currentUserService.requireAnyRole("REVIEWER", "MANAGER");
         validateRequest(request);
         Topic topic = topicRepository.findById(request.topicId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Topic not found"));
@@ -76,7 +76,7 @@ public class TopicModuleReleaseService {
 
     @Transactional
     public TopicModuleReleaseResponse approve(UUID releaseId) {
-        User actor = currentUserService.requireAnyRole("REVIEWER", "ADMIN");
+        User actor = currentUserService.requireAnyRole("REVIEWER", "MANAGER");
         TopicModuleRelease release = requireReleaseForUpdate(releaseId);
         requireStatus(release, ModuleReleaseStatus.DRAFT, "Only a DRAFT release can be approved");
         validateApprovable(release);
@@ -96,7 +96,7 @@ public class TopicModuleReleaseService {
 
     @Transactional
     public TopicModuleReleaseResponse retire(UUID releaseId) {
-        User actor = currentUserService.requireAnyRole("ADMIN");
+        User actor = currentUserService.requireAnyRole("MANAGER");
         TopicModuleRelease release = requireReleaseForUpdate(releaseId);
         requireStatus(release, ModuleReleaseStatus.APPROVED, "Only an APPROVED release can be retired");
         release.setStatus(ModuleReleaseStatus.RETIRED);
@@ -107,7 +107,7 @@ public class TopicModuleReleaseService {
 
     @Transactional(readOnly = true)
     public TopicModuleReleaseResponse get(UUID releaseId) {
-        currentUserService.requireAnyRole("REVIEWER", "ADMIN");
+        currentUserService.requireAnyRole("REVIEWER", "MANAGER");
         return toResponse(requireRelease(releaseId));
     }
 

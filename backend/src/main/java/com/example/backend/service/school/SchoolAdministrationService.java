@@ -33,11 +33,11 @@ public class SchoolAdministrationService {
             @NotNull @Positive Integer studentQuota, @PositiveOrZero Integer monthlyTokenQuota, boolean active) { }
 
     @Transactional(readOnly=true)
-    public List<School> list() { currentUser.requireAnyRole("ADMIN"); return schools.findAll(); }
+    public List<School> list() { currentUser.requireAnyRole("MANAGER"); return schools.findAll(); }
 
     @Transactional
     public School save(UUID id, SchoolRequest request) {
-        currentUser.requireAnyRole("ADMIN");
+        currentUser.requireAnyRole("MANAGER");
         if ((request.licenseStart() == null) != (request.licenseEnd() == null)
                 || (request.licenseStart() != null && request.licenseEnd().isBefore(request.licenseStart())))
             throw new ApiException(HttpStatus.BAD_REQUEST, "License dates must form a valid range");
@@ -51,7 +51,7 @@ public class SchoolAdministrationService {
 
     @Transactional
     public School setActive(UUID id, boolean active) {
-        currentUser.requireAnyRole("ADMIN"); School school = requireSchool(id);
+        currentUser.requireAnyRole("MANAGER"); School school = requireSchool(id);
         school.setActive(active); return schools.save(school);
     }
 
@@ -59,11 +59,11 @@ public class SchoolAdministrationService {
     public List<LicensePlan> publicPlans() { return plans.findAll().stream().filter(LicensePlan::isActive).toList(); }
 
     @Transactional(readOnly=true)
-    public List<LicensePlan> allPlans() { currentUser.requireAnyRole("ADMIN"); return plans.findAll(); }
+    public List<LicensePlan> allPlans() { currentUser.requireAnyRole("MANAGER"); return plans.findAll(); }
 
     @Transactional
     public LicensePlan savePlan(PlanRequest request) {
-        currentUser.requireAnyRole("ADMIN");
+        currentUser.requireAnyRole("MANAGER");
         String code = request.code().trim().toUpperCase(Locale.ROOT);
         LicensePlan plan = plans.findById(code).orElseGet(LicensePlan::new);
         plan.setCode(code); plan.setName(request.name()); plan.setDescription(request.description());

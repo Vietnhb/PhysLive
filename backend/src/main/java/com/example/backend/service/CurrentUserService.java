@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.entity.User;
+import com.example.backend.entity.enums.RoleName;
 import com.example.backend.exception.ApiException;
 import com.example.backend.repository.UserRepository;
 
@@ -33,10 +34,11 @@ public class CurrentUserService {
     public User requireAnyRole(String... allowedRoles) {
         User user = requireCurrentUser();
         String role = user.getRole() == null ? null : user.getRole().getName();
-        boolean allowed = role != null && Arrays.stream(allowedRoles)
-                .anyMatch(candidate -> candidate.equalsIgnoreCase(role)
-                        || (com.example.backend.entity.enums.RoleName.CONTENT_REVIEWER.matches(candidate)
-                        && com.example.backend.entity.enums.RoleName.CONTENT_REVIEWER.matches(role)));
+        RoleName actualRole = RoleName.from(role).orElse(null);
+        boolean allowed = actualRole != null && Arrays.stream(allowedRoles)
+                .map(RoleName::from)
+                .flatMap(java.util.Optional::stream)
+                .anyMatch(candidate -> candidate == actualRole);
         if (!allowed) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Required role: " + String.join(" or ", allowedRoles));
         }

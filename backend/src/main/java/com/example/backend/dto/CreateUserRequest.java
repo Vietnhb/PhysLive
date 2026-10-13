@@ -26,7 +26,7 @@ public class CreateUserRequest {
     @NotBlank(message = "Họ và tên không được để trống")
     private String fullName;
 
-    @Schema(description = "Role ID: 1 = ADMIN, 2 = TEACHER, 3 = REVIEWER, 4 = STUDENT, 5 = GUEST (mặc định 5 nếu không truyền)", example = "2")
+    @Schema(description = "Role ID: 1=ADMIN, 2=MANAGER, 3=REVIEWER, 4=SCHOOL, 5=STAFF, 6=STUDENT", example = "5")
     private Integer roleId;
 
     @Schema(description = "Mã trường / tổ chức (tùy chọn)", example = "THPT_CHUYEN_HANOI")

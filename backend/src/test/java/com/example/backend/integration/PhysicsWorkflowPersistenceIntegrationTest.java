@@ -207,7 +207,7 @@ class PhysicsWorkflowPersistenceIntegrationTest {
 
     private User persistOwner() {
         Role role = new Role();
-        role.setName("GUEST");
+        role.setName("MANAGER");
         entityManager.persist(role);
         User user = new User();
         user.setEmail("physics-owner@example.com");

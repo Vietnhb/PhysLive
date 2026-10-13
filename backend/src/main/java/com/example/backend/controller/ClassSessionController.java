@@ -53,7 +53,7 @@ public class ClassSessionController {
 
     @Operation(summary = "Ghi lại phiên biểu diễn mô phỏng trên lớp", description = "Giáo viên lưu lại buổi học gồm đặc tả bài toán và timeline các lần kéo thanh trượt/slider.")
     @PostMapping
-    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER')")
     public ResponseEntity<ClassSessionResponse> createSession(
             @Valid @RequestBody CreateClassSessionRequest request,
             Authentication authentication) {
@@ -62,7 +62,7 @@ public class ClassSessionController {
 
     @Operation(summary = "Xoá phiên biểu diễn", description = "Giáo viên hoặc Admin xoá bản ghi buổi biểu diễn.")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER')")
     public ResponseEntity<Void> deleteSession(
             @PathVariable UUID id,
             Authentication authentication) {
