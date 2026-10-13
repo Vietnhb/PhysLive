@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/schools/{schoolId}/users")
-@PreAuthorize("hasAnyRole('ADMIN', 'SCHOOL_MANAGER')")
+@PreAuthorize("hasAnyRole('MANAGER', 'SCHOOL')")
 @RequiredArgsConstructor
 public class SchoolManagementController {
     private final AdminService adminService;

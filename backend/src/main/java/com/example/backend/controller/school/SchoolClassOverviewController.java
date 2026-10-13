@@ -19,7 +19,7 @@ public class SchoolClassOverviewController {
     }
 
     @GetMapping("/api/assignments/mine/teacher/classes")
-    @PreAuthorize("hasAnyRole('TEACHER','ADMIN')")
+    @PreAuthorize("hasAnyRole('STAFF','MANAGER')")
     public List<SchoolClassService.TeacherClassOption> teacherClasses() {
         return service.classesForTeacher();
     }

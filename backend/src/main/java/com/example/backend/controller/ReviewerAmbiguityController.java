@@ -32,7 +32,7 @@ import lombok.AllArgsConstructor;
 @StandardApiResponses
 @RestController
 @RequestMapping("/api/reviewer/ambiguities")
-@PreAuthorize("hasAnyRole('REVIEWER', 'ADMIN')")
+@PreAuthorize("hasAnyRole('REVIEWER', 'MANAGER')")
 @AllArgsConstructor
 public class ReviewerAmbiguityController {
 

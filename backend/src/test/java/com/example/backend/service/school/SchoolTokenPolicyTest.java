@@ -29,7 +29,7 @@ class SchoolTokenPolicyTest {
         school = new School(); school.setId(UUID.randomUUID());
         school.setLicenseStart(LocalDate.now().minusDays(1)); school.setLicenseEnd(LocalDate.now().plusDays(1));
         school.setTokenUsageMonth(LocalDate.now().withDayOfMonth(1)); school.setMonthlyTokenQuota(100);
-        Role role = new Role(); role.setName("TEACHER");
+        Role role = new Role(); role.setName("STAFF");
         teacher = new User(); teacher.setRole(role); teacher.setSchool(school);
         when(current.requireCurrentUser()).thenReturn(teacher);
         when(schools.findByIdForUpdate(school.getId())).thenReturn(Optional.of(school));
@@ -63,7 +63,7 @@ class SchoolTokenPolicyTest {
         teacher.setEnabled(false); assertThat(license.canPerformWriteOperations(teacher)).isFalse();
     }
     @Test void curriculumReviewerCannotCallTeachingAi() {
-        teacher.getRole().setName("CONTENT_REVIEWER"); teacher.setSchool(null);
+        teacher.getRole().setName("REVIEWER"); teacher.setSchool(null);
         assertThatThrownBy(() -> service.meterAiCall(json::createObjectNode)).isInstanceOf(ApiException.class);
     }
 }

@@ -37,7 +37,7 @@ import lombok.AllArgsConstructor;
 @StandardApiResponses
 @RestController
 @RequestMapping("/api/reviewer")
-@PreAuthorize("hasAnyRole('REVIEWER', 'ADMIN')")
+@PreAuthorize("hasAnyRole('REVIEWER', 'MANAGER')")
 @AllArgsConstructor
 public class ReviewerSchemaController {
 

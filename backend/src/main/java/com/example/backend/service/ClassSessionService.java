@@ -34,7 +34,7 @@ public class ClassSessionService {
         String roleName = user.getRole() != null ? user.getRole().getName() : "STUDENT";
 
         List<ClassSession> list;
-        if ("TEACHER".equalsIgnoreCase(roleName)) {
+        if ("STAFF".equalsIgnoreCase(roleName)) {
             list = classSessionRepository.findByTeacherIdOrderByCreatedAtDesc(user.getId());
         } else {
             // Students and Admin can view all recorded classroom sessions
@@ -82,7 +82,7 @@ public class ClassSessionService {
         ClassSession session = classSessionRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy phiên tương tác / buổi học với ID: " + id));
 
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        boolean isAdmin = user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
         if (!session.getTeacherId().equals(user.getId()) && !isAdmin) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền xoá buổi học này");
         }
@@ -91,7 +91,7 @@ public class ClassSessionService {
     }
 
     private boolean isAdmin(User user) {
-        return user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        return user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
     }
 
     private boolean canView(User user, ClassSession session) {

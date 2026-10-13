@@ -55,7 +55,7 @@ public class AttemptController {
 
     @Operation(summary = "Lịch sử các bài tập đã nộp của tôi", description = "Dành cho Học sinh xem lại các giả thuyết và câu trả lời dự đoán đã nộp cho các bài tập.")
     @GetMapping("/assignments/my")
-    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'MANAGER')")
     public ResponseEntity<List<AssignmentSubmissionResponse>> getMySubmissions(
             Authentication authentication) {
         return ResponseEntity.ok(assignmentService.getMySubmissions(authentication.getName()));

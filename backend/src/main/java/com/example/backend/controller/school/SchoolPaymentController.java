@@ -29,13 +29,13 @@ public class SchoolPaymentController {
         return payments.recover(credentials, http.getRemoteAddr());
     }
 
-    @PreAuthorize("hasRole('SCHOOL_MANAGER')") @GetMapping("/api/school/billing")
+    @PreAuthorize("hasRole('SCHOOL')") @GetMapping("/api/school/billing")
     public SchoolPaymentService.Billing billing() { return payments.billing(); }
-    @PreAuthorize("hasRole('SCHOOL_MANAGER')") @PostMapping("/api/school/billing/quote")
+    @PreAuthorize("hasRole('SCHOOL')") @PostMapping("/api/school/billing/quote")
     public SchoolPaymentService.Quote quote(@Valid @RequestBody SchoolPaymentService.PlanChoice request) { return payments.quote(request.planCode()); }
-    @PreAuthorize("hasRole('SCHOOL_MANAGER')") @PostMapping("/api/school/billing/checkout")
+    @PreAuthorize("hasRole('SCHOOL')") @PostMapping("/api/school/billing/checkout")
     public SchoolPaymentService.Checkout purchase(@Valid @RequestBody SchoolPaymentService.PlanChoice request, HttpServletRequest http) { return payments.purchase(request.planCode(), request.expectedAmountVnd(), http.getRemoteAddr()); }
-    @PreAuthorize("hasRole('SCHOOL_MANAGER')") @PutMapping("/api/school/billing/next-plan")
+    @PreAuthorize("hasRole('SCHOOL')") @PutMapping("/api/school/billing/next-plan")
     public SchoolPaymentService.Billing nextPlan(@Valid @RequestBody SchoolPaymentService.PlanChoice request) { return payments.nextPlan(request.planCode()); }
 
     @GetMapping("/api/auth/payments/{id}")
@@ -43,21 +43,21 @@ public class SchoolPaymentController {
         return Map.of("status", payments.status(id));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/api/admin/payment-notifications")
     public List<SchoolPaymentService.Notification> notifications() {
         return payments.notifications();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/api/admin/payments")
     public List<SchoolPaymentService.AdminPaymentRow> adminPayments() { return payments.adminPayments(); }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/api/admin/payment-report")
     public SchoolPaymentService.RevenueSummary paymentReport() { return payments.revenueSummary(); }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping("/api/admin/payments/{id}/reconcile")
     public Map<String, String> reconcile(@PathVariable UUID id) { return Map.of("status", payments.reconcilePayment(id)); }
 }

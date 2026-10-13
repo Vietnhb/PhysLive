@@ -39,7 +39,7 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public List<UserStatusResponse> users() {
-        currentUserService.requireAnyRole("ADMIN");
+        currentUserService.requireAnyRole("MANAGER");
         return userRepository.findAll().stream().map(this::toUser).toList();
     }
 
@@ -62,7 +62,7 @@ public class AdminService {
         user.setFullName(request.fullName().trim());
         user.setRole(role);
         user.setSchool(school); user.setInstitutionId(school == null ? null : school.getId().toString());
-        if (RoleName.SCHOOL_MANAGER.matches(role.getName()))
+        if (RoleName.SCHOOL.matches(role.getName()))
             roleValidationService.validateSingleSchoolManager(school.getId(), null);
         user.setActive(true);
         return toUser(userRepository.save(user));
@@ -79,7 +79,7 @@ public class AdminService {
         if (user.getSchool() != null) schoolRepository.findByIdForUpdate(user.getSchool().getId()).orElseThrow();
         if (active && (!user.isEnabled() || !Boolean.TRUE.equals(user.getActive())))
             requireStudentSeat(user.getRole().getName(), user.getSchool());
-        if (active && RoleName.SCHOOL_MANAGER.matches(user.getRole().getName()))
+        if (active && RoleName.SCHOOL.matches(user.getRole().getName()))
             roleValidationService.validateSingleSchoolManager(user.getSchool().getId(), user.getId());
         user.setActive(active); user.setEnabled(active);
         user.setDeactivatedAt(active ? null : java.time.Instant.now());
@@ -102,7 +102,7 @@ public class AdminService {
         requireManage(user.getRole().getName(), user.getSchool());
         Role role = roleRepository.findByName(request.role().trim().toUpperCase(java.util.Locale.ROOT))
                 .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role is not supported"));
-        if (currentUserService.requireCurrentUser().getId().equals(id) && !RoleName.ADMIN.matches(role.getName()))
+        if (currentUserService.requireCurrentUser().getId().equals(id) && !RoleName.MANAGER.matches(role.getName()))
             throw new ApiException(HttpStatus.CONFLICT, "You cannot remove your own admin role");
         var school = resolveSchool(request.institutionId());
         roleValidationService.validateRoleSchoolConsistency(role.getName(), school);
@@ -110,7 +110,7 @@ public class AdminService {
         boolean alreadyOccupiesSeat = RoleName.STUDENT.matches(user.getRole().getName()) && !Boolean.FALSE.equals(user.getActive())
                 && user.getSchool() != null && school != null && user.getSchool().getId().equals(school.getId());
         if (!Boolean.FALSE.equals(user.getActive()) && !alreadyOccupiesSeat) requireStudentSeat(role.getName(), school);
-        if (Boolean.TRUE.equals(user.getActive()) && RoleName.SCHOOL_MANAGER.matches(role.getName()))
+        if (Boolean.TRUE.equals(user.getActive()) && RoleName.SCHOOL.matches(role.getName()))
             roleValidationService.validateSingleSchoolManager(school.getId(), user.getId());
         boolean schoolChanged = !java.util.Objects.equals(user.getSchool() == null ? null : user.getSchool().getId(),
                 school == null ? null : school.getId());
@@ -130,9 +130,9 @@ public class AdminService {
 
     private void requireManage(String targetRole, com.example.backend.entity.school.School school) {
         User actor = currentUserService.requireCurrentUser();
-        if (actor.getRole() != null && RoleName.ADMIN.matches(actor.getRole().getName())) return;
+        if (actor.getRole() != null && RoleName.MANAGER.matches(actor.getRole().getName())) return;
         if (school == null || !roleValidationService.canManageSchool(actor, school.getId())
-                || !(RoleName.TEACHER.matches(targetRole) || RoleName.STUDENT.matches(targetRole)))
+                || !(RoleName.STAFF.matches(targetRole) || RoleName.STUDENT.matches(targetRole)))
             throw new ApiException(HttpStatus.FORBIDDEN, "You can only manage teachers and students in your school");
         licenseCheckService.requireWriteAccess(actor);
     }
