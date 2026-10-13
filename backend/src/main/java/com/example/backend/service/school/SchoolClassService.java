@@ -1,6 +1,7 @@
 package com.example.backend.service.school;
 
 import com.example.backend.service.CurrentUserService;
+import com.example.backend.service.account.AccountAccessService;
 import com.example.backend.service.account.RoleValidationService;
 
 import com.example.backend.entity.school.ClassEnrollment;
@@ -15,6 +16,8 @@ import com.example.backend.repository.school.ClassTeacherAssignmentRepository;
 import com.example.backend.repository.school.SchoolClassRepository;
 import com.example.backend.repository.school.SchoolRepository;
 import com.example.backend.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -42,6 +45,8 @@ public class SchoolClassService {
     private final CurrentUserService currentUser;
     private final RoleValidationService roleValidation;
     private final LicenseCheckService licenseCheck;
+    private final AccountAccessService accountAccess;
+    private final EntityManager entityManager;
 
     public record ClassRequest(@NotBlank @Size(max = 100) String name,
                                @NotNull @Min(10) @Max(12) Integer gradeLevel,
@@ -106,6 +111,10 @@ public class SchoolClassService {
 
     @Transactional(readOnly = true)
     public ClassDetail get(UUID schoolId, UUID classId) {
+        return getInternal(schoolId, classId);
+    }
+
+    private ClassDetail getInternal(UUID schoolId, UUID classId) {
         requireSchoolAccess(schoolId);
         SchoolClass schoolClass = activeClassInSchool(schoolId, classId);
         List<Person> teachers = teacherAssignments.findByClassIdAndIsActiveTrue(classId).stream()
@@ -118,16 +127,21 @@ public class SchoolClassService {
 
     @Transactional
     public ClassDetail create(UUID schoolId, ClassRequest request) {
-        requireWriteAccess(schoolId);
+        User creator = requireWriteAccess(schoolId);
+        if (!RoleName.SCHOOL.matches(creator.getRole().getName())
+                && !RoleName.MANAGER.matches(creator.getRole().getName()))
+            throw new ApiException(HttpStatus.FORBIDDEN, "Only school or platform managers can create classes");
+        School school = schools.findByIdForUpdate(schoolId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy trường."));
+        entityManager.refresh(school, LockModeType.PESSIMISTIC_WRITE);
         String name = clean(request.name());
         String year = clean(request.schoolYear());
         if (classes.existsBySchoolIdAndNameIgnoreCaseAndSchoolYear(schoolId, name, year))
             throw new ApiException(HttpStatus.CONFLICT, "Lớp đã tồn tại trong năm học này.");
-        School school = school(schoolId);
         SchoolClass schoolClass = new SchoolClass();
         schoolClass.setSchool(school); schoolClass.setName(name); schoolClass.setGradeLevel(request.gradeLevel());
         schoolClass.setSchoolYear(year); schoolClass.setSubject(blankToNull(request.subject())); schoolClass.setIsActive(true);
-        return get(schoolId, classes.save(schoolClass).getId());
+        return getInternal(schoolId, classes.save(schoolClass).getId());
     }
 
     @Transactional
@@ -142,7 +156,7 @@ public class SchoolClassService {
             throw new ApiException(HttpStatus.CONFLICT, "Không thể đổi năm học khi lớp đã có enrollment.");
         schoolClass.setName(name); schoolClass.setGradeLevel(request.gradeLevel()); schoolClass.setSchoolYear(year);
         schoolClass.setSubject(blankToNull(request.subject()));
-        return get(schoolId, classes.save(schoolClass).getId());
+        return getInternal(schoolId, classes.save(schoolClass).getId());
     }
 
     @Transactional
@@ -158,6 +172,9 @@ public class SchoolClassService {
     public TeacherAssignment assignTeacher(UUID schoolId, UUID classId, Integer teacherId) {
         requireWriteAccess(schoolId); SchoolClass schoolClass = activeClassInSchool(schoolId, classId);
         User teacher = userInSchool(schoolId, teacherId, RoleName.STAFF.name());
+        if (!accountAccess.canTeach(teacher))
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    "Account must have the TEACH permission before it can be assigned to a class");
         ClassTeacherAssignment assignment = teacherAssignments.findBySchoolClassIdAndTeacherId(classId, teacherId).orElseGet(ClassTeacherAssignment::new);
         assignment.setSchoolClass(schoolClass); assignment.setTeacher(teacher); assignment.setIsActive(true);
         assignment = teacherAssignments.save(assignment);
@@ -174,6 +191,10 @@ public class SchoolClassService {
 
     @Transactional
     public Enrollment enrollStudent(UUID schoolId, UUID classId, Integer studentId) {
+        return enrollStudentInternal(schoolId, classId, studentId);
+    }
+
+    private Enrollment enrollStudentInternal(UUID schoolId, UUID classId, Integer studentId) {
         requireWriteAccess(schoolId);
         School school = schools.findByIdForUpdate(schoolId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy trường."));
@@ -206,7 +227,7 @@ public class SchoolClassService {
                 existing.setStatus(ClassEnrollment.EnrollmentStatus.TRANSFERRED); enrollments.saveAndFlush(existing);
             }
         });
-        return enrollStudent(schoolId, targetClassId, student.getId());
+        return enrollStudentInternal(schoolId, targetClassId, student.getId());
     }
 
     @Transactional
@@ -232,7 +253,10 @@ public class SchoolClassService {
 
     private User requireSchoolAccess(UUID schoolId) {
         User actor = currentUser.requireCurrentUser();
-        if (!roleValidation.canManageSchool(actor, schoolId)) throw new ApiException(HttpStatus.FORBIDDEN, "School access denied");
+        boolean departmentAccess = accountAccess.isDepartmentHead(actor)
+                && actor.getSchool() != null && schoolId.equals(actor.getSchool().getId());
+        if (!roleValidation.canManageSchool(actor, schoolId) && !departmentAccess)
+            throw new ApiException(HttpStatus.FORBIDDEN, "School access denied");
         return actor;
     }
 
@@ -248,8 +272,6 @@ public class SchoolClassService {
             throw new ApiException(HttpStatus.CONFLICT, "Lớp đã được tắt và không thể cập nhật.");
         return schoolClass;
     }
-
-    private School school(UUID schoolId) { return schools.findById(schoolId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy trường.")); }
 
     private User userInSchool(UUID schoolId, Integer id, String role) {
         User user = users.findById(id).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy người dùng."));
