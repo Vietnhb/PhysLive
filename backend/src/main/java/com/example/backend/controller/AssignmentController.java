@@ -23,6 +23,8 @@ import com.example.backend.dto.AssignmentSubmissionResponse;
 import com.example.backend.dto.CreateAssignmentRequest;
 import com.example.backend.dto.SubmitAssignmentRequest;
 import com.example.backend.dto.UpdateAssignmentRequest;
+import com.example.backend.dto.assignment.AssignmentReportResponse;
+import com.example.backend.dto.assignment.GradeAssignmentRequest;
 import com.example.backend.service.AssignmentService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -104,5 +106,43 @@ public class AssignmentController {
             @Valid @RequestBody SubmitAssignmentRequest request,
             Authentication authentication) {
         return ResponseEntity.status(HttpStatus.CREATED).body(assignmentService.submitAssignment(id, request, authentication.getName()));
+    }
+
+    @PostMapping("/{id}/predictions")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<AssignmentSubmissionResponse> submitPrediction(
+            @PathVariable UUID id,
+            @Valid @RequestBody SubmitAssignmentRequest request,
+            Authentication authentication) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(assignmentService.submitAssignment(id, request, authentication.getName()));
+    }
+
+    @GetMapping("/{id}/report")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER')")
+    public ResponseEntity<AssignmentReportResponse> report(
+            @PathVariable UUID id, Authentication authentication) {
+        return ResponseEntity.ok(assignmentService.report(id, authentication.getName()));
+    }
+
+    @PutMapping("/{assignmentId}/submissions/{submissionId}/grade")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER')")
+    public ResponseEntity<AssignmentSubmissionResponse> grade(
+            @PathVariable UUID assignmentId,
+            @PathVariable UUID submissionId,
+            @Valid @RequestBody GradeAssignmentRequest request,
+            Authentication authentication) {
+        return ResponseEntity.ok(assignmentService.gradeSubmission(assignmentId, submissionId,
+                request.score(), request.feedback(), request.confirm(), authentication.getName()));
+    }
+
+    @PostMapping("/{assignmentId}/submissions/{submissionId}/reopen")
+    @PreAuthorize("hasAnyRole('STAFF', 'MANAGER')")
+    public ResponseEntity<AssignmentSubmissionResponse> reopen(
+            @PathVariable UUID assignmentId,
+            @PathVariable UUID submissionId,
+            Authentication authentication) {
+        return ResponseEntity.ok(assignmentService.reopenSubmission(
+                assignmentId, submissionId, authentication.getName()));
     }
 }

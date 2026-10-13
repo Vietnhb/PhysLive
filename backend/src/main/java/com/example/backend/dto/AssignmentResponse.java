@@ -1,6 +1,7 @@
 package com.example.backend.dto;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,6 +55,18 @@ public class AssignmentResponse {
 
     @Schema(description = "Số lượng bài nộp đã nhận")
     private int submissionCount;
+
+    private boolean predictionSubmitted;
+    private boolean submissionCompleted;
+    private OffsetDateTime completedAt;
+    private Object gradingCriteria;
+    private BigDecimal maxScore;
+    private boolean autoGrade;
+    private BigDecimal score;
+    private String feedback;
+    private String gradingStatus;
+    private boolean retryAllowed;
+    private Object predictions;
 
     @Schema(description = "Thời điểm tạo")
     private OffsetDateTime createdAt;

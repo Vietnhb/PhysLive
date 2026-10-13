@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -55,6 +56,30 @@ public class AssignmentSubmission {
     @Column(name = "submitted_at", nullable = false)
     private OffsetDateTime submittedAt;
 
+    @Column(name = "completed_at")
+    private OffsetDateTime completedAt;
+
+    @Column(name = "score", precision = 8, scale = 3)
+    private BigDecimal score;
+
+    @Column(name = "max_score", precision = 8, scale = 3)
+    private BigDecimal maxScore;
+
+    @Column(name = "feedback", columnDefinition = "text")
+    private String feedback;
+
+    @Column(name = "grading_status", nullable = false, length = 24)
+    private String gradingStatus = "PENDING";
+
+    @Column(name = "graded_at")
+    private OffsetDateTime gradedAt;
+
+    @Column(name = "graded_by")
+    private Integer gradedBy;
+
+    @Column(name = "retry_allowed", nullable = false)
+    private boolean retryAllowed;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -68,6 +93,9 @@ public class AssignmentSubmission {
         this.updatedAt = now;
         if (this.submittedAt == null) {
             this.submittedAt = now;
+        }
+        if (this.gradingStatus == null) {
+            this.gradingStatus = "PENDING";
         }
     }
 

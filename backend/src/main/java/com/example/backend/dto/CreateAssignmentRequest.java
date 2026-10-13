@@ -1,6 +1,7 @@
 package com.example.backend.dto;
 
 import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,4 +35,11 @@ public class CreateAssignmentRequest {
 
     @Schema(description = "Danh sách ID của các học sinh được giao bài tập", example = "[7, 18]")
     private List<Integer> studentIds;
+
+    private java.util.Map<String, Object> gradingCriteria;
+
+    @jakarta.validation.constraints.DecimalMin("0.001")
+    private BigDecimal maxScore;
+
+    private Boolean autoGrade;
 }
