@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class B2bLegacyAccessTest {
     private User user(int id) {
         User u = new User(); u.setId(id); u.setEmail(id + "@test.example");
-        Role r = new Role(); r.setName("TEACHER"); u.setRole(r);
+        Role r = new Role(); r.setName("STAFF"); u.setRole(r);
         School s = new School(); s.setId(UUID.randomUUID()); u.setSchool(s); return u;
     }
     @Test void privateLibraryCannotBeClonedByAnotherTeacher() {

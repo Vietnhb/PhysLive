@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/schools/{schoolId}/classes")
-@PreAuthorize("hasAnyRole('SCHOOL_MANAGER', 'ADMIN')")
+@PreAuthorize("hasAnyRole('SCHOOL', 'MANAGER')")
 @RequiredArgsConstructor
 public class SchoolClassController {
     private final SchoolClassService service;

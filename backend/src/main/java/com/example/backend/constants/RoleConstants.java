@@ -5,26 +5,25 @@ package com.example.backend.constants;
  * 
  * Platform roles (school_id = NULL):
  * - ADMIN: System administrator, manages all schools and platform settings
- * - CONTENT_REVIEWER: Reviews shared simulations, manages content quality
+ * - MANAGER: Operates schools and platform workflows
+ * - REVIEWER: Reviews shared simulations and manages content quality
  * 
  * School roles (school_id = UUID):
- * - SCHOOL_MANAGER: Manages one school (1 per school), creates classes, assigns teachers
- * - TEACHER: Creates simulations, teaches classes, assigns work
+ * - SCHOOL: Manages one school (1 per school), creates classes, assigns staff
+ * - STAFF: Creates simulations, teaches classes, assigns work
  * - STUDENT: Takes classes, submits assignments
  */
 public final class RoleConstants {
     
     // Platform roles
     public static final String ADMIN = "ADMIN";
-    public static final String CONTENT_REVIEWER = "CONTENT_REVIEWER";
+    public static final String MANAGER = "MANAGER";
+    public static final String REVIEWER = "REVIEWER";
     
     // School roles
-    public static final String SCHOOL_MANAGER = "SCHOOL_MANAGER";
-    public static final String TEACHER = "TEACHER";
+    public static final String SCHOOL = "SCHOOL";
+    public static final String STAFF = "STAFF";
     public static final String STUDENT = "STUDENT";
-    
-    // Legacy role (for backward compatibility)
-    public static final String GUEST = "GUEST";
     
     // Spring Security role prefix
     public static final String ROLE_PREFIX = "ROLE_";
@@ -37,14 +36,14 @@ public final class RoleConstants {
      * Check if role is platform-level (school_id must be NULL).
      */
     public static boolean isPlatformRole(String roleName) {
-        return ADMIN.equals(roleName) || CONTENT_REVIEWER.equals(roleName);
+        return ADMIN.equals(roleName) || MANAGER.equals(roleName) || REVIEWER.equals(roleName);
     }
     
     /**
      * Check if role is school-level (school_id must be NOT NULL).
      */
     public static boolean isSchoolRole(String roleName) {
-        return SCHOOL_MANAGER.equals(roleName) || TEACHER.equals(roleName) || STUDENT.equals(roleName);
+        return SCHOOL.equals(roleName) || STAFF.equals(roleName) || STUDENT.equals(roleName);
     }
     
     /**

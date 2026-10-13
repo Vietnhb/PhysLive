@@ -63,7 +63,7 @@ public class LibraryService {
         LibraryItem item = libraryItemRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
 
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        boolean isAdmin = user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
         if ("PERSONAL".equalsIgnoreCase(item.getVisibility()) && !item.getOwnerId().equals(user.getId()) && !isAdmin) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền xem mục thư viện cá nhân này");
         }
@@ -98,7 +98,7 @@ public class LibraryService {
         LibraryItem item = libraryItemRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
 
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        boolean isAdmin = user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
         if (!item.getOwnerId().equals(user.getId()) && !isAdmin) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền chỉnh sửa mục thư viện này");
         }
@@ -123,7 +123,7 @@ public class LibraryService {
         LibraryItem item = libraryItemRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
 
-        boolean isAdmin = user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        boolean isAdmin = user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
         if (!item.getOwnerId().equals(user.getId()) && !isAdmin) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền xoá mục thư viện này");
         }
@@ -154,7 +154,7 @@ public class LibraryService {
     }
 
     private boolean isAdmin(User user) {
-        return user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getName());
+        return user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
     }
 
     private User getUserByEmail(String email) {

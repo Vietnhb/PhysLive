@@ -25,7 +25,7 @@ public class UpdateUserRequest {
     @Schema(description = "URL ảnh đại diện mới (tùy chọn)", example = "https://example.com/new-avatar.jpg")
     private String avatarUrl;
 
-    @Schema(description = "Role ID mới (chỉ ADMIN có quyền sửa): 1=ADMIN, 2=TEACHER, 3=REVIEWER, 4=STUDENT, 5=GUEST", example = "2")
+    @Schema(description = "Role ID mới: 1=ADMIN, 2=MANAGER, 3=REVIEWER, 4=SCHOOL, 5=STAFF, 6=STUDENT", example = "5")
     private Integer roleId;
 
     @Schema(description = "Trạng thái kích hoạt tài khoản (chỉ ADMIN có quyền sửa)", example = "true")

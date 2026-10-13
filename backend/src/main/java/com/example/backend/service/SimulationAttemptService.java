@@ -31,7 +31,7 @@ public class SimulationAttemptService {
 
     @Transactional
     public SimulationRunResponse recordSimulationRun(CreateSimulationRunRequest request) {
-        var actor = currentUserService.requireAnyRole("TEACHER", "ADMIN");
+        var actor = currentUserService.requireAnyRole("STAFF", "MANAGER");
         licenses.requireWriteAccess(actor);
         Simulation simulation = simulationRepository.findById(request.getSimulationId())
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mô phỏng với ID: " + request.getSimulationId()));
@@ -65,7 +65,7 @@ public class SimulationAttemptService {
     }
 
     private void requireOwner(Simulation simulation, com.example.backend.entity.User actor) {
-        if (actor.getRole() != null && "ADMIN".equalsIgnoreCase(actor.getRole().getName())) return;
+        if (actor.getRole() != null && "MANAGER".equalsIgnoreCase(actor.getRole().getName())) return;
         Integer ownerId = simulation.getValidationRun() != null
                 ? simulation.getValidationRun().getSpecification().getSubmission().getOwner().getId() : simulation.getOwnerId();
         if (!actor.getId().equals(ownerId)) throw new ApiException(HttpStatus.NOT_FOUND, "Simulation not found");

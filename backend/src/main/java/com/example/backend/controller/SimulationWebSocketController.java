@@ -30,7 +30,7 @@ public class SimulationWebSocketController {
         context.setAuthentication(authentication);
         org.springframework.security.core.context.SecurityContextHolder.setContext(context);
         try {
-            var actor = currentUser.requireAnyRole("TEACHER", "ADMIN");
+            var actor = currentUser.requireAnyRole("STAFF", "MANAGER");
             license.requireWriteAccess(actor);
             return simulationRunService.create(request.simulationId(), request.toRunRequest());
         } finally {

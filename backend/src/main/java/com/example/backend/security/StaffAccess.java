@@ -16,7 +16,7 @@ public class StaffAccess {
     public static boolean canTeach(User user) {
         if (user == null || user.getRole() == null) return false;
         String role = user.getRole().getName();
-        return "TEACHER".equals(role) || "ADMIN".equals(role)
+        return "MANAGER".equals(role)
                 || ("STAFF".equals(role) && user.hasPermission("TEACH"));
     }
 
