@@ -30,6 +30,10 @@ public class AccountAccessService {
                 && user.hasPermission(PermissionCode.DEPARTMENT_HEAD_PHYSICS);
     }
 
+    public boolean canReviewPublic(User user) {
+        return active(user) && (hasRole(user, RoleName.REVIEWER) || hasRole(user, RoleName.MANAGER));
+    }
+
     public boolean isStaffWithoutTeaching(User user) {
         return user != null && hasRole(user, RoleName.STAFF) && !user.hasPermission(PermissionCode.TEACH);
     }

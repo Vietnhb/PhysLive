@@ -20,6 +20,14 @@ public class LibraryItemResponse {
     @Schema(description = "Quyền hiển thị: PERSONAL hoặc SHARED")
     private String visibility;
 
+    private String moderationStatus;
+    private String moderationComment;
+    private java.time.Instant moderatedAt;
+    private Integer moderatedBy;
+    private String sharedInstitutionId;
+    private UUID schoolId;
+    private String schoolName;
+
     @Schema(description = "Trạng thái hiển thị")
     private boolean active;
 

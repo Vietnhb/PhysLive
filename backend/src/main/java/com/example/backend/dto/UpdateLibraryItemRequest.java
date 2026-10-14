@@ -11,7 +11,7 @@ public class UpdateLibraryItemRequest {
     private String title;
 
     @Schema(description = "Chế độ hiển thị: PERSONAL hoặc SHARED", example = "PERSONAL")
-    @Pattern(regexp = "PERSONAL|SHARED", message = "Visibility phải là PERSONAL hoặc SHARED")
+    @Pattern(regexp = "PERSONAL|SHARED|PUBLIC", message = "Visibility must be PERSONAL, SHARED, or PUBLIC")
     private String visibility;
 
     @Schema(description = "Trạng thái kích hoạt (false để ẩn)", example = "true")

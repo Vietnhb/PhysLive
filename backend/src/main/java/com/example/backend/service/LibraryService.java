@@ -14,6 +14,7 @@ import com.example.backend.dto.UpdateLibraryItemRequest;
 import com.example.backend.entity.LibraryItem;
 import com.example.backend.entity.Specification;
 import com.example.backend.entity.User;
+import com.example.backend.entity.enums.LibraryModerationStatus;
 import com.example.backend.exception.ApiException;
 import com.example.backend.repository.LibraryItemRepository;
 import com.example.backend.repository.SpecificationRepository;
@@ -43,15 +44,23 @@ public class LibraryService {
                         .collect(Collectors.toList());
             }
         } else if ("SHARED".equalsIgnoreCase(visibility)) {
-            items = libraryItemRepository.findByVisibilityAndActiveOrderByCreatedAtDesc("SHARED", true);
+            items = user.getSchool() == null ? List.of()
+                    : libraryItemRepository.findPublishedSharedForSchool(user.getSchool().getId());
             if (search != null && !search.trim().isEmpty()) {
                 String keyword = search.trim().toLowerCase();
                 items = items.stream()
                         .filter(i -> i.getTitle().toLowerCase().contains(keyword))
                         .collect(Collectors.toList());
             }
+        } else if ("PUBLIC".equalsIgnoreCase(visibility)) {
+            items = libraryItemRepository.findPublishedPublic();
+            if (search != null && !search.trim().isEmpty()) {
+                String keyword = search.trim().toLowerCase();
+                items = items.stream().filter(i -> i.getTitle().toLowerCase().contains(keyword)).toList();
+            }
         } else {
-            items = libraryItemRepository.searchAccessibleItems(user.getId(), search);
+            items = libraryItemRepository.findVisibleItems(user.getId(),
+                    user.getSchool() == null ? null : user.getSchool().getId(), search);
         }
 
         return items.stream().map(this::toResponse).collect(Collectors.toList());
@@ -64,7 +73,7 @@ public class LibraryService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
 
         boolean isAdmin = user.getRole() != null && "MANAGER".equalsIgnoreCase(user.getRole().getName());
-        if ("PERSONAL".equalsIgnoreCase(item.getVisibility()) && !item.getOwnerId().equals(user.getId()) && !isAdmin) {
+        if (!item.getOwnerId().equals(user.getId()) && !isAdmin && !isPublishedFor(user, item)) {
             throw new ApiException(HttpStatus.FORBIDDEN, "Bạn không có quyền xem mục thư viện cá nhân này");
         }
 
@@ -81,7 +90,14 @@ public class LibraryService {
             throw new ApiException(HttpStatus.FORBIDDEN, "Specification belongs to another teacher");
         LibraryItem item = new LibraryItem();
         item.setTitle(request.getTitle().trim());
-        item.setVisibility(request.getVisibility() != null ? request.getVisibility().toUpperCase() : "SHARED");
+        String visibility = request.getVisibility() != null ? request.getVisibility().toUpperCase() : "SHARED";
+        if ("SHARED".equals(visibility) && user.getSchool() == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "School sharing requires a school account");
+        }
+        item.setVisibility(visibility);
+        item.setSharedInstitutionId("SHARED".equals(visibility) ? user.getSchool().getId().toString() : null);
+        item.setModerationStatus("PERSONAL".equals(visibility)
+                ? LibraryModerationStatus.APPROVED : LibraryModerationStatus.PENDING);
         item.setActive(true);
         item.setOwnerId(user.getId());
         item.setOwner(user);
@@ -107,7 +123,27 @@ public class LibraryService {
             item.setTitle(request.getTitle().trim());
         }
         if (request.getVisibility() != null) {
-            item.setVisibility(request.getVisibility().toUpperCase());
+            String visibility = request.getVisibility().toUpperCase();
+            if ("SHARED".equals(visibility) && user.getSchool() == null) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "School sharing requires a school account");
+            }
+            if (!visibility.equalsIgnoreCase(item.getVisibility())) {
+                item.setVisibility(visibility);
+                item.setSharedInstitutionId("SHARED".equals(visibility)
+                        ? user.getSchool().getId().toString() : null);
+                item.setModerationStatus("PERSONAL".equals(visibility)
+                        ? LibraryModerationStatus.APPROVED : LibraryModerationStatus.PENDING);
+                item.setModerationComment(null);
+                item.setModeratedAt(null);
+                item.setModeratedBy(null);
+            }
+            if (!"PERSONAL".equals(visibility)
+                    && item.getModerationStatus() == LibraryModerationStatus.REJECTED) {
+                item.setModerationStatus(LibraryModerationStatus.PENDING);
+                item.setModerationComment(null);
+                item.setModeratedAt(null);
+                item.setModeratedBy(null);
+            }
         }
         if (request.getActive() != null) {
             item.setActive(request.getActive());
@@ -138,11 +174,12 @@ public class LibraryService {
         LibraryItem source = libraryItemRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy mục thư viện với ID: " + id));
 
-        if (!"SHARED".equalsIgnoreCase(source.getVisibility()) && !user.getId().equals(source.getOwnerId()) && !isAdmin(user))
+        if (!user.getId().equals(source.getOwnerId()) && !isAdmin(user) && !isPublishedFor(user, source))
             throw new ApiException(HttpStatus.FORBIDDEN, "Private library item is not accessible");
         LibraryItem clone = new LibraryItem();
         clone.setTitle(source.getTitle() + " (Bản sao)");
         clone.setVisibility("PERSONAL");
+        clone.setModerationStatus(LibraryModerationStatus.APPROVED);
         clone.setActive(true);
         clone.setOwnerId(user.getId());
         clone.setOwner(user);
@@ -171,15 +208,35 @@ public class LibraryService {
                 .id(item.getId())
                 .title(item.getTitle())
                 .visibility(item.getVisibility())
+                .moderationStatus(item.getModerationStatus().name())
+                .moderationComment(item.getModerationComment())
+                .moderatedAt(item.getModeratedAt())
+                .moderatedBy(item.getModeratedBy() == null ? null : item.getModeratedBy().getId())
+                .sharedInstitutionId(item.getSharedInstitutionId())
                 .active(item.isActive())
                 .ownerId(item.getOwnerId())
                 .ownerName(item.getOwner() != null ? item.getOwner().getFullName() : null)
                 .ownerEmail(item.getOwner() != null ? item.getOwner().getEmail() : null)
+                .schoolId(item.getOwner() == null || item.getOwner().getSchool() == null
+                        ? null : item.getOwner().getSchool().getId())
+                .schoolName(item.getOwner() == null || item.getOwner().getSchool() == null
+                        ? null : item.getOwner().getSchool().getName())
                 .specificationId(item.getSpecificationId())
                 .topic(topic)
                 .specificationDetails(details)
                 .createdAt(item.getCreatedAt())
                 .updatedAt(item.getUpdatedAt())
                 .build();
+    }
+
+    private boolean isPublishedFor(User user, LibraryItem item) {
+        if (!item.isActive() || item.getModerationStatus() != LibraryModerationStatus.APPROVED
+                && item.getModerationStatus() != LibraryModerationStatus.FEATURED) return false;
+        if ("PUBLIC".equalsIgnoreCase(item.getVisibility())) return true;
+        return "SHARED".equalsIgnoreCase(item.getVisibility()) && user.getSchool() != null
+                && item.getOwner() != null && item.getOwner().getSchool() != null
+                && user.getSchool().getId().equals(item.getOwner().getSchool().getId())
+                && (!org.springframework.util.StringUtils.hasText(item.getSharedInstitutionId())
+                    || user.getSchool().getId().toString().equals(item.getSharedInstitutionId()));
     }
 }
