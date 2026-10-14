@@ -20,6 +20,6 @@ public class CreateLibraryItemRequest {
     private UUID specificationId;
 
     @Schema(description = "Chế độ hiển thị: PERSONAL (Cá nhân) hoặc SHARED (Chia sẻ toàn trường)", example = "SHARED")
-    @Pattern(regexp = "PERSONAL|SHARED", message = "Visibility phải là PERSONAL hoặc SHARED")
+    @Pattern(regexp = "PERSONAL|SHARED|PUBLIC", message = "Visibility must be PERSONAL, SHARED, or PUBLIC")
     private String visibility = "SHARED";
 }
