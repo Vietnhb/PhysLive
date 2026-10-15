@@ -6,6 +6,7 @@ import com.example.backend.service.account.AccountAccessService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,8 @@ public class AccountCapabilityInterceptor implements HandlerInterceptor {
         "/api/user/students", "/api/library", "/api/library/**"
     };
     private static final List<String> READ_METHODS = List.of("GET", "HEAD", "OPTIONS");
+    private static final Pattern COMMUNITY_INTERACTION =
+            Pattern.compile("^/api/library/[^/]+/(comments(/[^/]+)?|reaction)$");
 
     private final AccountAccessService access;
     private final CurrentUserService currentUser;
@@ -35,6 +38,7 @@ public class AccountCapabilityInterceptor implements HandlerInterceptor {
     }
 
     private static boolean teaching(String path, boolean read) {
+        if (COMMUNITY_INTERACTION.matcher(path).matches()) return false;
         if (path.startsWith("/api/problems") || path.startsWith("/api/specifications")
                 || path.startsWith("/api/validations") || path.startsWith("/api/simulation")
                 || path.startsWith("/api/assignments") || path.equals("/api/user/students")

@@ -67,6 +67,14 @@ public class LibraryService {
     }
 
     @Transactional(readOnly = true)
+    public List<LibraryItemResponse> getCommunityItems(String topic) {
+        String normalizedTopic = topic == null || topic.isBlank() ? null : topic.trim();
+        return libraryItemRepository.findCommunityItems(normalizedTopic).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public LibraryItemResponse getLibraryItemById(UUID id, String userEmail) {
         User user = getUserByEmail(userEmail);
         LibraryItem item = libraryItemRepository.findByIdAndActive(id, true)
@@ -229,11 +237,15 @@ public class LibraryService {
                 .build();
     }
 
-    private boolean isPublishedFor(User user, LibraryItem item) {
+    static boolean isPublishedFor(User user, LibraryItem item) {
         if (!item.isActive() || item.getModerationStatus() != LibraryModerationStatus.APPROVED
                 && item.getModerationStatus() != LibraryModerationStatus.FEATURED) return false;
         if ("PUBLIC".equalsIgnoreCase(item.getVisibility())) return true;
-        return "SHARED".equalsIgnoreCase(item.getVisibility()) && user.getSchool() != null
+        return sharedWithSchool(user, item);
+    }
+
+    static boolean sharedWithSchool(User user, LibraryItem item) {
+        return user != null && "SHARED".equalsIgnoreCase(item.getVisibility()) && user.getSchool() != null
                 && item.getOwner() != null && item.getOwner().getSchool() != null
                 && user.getSchool().getId().equals(item.getOwner().getSchool().getId())
                 && (!org.springframework.util.StringUtils.hasText(item.getSharedInstitutionId())
