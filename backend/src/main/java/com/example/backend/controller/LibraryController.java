@@ -21,6 +21,8 @@ import com.example.backend.annotation.StandardApiResponses;
 import com.example.backend.dto.CreateLibraryItemRequest;
 import com.example.backend.dto.LibraryItemResponse;
 import com.example.backend.dto.UpdateLibraryItemRequest;
+import com.example.backend.dto.library.LibraryDiscussion;
+import com.example.backend.service.LibraryDiscussionService;
 import com.example.backend.service.LibraryService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,6 +42,46 @@ import lombok.AllArgsConstructor;
 public class LibraryController {
 
     private final LibraryService libraryService;
+    private final LibraryDiscussionService discussionService;
+
+    @GetMapping("/community")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<List<LibraryItemResponse>> community(
+            @RequestParam(required = false) String topic) {
+        return ResponseEntity.ok(libraryService.getCommunityItems(topic));
+    }
+
+    @GetMapping("/{id}/discussion")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<LibraryDiscussion.Discussion> discussion(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(discussionService.discussion(id, page, size));
+    }
+
+    @PostMapping("/{id}/comments")
+    @PreAuthorize("hasAnyRole('MANAGER','REVIEWER','SCHOOL','STAFF','STUDENT')")
+    public ResponseEntity<LibraryDiscussion.Comment> comment(
+            @PathVariable UUID id,
+            @Valid @RequestBody LibraryDiscussion.CommentRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(discussionService.comment(id, request.body()));
+    }
+
+    @DeleteMapping("/{id}/comments/{commentId}")
+    @PreAuthorize("hasAnyRole('MANAGER','REVIEWER','SCHOOL','STAFF','STUDENT')")
+    public ResponseEntity<Void> removeComment(@PathVariable UUID id, @PathVariable UUID commentId) {
+        discussionService.removeComment(id, commentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/reaction")
+    @PreAuthorize("hasAnyRole('MANAGER','REVIEWER','SCHOOL','STAFF','STUDENT')")
+    public ResponseEntity<LibraryDiscussion.Reaction> react(
+            @PathVariable UUID id,
+            @Valid @RequestBody LibraryDiscussion.ReactionRequest request) {
+        return ResponseEntity.ok(discussionService.react(id, request.liked()));
+    }
 
     @Operation(summary = "Tìm kiếm và xem danh sách mô phỏng trong thư viện", description = "Lấy danh sách các mô phỏng được chia sẻ (SHARED) hoặc mô phỏng cá nhân (PERSONAL) có hỗ trợ tìm kiếm theo từ khoá tiêu đề.")
     @GetMapping

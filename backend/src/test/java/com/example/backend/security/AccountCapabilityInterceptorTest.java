@@ -24,6 +24,9 @@ class AccountCapabilityInterceptorTest {
         "DEPARTMENT_HEAD_PHYSICS,GET,/api/assignments,false",
         "DEPARTMENT_HEAD_PHYSICS,GET,/api/library/folders,false",
         "DEPARTMENT_HEAD_PHYSICS,GET,/api/library,true",
+        "DEPARTMENT_HEAD_PHYSICS,POST,/api/library/id/comments,true",
+        "DEPARTMENT_HEAD_PHYSICS,DELETE,/api/library/id/comments/comment-id,true",
+        "DEPARTMENT_HEAD_PHYSICS,PUT,/api/library/id/reaction,true",
         "TEACH,POST,/api/simulations/id/runs,true",
         "TEACH,POST,/api/library,true"
     })
