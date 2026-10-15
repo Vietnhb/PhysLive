@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -59,6 +61,11 @@ public interface LibraryItemRepository extends JpaRepository<LibraryItem, UUID> 
     @Query("SELECT i FROM LibraryItem i WHERE i.visibility = 'PUBLIC' AND i.moderationStatus = :status "
             + "AND (i.active = true OR i.moderationStatus = 'REMOVED') ORDER BY i.createdAt ASC")
     List<LibraryItem> findPublicModerationItems(@Param("status") LibraryModerationStatus status);
+
+    @EntityGraph(attributePaths = {"owner", "owner.school", "specification"})
+    @Query("SELECT i FROM LibraryItem i WHERE i.visibility = 'PUBLIC' AND i.moderationStatus = :status "
+            + "AND (i.active = true OR i.moderationStatus = 'REMOVED')")
+    Page<LibraryItem> findPublicModerationItems(@Param("status") LibraryModerationStatus status, Pageable pageable);
 
     @EntityGraph(attributePaths = {"owner", "owner.school", "specification"})
     @Query("SELECT i FROM LibraryItem i WHERE i.visibility = 'SHARED' AND i.owner.school.id = :schoolId "
