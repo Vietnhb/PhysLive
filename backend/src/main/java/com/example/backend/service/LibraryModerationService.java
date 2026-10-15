@@ -36,6 +36,14 @@ public class LibraryModerationService {
         return items.findPublicModerationItems(defaultStatus(status)).stream().map(this::response).toList();
     }
 
+    @Transactional(readOnly = true)
+    public LibraryModerationContracts.Page publicQueuePage(LibraryModerationStatus status, org.springframework.data.domain.Pageable pageable) {
+        requirePublicReviewer();
+        org.springframework.data.domain.Page<LibraryItem> result = items.findPublicModerationItems(defaultStatus(status), pageable);
+        return new LibraryModerationContracts.Page(result.getContent().stream().map(this::response).toList(),
+                result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages());
+    }
+
     @Transactional
     public LibraryItemResponse moderatePublic(UUID id, LibraryModerationStatus status, String comment) {
         User actor = requirePublicReviewer();
