@@ -95,6 +95,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/schools/**").hasAnyRole("SCHOOL", "MANAGER")
                         .requestMatchers("/api/school/**").hasRole("SCHOOL")
                         .requestMatchers("/api/reviewer/**").hasAnyRole("REVIEWER", "MANAGER")
+                        .requestMatchers("/api/evaluations", "/api/evaluations/**").hasAnyRole("REVIEWER", "MANAGER")
                         .requestMatchers("/api/problems/**", "/api/specifications/**", "/api/validations/**")
                             .hasAnyRole("STAFF", "MANAGER")
                         .requestMatchers(HttpMethod.POST, "/api/simulations/**").hasAnyRole("STAFF", "MANAGER")

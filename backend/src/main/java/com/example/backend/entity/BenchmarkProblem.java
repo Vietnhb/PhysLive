@@ -9,9 +9,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "benchmark_problems")
@@ -35,11 +37,26 @@ public class BenchmarkProblem extends AuditedEntity {
     @Column(nullable = false)
     private boolean active = true;
 
+    @Column(nullable = false, length = 24)
+    private String status = "DRAFT";
+
+    @Version
+    @Column(nullable = false)
+    private long version;
+
+    @Column(name = "created_by_reference", length = 80)
+    private String createdByReference;
+
+    @Column(name = "archived_reason", columnDefinition = "text")
+    private String archivedReason;
+
     @OneToMany(mappedBy = "benchmarkProblem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     @OrderBy("createdAt ASC")
     private List<GoldAnnotation> annotations = new ArrayList<>();
 
     @OneToMany(mappedBy = "benchmarkProblem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 50)
     @OrderBy("createdAt ASC")
     private List<Adjudication> adjudications = new ArrayList<>();
 
