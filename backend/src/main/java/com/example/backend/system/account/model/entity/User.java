@@ -44,6 +44,19 @@ public class User {
     @Column(nullable = true)
     private Boolean active = true;
 
+    @Column(name = "account_status", length = 32)
+    private String accountStatus = "ACTIVE";
+
+    @Column(name = "suspension_reason", columnDefinition = "TEXT")
+    private String suspensionReason;
+
+    @Column(name = "suspended_until")
+    private Instant suspendedUntil;
+
+    public boolean isSuspendedReadOnly() {
+        return "SUSPENDED_READ_ONLY".equalsIgnoreCase(accountStatus) || Boolean.FALSE.equals(active);
+    }
+
     /**
      * School the user belongs to (nullable for platform roles).
      *

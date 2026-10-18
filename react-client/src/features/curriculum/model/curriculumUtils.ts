@@ -10,8 +10,8 @@ export function curriculumPath(kind: CurriculumKind, parentId: string) {
 }
 
 export function curriculumParentOptions(kind: CurriculumKind, tree: CurriculumTree | null) {
-  if (kind === "module") return (tree?.topics ?? []).map(item => ({ id: item.id, label: `Chủ đề: ${item.name}` }));
-  if (kind === "level") return (tree?.topics.flatMap(t => t.modules) ?? []).map(item => ({ id: item.id, label: `Module: ${item.name}` }));
-  if (kind === "lesson") return (tree?.topics.flatMap(t => t.modules.flatMap(m => m.levels)) ?? []).map(item => ({ id: item.id, label: `Level: ${item.name}` }));
+  if (kind === "module") return (tree?.topics ?? []).map(item => ({ id: item.id, label: `Môn học / Chủ đề: ${item.name}` }));
+  if (kind === "level") return (tree?.topics.flatMap(t => t.modules) ?? []).map(item => ({ id: item.id, label: `Chương / Học phần: ${item.name}` }));
+  if (kind === "lesson") return (tree?.topics.flatMap(t => t.modules.flatMap(m => m.levels)) ?? []).map(item => ({ id: item.id, label: `Khối lớp: ${item.name}` }));
   return [];
 }

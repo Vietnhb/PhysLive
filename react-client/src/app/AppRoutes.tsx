@@ -4,6 +4,7 @@ import { useSessionStore } from "../shared/auth/sessionStore";
 import { isStudentRole, ROLE_NAMES, LEARNING_MANAGER_ROLES, CONTENT_REVIEW_ROLES, APPLICATION_ROLES } from "../shared/auth/roles";
 import { canTeach, isDepartmentHead, userHome } from "../shared/auth/permissions";
 import RequireAccess from "./RequireAccess";
+import AccountSuspendedBanner from "../features/account/components/AccountSuspendedBanner";
 
 const AdminDirectory = lazy(() => import("../features/account/pages/AdminDirectory"));
 const Admin = lazy(() => import("../features/management/pages/OverviewView").then(module => ({ default: module.OverviewView })));
@@ -91,6 +92,7 @@ export default function AppRoutes({ authReady }: { authReady: boolean }) {
   if (managerBillingOnly && !user?.mustChangePassword) return <Navigate to="/school/billing" replace />;
 
   return <Suspense fallback={<main className="route-loading" aria-busy="true" />}>
+        <AccountSuspendedBanner />
         <Routes>
           {/* Home is the guest landing page; signed-in accounts go to their own area. */}
           <Route path="/" element={!authReady ? <main className="route-loading" aria-busy="true" /> : user ? <Navigate to={userHome(user)} replace /> : <Home />} />

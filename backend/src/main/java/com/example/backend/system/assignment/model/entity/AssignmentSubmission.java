@@ -65,4 +65,8 @@ public class AssignmentSubmission extends AuditedEntity {
 
     @Column(nullable = false)
     private boolean retryAllowed;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "assigned_parameters", columnDefinition = "jsonb")
+    private JsonNode assignedParameters;
 }
