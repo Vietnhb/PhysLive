@@ -142,12 +142,15 @@ public class AdminService {
     }
 
     private UserStatusResponse toUser(User user) {
+        String status = user.getAccountStatus() != null ? user.getAccountStatus()
+                : (!Boolean.FALSE.equals(user.getActive()) ? "ACTIVE" : "SUSPENDED_READ_ONLY");
         return new UserStatusResponse(user.getId(), user.getEmail(), user.getFullName(),
                 user.getRole() == null ? "UNKNOWN" : user.getRole().getName(), !Boolean.FALSE.equals(user.getActive()),
                 user.getInstitutionId(), user.getLastLogin(), user.getDateOfBirth(), user.getAvatarUrl(),
                 user.getSchool() == null ? null : user.getSchool().getId(),
                 user.getSchool() == null ? null : user.getSchool().getName(), user.isMustChangePassword(),
-                user.permissionCodes());
+                user.permissionCodes(),
+                status, user.getSuspensionReason(), user.getSuspendedUntil());
     }
 
     @Transactional

@@ -60,8 +60,10 @@ public class SecurityConfig {
                 .requestMatchers(POST, "/api/simulation/render-diagnostics").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/auth/**", "/ws/**", "/actuator/health").permitAll()
                 .requestMatchers("/api/user/me", "/api/user/me/**").hasAnyRole(ADMIN, MANAGER, REVIEWER, SCHOOL, STAFF, STUDENT)
+                .requestMatchers("/api/appeals", "/api/appeals/**").hasAnyRole(ADMIN, MANAGER, REVIEWER, SCHOOL, STAFF, STUDENT)
                 // ADMIN manages only MANAGER accounts; target-role restrictions remain in the service.
-                .requestMatchers(GET, "/api/admin/users").hasAnyRole(ADMIN, MANAGER)
+                .requestMatchers(GET, "/api/admin/users", "/api/admin/analytics", "/api/admin/appeals", "/api/admin/payments", "/api/admin/payment-report").hasAnyRole(ADMIN, MANAGER)
+                .requestMatchers(PUT, "/api/admin/appeals/**").hasAnyRole(ADMIN, MANAGER)
                 .requestMatchers(POST, "/api/admin/users").hasAnyRole(ADMIN, MANAGER)
                 .requestMatchers(PUT, "/api/admin/users/**").hasAnyRole(ADMIN, MANAGER)
                 .requestMatchers(POST, "/api/admin/users/*/reset-password").hasAnyRole(ADMIN, MANAGER)

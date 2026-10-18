@@ -52,9 +52,24 @@ public class JwtFilter extends OncePerRequestFilter {
 
             String email = claims.getSubject();
             var currentUser = userRepository.findByEmail(email);
-            if (currentUser.isPresent() && !Boolean.TRUE.equals(currentUser.get().getActive())) {
-                writeForbidden(response, ACCOUNT_LOCKED_MESSAGE);
-                return;
+            if (currentUser.isPresent()) {
+                var user = currentUser.get();
+                boolean isSuspended = user.isSuspendedReadOnly();
+                String path = request.getRequestURI().substring(request.getContextPath().length());
+                boolean isRead = List.of("GET", "HEAD", "OPTIONS").contains(request.getMethod());
+                boolean isAppeal = path.startsWith("/api/appeals") || path.startsWith("/api/account/appeals");
+                boolean isAuthMe = "/api/user/me".equals(path) || "/api/auth/logout".equals(path);
+
+                if (isSuspended && !isRead && !isAppeal && !isAuthMe) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                    String reasonMsg = user.getSuspensionReason() != null ? " Lý do: " + user.getSuspensionReason() : "";
+                    objectMapper.writeValue(response.getOutputStream(), new ErrorResponse(
+                            HttpServletResponse.SC_FORBIDDEN,
+                            "Tài khoản đang trong trạng thái tạm khóa (chỉ xem)." + reasonMsg + " Bạn có thể xem lý do hoặc gửi khiếu nại."));
+                    return;
+                }
             }
             if (currentUser.isPresent() && currentUser.get().getSchool() != null
                     && !currentUser.get().getSchool().isActive()) {

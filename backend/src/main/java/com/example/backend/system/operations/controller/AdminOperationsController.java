@@ -25,6 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminOperationsController {
     private final AdminOperationsService service;
+    private final com.example.backend.system.operations.service.AdminAnalyticsService analyticsService;
+
+    @GetMapping("/analytics")
+    public com.example.backend.system.operations.dto.AdminAnalyticsDto analytics() {
+        return analyticsService.getAnalytics();
+    }
 
     @GetMapping("/plans")
     public List<LicensePlanResponse> plans() {

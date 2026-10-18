@@ -72,6 +72,10 @@ public class Assignment extends AuditedEntity {
     @Column(name = "auto_grade", nullable = false)
     private boolean autoGrade;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "parameter_template", columnDefinition = "jsonb")
+    private JsonNode parameterTemplate;
+
     @ElementCollection
     @CollectionTable(name = "assignment_students", joinColumns = @JoinColumn(name = "assignment_id"),
             uniqueConstraints = @UniqueConstraint(name = "uk_assignment_student", columnNames = {"assignment_id", "student_id"}))

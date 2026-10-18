@@ -63,12 +63,19 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
   const [openActions, setOpenActions] = useState<number | null>(null);
   const [resetUser, setResetUser] = useState<User | null>(null);
   const [notice, setNotice] = useState("");
+  const [selectedRole, setSelectedRole] = useState<string>("ALL");
   const busyRef = useRef(false);
   const load = useCallback(async () => { setLoading(true); try { const [users, schools] = await Promise.all([adminUsers(schoolId), (schoolId || adminOnly) ? Promise.resolve([]) : adminSchools()]); setItems(users); setAvailableSchools(schools); setError(""); } catch (e) { setError(apiMessage(e, "Không thể tải danh sách người dùng.")); } finally { setLoading(false); } }, [schoolId, adminOnly]);
   useEffect(() => { void load(); }, [load]);
   const schoolScoped = Boolean(schoolId);
   const scopedItems = useMemo(() => schoolScoped ? items.filter(item => item.role === "STAFF" || item.role === "STUDENT") : items, [items, schoolScoped]);
-  const filtered = useMemo(() => { const q = query.trim().toLowerCase(); return scopedItems.filter(item => !q || item.email.toLowerCase().includes(q) || item.fullName.toLowerCase().includes(q)); }, [scopedItems, query]);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return scopedItems.filter(item => {
+      if (selectedRole !== "ALL" && item.role !== selectedRole) return false;
+      return !q || item.email.toLowerCase().includes(q) || item.fullName.toLowerCase().includes(q);
+    });
+  }, [scopedItems, query, selectedRole]);
   const updateDetails = (details: Partial<AccountDetails>) => setForm(current => ({ ...current, ...details }));
   const submit = async (event: FormEvent) => {
     event.preventDefault(); if (busyRef.current) return;
@@ -86,8 +93,22 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
   const edit = (item: User) => { setError(""); setNotice(""); setEditing(item.id); setForm({ email: item.email, password: "", fullName: item.fullName, role: item.role, institutionId: item.schoolId ?? item.institutionId ?? "", ...accountDetails(item) }); setShowForm(true); };
   const toggle = async (item: User) => { if (busyRef.current) return; busyRef.current = true; setBusy(true); setError(""); setNotice(""); try { const updated = await setManagedUserActive(item.id, item.active === false, schoolId); setItems(current => current.map(user => user.id === updated.id ? updated : user)); } catch (e) { setError(apiMessage(e, "Không thể cập nhật trạng thái tài khoản.")); } finally { busyRef.current = false; setBusy(false); } };
   return <div className="admin-content">
-    <PageHeader title="Tài khoản" description="" action={<div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>{schoolId && (actorRole === "SCHOOL" || actorRole === "MANAGER") && <SchoolBulkImport schoolId={schoolId} kind="USERS" disabled={busy} onImported={load} />}<Button primary disabled={busy} onClick={() => { setError(""); setNotice(""); setEditing(null); setForm(newUser()); setShowForm(true); }}><LearningIcon name="plus" />Tạo tài khoản</Button></div>} />
-    <div className="admin-toolbar"><TextField.Root type="search" size="3" aria-label="Tìm theo email hoặc họ tên" placeholder={schoolScoped ? "Tìm giáo viên, học sinh…" : "Tìm họ tên hoặc email…"} value={query} onChange={event => setQuery(event.target.value)} style={{ width: "min(100%, 420px)" }}><TextField.Slot><LearningIcon name="search" /></TextField.Slot></TextField.Root><IconButton type="button" variant="surface" size="3" aria-label="Làm mới danh sách tài khoản" onClick={() => void load()} disabled={loading}><LearningIcon name="refresh" /></IconButton></div>
+    <PageHeader title="Tài khoản người dùng" description="" action={<div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>{schoolId && (actorRole === "SCHOOL" || actorRole === "MANAGER") && <SchoolBulkImport schoolId={schoolId} kind="USERS" disabled={busy} onImported={load} />}<Button primary disabled={busy} onClick={() => { setError(""); setNotice(""); setEditing(null); setForm(newUser()); setShowForm(true); }}><LearningIcon name="plus" />Tạo tài khoản</Button></div>} />
+    <div className="admin-toolbar">
+      <TextField.Root type="search" size="3" aria-label="Tìm theo email hoặc họ tên" placeholder={schoolScoped ? "Tìm giáo viên, học sinh…" : "Tìm họ tên hoặc email…"} value={query} onChange={event => setQuery(event.target.value)} style={{ width: "min(100%, 360px)" }}><TextField.Slot><LearningIcon name="search" /></TextField.Slot></TextField.Root>
+      <Select.Root size="3" value={selectedRole} onValueChange={setSelectedRole} aria-label="Lọc theo đối tượng người dùng">
+        <Select.Trigger style={{ minWidth: 180 }} />
+        <Select.Content>
+          <Select.Item value="ALL">Tất cả đối tượng</Select.Item>
+          <Select.Item value="SCHOOL">Quản trị trường (SCHOOL)</Select.Item>
+          <Select.Item value="STAFF">Giáo viên (STAFF)</Select.Item>
+          <Select.Item value="STUDENT">Học sinh (STUDENT)</Select.Item>
+          <Select.Item value="REVIEWER">Người thẩm định (REVIEWER)</Select.Item>
+          <Select.Item value="MANAGER">Quản lý vận hành (MANAGER)</Select.Item>
+        </Select.Content>
+      </Select.Root>
+      <IconButton type="button" variant="surface" size="3" aria-label="Làm mới danh sách tài khoản" onClick={() => void load()} disabled={loading}><LearningIcon name="refresh" /></IconButton>
+    </div>
     {error && <ErrorNotice error={error} onRetry={() => void load()} />}
     {notice && <Callout.Root color="green" role="status"><Callout.Text>{notice}</Callout.Text></Callout.Root>}
     <div className="admin-stats-grid">
