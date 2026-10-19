@@ -2,6 +2,7 @@ import { useState } from "react";
 import Icon from "../../../shared/ui/LearningIcon";
 import SimulationComplaintDialog from "../../support/components/SimulationComplaintDialog";
 import SvgPixiScene from "./SvgPixiScene";
+import SimulationExport from "./SimulationExport";
 import ClarifyQuestion from "./ClarifyQuestion";
 import { RecognitionDisplay, FormulaReview } from "./SimulationReview";
 import { visualSource, type SimulationWorkspaceModel } from "../hooks/useSimulationWorkspace";
@@ -20,6 +21,7 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
   const { simulation, liveTimeline, presentation, runValues, sandboxKey, validation, renderError, setRenderError, restartPreview, recomputing } = preview;
   // "Báo lỗi" and "Dựng lại" live in the authored player's toolbar.
   const stageActions = <>
+    <SimulationExport preview={preview} />
     {complaint && <button type="button" className="sim-action" title="Báo cho người kiểm duyệt khi mô phỏng sai" onClick={() => setComplaintOpen(true)}><Icon name="message" />Báo lỗi</button>}
     <button type="button" className="sim-action" title="Dựng lại cảnh và phát từ đầu" onClick={restartPreview}><Icon name="reset" />Dựng lại</button>
   </>;
