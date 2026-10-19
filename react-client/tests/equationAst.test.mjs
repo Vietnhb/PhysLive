@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseFormula, formatFormula, FormulaError, capabilityMath, withPhase } from '../src/features/reviewer/model/equationAst.ts';
 
 function evaluate(ast, env) {
@@ -43,8 +44,8 @@ test('functions of several values parse, print and survive a round trip', () => 
   assert.throws(() => formatFormula(['if', 'a', 'b']), FormulaError);
 });
 
-const LIBRARY = process.env.CAPABILITY_LIBRARY;
-test('every shipped capability formula round-trips', { skip: !LIBRARY || !existsSync(LIBRARY) }, () => {
+const LIBRARY = process.env.CAPABILITY_LIBRARY || fileURLToPath(new URL('../../backend/src/main/resources/schemas/library/capabilities/', import.meta.url));
+test('every shipped capability formula round-trips', () => {
   const files = readdirSync(LIBRARY, { recursive: true }).filter(name => String(name).endsWith('.json'));
   assert.ok(files.length > 0);
   let formulas = 0;

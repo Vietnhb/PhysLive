@@ -23,7 +23,7 @@ The branch stack retains each review boundary: integration → 05 workspace/stor
 ## Verification
 
 - Maven: 349 tests, zero failures/errors, four skipped. The skips are two PostgreSQL persistence cases requiring Docker and two live-provider cases requiring explicit credentials/configuration.
-- Web: architecture check, ESLint, Node contract/unit tests and production build.
+- Web: architecture check, ESLint, all 54 Node contract/unit tests and production build. Capability formula round trips run against the shipped catalog by default.
 - Chromium: mobile Staff clarification, department-head denial of teaching access, and downloaded HTML replay with the browser offline. Browser API responses are mocked for UI acceptance; the actual offline renderer executes in Chromium.
 - Flutter: analyzer clean, three policy tests pass, debug APK and release APK build. `apksigner verify` confirms the release APK's upload signature.
 - No live-provider, PostgreSQL production-migration or physical-phone acceptance is claimed by these checks. CI now runs backend/web checks, Chromium and Android debug build.
