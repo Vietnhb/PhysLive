@@ -1,9 +1,0 @@
-{
-  "stage": "failed",
-  "runnerPid": 28580,
-  "updatedAt": "2026-10-10T10:01:28.6387398Z",
-  "status": "failed",
-  "epochs": 2,
-  "scope": "810 examples / 98 cases; all target windows twice; three timeline samples per training input; production isolated",
-  "detail": "training exited 1; see training.stderr.log"
-}

@@ -1,5 +1,12 @@
 # Dependencies
 **/node_modules/
+**/.dart_tool/
+**/.flutter-plugins-dependencies
+**/android/.gradle/
+**/android/local.properties
+**/key.properties
+*.jks
+*.keystore
 
 # Build outputs
 **/target/
@@ -38,7 +45,10 @@ Thumbs.db
 
 # Local generated outputs and AI training experiments
 /output/
+/backend/logs/
+/mobile/
 
 # Local Claude outputs and frontend tests/previews
 /Claude outputs/
-/react-client/tests/
+/react-client/test-results/
+/react-client/playwright-report/

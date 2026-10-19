@@ -1,6 +1,0 @@
-{
-  "status": "PASSED",
-  "programs": 810,
-  "updates": 3240,
-  "scope": "JS syntax, mount/update/seek/resize/destroy and exact fields with a lightweight Pixi mock. Raster appearance, topology and human quality are not verified."
-}
