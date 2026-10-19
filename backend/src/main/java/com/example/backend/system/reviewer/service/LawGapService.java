@@ -42,6 +42,14 @@ public class LawGapService implements LawGapSink {
                 found.computeIfAbsent(key, ignored -> draft(key, "AMBIGUOUS", schemaId, topic, null, null, law.path("title").asText(law.path("law").asText()),
                         description, "Các đại lượng cùng khớp: " + law.path("quantities")));
             }
+            // a law that still refuses the model after the repair loop: the model was wrong, or the law is too narrow
+            if ("FLAGGED".equals(validation.path("status").asText()))
+                for (JsonNode check : validation.path("lawChecks")) {
+                    if (!"FAILED".equals(check.path("status").asText())) continue;
+                    String key = "VIOLATION|" + check.path("law").asText();
+                    found.computeIfAbsent(key, ignored -> draft(key, "VIOLATION", schemaId, topic, null, null,
+                            check.path("title").asText(check.path("law").asText()), description, check.path("message").asText("")));
+                }
             for (LawGap gap : found.values()) {
                 LawGap known = gaps.findByGapKey(gap.getGapKey()).orElse(null);
                 if (known == null) { gaps.save(gap); continue; }

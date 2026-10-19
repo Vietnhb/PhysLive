@@ -36,6 +36,16 @@ public class SchemaDefinitionService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * A mark that changes whenever the approved schemas could have changed (a schema version or a topic added or
+     * changed), cheap enough to read on every request: what is built from the approved schemas can be kept until it moves.
+     */
+    public String approvedFingerprint() {
+        var s = schemas.changeMark();
+        var t = topics.changeMark();
+        return (s == null ? "-" : s.getCount() + "@" + s.getUpdated()) + "|" + (t == null ? "-" : t.getCount() + "@" + t.getUpdated());
+    }
+
     public List<SchemaVersion> approvedSchemas() {
         List<String> enabledTopics = topics.findByEnabledTrueOrderBySortOrderAsc().stream().map(Topic::getName).toList();
         if (enabledTopics.isEmpty()) return List.of();

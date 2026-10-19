@@ -33,6 +33,12 @@ public class AIService {
     /** The reviewers' list of what the law catalogues are missing; absent where no such list is kept. */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     private LawGapSink gaps;
+    /** Solved results by request; absent where nothing is kept. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private ComputeResultCache computed;
+    /** The merged law catalogue and the approved topic versions, kept while the approved schemas stay the same. */
+    private record Approved(String mark, ObjectNode catalogue, java.util.concurrent.ConcurrentHashMap<String, SchemaVersion> versions) {}
+    private volatile Approved approved;
     private static final String NO_MATCH = "NO_MATCH";
     /** How many times a model the solver or a law refuses goes back to its author before the best one stands. */
     private static final int MAX_MODEL_REPAIRS = 2;
@@ -230,11 +236,53 @@ public class AIService {
     public ObjectNode compute(JsonNode request) {
         requireSignedPlan(request);
         SchemaVersion schema = selectedSchema(request);
+        String key = computeKey(request, schema);
+        byte[] kept = key == null ? null : computed.get(key);
+        if (kept != null) {
+            try { return (ObjectNode) json.readTree(kept); } catch (java.io.IOException ignored) { /* solved again below */ }
+        }
         ObjectNode result = solve(request, schema, request.path("parameters"));
         JsonNode spec = request.path("simulationSpec");
         JsonNode fieldMeta = written(spec) ? models.fieldMeta(spec) : solverFieldMeta(definition(request, schema), spec);
         result.set("presentation", TeacherSimulationPresentation.create((ObjectNode) result.path("solverTimeline"), spec, perMember(fieldMeta), request.path("parameters")));
+        if (key != null) {
+            try { computed.put(key, json.writeValueAsBytes(result)); } catch (java.io.IOException ignored) { /* not kept */ }
+        }
         return result;
+    }
+
+    /**
+     * What decides a solved result: the signed plan, the topic version, the slider values and the approved laws it is
+     * checked against. Null when results are not kept.
+     */
+    private String computeKey(JsonNode request, SchemaVersion schema) {
+        Approved now = current();
+        if (computed == null || now == null) return null;
+        java.util.TreeMap<String, String> sliders = new java.util.TreeMap<>();
+        request.path("parameters").fields().forEachRemaining(entry -> sliders.put(entry.getKey(), entry.getValue().asText()));
+        try {
+            var digest = java.security.MessageDigest.getInstance("SHA-256");
+            for (String part : java.util.List.of(schema.getSchemaId() + "@" + schema.getVersion(), now.mark(), request.path("planSignature").asText(),
+                    request.path("simulationSpec").toString(), sliders.toString())) {
+                digest.update(part.getBytes(StandardCharsets.UTF_8));
+                digest.update((byte) 0);
+            }
+            return java.util.HexFormat.of().formatHex(digest.digest());
+        } catch (java.security.NoSuchAlgorithmException impossible) {
+            return null;
+        }
+    }
+
+    /** The approved schemas as they are now: rebuilt only when their change mark moves. Null where no mark is kept. */
+    private Approved current() {
+        String mark = schemas.approvedFingerprint();
+        if (mark == null) return null;
+        Approved now = approved;
+        if (now == null || !now.mark().equals(mark)) {
+            now = new Approved(mark, mergedCatalogue(), new java.util.concurrent.ConcurrentHashMap<>());
+            approved = now;
+        }
+        return now;
     }
 
     /** The description of a group's quantity ("hat[i].x") once for each member ("hat[0].x", "hat[1].x"…), as the timeline names them. */
@@ -292,6 +340,11 @@ public class AIService {
      * topic for its curriculum context, but nothing it describes is outside the reach of another topic's laws.
      */
     private ObjectNode catalogue() {
+        Approved now = current();
+        return now == null ? mergedCatalogue() : now.catalogue();
+    }
+
+    private ObjectNode mergedCatalogue() {
         java.util.List<JsonNode> all = new java.util.ArrayList<>();
         for (SchemaVersion schema : schemas.approvedSchemas())
             if (schema.getDefinition().path("lawCatalogue").isObject())
@@ -310,8 +363,10 @@ public class AIService {
     }
 
     private SchemaVersion selectedSchema(JsonNode request) {
-        return schemas.requireCurrentApproved(request.path("schemaId").asText(),
-                request.path("schemaVersion").asText());
+        String id = request.path("schemaId").asText(), version = request.path("schemaVersion").asText();
+        Approved now = current();
+        if (now == null) return schemas.requireCurrentApproved(id, version);
+        return now.versions().computeIfAbsent(id + "@" + version, ignored -> schemas.requireCurrentApproved(id, version));
     }
 
     /**
@@ -499,7 +554,9 @@ public class AIService {
         // What no law could check goes on the reviewers' list, and the teacher is told that it did.
         if (gaps != null && gaps.record(selected.getSchemaId(), selected.getTopic(), description, spec, computed.path("validation")) > 0) {
             ObjectNode checked = (ObjectNode) computed.path("validation");
-            String notice = "Phần chưa có định luật đối chiếu đã được gửi cho bộ phận biên soạn để bổ sung; mô phỏng vẫn dùng được.";
+            String notice = status.equals(FreeModel.FLAGGED)
+                    ? "Trường hợp này đã được gửi cho bộ phận biên soạn xem lại định luật liên quan; bạn có thể diễn đạt lại mô tả rồi thử lại."
+                    : "Phần chưa có định luật đối chiếu đã được gửi cho bộ phận biên soạn để bổ sung; mô phỏng vẫn dùng được.";
             checked.put("reviewNotice", notice);
             checked.put("verificationScope", checked.path("verificationScope").asText() + ". " + notice);
         }

@@ -19,7 +19,10 @@ public class LawGap extends AuditedEntity {
     @Column(name = "gap_key", nullable = false, length = 240, unique = true)
     private String gapKey;
 
-    /** UNCHECKED: a role no law reached; NO_ROLE: a quantity no role fitted; AMBIGUOUS: a law that could not tell which quantity was meant. */
+    /**
+     * UNCHECKED: a role no law reached; NO_ROLE: a quantity no role fitted; AMBIGUOUS: a law that could not tell which
+     * quantity was meant; VIOLATION: a law that still refused the model after the repair loop.
+     */
     @Column(nullable = false, length = 16)
     private String kind;
 

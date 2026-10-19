@@ -8,6 +8,12 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SchemaVersionRepository extends JpaRepository<SchemaVersion, UUID> {
+    /** How many rows there are and when the latest changed: moves whenever any schema version is added or changed. */
+    interface ChangeMark { Long getCount(); java.time.Instant getUpdated(); }
+
+    @org.springframework.data.jpa.repository.Query("select count(s) as count, max(s.updatedAt) as updated from SchemaVersion s")
+    ChangeMark changeMark();
+
     List<SchemaVersion> findByLifecycleStatus(LifecycleStatus lifecycleStatus);
     List<SchemaVersion> findAllByLifecycleStatusAndTopicInOrderByTopicAscSchemaIdAscCreatedAtDesc(
             LifecycleStatus lifecycleStatus, List<String> topics);

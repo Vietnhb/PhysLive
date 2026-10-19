@@ -19,9 +19,11 @@ import java.util.Set;
 public final class LawChecks {
     private static final String AMBIGUOUS = "\u0000ambiguous";
     private static final double RELATIVE = 0.02, FRACTION = 0;
+    /** System property that switches starting-value disambiguation off, for the research ablation only. */
+    public static final String ROLE_DISAMBIGUATION = "physlive.laws.roleDisambiguation";
 
-    /** One quantity of the model over the run, with the role attributes laws match on. */
-    public record Symbol(String id, String label, String unit, Map<String, String> attributes, double[] values) {
+    /** One quantity of the model over the run, with the role attributes laws match on; given: a slider or constant. */
+    public record Symbol(String id, String label, String unit, Map<String, String> attributes, double[] values, boolean given) {
         String get(String attribute) { return attributes.get(attribute); }
     }
 
@@ -102,11 +104,13 @@ public final class LawChecks {
                 if (i > 0 && time[i] > time[i - 1]) worth.merge("d/dt " + symbol.unit() + "@" + symbol.get("of"), Math.abs(values[i] - values[i - 1]) / (time[i] - time[i - 1]), Math::max);
             }
         }
+        // on by default; switched off only to measure what it changes (research ablation)
+        Set<String> evolving = Boolean.parseBoolean(System.getProperty(ROLE_DISAMBIGUATION, "true")) ? evolvingRoles(catalogue) : null;
         for (JsonNode law : catalogue.path("laws")) {
             List<String> scope = new ArrayList<>();
             law.path("scope").forEach(attribute -> scope.add(attribute.asText()));
             for (Map<String, String> where : scopes(scope, symbols)) {
-                Map<String, List<Symbol>> bound = bind(law, scope, where, symbols);
+                Map<String, List<Symbol>> bound = bind(law, scope, where, symbols, evolving);
                 if (bound == null) continue;
                 if (bound.containsKey(AMBIGUOUS)) {
                     ObjectNode note = results.addObject().put("law", law.path("id").asText()).put("title", law.path("title").asText()).put("status", "AMBIGUOUS");
@@ -155,7 +159,36 @@ public final class LawChecks {
         return true;
     }
 
-    private static Map<String, List<Symbol>> bind(JsonNode law, List<String> scope, Map<String, String> where, List<Symbol> symbols) {
+    /** The roles some law takes the rate of change of (a position, a velocity, a charge): what such a role names changes over a run. */
+    private static Set<String> evolvingRoles(JsonNode catalogue) {
+        Set<String> roles = new LinkedHashSet<>();
+        for (JsonNode law : catalogue.path("laws")) {
+            Set<String> varied = new LinkedHashSet<>();
+            differentiated(law, varied);
+            law.path("bind").fields().forEachRemaining(variable -> { if (varied.contains(variable.getKey())) roles.add(variable.getValue().path("role").asText()); });
+        }
+        return roles;
+    }
+
+    private static void differentiated(JsonNode node, Set<String> into) {
+        if (node.isArray() && node.size() == 2 && "ddt".equals(node.get(0).asText()) && node.get(1).isTextual()) into.add(node.get(1).asText());
+        for (JsonNode child : node) differentiated(child, into);
+    }
+
+    /**
+     * A slider or constant beside a quantity the model computes, with the same role for the same thing, is where that
+     * quantity starts or what it is set from (v0 beside v, T0 beside T): a law about one such quantity is about the
+     * computed one. A law that adds them up (the components of a velocity) leaves out such a value of a role laws take
+     * the rate of change of; given values of other roles (a force set by a slider) are real and stay in the sum.
+     */
+    private static List<Symbol> withoutStartingValues(List<Symbol> found, boolean many, Set<String> evolving) {
+        List<Symbol> computed = found.stream().filter(symbol -> !symbol.given()).toList();
+        if (!many) return found.size() > 1 && computed.size() == 1 ? computed : found;
+        return found.stream().filter(symbol -> !symbol.given() || !evolving.contains(symbol.get("role")) || computed.stream()
+                .noneMatch(other -> other.attributes().entrySet().containsAll(symbol.attributes().entrySet()))).toList();
+    }
+
+    private static Map<String, List<Symbol>> bind(JsonNode law, List<String> scope, Map<String, String> where, List<Symbol> symbols, Set<String> evolving) {
         JsonNode unless = law.path("unless");
         for (JsonNode exception : unless.isArray() ? unless : unless.isObject() ? List.of(unless) : List.<JsonNode>of())
             for (Symbol symbol : symbols) if (matches(symbol, exception, scope, where) && scope.stream().allMatch(a -> symbol.get(a) != null)) return null;
@@ -167,6 +200,7 @@ public final class LawChecks {
             List<Symbol> found = new ArrayList<>();
             for (Symbol symbol : symbols) if (matches(symbol, variable.getValue(), scope, where)) found.add(symbol);
             boolean many = variable.getValue().path("many").asBoolean();
+            if (evolving != null) found = new ArrayList<>(withoutStartingValues(found, many, evolving));
             if (many ? found.size() < variable.getValue().path("min").asInt(0) : found.isEmpty()) return null;
             if (!many && found.size() > 1) unclear = found;
             bound.put(variable.getKey(), found);
