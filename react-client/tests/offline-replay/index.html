@@ -1,0 +1,10 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><title>Offline replay fixture</title><button id="export">Export</button><script type="module">
+import { offlineReplay } from '/src/features/simulation/engine/offlineReplay.ts';
+import { downloadFile } from '/src/features/simulation/engine/exportData.ts';
+const timeline = { durationSeconds: 2, frames: [{ t: 0, values: { x: 0 } }, { t: 1, values: { x: 2 } }, { t: 2, values: { x: 4 } }] };
+const snapshot = { description: '\u003c/script text must remain text>', validation: { status: 'VERIFIED_BY_LAWS' }, simulationSpec: {
+  visualProgram: { code: 'async function(PIXI,app,api){const mark=new PIXI.Graphics().circle(0,0,10).fill(0x3155d6);app.stage.addChild(mark);return {update(frame){mark.x=50+frame.fields.x*10;mark.y=60;}}}', playbackRate: 1 },
+  parameters: [], solverTimeline: timeline,
+}};
+document.querySelector('#export').onclick=()=>downloadFile('physlive-replay.html',offlineReplay(snapshot,timeline,{}),'text/html');
+</script></html>
