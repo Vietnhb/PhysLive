@@ -1,5 +1,7 @@
 # PhysLive documentation map
 
+- [Staff delivery](staff-delivery.md) records the completed port, validation and deployment prerequisites.
+
 ## Current architecture
 
 - [Backend maintenance](implementation/backend-maintenance.md) documents feature packages, configuration, cleanup and verification.
