@@ -75,7 +75,11 @@ export class Equations {
   private readonly canonicalUnit = new Map<string, string>();
   private readonly unitFactor = new Map<string, number>();
 
-  constructor(units: Node[], readonly limits: SolverLimits, readonly constants: SolverConstants) {
+  readonly limits: SolverLimits;
+  readonly constants: SolverConstants;
+  constructor(units: Node[], limits: SolverLimits, constants: SolverConstants) {
+    this.limits = limits;
+    this.constants = constants;
     for (const unit of units) {
       const dimension = new Map<string, number>();
       for (const [key, value] of fields(path(unit, "dimensions"))) dimension.set(key, asDouble(value));
@@ -757,7 +761,11 @@ class Simulation {
   readonly latched = new Map<string, Map<Node, number>>();
   readonly loose = new Map<string, Node[]>();
 
-  constructor(private readonly eq: Equations, readonly bounds: Bound[]) {
+  private readonly eq: Equations;
+  readonly bounds: Bound[];
+  constructor(eq: Equations, bounds: Bound[]) {
+    this.eq = eq;
+    this.bounds = bounds;
     for (const bound of bounds) this.byId.set(bound.id, bound);
   }
 

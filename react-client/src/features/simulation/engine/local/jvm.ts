@@ -8,7 +8,8 @@ export type Node = any;
 
 export class SolverError extends Error {
   /** The HTTP status the server answers this with (422 for a model or slider the solver refuses). */
-  constructor(message: string, readonly status = 422) { super(message); }
+  readonly status: number;
+  constructor(message: string, status = 422) { super(message); this.status = status; }
 }
 
 export function require(condition: unknown, message: string): asserts condition {
