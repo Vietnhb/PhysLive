@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class SchoolReportService {
     private final SchoolRepository schools;
+    private final AiQuotaService aiQuota;
     private final SchoolClassRepository classes;
     private final ClassEnrollmentRepository enrollments;
     private final ClassTeacherAssignmentRepository teacherAssignments;
@@ -41,7 +42,7 @@ public class SchoolReportService {
         long enrolled = enrollments.countActiveStudentsBySchoolId(schoolId);
         return new Summary(schoolId, school.getName(), students, teachers, managers,
                 classes.findBySchoolIdAndIsActiveTrue(schoolId).size(), enrolled,
-                school.getUsedTokens() == null ? 0L : school.getUsedTokens(), school.getMonthlyTokenQuota(), school.getLicenseEnd());
+                aiQuota.usedThisMonth(school), school.getMonthlyTokenQuota(), school.getLicenseEnd());
     }
 
     public List<ClassRow> classes(UUID schoolId) {
