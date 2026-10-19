@@ -347,8 +347,7 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
         setRunValues(result.presentation.parameters);
         setValidation(result.validation);
         setError(null);
-        // New parameters mean a new motion: replay it from t = 0 instead of continuing mid-way.
-        setSandboxKey(key => key + 1);
+        // New parameters mean a new motion: the scene replays it from t = 0 in place (SvgPixiScene sends "replace").
         setRecomputing(false);
       }).catch((cause: unknown) => {
         if (controller.signal.aborted) return;

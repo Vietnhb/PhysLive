@@ -54,7 +54,7 @@ export type SimulationValidation = {
     | "VERIFIED_ANALYTICAL" | "VERIFIED_NUMERICAL" | "ASSUMPTION_REVIEW" | "VISUAL_ONLY_UNVERIFIED" | "UNSUPPORTED";
   flags: string[]; metrics?: Record<string, number>;
   /** Every curriculum law that applied to the run, and whether it held. */
-  lawChecks?: Array<{ law: string; title: string; curriculum?: string; status: "PASSED" | "FAILED"; scope?: Record<string, string> }>;
+  lawChecks?: Array<{ law: string; title: string; curriculum?: string; status: "PASSED" | "FAILED" | "AMBIGUOUS"; scope?: Record<string, string> }>;
   /** Ids of the model's quantities that no law checked. */
   uncheckedQuantities?: string[];
   executionMethod?: string; solverMethod?: string; verificationMethod?: string; verificationScope?: string;

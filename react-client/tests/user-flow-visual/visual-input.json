@@ -1,0 +1,3844 @@
+{
+  "description" : "Ở sân trường, một bạn ném quả bóng từ độ cao 1,5 m với tốc độ 10 m/s, chếch lên 40 độ so với phương ngang. Bỏ qua sức cản không khí, lấy g = 9,8 m/s². Tôi muốn nhìn thấy quả bóng bay, đường đi của nó và mũi tên vận tốc, từ lúc ném đến khi bóng chạm đất. Cho tôi thay đổi tốc độ ném và góc ném để so sánh.",
+  "planExplanation" : "Quả bóng được ném từ độ cao 1,5 m với vận tốc ban đầu và góc ném cho trước. Khi không có sức cản không khí, chuyển động của nó được mô tả bởi công thức ném xiên: x = x₀+v₀·cosθ·t, y = h₀+v₀·sinθ·t‑½·g·t². Vận tốc theo các trục là vx = v₀·cosθ, vy = v₀·sinθ‑g·t, nên mũi tên vận tốc thay đổi trong suốt quỹ đạo. Bạn có thể thay đổi vận tốc ném và góc ném để quan sát cách quỹ đạo và tốc độ thay đổi.",
+  "confirmedPlan" : {
+    "durationSeconds" : 3,
+    "physicsCoverage" : "COMPLETE",
+    "parameters" : [ {
+      "name" : "v0",
+      "label" : "vận tốc ném",
+      "value" : 10,
+      "unit" : "m/s",
+      "min" : 0.1,
+      "max" : 30,
+      "step" : 0.1
+    }, {
+      "name" : "theta",
+      "label" : "góc ném",
+      "value" : 40,
+      "unit" : "deg",
+      "min" : 0,
+      "max" : 90,
+      "step" : 1
+    } ],
+    "physicsModels" : [ {
+      "id" : "p1",
+      "label" : "Quả bóng",
+      "capabilityId" : "projectile",
+      "inputs" : {
+        "initial_position" : 0,
+        "initial_height" : 1.5,
+        "initial_velocity" : "v0",
+        "launch_angle" : "theta",
+        "gravitational_acceleration" : 9.8,
+        "mass" : 1
+      }
+    } ],
+    "requiredObjects" : [ {
+      "label" : "quả bóng",
+      "count" : 1,
+      "shape" : "sphere",
+      "contextual" : false
+    }, {
+      "label" : "quỹ đạo",
+      "count" : 1,
+      "shape" : "line",
+      "contextual" : false
+    } ],
+    "observables" : [ {
+      "field" : "p1.x",
+      "object" : "quả bóng",
+      "label" : "vị trí x"
+    }, {
+      "field" : "p1.y",
+      "object" : "quả bóng",
+      "label" : "vị trí y"
+    }, {
+      "field" : "p1.vx",
+      "object" : "quả bóng",
+      "label" : "vận tốc theo x"
+    }, {
+      "field" : "p1.vy",
+      "object" : "quả bóng",
+      "label" : "vận tốc theo y"
+    }, {
+      "field" : "p1.speed",
+      "object" : "quả bóng",
+      "label" : "tốc độ"
+    } ],
+    "schemaId" : "thpt_kinematics",
+    "topic" : "KINEMATICS",
+    "topicVersion" : "1.0"
+  },
+  "physicsSchema" : {
+    "laws" : [ {
+      "id" : "uniform_motion",
+      "name" : "Chuyển động thẳng đều / biến đổi đều theo một trục",
+      "inputs" : [ "initial_position", "initial_velocity", "acceleration" ],
+      "outputs" : [ "position", "velocity" ],
+      "appliesTo" : {
+        "quantities" : [ "initial_position", "initial_velocity", "acceleration", "position", "velocity" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "assumptions" : [ "Acceleration is zero during the interval.", "The selected axis is inertial." ],
+      "description" : "x(t)=x0+v0*t; v(t)=v0"
+    }, {
+      "id" : "uniform_acceleration",
+      "name" : "Chuyển động thẳng biến đổi đều",
+      "inputs" : [ "initial_position", "initial_velocity", "acceleration" ],
+      "outputs" : [ "position", "velocity", "acceleration" ],
+      "appliesTo" : {
+        "quantities" : [ "initial_position", "initial_velocity", "acceleration", "position", "velocity", "acceleration" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "assumptions" : [ "Acceleration is constant during the interval.", "All participants use the same axis convention." ],
+      "description" : "x(t)=x0+v0*t+0.5*a*t^2; v(t)=v0+a*t"
+    }, {
+      "id" : "free_fall",
+      "name" : "Rơi tự do và chuyển động thẳng đứng trong trọng trường",
+      "inputs" : [ "initial_position", "initial_velocity", "gravitational_acceleration", "mass" ],
+      "outputs" : [ "position", "velocity", "kinetic_energy", "potential_energy", "mechanical_energy" ],
+      "appliesTo" : {
+        "quantities" : [ "initial_position", "initial_velocity", "gravitational_acceleration", "mass", "position", "velocity", "kinetic_energy", "potential_energy", "mechanical_energy" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "assumptions" : [ "Air resistance is neglected.", "Gravity is uniform and points along the selected axis." ],
+      "description" : "a=-g; x(t)=x0+v0*t-0.5*g*t^2; v(t)=v0-g*t"
+    }, {
+      "id" : "projectile",
+      "name" : "Chuyển động ném (ném ngang, ném xiên)",
+      "inputs" : [ "initial_position", "initial_height", "initial_velocity", "launch_angle", "gravitational_acceleration", "mass" ],
+      "outputs" : [ "x", "y", "vx", "vy", "speed", "kinetic_energy", "potential_energy", "mechanical_energy" ],
+      "appliesTo" : {
+        "quantities" : [ "initial_position", "initial_height", "initial_velocity", "launch_angle", "gravitational_acceleration", "mass", "x", "y", "vx", "vy", "speed", "kinetic_energy", "potential_energy", "mechanical_energy" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "assumptions" : [ "Air resistance is neglected.", "Gravity is uniform." ],
+      "description" : "x=x0+v0*cos(theta)*t; y=y0+v0*sin(theta)*t-0.5*g*t^2"
+    }, {
+      "id" : "uniform_motion_2d",
+      "name" : "Chuyển động trong mặt phẳng và cộng vận tốc",
+      "inputs" : [ "initial_x", "initial_y", "speed", "heading_angle", "drift_velocity_x", "drift_velocity_y" ],
+      "outputs" : [ "x", "y", "vx", "vy", "ground_speed" ],
+      "appliesTo" : {
+        "quantities" : [ "initial_x", "initial_y", "speed", "heading_angle", "drift_velocity_x", "drift_velocity_y", "x", "y", "vx", "vy", "ground_speed" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "assumptions" : [ "Vật chuyển động thẳng đều so với môi trường (nước, gió…) và môi trường chuyển động đều so với mặt đất." ],
+      "description" : "v13 = v12 + v23 (cộng vận tốc)"
+    }, {
+      "id" : "sliding_to_stop_with_friction",
+      "name" : "Vật trượt chậm dần do ma sát",
+      "inputs" : [ "initial_velocity", "friction_coefficient", "gravitational_acceleration", "initial_position" ],
+      "outputs" : [ "elapsed_time", "position", "velocity", "acceleration" ],
+      "appliesTo" : {
+        "quantities" : [ "initial_velocity", "friction_coefficient", "gravitational_acceleration", "initial_position", "elapsed_time", "position", "velocity", "acceleration" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "assumptions" : [ "Vật trượt trên mặt ngang chỉ chịu ma sát trượt, dừng lại và đứng yên khi vận tốc bằng 0." ],
+      "description" : "a = -mu*g (khi vật còn trượt); v = v0 - mu*g*t; s = v0^2/(2*mu*g)"
+    } ],
+    "grade" : 10,
+    "model" : "generated_visual",
+    "curriculum" : [ {
+      "name" : "Mô tả chuyển động",
+      "summary" : "Tốc độ, vận tốc, độ dịch chuyển, độ dịch chuyển và vận tốc tổng hợp; đồ thị độ dịch chuyển – thời gian."
+    }, {
+      "name" : "Chuyển động biến đổi",
+      "summary" : "Gia tốc; đồ thị vận tốc – thời gian; chuyển động thẳng biến đổi đều; rơi tự do; chuyển động ném."
+    } ],
+    "description" : "Động học (Vật lí 10): mô tả chuyển động không xét nguyên nhân — độ dịch chuyển, quãng đường, tốc độ, vận tốc, cộng vận tốc (thuyền qua sông, máy bay trong gió), gia tốc, chuyển động thẳng đều và biến đổi đều, rơi tự do, ném ngang, ném xiên, đồ thị độ dịch chuyển – thời gian và vận tốc – thời gian.",
+    "limitations" : [ "Verified computation requires all relevant behavior to map to declared executable capabilities and their validity domains. Unmapped behavior is explicitly visual-only and unverified." ],
+    "objectTypes" : [ {
+      "type" : "moving_body",
+      "label" : "vật chuyển động",
+      "description" : "Xe, người, bóng, thuyền, máy bay…"
+    }, {
+      "type" : "reference_frame",
+      "label" : "hệ quy chiếu",
+      "description" : "Hệ quy chiếu (mặt đất, dòng nước, gió…)."
+    }, {
+      "type" : "path",
+      "label" : "quỹ đạo",
+      "description" : "Đường, làn, quỹ đạo."
+    } ],
+    "unitCatalog" : [ {
+      "symbol" : "m",
+      "dimension" : "length"
+    }, {
+      "symbol" : "m/s",
+      "dimension" : "velocity"
+    }, {
+      "symbol" : "m/s^2",
+      "dimension" : "acceleration"
+    }, {
+      "symbol" : "kg",
+      "dimension" : "mass"
+    }, {
+      "symbol" : "J",
+      "dimension" : "derived"
+    }, {
+      "symbol" : "rad",
+      "dimension" : "derived"
+    }, {
+      "symbol" : "1",
+      "dimension" : "derived"
+    }, {
+      "symbol" : "s",
+      "dimension" : "derived"
+    } ],
+    "capabilities" : [ {
+      "title" : "Chuyển động thẳng đều / biến đổi đều theo một trục",
+      "outputs" : [ {
+        "key" : "position",
+        "unit" : "m"
+      }, {
+        "key" : "velocity",
+        "unit" : "m/s"
+      } ],
+      "version" : "2.0",
+      "execution" : {
+        "math" : {
+          "rates" : {
+            "position" : "velocity",
+            "velocity" : 0
+          },
+          "initial" : {
+            "position" : "initial_position",
+            "velocity" : "initial_velocity"
+          },
+          "outputs" : {
+            "position" : "position",
+            "velocity" : "velocity"
+          },
+          "closedForm" : {
+            "position" : [ "add", [ "add", "initial_position", [ "mul", "initial_velocity", "t" ] ], [ "mul", [ "mul", 0.5, 0 ], [ "pow", "t", 2 ] ] ],
+            "velocity" : [ "add", "initial_velocity", [ "mul", 0, "t" ] ]
+          }
+        },
+        "primary" : "closed_form",
+        "numerical" : {
+          "method" : "rk4",
+          "solverId" : "schema_ast_rk4"
+        },
+        "closedForm" : {
+          "method" : "approved_ast",
+          "solverId" : "schema_ast_reference"
+        }
+      },
+      "validation" : {
+        "strategy" : "closed_form_checkpoints",
+        "benchmarks" : [ ],
+        "invariants" : [ "finite_output" ],
+        "absoluteTolerance" : 1.0E-8,
+        "relativeTolerance" : 1.0E-8
+      },
+      "assumptions" : [ "Acceleration is zero during the interval.", "The selected axis is inertial." ],
+      "equationSet" : {
+        "derived" : [ "displacement=x(t)-x0" ],
+        "canonical" : [ "x(t)=x0+v0*t", "v(t)=v0" ],
+        "dependencies" : [ {
+          "id" : "position",
+          "dependsOn" : [ "initial_position", "initial_velocity" ]
+        }, {
+          "id" : "velocity",
+          "dependsOn" : [ "initial_velocity" ]
+        } ]
+      },
+      "capabilityId" : "uniform_motion",
+      "applicability" : {
+        "quantities" : [ "initial_position", "initial_velocity", "elapsed_time" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "validityDomain" : {
+        "durationPositive" : true
+      },
+      "canonicalInputs" : [ {
+        "key" : "initial_position",
+        "unit" : "m",
+        "defaultValue" : 0
+      }, {
+        "key" : "initial_velocity",
+        "unit" : "m/s"
+      }, {
+        "key" : "acceleration",
+        "unit" : "m/s^2",
+        "defaultValue" : 0
+      } ],
+      "rendererBindings" : [ {
+        "role" : "trajectory",
+        "source" : "position"
+      }, {
+        "role" : "velocity_vector",
+        "source" : "velocity"
+      } ]
+    }, {
+      "title" : "Chuyển động thẳng biến đổi đều",
+      "outputs" : [ {
+        "key" : "position",
+        "unit" : "m"
+      }, {
+        "key" : "velocity",
+        "unit" : "m/s"
+      }, {
+        "key" : "acceleration",
+        "unit" : "m/s^2"
+      } ],
+      "version" : "2.0",
+      "execution" : {
+        "math" : {
+          "rates" : {
+            "position" : "velocity",
+            "velocity" : "acceleration"
+          },
+          "initial" : {
+            "position" : "initial_position",
+            "velocity" : "initial_velocity"
+          },
+          "outputs" : {
+            "position" : "position",
+            "velocity" : "velocity",
+            "acceleration" : "acceleration"
+          },
+          "closedForm" : {
+            "position" : [ "add", [ "add", "initial_position", [ "mul", "initial_velocity", "t" ] ], [ "mul", [ "mul", 0.5, "acceleration" ], [ "pow", "t", 2 ] ] ],
+            "velocity" : [ "add", "initial_velocity", [ "mul", "acceleration", "t" ] ],
+            "acceleration" : "acceleration"
+          }
+        },
+        "primary" : "numerical",
+        "numerical" : {
+          "method" : "rk4",
+          "solverId" : "schema_ast_rk4"
+        },
+        "closedForm" : {
+          "method" : "approved_ast",
+          "solverId" : "schema_ast_reference"
+        }
+      },
+      "validation" : {
+        "strategy" : "closed_form_checkpoints",
+        "benchmarks" : [ {
+          "name" : "zero_acceleration",
+          "inputs" : {
+            "acceleration" : 0
+          }
+        } ],
+        "invariants" : [ "finite_output", "v_equals_v0_plus_a_times_t" ],
+        "absoluteTolerance" : 1.0E-8,
+        "relativeTolerance" : 1.0E-8
+      },
+      "assumptions" : [ "Acceleration is constant during the interval.", "All participants use the same axis convention." ],
+      "equationSet" : {
+        "derived" : [ "displacement=x(t)-x0" ],
+        "canonical" : [ "x(t)=x0+v0*t+0.5*a*t^2", "v(t)=v0+a*t" ],
+        "dependencies" : [ {
+          "id" : "position",
+          "dependsOn" : [ "initial_position", "initial_velocity", "acceleration" ]
+        }, {
+          "id" : "velocity",
+          "dependsOn" : [ "initial_velocity", "acceleration" ]
+        }, {
+          "id" : "acceleration",
+          "dependsOn" : [ ]
+        } ]
+      },
+      "capabilityId" : "uniform_acceleration",
+      "applicability" : {
+        "quantities" : [ "initial_position", "initial_velocity", "acceleration", "elapsed_time" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "validityDomain" : {
+        "durationPositive" : true
+      },
+      "canonicalInputs" : [ {
+        "key" : "initial_position",
+        "unit" : "m",
+        "defaultValue" : 0
+      }, {
+        "key" : "initial_velocity",
+        "unit" : "m/s"
+      }, {
+        "key" : "acceleration",
+        "unit" : "m/s^2",
+        "timeVarying" : true
+      } ],
+      "rendererBindings" : [ {
+        "role" : "trajectory",
+        "source" : "position"
+      }, {
+        "role" : "velocity_vector",
+        "source" : "velocity"
+      }, {
+        "role" : "acceleration_vector",
+        "source" : "acceleration"
+      } ]
+    }, {
+      "title" : "Rơi tự do và chuyển động thẳng đứng trong trọng trường",
+      "outputs" : [ {
+        "key" : "position",
+        "unit" : "m"
+      }, {
+        "key" : "velocity",
+        "unit" : "m/s"
+      }, {
+        "key" : "kinetic_energy",
+        "unit" : "J"
+      }, {
+        "key" : "potential_energy",
+        "unit" : "J"
+      }, {
+        "key" : "mechanical_energy",
+        "unit" : "J"
+      } ],
+      "version" : "2.0",
+      "execution" : {
+        "math" : {
+          "rates" : {
+            "position" : "velocity",
+            "velocity" : [ "neg", "gravitational_acceleration" ]
+          },
+          "initial" : {
+            "position" : "initial_position",
+            "velocity" : "initial_velocity"
+          },
+          "outputs" : {
+            "position" : "position",
+            "velocity" : "velocity",
+            "kinetic_energy" : [ "mul", [ "mul", 0.5, "mass" ], [ "pow", "velocity", 2 ] ],
+            "potential_energy" : [ "mul", [ "mul", "mass", "gravitational_acceleration" ], "position" ],
+            "mechanical_energy" : [ "add", [ "mul", [ "mul", 0.5, "mass" ], [ "pow", "velocity", 2 ] ], [ "mul", [ "mul", "mass", "gravitational_acceleration" ], "position" ] ]
+          },
+          "closedForm" : {
+            "position" : [ "add", [ "add", "initial_position", [ "mul", "initial_velocity", "t" ] ], [ "mul", [ "mul", 0.5, [ "neg", "gravitational_acceleration" ] ], [ "pow", "t", 2 ] ] ],
+            "velocity" : [ "add", "initial_velocity", [ "mul", [ "neg", "gravitational_acceleration" ], "t" ] ],
+            "kinetic_energy" : [ "mul", [ "mul", 0.5, "mass" ], [ "pow", "velocity", 2 ] ],
+            "potential_energy" : [ "mul", [ "mul", "mass", "gravitational_acceleration" ], "position" ],
+            "mechanical_energy" : [ "add", [ "mul", [ "mul", 0.5, "mass" ], [ "pow", "velocity", 2 ] ], [ "mul", [ "mul", "mass", "gravitational_acceleration" ], "position" ] ]
+          }
+        },
+        "primary" : "numerical",
+        "numerical" : {
+          "method" : "rk4",
+          "solverId" : "schema_ast_rk4"
+        },
+        "closedForm" : {
+          "method" : "approved_ast",
+          "solverId" : "schema_ast_reference"
+        }
+      },
+      "validation" : {
+        "strategy" : "closed_form_checkpoints",
+        "benchmarks" : [ ],
+        "invariants" : [ "finite_output" ],
+        "absoluteTolerance" : 1.0E-8,
+        "relativeTolerance" : 1.0E-8
+      },
+      "assumptions" : [ "Air resistance is neglected.", "Gravity is uniform and points along the selected axis." ],
+      "equationSet" : {
+        "derived" : [ "Wd = m*v^2/2", "Wt = m*g*h", "W = Wd + Wt" ],
+        "canonical" : [ "a=-g", "x(t)=x0+v0*t-0.5*g*t^2", "v(t)=v0-g*t" ],
+        "dependencies" : [ ]
+      },
+      "capabilityId" : "free_fall",
+      "applicability" : {
+        "quantities" : [ "initial_position", "initial_velocity", "gravitational_acceleration", "mass" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "validityDomain" : {
+        "durationPositive" : true
+      },
+      "canonicalInputs" : [ {
+        "key" : "initial_position",
+        "unit" : "m",
+        "defaultValue" : 0
+      }, {
+        "key" : "initial_velocity",
+        "unit" : "m/s"
+      }, {
+        "key" : "gravitational_acceleration",
+        "min" : 4.9E-324,
+        "unit" : "m/s^2"
+      }, {
+        "key" : "mass",
+        "min" : 1.0E-12,
+        "unit" : "kg",
+        "defaultValue" : 1
+      } ],
+      "rendererBindings" : [ {
+        "role" : "trajectory",
+        "source" : "position"
+      } ]
+    }, {
+      "title" : "Chuyển động ném (ném ngang, ném xiên)",
+      "outputs" : [ {
+        "key" : "x",
+        "unit" : "m"
+      }, {
+        "key" : "y",
+        "unit" : "m"
+      }, {
+        "key" : "vx",
+        "unit" : "m/s"
+      }, {
+        "key" : "vy",
+        "unit" : "m/s"
+      }, {
+        "key" : "speed",
+        "unit" : "m/s"
+      }, {
+        "key" : "kinetic_energy",
+        "unit" : "J"
+      }, {
+        "key" : "potential_energy",
+        "unit" : "J"
+      }, {
+        "key" : "mechanical_energy",
+        "unit" : "J"
+      } ],
+      "version" : "2.0",
+      "execution" : {
+        "math" : {
+          "rates" : {
+            "x" : "vx",
+            "y" : "vy",
+            "vx" : 0,
+            "vy" : [ "neg", "gravitational_acceleration" ]
+          },
+          "initial" : {
+            "x" : "initial_position",
+            "y" : "initial_height",
+            "vx" : [ "mul", "initial_velocity", [ "cos", "launch_angle" ] ],
+            "vy" : [ "mul", "initial_velocity", [ "sin", "launch_angle" ] ]
+          },
+          "outputs" : {
+            "x" : "x",
+            "y" : "y",
+            "vx" : "vx",
+            "vy" : "vy",
+            "speed" : [ "sqrt", [ "add", [ "pow", "vx", 2 ], [ "pow", "vy", 2 ] ] ],
+            "kinetic_energy" : [ "mul", [ "mul", 0.5, "mass" ], [ "add", [ "pow", "vx", 2 ], [ "pow", "vy", 2 ] ] ],
+            "potential_energy" : [ "mul", [ "mul", "mass", "gravitational_acceleration" ], "y" ],
+            "mechanical_energy" : [ "add", [ "mul", [ "mul", 0.5, "mass" ], [ "add", [ "pow", "vx", 2 ], [ "pow", "vy", 2 ] ] ], [ "mul", [ "mul", "mass", "gravitational_acceleration" ], "y" ] ]
+          },
+          "closedForm" : {
+            "x" : [ "add", "initial_position", [ "mul", [ "mul", "initial_velocity", [ "cos", "launch_angle" ] ], "t" ] ],
+            "y" : [ "add", [ "add", "initial_height", [ "mul", [ "mul", "initial_velocity", [ "sin", "launch_angle" ] ], "t" ] ], [ "neg", [ "mul", [ "mul", 0.5, "gravitational_acceleration" ], [ "pow", "t", 2 ] ] ] ],
+            "vx" : [ "mul", "initial_velocity", [ "cos", "launch_angle" ] ],
+            "vy" : [ "sub", [ "mul", "initial_velocity", [ "sin", "launch_angle" ] ], [ "mul", "gravitational_acceleration", "t" ] ],
+            "speed" : [ "sqrt", [ "add", [ "pow", "vx", 2 ], [ "pow", "vy", 2 ] ] ],
+            "kinetic_energy" : [ "mul", [ "mul", 0.5, "mass" ], [ "add", [ "pow", "vx", 2 ], [ "pow", "vy", 2 ] ] ],
+            "potential_energy" : [ "mul", [ "mul", "mass", "gravitational_acceleration" ], "y" ],
+            "mechanical_energy" : [ "add", [ "mul", [ "mul", 0.5, "mass" ], [ "add", [ "pow", "vx", 2 ], [ "pow", "vy", 2 ] ] ], [ "mul", [ "mul", "mass", "gravitational_acceleration" ], "y" ] ]
+          }
+        },
+        "primary" : "numerical",
+        "numerical" : {
+          "method" : "rk4",
+          "solverId" : "schema_ast_rk4"
+        },
+        "closedForm" : {
+          "method" : "approved_ast",
+          "solverId" : "schema_ast_reference"
+        }
+      },
+      "validation" : {
+        "strategy" : "closed_form_checkpoints",
+        "benchmarks" : [ ],
+        "invariants" : [ "finite_output" ],
+        "absoluteTolerance" : 1.0E-7,
+        "relativeTolerance" : 1.0E-7
+      },
+      "assumptions" : [ "Air resistance is neglected.", "Gravity is uniform." ],
+      "equationSet" : {
+        "derived" : [ "vx=v0*cos(theta)", "vy=v0*sin(theta)-g*t", "W = m*v^2/2 + m*g*y (bảo toàn)" ],
+        "canonical" : [ "x=x0+v0*cos(theta)*t", "y=y0+v0*sin(theta)*t-0.5*g*t^2" ],
+        "dependencies" : [ ]
+      },
+      "capabilityId" : "projectile",
+      "applicability" : {
+        "quantities" : [ "initial_position", "initial_height", "initial_velocity", "launch_angle", "gravitational_acceleration", "mass" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "validityDomain" : {
+        "durationPositive" : true
+      },
+      "canonicalInputs" : [ {
+        "key" : "initial_position",
+        "unit" : "m",
+        "defaultValue" : 0
+      }, {
+        "key" : "initial_height",
+        "unit" : "m",
+        "defaultValue" : 0
+      }, {
+        "key" : "initial_velocity",
+        "unit" : "m/s"
+      }, {
+        "key" : "launch_angle",
+        "unit" : "rad"
+      }, {
+        "key" : "gravitational_acceleration",
+        "min" : 4.9E-324,
+        "unit" : "m/s^2"
+      }, {
+        "key" : "mass",
+        "min" : 1.0E-12,
+        "unit" : "kg",
+        "defaultValue" : 1
+      } ],
+      "rendererBindings" : [ {
+        "role" : "trajectory_x",
+        "source" : "x"
+      }, {
+        "role" : "trajectory_y",
+        "source" : "y"
+      } ]
+    }, {
+      "title" : "Chuyển động trong mặt phẳng và cộng vận tốc",
+      "outputs" : [ {
+        "key" : "x",
+        "unit" : "m"
+      }, {
+        "key" : "y",
+        "unit" : "m"
+      }, {
+        "key" : "vx",
+        "unit" : "m/s"
+      }, {
+        "key" : "vy",
+        "unit" : "m/s"
+      }, {
+        "key" : "ground_speed",
+        "unit" : "m/s"
+      } ],
+      "version" : "1.0",
+      "execution" : {
+        "math" : {
+          "rates" : {
+            "x" : [ "add", [ "mul", "speed", [ "cos", "heading_angle" ] ], "drift_velocity_x" ],
+            "y" : [ "add", [ "mul", "speed", [ "sin", "heading_angle" ] ], "drift_velocity_y" ]
+          },
+          "initial" : {
+            "x" : "initial_x",
+            "y" : "initial_y"
+          },
+          "outputs" : {
+            "x" : "x",
+            "y" : "y",
+            "vx" : [ "add", [ "mul", "speed", [ "cos", "heading_angle" ] ], "drift_velocity_x" ],
+            "vy" : [ "add", [ "mul", "speed", [ "sin", "heading_angle" ] ], "drift_velocity_y" ],
+            "ground_speed" : [ "sqrt", [ "add", [ "pow", [ "add", [ "mul", "speed", [ "cos", "heading_angle" ] ], "drift_velocity_x" ], 2 ], [ "pow", [ "add", [ "mul", "speed", [ "sin", "heading_angle" ] ], "drift_velocity_y" ], 2 ] ] ]
+          },
+          "closedForm" : {
+            "x" : [ "add", "initial_x", [ "mul", [ "add", [ "mul", "speed", [ "cos", "heading_angle" ] ], "drift_velocity_x" ], "t" ] ],
+            "y" : [ "add", "initial_y", [ "mul", [ "add", [ "mul", "speed", [ "sin", "heading_angle" ] ], "drift_velocity_y" ], "t" ] ],
+            "vx" : [ "add", [ "mul", "speed", [ "cos", "heading_angle" ] ], "drift_velocity_x" ],
+            "vy" : [ "add", [ "mul", "speed", [ "sin", "heading_angle" ] ], "drift_velocity_y" ],
+            "ground_speed" : [ "sqrt", [ "add", [ "pow", [ "add", [ "mul", "speed", [ "cos", "heading_angle" ] ], "drift_velocity_x" ], 2 ], [ "pow", [ "add", [ "mul", "speed", [ "sin", "heading_angle" ] ], "drift_velocity_y" ], 2 ] ] ]
+          }
+        },
+        "primary" : "analytical",
+        "numerical" : {
+          "method" : "rk4",
+          "solverId" : "schema_ast_rk4"
+        },
+        "closedForm" : {
+          "method" : "approved_ast",
+          "solverId" : "schema_ast_reference"
+        }
+      },
+      "validation" : {
+        "strategy" : "closed_form_checkpoints",
+        "benchmarks" : [ ],
+        "invariants" : [ "finite_output" ],
+        "absoluteTolerance" : 1.0E-4,
+        "relativeTolerance" : 1.0E-4
+      },
+      "assumptions" : [ "Vật chuyển động thẳng đều so với môi trường (nước, gió…) và môi trường chuyển động đều so với mặt đất." ],
+      "equationSet" : {
+        "derived" : [ "d = v*t" ],
+        "canonical" : [ "v13 = v12 + v23 (cộng vận tốc)" ]
+      },
+      "capabilityId" : "uniform_motion_2d",
+      "applicability" : {
+        "quantities" : [ "initial_x", "initial_y", "speed", "heading_angle", "drift_velocity_x", "drift_velocity_y" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "validityDomain" : {
+        "durationPositive" : true
+      },
+      "canonicalInputs" : [ {
+        "key" : "initial_x",
+        "unit" : "m",
+        "defaultValue" : 0
+      }, {
+        "key" : "initial_y",
+        "unit" : "m",
+        "defaultValue" : 0
+      }, {
+        "key" : "speed",
+        "unit" : "m/s",
+        "timeVarying" : true
+      }, {
+        "key" : "heading_angle",
+        "unit" : "rad",
+        "timeVarying" : true,
+        "defaultValue" : 0
+      }, {
+        "key" : "drift_velocity_x",
+        "unit" : "m/s",
+        "timeVarying" : true,
+        "defaultValue" : 0
+      }, {
+        "key" : "drift_velocity_y",
+        "unit" : "m/s",
+        "timeVarying" : true,
+        "defaultValue" : 0
+      } ],
+      "rendererBindings" : [ {
+        "role" : "horizontal_position",
+        "source" : "x"
+      }, {
+        "role" : "vertical_position",
+        "source" : "y"
+      } ]
+    }, {
+      "title" : "Vật trượt chậm dần do ma sát",
+      "outputs" : [ {
+        "key" : "elapsed_time",
+        "unit" : "s"
+      }, {
+        "key" : "position",
+        "unit" : "m"
+      }, {
+        "key" : "velocity",
+        "unit" : "m/s"
+      }, {
+        "key" : "acceleration",
+        "unit" : "m/s^2"
+      } ],
+      "version" : "1.0",
+      "execution" : {
+        "math" : {
+          "rates" : {
+            "elapsed_time" : 1
+          },
+          "initial" : {
+            "elapsed_time" : 0
+          },
+          "outputs" : {
+            "position" : [ "sub", [ "add", "initial_position", [ "mul", "initial_velocity", [ "mul", 0.5, [ "sub", [ "add", "elapsed_time", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ], [ "abs", [ "sub", "elapsed_time", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ] ] ] ] ] ], [ "mul", [ "mul", [ "mul", 0.5, "friction_coefficient" ], "gravitational_acceleration" ], [ "pow", [ "mul", 0.5, [ "sub", [ "add", "elapsed_time", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ], [ "abs", [ "sub", "elapsed_time", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ] ] ] ], 2 ] ] ],
+            "velocity" : [ "sub", "initial_velocity", [ "mul", [ "mul", "friction_coefficient", "gravitational_acceleration" ], [ "mul", 0.5, [ "sub", [ "add", "elapsed_time", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ], [ "abs", [ "sub", "elapsed_time", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ] ] ] ] ] ],
+            "acceleration" : [ "div", [ "mul", [ "mul", [ "neg", "friction_coefficient" ], "gravitational_acceleration" ], [ "add", [ "sub", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ], "elapsed_time" ], [ "abs", [ "sub", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ], "elapsed_time" ] ] ] ], [ "add", [ "mul", 2, [ "abs", [ "sub", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ], "elapsed_time" ] ] ], [ "div", [ "mul", 1.0E-12, "initial_velocity" ], [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ] ],
+            "elapsed_time" : "elapsed_time"
+          },
+          "closedForm" : {
+            "position" : [ "sub", [ "add", "initial_position", [ "mul", "initial_velocity", [ "mul", 0.5, [ "sub", [ "add", "t", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ], [ "abs", [ "sub", "t", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ] ] ] ] ] ], [ "mul", [ "mul", [ "mul", 0.5, "friction_coefficient" ], "gravitational_acceleration" ], [ "pow", [ "mul", 0.5, [ "sub", [ "add", "t", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ], [ "abs", [ "sub", "t", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ] ] ] ], 2 ] ] ],
+            "velocity" : [ "sub", "initial_velocity", [ "mul", [ "mul", "friction_coefficient", "gravitational_acceleration" ], [ "mul", 0.5, [ "sub", [ "add", "t", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ], [ "abs", [ "sub", "t", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ] ] ] ] ] ],
+            "acceleration" : [ "div", [ "mul", [ "mul", [ "neg", "friction_coefficient" ], "gravitational_acceleration" ], [ "add", [ "sub", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ], "t" ], [ "abs", [ "sub", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ], "t" ] ] ] ], [ "add", [ "mul", 2, [ "abs", [ "sub", [ "div", "initial_velocity", [ "mul", "friction_coefficient", "gravitational_acceleration" ] ], "t" ] ] ], [ "div", [ "mul", 1.0E-12, "initial_velocity" ], [ "mul", "friction_coefficient", "gravitational_acceleration" ] ] ] ],
+            "elapsed_time" : "t"
+          }
+        },
+        "primary" : "analytical",
+        "numerical" : {
+          "method" : "rk4",
+          "solverId" : "schema_ast_rk4"
+        },
+        "closedForm" : {
+          "method" : "approved_ast",
+          "solverId" : "schema_ast_reference"
+        }
+      },
+      "validation" : {
+        "strategy" : "closed_form_checkpoints",
+        "benchmarks" : [ ],
+        "invariants" : [ "finite_output" ],
+        "absoluteTolerance" : 1.0E-4,
+        "relativeTolerance" : 1.0E-4
+      },
+      "assumptions" : [ "Vật trượt trên mặt ngang chỉ chịu ma sát trượt, dừng lại và đứng yên khi vận tốc bằng 0." ],
+      "equationSet" : {
+        "derived" : [ "t_dung = v0/(mu*g)" ],
+        "canonical" : [ "a = -mu*g (khi vật còn trượt)", "v = v0 - mu*g*t", "s = v0^2/(2*mu*g)" ]
+      },
+      "capabilityId" : "sliding_to_stop_with_friction",
+      "applicability" : {
+        "quantities" : [ "initial_velocity", "friction_coefficient", "gravitational_acceleration", "initial_position" ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "validityDomain" : {
+        "durationPositive" : true
+      },
+      "canonicalInputs" : [ {
+        "key" : "initial_velocity",
+        "min" : 1.0E-9,
+        "unit" : "m/s"
+      }, {
+        "key" : "friction_coefficient",
+        "max" : 5,
+        "min" : 1.0E-6,
+        "unit" : "1"
+      }, {
+        "key" : "gravitational_acceleration",
+        "min" : 1.0E-6,
+        "unit" : "m/s^2",
+        "defaultValue" : 9.80665
+      }, {
+        "key" : "initial_position",
+        "unit" : "m",
+        "defaultValue" : 0
+      } ],
+      "rendererBindings" : [ {
+        "role" : "position",
+        "source" : "position"
+      }, {
+        "role" : "velocity",
+        "source" : "velocity"
+      } ]
+    } ],
+    "coreTypeRefs" : [ "object_identity", "scalar_quantity", "typed_relation" ],
+    "relationTypes" : [ {
+      "type" : "acts_on",
+      "label" : "tác dụng lên",
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "Một đối tượng tác dụng (lực, trường, nhiệt, bức xạ…) lên đối tượng khác.",
+      "objectTypes" : [ "moving_body", "reference_frame", "path" ],
+      "subjectTypes" : [ "moving_body", "reference_frame", "path" ]
+    }, {
+      "type" : "connected_to",
+      "label" : "nối với",
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "Hai đối tượng được nối trực tiếp (dây, mạch, khớp, lò xo).",
+      "objectTypes" : [ "moving_body", "reference_frame", "path" ],
+      "subjectTypes" : [ "moving_body", "reference_frame", "path" ]
+    }, {
+      "type" : "located_in",
+      "label" : "nằm trong",
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "Đối tượng nằm trong một môi trường, vùng trường hoặc bình chứa.",
+      "objectTypes" : [ "moving_body", "reference_frame", "path" ],
+      "subjectTypes" : [ "moving_body", "reference_frame", "path" ]
+    }, {
+      "type" : "moves_relative_to",
+      "label" : "chuyển động so với",
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "Chuyển động được mô tả so với một hệ quy chiếu hoặc vật khác.",
+      "objectTypes" : [ "moving_body", "reference_frame", "path" ],
+      "subjectTypes" : [ "moving_body", "reference_frame", "path" ]
+    }, {
+      "type" : "emits",
+      "label" : "phát ra",
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "Nguồn phát ra sóng, hạt, bức xạ hoặc nhiệt.",
+      "objectTypes" : [ "moving_body", "reference_frame", "path" ],
+      "subjectTypes" : [ "moving_body", "reference_frame", "path" ]
+    } ],
+    "visualCapability" : {
+      "mode" : "generated_scene",
+      "scope" : "Generate or draw procedural visual elements from the confirmed setup, its objects, relations, and quantities. Never require a fixed asset catalog entry for an object.",
+      "purpose" : "An explanatory visual illustrates the phenomenon and declared assumptions. It is not evidence of a numerical physical simulation.",
+      "interaction" : "Changing parameter controls recomputes backend solver fields; PixiJS updates the generated SVG layers from those fields. Decorative presentation controls remain separate from physics."
+    },
+    "conceptVocabulary" : {
+      "scope" : "high_school_physics",
+      "guidance" : "Listed concepts guide interpretation but are not an exhaustive allowlist. An unlisted concept may be introduced only when grounded in the user's confirmed description and an established high-school physics law; explain the law and any assumptions. If that grounding is uncertain, clarify instead of inventing behavior.",
+      "openWorld" : true
+    },
+    "metaSchemaVersion" : "2.0",
+    "quantityDefinitions" : [ {
+      "key" : "initial_position",
+      "label" : "tọa độ ban đầu",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "tọa độ ban đầu",
+      "allowedUnits" : [ "m" ]
+    }, {
+      "key" : "initial_velocity",
+      "label" : "vận tốc ban đầu",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "vận tốc ban đầu",
+      "allowedUnits" : [ "m/s" ]
+    }, {
+      "key" : "acceleration",
+      "label" : "gia tốc",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "gia tốc",
+      "allowedUnits" : [ "m/s^2" ]
+    }, {
+      "key" : "position",
+      "label" : "tọa độ",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "tọa độ",
+      "allowedUnits" : [ "m" ]
+    }, {
+      "key" : "velocity",
+      "label" : "vận tốc",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "vận tốc",
+      "allowedUnits" : [ "m/s" ]
+    }, {
+      "key" : "gravitational_acceleration",
+      "label" : "gia tốc trọng trường",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "gia tốc trọng trường",
+      "allowedUnits" : [ "m/s^2" ]
+    }, {
+      "key" : "mass",
+      "label" : "khối lượng",
+      "aliases" : [ "m" ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "khối lượng",
+      "allowedUnits" : [ "kg" ]
+    }, {
+      "key" : "kinetic_energy",
+      "label" : "động năng",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "động năng",
+      "allowedUnits" : [ "J" ]
+    }, {
+      "key" : "potential_energy",
+      "label" : "thế năng",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "thế năng",
+      "allowedUnits" : [ "J" ]
+    }, {
+      "key" : "mechanical_energy",
+      "label" : "cơ năng",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "cơ năng",
+      "allowedUnits" : [ "J" ]
+    }, {
+      "key" : "initial_height",
+      "label" : "độ cao ban đầu",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "độ cao ban đầu",
+      "allowedUnits" : [ "m" ]
+    }, {
+      "key" : "launch_angle",
+      "label" : "góc phóng",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "Angle from a stated reference direction.",
+      "allowedUnits" : [ "rad" ]
+    }, {
+      "key" : "x",
+      "label" : "tọa độ x",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "tọa độ x",
+      "allowedUnits" : [ "m" ]
+    }, {
+      "key" : "y",
+      "label" : "tọa độ y",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "tọa độ y",
+      "allowedUnits" : [ "m" ]
+    }, {
+      "key" : "vx",
+      "label" : "vận tốc theo x",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "vận tốc theo x",
+      "allowedUnits" : [ "m/s" ]
+    }, {
+      "key" : "vy",
+      "label" : "vận tốc theo y",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "vận tốc theo y",
+      "allowedUnits" : [ "m/s" ]
+    }, {
+      "key" : "speed",
+      "label" : "tốc độ",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "tốc độ",
+      "allowedUnits" : [ "m/s" ]
+    }, {
+      "key" : "initial_x",
+      "label" : "tọa độ x ban đầu",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "tọa độ x ban đầu",
+      "allowedUnits" : [ "m" ]
+    }, {
+      "key" : "initial_y",
+      "label" : "tọa độ y ban đầu",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "tọa độ y ban đầu",
+      "allowedUnits" : [ "m" ]
+    }, {
+      "key" : "heading_angle",
+      "label" : "góc hướng",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "góc hướng",
+      "allowedUnits" : [ "rad" ]
+    }, {
+      "key" : "drift_velocity_x",
+      "label" : "vận tốc trôi theo x",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "vận tốc trôi theo x",
+      "allowedUnits" : [ "m/s" ]
+    }, {
+      "key" : "drift_velocity_y",
+      "label" : "vận tốc trôi theo y",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "vận tốc trôi theo y",
+      "allowedUnits" : [ "m/s" ]
+    }, {
+      "key" : "ground_speed",
+      "label" : "tốc độ so với mặt đất",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "tốc độ so với mặt đất",
+      "allowedUnits" : [ "m/s" ]
+    }, {
+      "key" : "friction_coefficient",
+      "label" : "hệ số ma sát",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "hệ số ma sát",
+      "allowedUnits" : [ "1" ]
+    }, {
+      "key" : "elapsed_time",
+      "label" : "thời gian",
+      "aliases" : [ ],
+      "appliesTo" : {
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ]
+      },
+      "description" : "thời gian",
+      "allowedUnits" : [ "s" ]
+    } ],
+    "simulationCapability" : {
+      "mode" : "generated_visual",
+      "scope" : "LLM-generated contextual SVG/PixiJS presentation. Physical quantities are computed from applicable approved capability equation ASTs. Participant names, counts, shapes and environments are unrestricted by the renderer.",
+      "runtimes" : [ "generated_visual" ],
+      "limitations" : [ "Verified computation requires all relevant behavior to map to declared executable capabilities and their validity domains. Unmapped behavior is explicitly visual-only and unverified." ]
+    },
+    "applicationRequirements" : [ {
+      "id" : "participants_and_roles",
+      "appliesTo" : {
+        "quantities" : [ ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ],
+        "relationTypes" : [ ]
+      },
+      "description" : "Xác định các đối tượng tham gia và vai trò vật lí của từng đối tượng trước khi chọn định luật."
+    }, {
+      "id" : "initial_state",
+      "appliesTo" : {
+        "quantities" : [ ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ],
+        "relationTypes" : [ ]
+      },
+      "description" : "Trạng thái ban đầu và các thông số cần do người dùng cung cấp hoặc chấp nhận giá trị mặc định."
+    }, {
+      "id" : "validity",
+      "appliesTo" : {
+        "quantities" : [ ],
+        "objectTypes" : [ "moving_body", "reference_frame", "path" ],
+        "relationTypes" : [ ]
+      },
+      "description" : "Chỉ dùng một năng lực tính toán khi các giả thiết của nó phù hợp với mô tả; nếu không, hỏi lại bằng ngôn ngữ đời thường."
+    } ]
+  },
+  "solverFieldMeta" : {
+    "p1.x" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "x",
+      "unit" : "m",
+      "label" : "tọa độ x",
+      "rendererRole" : "trajectory_x"
+    },
+    "p1.y" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "y",
+      "unit" : "m",
+      "label" : "tọa độ y",
+      "rendererRole" : "trajectory_y"
+    },
+    "p1.vx" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "vx",
+      "unit" : "m/s",
+      "label" : "vận tốc theo x"
+    },
+    "p1.vy" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "vy",
+      "unit" : "m/s",
+      "label" : "vận tốc theo y"
+    },
+    "p1.speed" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "speed",
+      "unit" : "m/s",
+      "label" : "tốc độ"
+    },
+    "p1.kinetic_energy" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "kinetic_energy",
+      "unit" : "J",
+      "label" : "động năng"
+    },
+    "p1.potential_energy" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "potential_energy",
+      "unit" : "J",
+      "label" : "thế năng"
+    },
+    "p1.mechanical_energy" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "mechanical_energy",
+      "unit" : "J",
+      "label" : "cơ năng"
+    },
+    "p1.initial_position" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "initial_position",
+      "unit" : "m",
+      "label" : "tọa độ ban đầu",
+      "constant" : 0
+    },
+    "p1.initial_height" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "initial_height",
+      "unit" : "m",
+      "label" : "độ cao ban đầu",
+      "constant" : 1.5
+    },
+    "p1.gravitational_acceleration" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "gravitational_acceleration",
+      "unit" : "m/s^2",
+      "label" : "gia tốc trọng trường",
+      "constant" : 9.8
+    },
+    "p1.mass" : {
+      "participantId" : "p1",
+      "participantLabel" : "Quả bóng",
+      "quantity" : "mass",
+      "unit" : "kg",
+      "label" : "khối lượng",
+      "constant" : 1
+    }
+  },
+  "solverTimeline" : {
+    "durationSeconds" : 3.0,
+    "frames" : [ {
+      "t" : 0.0,
+      "values" : {
+        "t" : 0.0,
+        "p1.x" : 0.0,
+        "p1.y" : 1.5,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 6.4278760968653925,
+        "p1.speed" : 10.0,
+        "p1.kinetic_energy" : 49.99999999999999,
+        "p1.potential_energy" : 14.700000000000001,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.015,
+      "values" : {
+        "t" : 0.015,
+        "p1.x" : 0.1149066664678467,
+        "p1.y" : 1.595315641452981,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 6.280876096865392,
+        "p1.speed" : 9.906150282906149,
+        "p1.kinetic_energy" : 49.06590671376078,
+        "p1.potential_energy" : 15.634093286239215,
+        "p1.mechanical_energy" : 64.7
+      }
+    }, {
+      "t" : 0.03,
+      "values" : {
+        "t" : 0.03,
+        "p1.x" : 0.2298133329356934,
+        "p1.y" : 1.688426282905962,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 6.133876096865392,
+        "p1.speed" : 9.813605089621404,
+        "p1.kinetic_energy" : 48.15342242752156,
+        "p1.potential_energy" : 16.54657757247843,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.045,
+      "values" : {
+        "t" : 0.045,
+        "p1.x" : 0.3447199994035401,
+        "p1.y" : 1.779331924358943,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 5.986876096865392,
+        "p1.speed" : 9.722401672558314,
+        "p1.kinetic_energy" : 47.262547141282354,
+        "p1.potential_energy" : 17.43745285871764,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.06,
+      "values" : {
+        "t" : 0.06,
+        "p1.x" : 0.4596266658713868,
+        "p1.y" : 1.868032565811924,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 5.8398760968653916,
+        "p1.speed" : 9.632578144509717,
+        "p1.kinetic_energy" : 46.39328085504313,
+        "p1.potential_energy" : 18.306719144956855,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.075,
+      "values" : {
+        "t" : 0.075,
+        "p1.x" : 0.5745333323392334,
+        "p1.y" : 1.9545282072649048,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 5.692876096865391,
+        "p1.speed" : 9.54417346539803,
+        "p1.kinetic_energy" : 45.54562356880392,
+        "p1.potential_energy" : 19.15437643119607,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.09,
+      "values" : {
+        "t" : 0.09,
+        "p1.x" : 0.6894399988070801,
+        "p1.y" : 2.0388188487178858,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 5.545876096865391,
+        "p1.speed" : 9.457227424839132,
+        "p1.kinetic_energy" : 44.719575282564705,
+        "p1.potential_energy" : 19.98042471743528,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.105,
+      "values" : {
+        "t" : 0.105,
+        "p1.x" : 0.8043466652749267,
+        "p1.y" : 2.1209044901708665,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 5.398876096865391,
+        "p1.speed" : 9.371780620173041,
+        "p1.kinetic_energy" : 43.915135996325496,
+        "p1.potential_energy" : 20.784864003674492,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.12,
+      "values" : {
+        "t" : 0.12,
+        "p1.x" : 0.9192533317427733,
+        "p1.y" : 2.200785131623847,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 5.251876096865391,
+        "p1.speed" : 9.287874429608346,
+        "p1.kinetic_energy" : 43.13230571008628,
+        "p1.potential_energy" : 21.567694289913703,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.135,
+      "values" : {
+        "t" : 0.135,
+        "p1.x" : 1.03415999821062,
+        "p1.y" : 2.278460773076828,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 5.10487609686539,
+        "p1.speed" : 9.205550980125748,
+        "p1.kinetic_energy" : 42.371084423847066,
+        "p1.potential_energy" : 22.328915576152916,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.15,
+      "values" : {
+        "t" : 0.15,
+        "p1.x" : 1.1490666646784666,
+        "p1.y" : 2.3539314145298085,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 4.95787609686539,
+        "p1.speed" : 9.124853109788436,
+        "p1.kinetic_energy" : 41.63147213760785,
+        "p1.potential_energy" : 23.068527862392123,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.165,
+      "values" : {
+        "t" : 0.165,
+        "p1.x" : 1.2639733311463133,
+        "p1.y" : 2.427197055982789,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 4.81087609686539,
+        "p1.speed" : 9.045824324114264,
+        "p1.kinetic_energy" : 40.91346885136864,
+        "p1.potential_energy" : 23.786531148631337,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.18,
+      "values" : {
+        "t" : 0.18,
+        "p1.x" : 1.37887999761416,
+        "p1.y" : 2.4982576974357698,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 4.66387609686539,
+        "p1.speed" : 8.968508746177307,
+        "p1.kinetic_energy" : 40.21707456512942,
+        "p1.potential_energy" : 24.482925434870545,
+        "p1.mechanical_energy" : 64.69999999999996
+      }
+    }, {
+      "t" : 0.195,
+      "values" : {
+        "t" : 0.195,
+        "p1.x" : 1.4937866640820066,
+        "p1.y" : 2.567113338888751,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 4.516876096865389,
+        "p1.speed" : 8.892951060125116,
+        "p1.kinetic_energy" : 39.54228927889021,
+        "p1.potential_energy" : 25.15771072110976,
+        "p1.mechanical_energy" : 64.69999999999996
+      }
+    }, {
+      "t" : 0.21,
+      "values" : {
+        "t" : 0.21,
+        "p1.x" : 1.6086933305498532,
+        "p1.y" : 2.633763980341732,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 4.369876096865389,
+        "p1.speed" : 8.819196447823463,
+        "p1.kinetic_energy" : 38.889112992651,
+        "p1.potential_energy" : 25.810887007348974,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.225,
+      "values" : {
+        "t" : 0.225,
+        "p1.x" : 1.7235999970176998,
+        "p1.y" : 2.698209621794713,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 4.222876096865389,
+        "p1.speed" : 8.747290518373308,
+        "p1.kinetic_energy" : 38.25754570641179,
+        "p1.potential_energy" : 26.442454293588188,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.24,
+      "values" : {
+        "t" : 0.24,
+        "p1.x" : 1.8385066634855465,
+        "p1.y" : 2.760450263247694,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 4.075876096865389,
+        "p1.speed" : 8.677279230285558,
+        "p1.kinetic_energy" : 37.64758742017257,
+        "p1.potential_energy" : 27.052412579827404,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.255,
+      "values" : {
+        "t" : 0.255,
+        "p1.x" : 1.9534133299533931,
+        "p1.y" : 2.820485904700675,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 3.928876096865389,
+        "p1.speed" : 8.609208806148606,
+        "p1.kinetic_energy" : 37.05923813393336,
+        "p1.potential_energy" : 27.640761866066615,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.27,
+      "values" : {
+        "t" : 0.27,
+        "p1.x" : 2.06831999642124,
+        "p1.y" : 2.878316546153656,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 3.781876096865389,
+        "p1.speed" : 8.543125639681785,
+        "p1.kinetic_energy" : 36.49249784769415,
+        "p1.potential_energy" : 28.207502152305832,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.285,
+      "values" : {
+        "t" : 0.285,
+        "p1.x" : 2.1832266628890866,
+        "p1.y" : 2.933942187606637,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 3.6348760968653893,
+        "p1.speed" : 8.479076195135287,
+        "p1.kinetic_energy" : 35.94736656145494,
+        "p1.potential_energy" : 28.752633438545043,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.3,
+      "values" : {
+        "t" : 0.3,
+        "p1.x" : 2.2981333293569333,
+        "p1.y" : 2.987362829059618,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 3.4878760968653895,
+        "p1.speed" : 8.417106899073545,
+        "p1.kinetic_energy" : 35.42384427521573,
+        "p1.potential_energy" : 29.276155724784257,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.315,
+      "values" : {
+        "t" : 0.315,
+        "p1.x" : 2.41303999582478,
+        "p1.y" : 3.038578470512599,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 3.3408760968653897,
+        "p1.speed" : 8.357264024664593,
+        "p1.kinetic_energy" : 34.92193098897651,
+        "p1.potential_energy" : 29.778069011023472,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.33,
+      "values" : {
+        "t" : 0.33,
+        "p1.x" : 2.5279466622926265,
+        "p1.y" : 3.08758911196558,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 3.19387609686539,
+        "p1.speed" : 8.29959356869206,
+        "p1.kinetic_energy" : 34.4416267027373,
+        "p1.potential_energy" : 30.258373297262686,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.345,
+      "values" : {
+        "t" : 0.345,
+        "p1.x" : 2.642853328760473,
+        "p1.y" : 3.1343947534185608,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 3.04687609686539,
+        "p1.speed" : 8.244141121608495,
+        "p1.kinetic_energy" : 33.98293141649809,
+        "p1.potential_energy" : 30.7170685835019,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.36,
+      "values" : {
+        "t" : 0.36,
+        "p1.x" : 2.75775999522832,
+        "p1.y" : 3.1789953948715417,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 2.8998760968653903,
+        "p1.speed" : 8.190951731057739,
+        "p1.kinetic_energy" : 33.54584513025888,
+        "p1.potential_energy" : 31.15415486974111,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.375,
+      "values" : {
+        "t" : 0.375,
+        "p1.x" : 2.8726666616961665,
+        "p1.y" : 3.2213910363245226,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 2.7528760968653905,
+        "p1.speed" : 8.140069759408659,
+        "p1.kinetic_energy" : 33.130367844019666,
+        "p1.potential_energy" : 31.569632155980322,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.39,
+      "values" : {
+        "t" : 0.39,
+        "p1.x" : 2.987573328164013,
+        "p1.y" : 3.2615816777775035,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 2.6058760968653907,
+        "p1.speed" : 8.09153873596122,
+        "p1.kinetic_energy" : 32.736499557780455,
+        "p1.potential_energy" : 31.963500442219537,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.405,
+      "values" : {
+        "t" : 0.405,
+        "p1.x" : 3.1024799946318597,
+        "p1.y" : 3.2995673192304844,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 2.458876096865391,
+        "p1.speed" : 8.045401204606424,
+        "p1.kinetic_energy" : 32.36424027154125,
+        "p1.potential_energy" : 32.33575972845875,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.42,
+      "values" : {
+        "t" : 0.42,
+        "p1.x" : 3.2173866610997064,
+        "p1.y" : 3.3353479606834653,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 2.311876096865391,
+        "p1.speed" : 8.00169856784196,
+        "p1.kinetic_energy" : 32.01358998530203,
+        "p1.potential_energy" : 32.68641001469796,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.435,
+      "values" : {
+        "t" : 0.435,
+        "p1.x" : 3.332293327567553,
+        "p1.y" : 3.368923602136446,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 2.1648760968653913,
+        "p1.speed" : 7.960470928162834,
+        "p1.kinetic_energy" : 31.68454869906282,
+        "p1.potential_energy" : 33.01545130093717,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.45,
+      "values" : {
+        "t" : 0.45,
+        "p1.x" : 3.4471999940353997,
+        "p1.y" : 3.400294243589427,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 2.0178760968653915,
+        "p1.speed" : 7.921756927957789,
+        "p1.kinetic_energy" : 31.37711641282361,
+        "p1.potential_energy" : 33.322883587176385,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.465,
+      "values" : {
+        "t" : 0.465,
+        "p1.x" : 3.5621066605032463,
+        "p1.y" : 3.429459885042408,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 1.8708760968653915,
+        "p1.speed" : 7.885593589145258,
+        "p1.kinetic_energy" : 31.091293126584397,
+        "p1.potential_energy" : 33.6087068734156,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.48,
+      "values" : {
+        "t" : 0.48,
+        "p1.x" : 3.677013326971093,
+        "p1.y" : 3.4564205264953887,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 1.7238760968653914,
+        "p1.speed" : 7.852016153873499,
+        "p1.kinetic_energy" : 30.827078840345184,
+        "p1.potential_energy" : 33.87292115965481,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.495,
+      "values" : {
+        "t" : 0.495,
+        "p1.x" : 3.7919199934389396,
+        "p1.y" : 3.4811761679483695,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 1.5768760968653914,
+        "p1.speed" : 7.821057927685483,
+        "p1.kinetic_energy" : 30.584473554105973,
+        "p1.potential_energy" : 34.11552644589403,
+        "p1.mechanical_energy" : 64.7
+      }
+    }, {
+      "t" : 0.51,
+      "values" : {
+        "t" : 0.51,
+        "p1.x" : 3.9068266599067862,
+        "p1.y" : 3.5037268094013503,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 1.4298760968653914,
+        "p1.speed" : 7.7927501266070065,
+        "p1.kinetic_energy" : 30.36347726786676,
+        "p1.potential_energy" : 34.33652273213323,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.525,
+      "values" : {
+        "t" : 0.525,
+        "p1.x" : 4.021733326374633,
+        "p1.y" : 3.524072450854331,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 1.2828760968653914,
+        "p1.speed" : 7.767121729653469,
+        "p1.kinetic_energy" : 30.164089981627548,
+        "p1.potential_energy" : 34.53591001837245,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.54,
+      "values" : {
+        "t" : 0.54,
+        "p1.x" : 4.13663999284248,
+        "p1.y" : 3.542213092307312,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 1.1358760968653914,
+        "p1.speed" : 7.744199338264522,
+        "p1.kinetic_energy" : 29.986311695388334,
+        "p1.potential_energy" : 34.71368830461166,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.555,
+      "values" : {
+        "t" : 0.555,
+        "p1.x" : 4.251546659310327,
+        "p1.y" : 3.5581487337602926,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 0.9888760968653914,
+        "p1.speed" : 7.724007044164204,
+        "p1.kinetic_energy" : 29.830142409149122,
+        "p1.potential_energy" : 34.86985759085087,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.57,
+      "values" : {
+        "t" : 0.57,
+        "p1.x" : 4.366453325778173,
+        "p1.y" : 3.5718793752132734,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 0.8418760968653913,
+        "p1.speed" : 7.706566307105897,
+        "p1.kinetic_energy" : 29.695582122909908,
+        "p1.potential_energy" : 35.004417877090084,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.585,
+      "values" : {
+        "t" : 0.585,
+        "p1.x" : 4.48135999224602,
+        "p1.y" : 3.583405016666254,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 0.6948760968653913,
+        "p1.speed" : 7.691895843895794,
+        "p1.kinetic_energy" : 29.582630836670695,
+        "p1.potential_energy" : 35.11736916332929,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.6,
+      "values" : {
+        "t" : 0.6,
+        "p1.x" : 4.5962666587138665,
+        "p1.y" : 3.592725658119235,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 0.5478760968653913,
+        "p1.speed" : 7.680011529995444,
+        "p1.kinetic_energy" : 29.491288550431484,
+        "p1.potential_energy" : 35.208711449568504,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.615,
+      "values" : {
+        "t" : 0.615,
+        "p1.x" : 4.711173325181713,
+        "p1.y" : 3.5998412995722155,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 0.4008760968653913,
+        "p1.speed" : 7.670926314884308,
+        "p1.kinetic_energy" : 29.42155526419227,
+        "p1.potential_energy" : 35.27844473580772,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.63,
+      "values" : {
+        "t" : 0.63,
+        "p1.x" : 4.82607999164956,
+        "p1.y" : 3.6047519410251962,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 0.25387609686539125,
+        "p1.speed" : 7.664650152218699,
+        "p1.kinetic_energy" : 29.37343097795306,
+        "p1.potential_energy" : 35.326569022046925,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.645,
+      "values" : {
+        "t" : 0.645,
+        "p1.x" : 4.9409866581174064,
+        "p1.y" : 3.607457582478177,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : 0.10687609686539126,
+        "p1.speed" : 7.661189945656464,
+        "p1.kinetic_energy" : 29.346915691713846,
+        "p1.potential_energy" : 35.353084308286135,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.66,
+      "values" : {
+        "t" : 0.66,
+        "p1.x" : 5.055893324585253,
+        "p1.y" : 3.6079582239311576,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -0.04012390313460873,
+        "p1.speed" : 7.660549511030476,
+        "p1.kinetic_energy" : 29.342009405474634,
+        "p1.potential_energy" : 35.35799059452535,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.675,
+      "values" : {
+        "t" : 0.675,
+        "p1.x" : 5.1707999910531,
+        "p1.y" : 3.6062538653841383,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -0.18712390313460872,
+        "p1.speed" : 7.662729555352377,
+        "p1.kinetic_energy" : 29.35871211923542,
+        "p1.potential_energy" : 35.34128788076456,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.69,
+      "values" : {
+        "t" : 0.69,
+        "p1.x" : 5.285706657520946,
+        "p1.y" : 3.602344506837119,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -0.3341239031346087,
+        "p1.speed" : 7.667727672915387,
+        "p1.kinetic_energy" : 29.397023832996208,
+        "p1.potential_energy" : 35.30297616700377,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.705,
+      "values" : {
+        "t" : 0.705,
+        "p1.x" : 5.400613323988793,
+        "p1.y" : 3.5962301482901,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -0.48112390313460873,
+        "p1.speed" : 7.675538358546193,
+        "p1.kinetic_energy" : 29.456944546756997,
+        "p1.potential_energy" : 35.24305545324298,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.72,
+      "values" : {
+        "t" : 0.72,
+        "p1.x" : 5.51551999045664,
+        "p1.y" : 3.587910789743081,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -0.6281239031346088,
+        "p1.speed" : 7.686153037836,
+        "p1.kinetic_energy" : 29.538474260517784,
+        "p1.potential_energy" : 35.161525739482194,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.735,
+      "values" : {
+        "t" : 0.735,
+        "p1.x" : 5.630426656924486,
+        "p1.y" : 3.577386431196062,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -0.7751239031346088,
+        "p1.speed" : 7.699560113964767,
+        "p1.kinetic_energy" : 29.64161297427857,
+        "p1.potential_energy" : 35.05838702572141,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 0.75,
+      "values" : {
+        "t" : 0.75,
+        "p1.x" : 5.745333323392333,
+        "p1.y" : 3.564657072649043,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -0.9221239031346088,
+        "p1.speed" : 7.715745030525485,
+        "p1.kinetic_energy" : 29.76636068803936,
+        "p1.potential_energy" : 34.933639311960626,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.765,
+      "values" : {
+        "t" : 0.765,
+        "p1.x" : 5.86023998986018,
+        "p1.y" : 3.5497227141020242,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -1.0691239031346087,
+        "p1.speed" : 7.734690349561531,
+        "p1.kinetic_energy" : 29.912717401800144,
+        "p1.potential_energy" : 34.78728259819984,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.78,
+      "values" : {
+        "t" : 0.78,
+        "p1.x" : 5.975146656328026,
+        "p1.y" : 3.5325833555550052,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -1.2161239031346087,
+        "p1.speed" : 7.756375843854001,
+        "p1.kinetic_energy" : 30.080683115560934,
+        "p1.potential_energy" : 34.61931688443905,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.795,
+      "values" : {
+        "t" : 0.795,
+        "p1.x" : 6.090053322795873,
+        "p1.y" : 3.5132389970079863,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -1.3631239031346087,
+        "p1.speed" : 7.780778602340735,
+        "p1.kinetic_energy" : 30.27025782932172,
+        "p1.potential_energy" : 34.42974217067827,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.81,
+      "values" : {
+        "t" : 0.81,
+        "p1.x" : 6.2049599892637195,
+        "p1.y" : 3.4916896384609672,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -1.5101239031346088,
+        "p1.speed" : 7.807873147417612,
+        "p1.kinetic_energy" : 30.481441543082507,
+        "p1.potential_energy" : 34.218558456917485,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.825,
+      "values" : {
+        "t" : 0.825,
+        "p1.x" : 6.319866655731566,
+        "p1.y" : 3.4679352799139482,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -1.6571239031346088,
+        "p1.speed" : 7.837631562767325,
+        "p1.kinetic_energy" : 30.714234256843294,
+        "p1.potential_energy" : 33.9857657431567,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.84,
+      "values" : {
+        "t" : 0.84,
+        "p1.x" : 6.434773322199413,
+        "p1.y" : 3.441975921366929,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -1.8041239031346088,
+        "p1.speed" : 7.870023630282705,
+        "p1.kinetic_energy" : 30.968635970604083,
+        "p1.potential_energy" : 33.731364029395905,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.855,
+      "values" : {
+        "t" : 0.855,
+        "p1.x" : 6.549679988667259,
+        "p1.y" : 3.41381156281991,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -1.9511239031346088,
+        "p1.speed" : 7.905016974600987,
+        "p1.kinetic_energy" : 31.24464668436487,
+        "p1.potential_energy" : 33.45535331563512,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.87,
+      "values" : {
+        "t" : 0.87,
+        "p1.x" : 6.664586655135106,
+        "p1.y" : 3.383442204272891,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -2.0981239031346086,
+        "p1.speed" : 7.942577213741854,
+        "p1.kinetic_energy" : 31.54226639812566,
+        "p1.potential_energy" : 33.157733601874334,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.885,
+      "values" : {
+        "t" : 0.885,
+        "p1.x" : 6.779493321602953,
+        "p1.y" : 3.350867845725872,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -2.2451239031346084,
+        "p1.speed" : 7.982668114344532,
+        "p1.kinetic_energy" : 31.861495111886445,
+        "p1.potential_energy" : 32.83850488811355,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.9,
+      "values" : {
+        "t" : 0.9,
+        "p1.x" : 6.894399988070799,
+        "p1.y" : 3.316088487178853,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -2.392123903134608,
+        "p1.speed" : 8.025251750025943,
+        "p1.kinetic_energy" : 32.20233282564723,
+        "p1.potential_energy" : 32.49766717435276,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.915,
+      "values" : {
+        "t" : 0.915,
+        "p1.x" : 7.009306654538646,
+        "p1.y" : 3.279104128631834,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -2.539123903134608,
+        "p1.speed" : 8.070288661430645,
+        "p1.kinetic_energy" : 32.56477953940802,
+        "p1.potential_energy" : 32.135220460591974,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.93,
+      "values" : {
+        "t" : 0.93,
+        "p1.x" : 7.124213321006493,
+        "p1.y" : 3.2399147700848148,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -2.686123903134608,
+        "p1.speed" : 8.117738016611376,
+        "p1.kinetic_energy" : 32.9488352531688,
+        "p1.potential_energy" : 31.751164746831186,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.945,
+      "values" : {
+        "t" : 0.945,
+        "p1.x" : 7.239119987474339,
+        "p1.y" : 3.1985204115377956,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -2.8331239031346076,
+        "p1.speed" : 8.16755777046353,
+        "p1.kinetic_energy" : 33.354499966929595,
+        "p1.potential_energy" : 31.3455000330704,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.96,
+      "values" : {
+        "t" : 0.96,
+        "p1.x" : 7.354026653942186,
+        "p1.y" : 3.1549210529907765,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -2.9801239031346074,
+        "p1.speed" : 8.219704822034716,
+        "p1.kinetic_energy" : 33.78177368069038,
+        "p1.potential_energy" : 30.91822631930961,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.975,
+      "values" : {
+        "t" : 0.975,
+        "p1.x" : 7.4689333204100326,
+        "p1.y" : 3.1091166944437574,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -3.127123903134607,
+        "p1.speed" : 8.274135168638614,
+        "p1.kinetic_energy" : 34.23065639445117,
+        "p1.potential_energy" : 30.469343605548826,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 0.99,
+      "values" : {
+        "t" : 0.99,
+        "p1.x" : 7.583839986877879,
+        "p1.y" : 3.0611073358967382,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -3.274123903134607,
+        "p1.speed" : 8.330804055817415,
+        "p1.kinetic_energy" : 34.70114810821195,
+        "p1.potential_energy" : 29.998851891788036,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.005,
+      "values" : {
+        "t" : 1.005,
+        "p1.x" : 7.698746653345726,
+        "p1.y" : 3.010892977349719,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -3.421123903134607,
+        "p1.speed" : 8.389666122316518,
+        "p1.kinetic_energy" : 35.19324882197274,
+        "p1.potential_energy" : 29.506751178027248,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.02,
+      "values" : {
+        "t" : 1.02,
+        "p1.x" : 7.8136533198135725,
+        "p1.y" : 2.9584736188027,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -3.5681239031346066,
+        "p1.speed" : 8.450675539355837,
+        "p1.kinetic_energy" : 35.70695853573353,
+        "p1.potential_energy" : 28.99304146426646,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.035,
+      "values" : {
+        "t" : 1.035,
+        "p1.x" : 7.928559986281419,
+        "p1.y" : 2.9038492602556807,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -3.7151239031346064,
+        "p1.speed" : 8.513786143601953,
+        "p1.kinetic_energy" : 36.242277249494315,
+        "p1.potential_energy" : 28.457722750505674,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.05,
+      "values" : {
+        "t" : 1.05,
+        "p1.x" : 8.043466652749267,
+        "p1.y" : 2.8470199017086615,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -3.862123903134606,
+        "p1.speed" : 8.578951563361935,
+        "p1.kinetic_energy" : 36.7992049632551,
+        "p1.potential_energy" : 27.900795036744885,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.065,
+      "values" : {
+        "t" : 1.065,
+        "p1.x" : 8.158373319217114,
+        "p1.y" : 2.7879855431616423,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -4.009123903134606,
+        "p1.speed" : 8.646125337631405,
+        "p1.kinetic_energy" : 37.377741677015884,
+        "p1.potential_energy" : 27.322258322984098,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.08,
+      "values" : {
+        "t" : 1.08,
+        "p1.x" : 8.273279985684962,
+        "p1.y" : 2.726746184614623,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -4.156123903134606,
+        "p1.speed" : 8.715261027734817,
+        "p1.kinetic_energy" : 37.97788739077667,
+        "p1.potential_energy" : 26.72211260922331,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.095,
+      "values" : {
+        "t" : 1.095,
+        "p1.x" : 8.38818665215281,
+        "p1.y" : 2.663301826067604,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -4.3031239031346065,
+        "p1.speed" : 8.78631232139371,
+        "p1.kinetic_energy" : 38.59964210453746,
+        "p1.potential_energy" : 26.10035789546252,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 1.11,
+      "values" : {
+        "t" : 1.11,
+        "p1.x" : 8.503093318620657,
+        "p1.y" : 2.5976524675205845,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -4.450123903134607,
+        "p1.speed" : 8.859233129148171,
+        "p1.kinetic_energy" : 39.24300581829825,
+        "p1.potential_energy" : 25.45699418170173,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.125,
+      "values" : {
+        "t" : 1.125,
+        "p1.x" : 8.617999985088504,
+        "p1.y" : 2.5297981089735653,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -4.597123903134607,
+        "p1.speed" : 8.933977673137429,
+        "p1.kinetic_energy" : 39.90797853205903,
+        "p1.potential_energy" : 24.79202146794094,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 1.14,
+      "values" : {
+        "t" : 1.14,
+        "p1.x" : 8.732906651556352,
+        "p1.y" : 2.459738750426546,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -4.744123903134607,
+        "p1.speed" : 9.010500568316926,
+        "p1.kinetic_energy" : 40.59456024581983,
+        "p1.potential_energy" : 24.105439754180153,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.155,
+      "values" : {
+        "t" : 1.155,
+        "p1.x" : 8.8478133180242,
+        "p1.y" : 2.3874743918795267,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -4.891123903134607,
+        "p1.speed" : 9.088756896251612,
+        "p1.kinetic_energy" : 41.302750959580614,
+        "p1.potential_energy" : 23.397249040419364,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 1.17,
+      "values" : {
+        "t" : 1.17,
+        "p1.x" : 8.962719984492047,
+        "p1.y" : 2.3130050333325074,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -5.038123903134608,
+        "p1.speed" : 9.168702271678518,
+        "p1.kinetic_energy" : 42.032550673341404,
+        "p1.potential_energy" : 22.667449326658573,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 1.185,
+      "values" : {
+        "t" : 1.185,
+        "p1.x" : 9.077626650959894,
+        "p1.y" : 2.236330674785488,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -5.185123903134608,
+        "p1.speed" : 9.250292902076366,
+        "p1.kinetic_energy" : 42.78395938710219,
+        "p1.potential_energy" : 21.916040612897785,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 1.2,
+      "values" : {
+        "t" : 1.2,
+        "p1.x" : 9.192533317427742,
+        "p1.y" : 2.1574513162384688,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -5.332123903134608,
+        "p1.speed" : 9.333485640516407,
+        "p1.kinetic_energy" : 43.55697710086298,
+        "p1.potential_energy" : 21.143022899136994,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 1.215,
+      "values" : {
+        "t" : 1.215,
+        "p1.x" : 9.30743998389559,
+        "p1.y" : 2.07636695769145,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -5.479123903134608,
+        "p1.speed" : 9.418238032097486,
+        "p1.kinetic_energy" : 44.35160381462377,
+        "p1.potential_energy" : 20.34839618537621,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.23,
+      "values" : {
+        "t" : 1.23,
+        "p1.x" : 9.422346650363437,
+        "p1.y" : 1.9930775991444307,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -5.626123903134609,
+        "p1.speed" : 9.504508354290037,
+        "p1.kinetic_energy" : 45.167839528384555,
+        "p1.potential_energy" : 19.532160471615423,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 1.245,
+      "values" : {
+        "t" : 1.245,
+        "p1.x" : 9.537253316831285,
+        "p1.y" : 1.9075832405974116,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -5.773123903134609,
+        "p1.speed" : 9.592255651529035,
+        "p1.kinetic_energy" : 46.00568424214535,
+        "p1.potential_energy" : 18.694315757854636,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.26,
+      "values" : {
+        "t" : 1.26,
+        "p1.x" : 9.652159983299132,
+        "p1.y" : 1.8198838820503924,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -5.920123903134609,
+        "p1.speed" : 9.681439764405512,
+        "p1.kinetic_energy" : 46.865137955906135,
+        "p1.potential_energy" : 17.834862044093846,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.275,
+      "values" : {
+        "t" : 1.275,
+        "p1.x" : 9.76706664976698,
+        "p1.y" : 1.7299795235033733,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -6.067123903134609,
+        "p1.speed" : 9.772021353810779,
+        "p1.kinetic_energy" : 47.74620066966692,
+        "p1.potential_energy" : 16.95379933033306,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 1.29,
+      "values" : {
+        "t" : 1.29,
+        "p1.x" : 9.881973316234827,
+        "p1.y" : 1.637870164956354,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -6.21412390313461,
+        "p1.speed" : 9.863961920387538,
+        "p1.kinetic_energy" : 48.648872383427715,
+        "p1.potential_energy" : 16.05112761657227,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.305,
+      "values" : {
+        "t" : 1.305,
+        "p1.x" : 9.996879982702675,
+        "p1.y" : 1.5435558064093349,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -6.36112390313461,
+        "p1.speed" : 9.957223819638534,
+        "p1.kinetic_energy" : 49.5731530971885,
+        "p1.potential_energy" : 15.126846902811483,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.32,
+      "values" : {
+        "t" : 1.32,
+        "p1.x" : 10.111786649170522,
+        "p1.y" : 1.4470364478623157,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -6.50812390313461,
+        "p1.speed" : 10.051770273036416,
+        "p1.kinetic_energy" : 50.51904281094929,
+        "p1.potential_energy" : 14.180957189050694,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.335,
+      "values" : {
+        "t" : 1.335,
+        "p1.x" : 10.22669331563837,
+        "p1.y" : 1.3483120893152964,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -6.65512390313461,
+        "p1.speed" : 10.14756537546914,
+        "p1.kinetic_energy" : 51.48654152471008,
+        "p1.potential_energy" : 13.213458475289906,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.35,
+      "values" : {
+        "t" : 1.35,
+        "p1.x" : 10.341599982106217,
+        "p1.y" : 1.2473827307682772,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -6.802123903134611,
+        "p1.speed" : 10.2445740993436,
+        "p1.kinetic_energy" : 52.475649238470865,
+        "p1.potential_energy" : 12.224350761529118,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.365,
+      "values" : {
+        "t" : 1.365,
+        "p1.x" : 10.456506648574065,
+        "p1.y" : 1.144248372221258,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -6.949123903134611,
+        "p1.speed" : 10.342762295656964,
+        "p1.kinetic_energy" : 53.48636595223166,
+        "p1.potential_energy" : 11.213634047768329,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.38,
+      "values" : {
+        "t" : 1.38,
+        "p1.x" : 10.571413315041912,
+        "p1.y" : 1.0389090136742387,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -7.096123903134611,
+        "p1.speed" : 10.442096692330756,
+        "p1.kinetic_energy" : 54.51869166599245,
+        "p1.potential_energy" : 10.18130833400754,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.395,
+      "values" : {
+        "t" : 1.395,
+        "p1.x" : 10.68631998150976,
+        "p1.y" : 0.9313646551272196,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -7.243123903134611,
+        "p1.speed" : 10.54254489008733,
+        "p1.kinetic_energy" : 55.57262637975324,
+        "p1.potential_energy" : 9.127373620246752,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.41,
+      "values" : {
+        "t" : 1.41,
+        "p1.x" : 10.801226647977607,
+        "p1.y" : 0.8216152965802004,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -7.3901239031346115,
+        "p1.speed" : 10.64407535613254,
+        "p1.kinetic_energy" : 56.648170093514025,
+        "p1.potential_energy" : 8.051829906485965,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.425,
+      "values" : {
+        "t" : 1.425,
+        "p1.x" : 10.916133314445455,
+        "p1.y" : 0.7096609380331812,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -7.537123903134612,
+        "p1.speed" : 10.746657415892145,
+        "p1.kinetic_energy" : 57.74532280727482,
+        "p1.potential_energy" : 6.9546771927251765,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.44,
+      "values" : {
+        "t" : 1.44,
+        "p1.x" : 11.031039980913302,
+        "p1.y" : 0.595501579486162,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -7.684123903134612,
+        "p1.speed" : 10.850261243033332,
+        "p1.kinetic_energy" : 58.86408452103561,
+        "p1.potential_energy" : 5.835915478964388,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.455,
+      "values" : {
+        "t" : 1.455,
+        "p1.x" : 11.14594664738115,
+        "p1.y" : 0.47913722093914285,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -7.831123903134612,
+        "p1.speed" : 10.954857847986563,
+        "p1.kinetic_energy" : 60.004455234796396,
+        "p1.potential_energy" : 4.6955447652036,
+        "p1.mechanical_energy" : 64.69999999999999
+      }
+    }, {
+      "t" : 1.47,
+      "values" : {
+        "t" : 1.47,
+        "p1.x" : 11.260853313848997,
+        "p1.y" : 0.36056786239212363,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -7.9781239031346125,
+        "p1.speed" : 11.060419065167213,
+        "p1.kinetic_energy" : 61.16643494855719,
+        "p1.potential_energy" : 3.5335650514428116,
+        "p1.mechanical_energy" : 64.7
+      }
+    }, {
+      "t" : 1.485,
+      "values" : {
+        "t" : 1.485,
+        "p1.x" : 11.375759980316845,
+        "p1.y" : 0.23979350384510445,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -8.125123903134613,
+        "p1.speed" : 11.16691753908105,
+        "p1.kinetic_energy" : 62.35002366231798,
+        "p1.potential_energy" : 2.349976337682024,
+        "p1.mechanical_energy" : 64.7
+      }
+    }, {
+      "t" : 1.5,
+      "values" : {
+        "t" : 1.5,
+        "p1.x" : 11.490666646784693,
+        "p1.y" : 0.11681414529808526,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -8.272123903134613,
+        "p1.speed" : 11.274326709482812,
+        "p1.kinetic_energy" : 63.55522137607877,
+        "p1.potential_energy" : 1.1447786239212356,
+        "p1.mechanical_energy" : 64.7
+      }
+    }, {
+      "t" : 1.515,
+      "values" : {
+        "t" : 1.515,
+        "p1.x" : 11.60557331325254,
+        "p1.y" : -0.008370213248933916,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -8.419123903134613,
+        "p1.speed" : 11.382620795742916,
+        "p1.kinetic_energy" : 64.78202808983956,
+        "p1.potential_energy" : -0.08202808983955238,
+        "p1.mechanical_energy" : 64.7
+      }
+    }, {
+      "t" : 1.53,
+      "values" : {
+        "t" : 1.53,
+        "p1.x" : 11.720479979720388,
+        "p1.y" : -0.1357595717959531,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -8.566123903134613,
+        "p1.speed" : 11.491774780563736,
+        "p1.kinetic_energy" : 66.03044380360035,
+        "p1.potential_energy" : -1.3304438036003405,
+        "p1.mechanical_energy" : 64.7
+      }
+    }, {
+      "t" : 1.545,
+      "values" : {
+        "t" : 1.545,
+        "p1.x" : 11.835386646188235,
+        "p1.y" : -0.2653539303429723,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -8.713123903134614,
+        "p1.speed" : 11.601764393174095,
+        "p1.kinetic_energy" : 67.30046851736114,
+        "p1.potential_energy" : -2.6004685173611284,
+        "p1.mechanical_energy" : 64.70000000000002
+      }
+    }, {
+      "t" : 1.56,
+      "values" : {
+        "t" : 1.56,
+        "p1.x" : 11.950293312656083,
+        "p1.y" : -0.39715328888999146,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -8.860123903134614,
+        "p1.speed" : 11.712566092118493,
+        "p1.kinetic_energy" : 68.59210223112193,
+        "p1.potential_energy" : -3.8921022311219167,
+        "p1.mechanical_energy" : 64.70000000000002
+      }
+    }, {
+      "t" : 1.575,
+      "values" : {
+        "t" : 1.575,
+        "p1.x" : 12.06519997912393,
+        "p1.y" : -0.5311576474370107,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -9.007123903134614,
+        "p1.speed" : 11.824157047746171,
+        "p1.kinetic_energy" : 69.90534494488273,
+        "p1.potential_energy" : -5.205344944882705,
+        "p1.mechanical_energy" : 64.70000000000002
+      }
+    }, {
+      "t" : 1.59,
+      "values" : {
+        "t" : 1.59,
+        "p1.x" : 12.180106645591778,
+        "p1.y" : -0.6673670059840299,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -9.154123903134614,
+        "p1.speed" : 11.936515124494544,
+        "p1.kinetic_energy" : 71.24019665864351,
+        "p1.potential_energy" : -6.540196658643493,
+        "p1.mechanical_energy" : 64.70000000000002
+      }
+    }, {
+      "t" : 1.605,
+      "values" : {
+        "t" : 1.605,
+        "p1.x" : 12.295013312059625,
+        "p1.y" : -0.8057813645310491,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -9.301123903134615,
+        "p1.speed" : 12.049618863051586,
+        "p1.kinetic_energy" : 72.59665737240431,
+        "p1.potential_energy" : -7.896657372404282,
+        "p1.mechanical_energy" : 64.70000000000003
+      }
+    }, {
+      "t" : 1.62,
+      "values" : {
+        "t" : 1.62,
+        "p1.x" : 12.409919978527473,
+        "p1.y" : -0.9464007230780683,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -9.448123903134615,
+        "p1.speed" : 12.163447462472561,
+        "p1.kinetic_energy" : 73.97472708616509,
+        "p1.potential_energy" : -9.27472708616507,
+        "p1.mechanical_energy" : 64.70000000000002
+      }
+    }, {
+      "t" : 1.635,
+      "values" : {
+        "t" : 1.635,
+        "p1.x" : 12.52482664499532,
+        "p1.y" : -1.0892250816250875,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -9.595123903134615,
+        "p1.speed" : 12.277980762318036,
+        "p1.kinetic_energy" : 75.37440579992588,
+        "p1.potential_energy" : -10.674405799925857,
+        "p1.mechanical_energy" : 64.70000000000002
+      }
+    }, {
+      "t" : 1.65,
+      "values" : {
+        "t" : 1.65,
+        "p1.x" : 12.639733311463168,
+        "p1.y" : -1.2342544401721067,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -9.742123903134615,
+        "p1.speed" : 12.393199224872218,
+        "p1.kinetic_energy" : 76.79569351368667,
+        "p1.potential_energy" : -12.095693513686646,
+        "p1.mechanical_energy" : 64.70000000000003
+      }
+    }, {
+      "t" : 1.665,
+      "values" : {
+        "t" : 1.665,
+        "p1.x" : 12.754639977931015,
+        "p1.y" : -1.381488798719126,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -9.889123903134616,
+        "p1.speed" : 12.509083917493516,
+        "p1.kinetic_energy" : 78.23859022744746,
+        "p1.potential_energy" : -13.538590227447436,
+        "p1.mechanical_energy" : 64.70000000000002
+      }
+    }, {
+      "t" : 1.68,
+      "values" : {
+        "t" : 1.68,
+        "p1.x" : 12.869546644398863,
+        "p1.y" : -1.5309281572661453,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -10.036123903134616,
+        "p1.speed" : 12.625616495142584,
+        "p1.kinetic_energy" : 79.70309594120826,
+        "p1.potential_energy" : -15.003095941208224,
+        "p1.mechanical_energy" : 64.70000000000003
+      }
+    }, {
+      "t" : 1.695,
+      "values" : {
+        "t" : 1.695,
+        "p1.x" : 12.98445331086671,
+        "p1.y" : -1.6825725158131646,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -10.183123903134616,
+        "p1.speed" : 12.742779183127128,
+        "p1.kinetic_energy" : 81.18921065496905,
+        "p1.potential_energy" : -16.489210654969014,
+        "p1.mechanical_energy" : 64.70000000000003
+      }
+    }, {
+      "t" : 1.71,
+      "values" : {
+        "t" : 1.71,
+        "p1.x" : 13.099359977334558,
+        "p1.y" : -1.836421874360184,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -10.330123903134616,
+        "p1.speed" : 12.860554760097237,
+        "p1.kinetic_energy" : 82.69693436872984,
+        "p1.potential_energy" : -17.996934368729804,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.725,
+      "values" : {
+        "t" : 1.725,
+        "p1.x" : 13.214266643802405,
+        "p1.y" : -1.9924762329072032,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -10.477123903134617,
+        "p1.speed" : 12.978926541320021,
+        "p1.kinetic_energy" : 84.22626708249064,
+        "p1.potential_energy" : -19.526267082490595,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.74,
+      "values" : {
+        "t" : 1.74,
+        "p1.x" : 13.329173310270253,
+        "p1.y" : -2.1507355914542226,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -10.624123903134617,
+        "p1.speed" : 13.097878362257868,
+        "p1.kinetic_energy" : 85.77720879625141,
+        "p1.potential_energy" : -21.077208796251384,
+        "p1.mechanical_energy" : 64.70000000000003
+      }
+    }, {
+      "t" : 1.755,
+      "values" : {
+        "t" : 1.755,
+        "p1.x" : 13.4440799767381,
+        "p1.y" : -2.311199950001242,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -10.771123903134617,
+        "p1.speed" : 13.217394562470487,
+        "p1.kinetic_energy" : 87.3497595100122,
+        "p1.potential_energy" : -22.64975951001217,
+        "p1.mechanical_energy" : 64.70000000000003
+      }
+    }, {
+      "t" : 1.77,
+      "values" : {
+        "t" : 1.77,
+        "p1.x" : 13.558986643205948,
+        "p1.y" : -2.4738693085482613,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -10.918123903134617,
+        "p1.speed" : 13.337459969857305,
+        "p1.kinetic_energy" : 88.94391922377301,
+        "p1.potential_energy" : -24.243919223772963,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.785,
+      "values" : {
+        "t" : 1.785,
+        "p1.x" : 13.673893309673796,
+        "p1.y" : -2.6387436670952806,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -11.065123903134618,
+        "p1.speed" : 13.45805988525343,
+        "p1.kinetic_energy" : 90.5596879375338,
+        "p1.potential_energy" : -25.859687937533753,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.8,
+      "values" : {
+        "t" : 1.8,
+        "p1.x" : 13.788799976141643,
+        "p1.y" : -2.8058230256423,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -11.212123903134618,
+        "p1.speed" : 13.579180067389533,
+        "p1.kinetic_energy" : 92.1970656512946,
+        "p1.potential_energy" : -27.49706565129454,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.815,
+      "values" : {
+        "t" : 1.815,
+        "p1.x" : 13.90370664260949,
+        "p1.y" : -2.9751073841893194,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -11.359123903134618,
+        "p1.speed" : 13.700806718223228,
+        "p1.kinetic_energy" : 93.85605236505538,
+        "p1.potential_energy" : -29.15605236505533,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.83,
+      "values" : {
+        "t" : 1.83,
+        "p1.x" : 14.018613309077338,
+        "p1.y" : -3.146596742736339,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -11.506123903134618,
+        "p1.speed" : 13.822926468647381,
+        "p1.kinetic_energy" : 95.53664807881617,
+        "p1.potential_energy" : -30.836648078816122,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.845,
+      "values" : {
+        "t" : 1.845,
+        "p1.x" : 14.133519975545186,
+        "p1.y" : -3.3202911012833582,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -11.653123903134619,
+        "p1.speed" : 13.945526364578496,
+        "p1.kinetic_energy" : 97.23885279257696,
+        "p1.potential_energy" : -32.53885279257691,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.86,
+      "values" : {
+        "t" : 1.86,
+        "p1.x" : 14.248426642013033,
+        "p1.y" : -3.4961904598303777,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -11.800123903134619,
+        "p1.speed" : 14.0685938534267,
+        "p1.kinetic_energy" : 98.96266650633775,
+        "p1.potential_energy" : -34.2626665063377,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.875,
+      "values" : {
+        "t" : 1.875,
+        "p1.x" : 14.36333330848088,
+        "p1.y" : -3.674294818377397,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -11.947123903134619,
+        "p1.speed" : 14.19211677094707,
+        "p1.kinetic_energy" : 100.70808922009854,
+        "p1.potential_energy" : -36.0080892200985,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.89,
+      "values" : {
+        "t" : 1.89,
+        "p1.x" : 14.478239974948728,
+        "p1.y" : -3.8546041769244166,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -12.09412390313462,
+        "p1.speed" : 14.316083328470768,
+        "p1.kinetic_energy" : 102.47512093385933,
+        "p1.potential_energy" : -37.775120933859284,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.905,
+      "values" : {
+        "t" : 1.905,
+        "p1.x" : 14.593146641416576,
+        "p1.y" : -4.037118535471436,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -12.24112390313462,
+        "p1.speed" : 14.440482100513135,
+        "p1.kinetic_energy" : 104.26376164762013,
+        "p1.potential_energy" : -39.56376164762007,
+        "p1.mechanical_energy" : 64.70000000000006
+      }
+    }, {
+      "t" : 1.92,
+      "values" : {
+        "t" : 1.92,
+        "p1.x" : 14.708053307884423,
+        "p1.y" : -4.221837894018455,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -12.38812390313462,
+        "p1.speed" : 14.565302012754897,
+        "p1.kinetic_energy" : 106.07401136138091,
+        "p1.potential_energy" : -41.37401136138086,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 1.935,
+      "values" : {
+        "t" : 1.935,
+        "p1.x" : 14.82295997435227,
+        "p1.y" : -4.408762252565474,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -12.53512390313462,
+        "p1.speed" : 14.690532330391687,
+        "p1.kinetic_energy" : 107.9058700751417,
+        "p1.potential_energy" : -43.20587007514165,
+        "p1.mechanical_energy" : 64.70000000000006
+      }
+    }, {
+      "t" : 1.95,
+      "values" : {
+        "t" : 1.95,
+        "p1.x" : 14.937866640820118,
+        "p1.y" : -4.597891611112493,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -12.68212390313462,
+        "p1.speed" : 14.81616264684635,
+        "p1.kinetic_energy" : 109.7593377889025,
+        "p1.potential_energy" : -45.05933778890243,
+        "p1.mechanical_energy" : 64.70000000000007
+      }
+    }, {
+      "t" : 1.965,
+      "values" : {
+        "t" : 1.965,
+        "p1.x" : 15.052773307287966,
+        "p1.y" : -4.789225969659512,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -12.82912390313462,
+        "p1.speed" : 14.942182872837776,
+        "p1.kinetic_energy" : 111.63441450266329,
+        "p1.potential_energy" : -46.934414502663216,
+        "p1.mechanical_energy" : 64.70000000000007
+      }
+    }, {
+      "t" : 1.98,
+      "values" : {
+        "t" : 1.98,
+        "p1.x" : 15.167679973755813,
+        "p1.y" : -4.982765328206531,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -12.97612390313462,
+        "p1.speed" : 15.06858322579957,
+        "p1.kinetic_energy" : 113.5311002164241,
+        "p1.potential_energy" : -48.831100216424005,
+        "p1.mechanical_energy" : 64.70000000000009
+      }
+    }, {
+      "t" : 1.995,
+      "values" : {
+        "t" : 1.995,
+        "p1.x" : 15.282586640223661,
+        "p1.y" : -5.17850968675355,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -13.123123903134621,
+        "p1.speed" : 15.19535421964127,
+        "p1.kinetic_energy" : 115.44939493018488,
+        "p1.potential_energy" : -50.74939493018479,
+        "p1.mechanical_energy" : 64.70000000000009
+      }
+    }, {
+      "t" : 2.01,
+      "values" : {
+        "t" : 2.01,
+        "p1.x" : 15.397493306691509,
+        "p1.y" : -5.376459045300569,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -13.270123903134621,
+        "p1.speed" : 15.322486654844615,
+        "p1.kinetic_energy" : 117.38929864394568,
+        "p1.potential_energy" : -52.689298643945584,
+        "p1.mechanical_energy" : 64.7000000000001
+      }
+    }, {
+      "t" : 2.025,
+      "values" : {
+        "t" : 2.025,
+        "p1.x" : 15.512399973159356,
+        "p1.y" : -5.576613403847588,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -13.417123903134621,
+        "p1.speed" : 15.449971608886953,
+        "p1.kinetic_energy" : 119.35081135770646,
+        "p1.potential_energy" : -54.65081135770637,
+        "p1.mechanical_energy" : 64.7000000000001
+      }
+    }, {
+      "t" : 2.04,
+      "values" : {
+        "t" : 2.04,
+        "p1.x" : 15.627306639627204,
+        "p1.y" : -5.778972762394607,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -13.564123903134622,
+        "p1.speed" : 15.577800426983732,
+        "p1.kinetic_energy" : 121.33393307146726,
+        "p1.potential_energy" : -56.633933071467155,
+        "p1.mechanical_energy" : 64.7000000000001
+      }
+    }, {
+      "t" : 2.055,
+      "values" : {
+        "t" : 2.055,
+        "p1.x" : 15.742213306095051,
+        "p1.y" : -5.983537120941627,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -13.711123903134622,
+        "p1.speed" : 15.705964713141823,
+        "p1.kinetic_energy" : 123.33866378522805,
+        "p1.potential_energy" : -58.63866378522795,
+        "p1.mechanical_energy" : 64.7000000000001
+      }
+    }, {
+      "t" : 2.07,
+      "values" : {
+        "t" : 2.07,
+        "p1.x" : 15.857119972562899,
+        "p1.y" : -6.190306479488646,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -13.858123903134622,
+        "p1.speed" : 15.834456321515358,
+        "p1.kinetic_energy" : 125.36500349898884,
+        "p1.potential_energy" : -60.66500349898873,
+        "p1.mechanical_energy" : 64.7000000000001
+      }
+    }, {
+      "t" : 2.085,
+      "values" : {
+        "t" : 2.085,
+        "p1.x" : 15.972026639030746,
+        "p1.y" : -6.399280838035665,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -14.005123903134622,
+        "p1.speed" : 15.963267348055638,
+        "p1.kinetic_energy" : 127.41295221274963,
+        "p1.potential_energy" : -62.71295221274952,
+        "p1.mechanical_energy" : 64.7000000000001
+      }
+    }, {
+      "t" : 2.1,
+      "values" : {
+        "t" : 2.1,
+        "p1.x" : 16.086933305498594,
+        "p1.y" : -6.610460196582684,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -14.152123903134623,
+        "p1.speed" : 16.092390122446723,
+        "p1.kinetic_energy" : 129.48250992651043,
+        "p1.potential_energy" : -64.78250992651031,
+        "p1.mechanical_energy" : 64.70000000000012
+      }
+    }, {
+      "t" : 2.115,
+      "values" : {
+        "t" : 2.115,
+        "p1.x" : 16.20183997196644,
+        "p1.y" : -6.823844555129703,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -14.299123903134623,
+        "p1.speed" : 16.221817200318295,
+        "p1.kinetic_energy" : 131.57367664027123,
+        "p1.potential_energy" : -66.8736766402711,
+        "p1.mechanical_energy" : 64.70000000000013
+      }
+    }, {
+      "t" : 2.13,
+      "values" : {
+        "t" : 2.13,
+        "p1.x" : 16.316746638434285,
+        "p1.y" : -7.0394339136767226,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -14.446123903134623,
+        "p1.speed" : 16.351541355727417,
+        "p1.kinetic_energy" : 133.686452354032,
+        "p1.potential_energy" : -68.98645235403188,
+        "p1.mechanical_energy" : 64.70000000000013
+      }
+    }, {
+      "t" : 2.145,
+      "values" : {
+        "t" : 2.145,
+        "p1.x" : 16.43165330490213,
+        "p1.y" : -7.257228272223742,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -14.593123903134623,
+        "p1.speed" : 16.481555573900955,
+        "p1.kinetic_energy" : 135.8208370677928,
+        "p1.potential_energy" : -71.12083706779268,
+        "p1.mechanical_energy" : 64.70000000000013
+      }
+    }, {
+      "t" : 2.16,
+      "values" : {
+        "t" : 2.16,
+        "p1.x" : 16.546559971369977,
+        "p1.y" : -7.477227630770761,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -14.740123903134624,
+        "p1.speed" : 16.61185304423041,
+        "p1.kinetic_energy" : 137.9768307815536,
+        "p1.potential_energy" : -73.27683078155346,
+        "p1.mechanical_energy" : 64.70000000000013
+      }
+    }, {
+      "t" : 2.175,
+      "values" : {
+        "t" : 2.175,
+        "p1.x" : 16.661466637837822,
+        "p1.y" : -7.69943198931778,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -14.887123903134624,
+        "p1.speed" : 16.742427153511187,
+        "p1.kinetic_energy" : 140.15443349531438,
+        "p1.potential_energy" : -75.45443349531425,
+        "p1.mechanical_energy" : 64.70000000000013
+      }
+    }, {
+      "t" : 2.19,
+      "values" : {
+        "t" : 2.19,
+        "p1.x" : 16.776373304305668,
+        "p1.y" : -7.9238413478647995,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -15.034123903134624,
+        "p1.speed" : 16.873271479418282,
+        "p1.kinetic_energy" : 142.35364520907518,
+        "p1.potential_energy" : -77.65364520907504,
+        "p1.mechanical_energy" : 64.70000000000014
+      }
+    }, {
+      "t" : 2.205,
+      "values" : {
+        "t" : 2.205,
+        "p1.x" : 16.891279970773514,
+        "p1.y" : -8.150455706411819,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -15.181123903134624,
+        "p1.speed" : 17.004379784210656,
+        "p1.kinetic_energy" : 144.574465922836,
+        "p1.potential_energy" : -79.87446592283582,
+        "p1.mechanical_energy" : 64.70000000000017
+      }
+    }, {
+      "t" : 2.22,
+      "values" : {
+        "t" : 2.22,
+        "p1.x" : 17.00618663724136,
+        "p1.y" : -8.379275064958838,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -15.328123903134625,
+        "p1.speed" : 17.135746008656685,
+        "p1.kinetic_energy" : 146.81689563659677,
+        "p1.potential_energy" : -82.11689563659662,
+        "p1.mechanical_energy" : 64.70000000000014
+      }
+    }, {
+      "t" : 2.235,
+      "values" : {
+        "t" : 2.235,
+        "p1.x" : 17.121093303709205,
+        "p1.y" : -8.610299423505857,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -15.475123903134625,
+        "p1.speed" : 17.2673642661732,
+        "p1.kinetic_energy" : 149.08093435035755,
+        "p1.potential_energy" : -84.3809343503574,
+        "p1.mechanical_energy" : 64.70000000000014
+      }
+    }, {
+      "t" : 2.25,
+      "values" : {
+        "t" : 2.25,
+        "p1.x" : 17.23599997017705,
+        "p1.y" : -8.843528782052877,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -15.622123903134625,
+        "p1.speed" : 17.39922883717082,
+        "p1.kinetic_energy" : 151.36658206411835,
+        "p1.potential_energy" : -86.6665820641182,
+        "p1.mechanical_energy" : 64.70000000000014
+      }
+    }, {
+      "t" : 2.265,
+      "values" : {
+        "t" : 2.265,
+        "p1.x" : 17.350906636644897,
+        "p1.y" : -9.078963140599896,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -15.769123903134625,
+        "p1.speed" : 17.53133416359857,
+        "p1.kinetic_energy" : 153.67383877787915,
+        "p1.potential_energy" : -88.97383877787898,
+        "p1.mechanical_energy" : 64.70000000000017
+      }
+    }, {
+      "t" : 2.28,
+      "values" : {
+        "t" : 2.28,
+        "p1.x" : 17.465813303112743,
+        "p1.y" : -9.316602499146915,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -15.916123903134626,
+        "p1.speed" : 17.66367484368074,
+        "p1.kinetic_energy" : 156.00270449163995,
+        "p1.potential_energy" : -91.30270449163977,
+        "p1.mechanical_energy" : 64.70000000000017
+      }
+    }, {
+      "t" : 2.295,
+      "values" : {
+        "t" : 2.295,
+        "p1.x" : 17.58071996958059,
+        "p1.y" : -9.556446857693935,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -16.063123903134624,
+        "p1.speed" : 17.79624562683943,
+        "p1.kinetic_energy" : 158.35317920540072,
+        "p1.potential_energy" : -93.65317920540056,
+        "p1.mechanical_energy" : 64.70000000000016
+      }
+    }, {
+      "t" : 2.31,
+      "values" : {
+        "t" : 2.31,
+        "p1.x" : 17.695626636048434,
+        "p1.y" : -9.798496216240954,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -16.210123903134622,
+        "p1.speed" : 17.929041408796035,
+        "p1.kinetic_energy" : 160.72526291916148,
+        "p1.potential_energy" : -96.02526291916136,
+        "p1.mechanical_energy" : 64.70000000000012
+      }
+    }, {
+      "t" : 2.325,
+      "values" : {
+        "t" : 2.325,
+        "p1.x" : 17.81053330251628,
+        "p1.y" : -10.042750574787974,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -16.35712390313462,
+        "p1.speed" : 18.062057226845575,
+        "p1.kinetic_energy" : 163.11895563292225,
+        "p1.potential_energy" : -98.41895563292215,
+        "p1.mechanical_energy" : 64.7000000000001
+      }
+    }, {
+      "t" : 2.34,
+      "values" : {
+        "t" : 2.34,
+        "p1.x" : 17.925439968984126,
+        "p1.y" : -10.289209933334993,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -16.50412390313462,
+        "p1.speed" : 18.19528825529747,
+        "p1.kinetic_energy" : 165.534257346683,
+        "p1.potential_energy" : -100.83425734668293,
+        "p1.mechanical_energy" : 64.70000000000007
+      }
+    }, {
+      "t" : 2.355,
+      "values" : {
+        "t" : 2.355,
+        "p1.x" : 18.04034663545197,
+        "p1.y" : -10.537874291882012,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -16.651123903134618,
+        "p1.speed" : 18.328729801076985,
+        "p1.kinetic_energy" : 167.97116806044377,
+        "p1.potential_energy" : -103.27116806044373,
+        "p1.mechanical_energy" : 64.70000000000005
+      }
+    }, {
+      "t" : 2.37,
+      "values" : {
+        "t" : 2.37,
+        "p1.x" : 18.155253301919817,
+        "p1.y" : -10.788743650429032,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -16.798123903134616,
+        "p1.speed" : 18.462377299481478,
+        "p1.kinetic_energy" : 170.42968777420452,
+        "p1.potential_energy" : -105.72968777420452,
+        "p1.mechanical_energy" : 64.7
+      }
+    }, {
+      "t" : 2.385,
+      "values" : {
+        "t" : 2.385,
+        "p1.x" : 18.270159968387663,
+        "p1.y" : -11.041818008976051,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -16.945123903134615,
+        "p1.speed" : 18.596226310085886,
+        "p1.kinetic_energy" : 172.9098164879653,
+        "p1.potential_energy" : -108.20981648796531,
+        "p1.mechanical_energy" : 64.69999999999997
+      }
+    }, {
+      "t" : 2.4,
+      "values" : {
+        "t" : 2.4,
+        "p1.x" : 18.38506663485551,
+        "p1.y" : -11.29709736752307,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -17.092123903134613,
+        "p1.speed" : 18.730272512792016,
+        "p1.kinetic_energy" : 175.41155420172606,
+        "p1.potential_energy" : -110.7115542017261,
+        "p1.mechanical_energy" : 64.69999999999996
+      }
+    }, {
+      "t" : 2.415,
+      "values" : {
+        "t" : 2.415,
+        "p1.x" : 18.499973301323354,
+        "p1.y" : -11.55458172607009,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -17.23912390313461,
+        "p1.speed" : 18.86451170401645,
+        "p1.kinetic_energy" : 177.93490091548682,
+        "p1.potential_energy" : -113.23490091548689,
+        "p1.mechanical_energy" : 64.69999999999993
+      }
+    }, {
+      "t" : 2.43,
+      "values" : {
+        "t" : 2.43,
+        "p1.x" : 18.6148799677912,
+        "p1.y" : -11.81427108461711,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -17.38612390313461,
+        "p1.speed" : 18.99893979301201,
+        "p1.kinetic_energy" : 180.4798566292476,
+        "p1.potential_energy" : -115.77985662924767,
+        "p1.mechanical_energy" : 64.69999999999992
+      }
+    }, {
+      "t" : 2.445,
+      "values" : {
+        "t" : 2.445,
+        "p1.x" : 18.729786634259046,
+        "p1.y" : -12.076165443164129,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -17.53312390313461,
+        "p1.speed" : 19.133552798317847,
+        "p1.kinetic_energy" : 183.04642134300835,
+        "p1.potential_energy" : -118.34642134300847,
+        "p1.mechanical_energy" : 64.69999999999987
+      }
+    }, {
+      "t" : 2.46,
+      "values" : {
+        "t" : 2.46,
+        "p1.x" : 18.84469330072689,
+        "p1.y" : -12.340264801711148,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -17.680123903134607,
+        "p1.speed" : 19.26834684433354,
+        "p1.kinetic_energy" : 185.63459505676911,
+        "p1.potential_energy" : -120.93459505676927,
+        "p1.mechanical_energy" : 64.69999999999985
+      }
+    }, {
+      "t" : 2.475,
+      "values" : {
+        "t" : 2.475,
+        "p1.x" : 18.959599967194738,
+        "p1.y" : -12.606569160258168,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -17.827123903134606,
+        "p1.speed" : 19.403318158012556,
+        "p1.kinetic_energy" : 188.24437777052987,
+        "p1.potential_energy" : -123.54437777053006,
+        "p1.mechanical_energy" : 64.6999999999998
+      }
+    }, {
+      "t" : 2.49,
+      "values" : {
+        "t" : 2.49,
+        "p1.x" : 19.074506633662583,
+        "p1.y" : -12.875078518805187,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -17.974123903134604,
+        "p1.speed" : 19.538463065670783,
+        "p1.kinetic_energy" : 190.87576948429063,
+        "p1.potential_energy" : -126.17576948429085,
+        "p1.mechanical_energy" : 64.69999999999978
+      }
+    }, {
+      "t" : 2.505,
+      "values" : {
+        "t" : 2.505,
+        "p1.x" : 19.18941330013043,
+        "p1.y" : -13.145792877352207,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -18.121123903134603,
+        "p1.speed" : 19.673777989905822,
+        "p1.kinetic_energy" : 193.52877019805138,
+        "p1.potential_energy" : -128.82877019805164,
+        "p1.mechanical_energy" : 64.69999999999973
+      }
+    }, {
+      "t" : 2.52,
+      "values" : {
+        "t" : 2.52,
+        "p1.x" : 19.304319966598275,
+        "p1.y" : -13.418712235899227,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -18.2681239031346,
+        "p1.speed" : 19.80925944662304,
+        "p1.kinetic_energy" : 196.20337991181214,
+        "p1.potential_energy" : -131.50337991181243,
+        "p1.mechanical_energy" : 64.6999999999997
+      }
+    }, {
+      "t" : 2.535,
+      "values" : {
+        "t" : 2.535,
+        "p1.x" : 19.41922663306612,
+        "p1.y" : -13.693836594446246,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -18.4151239031346,
+        "p1.speed" : 19.9449040421644,
+        "p1.kinetic_energy" : 198.8995986255729,
+        "p1.potential_energy" : -134.19959862557323,
+        "p1.mechanical_energy" : 64.69999999999968
+      }
+    }, {
+      "t" : 2.55,
+      "values" : {
+        "t" : 2.55,
+        "p1.x" : 19.534133299533966,
+        "p1.y" : -13.971165952993266,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -18.562123903134598,
+        "p1.speed" : 20.080708470536276,
+        "p1.kinetic_energy" : 201.61742633933366,
+        "p1.potential_energy" : -136.917426339334,
+        "p1.mechanical_energy" : 64.69999999999965
+      }
+    }, {
+      "t" : 2.565,
+      "values" : {
+        "t" : 2.565,
+        "p1.x" : 19.649039966001812,
+        "p1.y" : -14.250700311540285,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -18.709123903134596,
+        "p1.speed" : 20.216669510732693,
+        "p1.kinetic_energy" : 204.3568630530944,
+        "p1.potential_energy" : -139.6568630530948,
+        "p1.mechanical_energy" : 64.69999999999959
+      }
+    }, {
+      "t" : 2.58,
+      "values" : {
+        "t" : 2.58,
+        "p1.x" : 19.763946632469658,
+        "p1.y" : -14.532439670087305,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -18.856123903134595,
+        "p1.speed" : 20.352784024150367,
+        "p1.kinetic_energy" : 207.11790876685518,
+        "p1.potential_energy" : -142.4179087668556,
+        "p1.mechanical_energy" : 64.69999999999959
+      }
+    }, {
+      "t" : 2.595,
+      "values" : {
+        "t" : 2.595,
+        "p1.x" : 19.878853298937504,
+        "p1.y" : -14.816384028634324,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -19.003123903134593,
+        "p1.speed" : 20.489048952092233,
+        "p1.kinetic_energy" : 209.90056348061592,
+        "p1.potential_energy" : -145.20056348061638,
+        "p1.mechanical_energy" : 64.69999999999953
+      }
+    }, {
+      "t" : 2.61,
+      "values" : {
+        "t" : 2.61,
+        "p1.x" : 19.99375996540535,
+        "p1.y" : -15.102533387181344,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -19.150123903134592,
+        "p1.speed" : 20.625461313356205,
+        "p1.kinetic_energy" : 212.7048271943767,
+        "p1.potential_energy" : -148.00482719437719,
+        "p1.mechanical_energy" : 64.6999999999995
+      }
+    }, {
+      "t" : 2.625,
+      "values" : {
+        "t" : 2.625,
+        "p1.x" : 20.108666631873195,
+        "p1.y" : -15.390887745728364,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -19.29712390313459,
+        "p1.speed" : 20.76201820190597,
+        "p1.kinetic_energy" : 215.53069990813745,
+        "p1.potential_energy" : -150.83069990813797,
+        "p1.mechanical_energy" : 64.69999999999948
+      }
+    }, {
+      "t" : 2.64,
+      "values" : {
+        "t" : 2.64,
+        "p1.x" : 20.22357329834104,
+        "p1.y" : -15.681447104275383,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -19.44412390313459,
+        "p1.speed" : 20.898716784620927,
+        "p1.kinetic_energy" : 218.3781816218982,
+        "p1.potential_energy" : -153.67818162189877,
+        "p1.mechanical_energy" : 64.69999999999942
+      }
+    }, {
+      "t" : 2.655,
+      "values" : {
+        "t" : 2.655,
+        "p1.x" : 20.338479964808887,
+        "p1.y" : -15.974211462822403,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -19.591123903134587,
+        "p1.speed" : 21.035554299122186,
+        "p1.kinetic_energy" : 221.24727233565895,
+        "p1.potential_energy" : -156.54727233565956,
+        "p1.mechanical_energy" : 64.69999999999939
+      }
+    }, {
+      "t" : 2.67,
+      "values" : {
+        "t" : 2.67,
+        "p1.x" : 20.453386631276732,
+        "p1.y" : -16.26918082136942,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -19.738123903134586,
+        "p1.speed" : 21.17252805167204,
+        "p1.kinetic_energy" : 224.1379720494197,
+        "p1.potential_energy" : -159.43797204942032,
+        "p1.mechanical_energy" : 64.69999999999936
+      }
+    }, {
+      "t" : 2.685,
+      "values" : {
+        "t" : 2.685,
+        "p1.x" : 20.568293297744578,
+        "p1.y" : -16.56635517991644,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -19.885123903134584,
+        "p1.speed" : 21.309635415144037,
+        "p1.kinetic_energy" : 227.05028076318047,
+        "p1.potential_energy" : -162.3502807631811,
+        "p1.mechanical_energy" : 64.69999999999936
+      }
+    }, {
+      "t" : 2.7,
+      "values" : {
+        "t" : 2.7,
+        "p1.x" : 20.683199964212424,
+        "p1.y" : -16.865734538463457,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -20.032123903134583,
+        "p1.speed" : 21.446873827061193,
+        "p1.kinetic_energy" : 229.9841984769412,
+        "p1.potential_energy" : -165.2841984769419,
+        "p1.mechanical_energy" : 64.6999999999993
+      }
+    }, {
+      "t" : 2.715,
+      "values" : {
+        "t" : 2.715,
+        "p1.x" : 20.79810663068027,
+        "p1.y" : -17.167318897010475,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -20.17912390313458,
+        "p1.speed" : 21.584240787699805,
+        "p1.kinetic_energy" : 232.93972519070195,
+        "p1.potential_energy" : -168.23972519070267,
+        "p1.mechanical_energy" : 64.69999999999928
+      }
+    }, {
+      "t" : 2.73,
+      "values" : {
+        "t" : 2.73,
+        "p1.x" : 20.913013297148115,
+        "p1.y" : -17.471108255557493,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -20.32612390313458,
+        "p1.speed" : 21.721733858256467,
+        "p1.kinetic_energy" : 235.9168609044627,
+        "p1.potential_energy" : -171.21686090446343,
+        "p1.mechanical_energy" : 64.69999999999928
+      }
+    }, {
+      "t" : 2.745,
+      "values" : {
+        "t" : 2.745,
+        "p1.x" : 21.02791996361596,
+        "p1.y" : -17.77710261410451,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -20.473123903134578,
+        "p1.speed" : 21.859350659076014,
+        "p1.kinetic_energy" : 238.91560561822345,
+        "p1.potential_energy" : -174.2156056182242,
+        "p1.mechanical_energy" : 64.69999999999925
+      }
+    }, {
+      "t" : 2.76,
+      "values" : {
+        "t" : 2.76,
+        "p1.x" : 21.142826630083807,
+        "p1.y" : -18.08530197265153,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -20.620123903134576,
+        "p1.speed" : 21.99708886793815,
+        "p1.kinetic_energy" : 241.9359593319842,
+        "p1.potential_energy" : -177.235959331985,
+        "p1.mechanical_energy" : 64.69999999999922
+      }
+    }, {
+      "t" : 2.775,
+      "values" : {
+        "t" : 2.775,
+        "p1.x" : 21.257733296551653,
+        "p1.y" : -18.395706331198546,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -20.767123903134575,
+        "p1.speed" : 22.134946218400668,
+        "p1.kinetic_energy" : 244.97792204574498,
+        "p1.potential_energy" : -180.27792204574578,
+        "p1.mechanical_energy" : 64.69999999999919
+      }
+    }, {
+      "t" : 2.79,
+      "values" : {
+        "t" : 2.79,
+        "p1.x" : 21.3726399630195,
+        "p1.y" : -18.708315689745564,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -20.914123903134573,
+        "p1.speed" : 22.272920498197166,
+        "p1.kinetic_energy" : 248.04149375950573,
+        "p1.potential_energy" : -183.34149375950653,
+        "p1.mechanical_energy" : 64.69999999999919
+      }
+    }, {
+      "t" : 2.805,
+      "values" : {
+        "t" : 2.805,
+        "p1.x" : 21.487546629487344,
+        "p1.y" : -19.023130048292582,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -21.061123903134572,
+        "p1.speed" : 22.411009547687335,
+        "p1.kinetic_energy" : 251.12667447326646,
+        "p1.potential_energy" : -186.42667447326733,
+        "p1.mechanical_energy" : 64.69999999999914
+      }
+    }, {
+      "t" : 2.82,
+      "values" : {
+        "t" : 2.82,
+        "p1.x" : 21.60245329595519,
+        "p1.y" : -19.3401494068396,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -21.20812390313457,
+        "p1.speed" : 22.549211258357893,
+        "p1.kinetic_energy" : 254.2334641870272,
+        "p1.potential_energy" : -189.5334641870281,
+        "p1.mechanical_energy" : 64.69999999999911
+      }
+    }, {
+      "t" : 2.835,
+      "values" : {
+        "t" : 2.835,
+        "p1.x" : 21.717359962423036,
+        "p1.y" : -19.65937376538662,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -21.35512390313457,
+        "p1.speed" : 22.68752357137235,
+        "p1.kinetic_energy" : 257.36186290078797,
+        "p1.potential_energy" : -192.66186290078886,
+        "p1.mechanical_energy" : 64.69999999999911
+      }
+    }, {
+      "t" : 2.85,
+      "values" : {
+        "t" : 2.85,
+        "p1.x" : 21.83226662889088,
+        "p1.y" : -19.980803123933637,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -21.502123903134567,
+        "p1.speed" : 22.825944476167844,
+        "p1.kinetic_energy" : 260.5118706145487,
+        "p1.potential_energy" : -195.81187061454966,
+        "p1.mechanical_energy" : 64.69999999999902
+      }
+    }, {
+      "t" : 2.865,
+      "values" : {
+        "t" : 2.865,
+        "p1.x" : 21.947173295358727,
+        "p1.y" : -20.304437482480655,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -21.649123903134566,
+        "p1.speed" : 22.96447200909742,
+        "p1.kinetic_energy" : 263.68348732830947,
+        "p1.potential_energy" : -198.98348732831042,
+        "p1.mechanical_energy" : 64.69999999999905
+      }
+    }, {
+      "t" : 2.88,
+      "values" : {
+        "t" : 2.88,
+        "p1.x" : 22.062079961826573,
+        "p1.y" : -20.630276841027673,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -21.796123903134564,
+        "p1.speed" : 23.103104252116,
+        "p1.kinetic_energy" : 266.8767130420702,
+        "p1.potential_energy" : -202.1767130420712,
+        "p1.mechanical_energy" : 64.699999999999
+      }
+    }, {
+      "t" : 2.895,
+      "values" : {
+        "t" : 2.895,
+        "p1.x" : 22.17698662829442,
+        "p1.y" : -20.95832119957469,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -21.943123903134563,
+        "p1.speed" : 23.24183933150864,
+        "p1.kinetic_energy" : 270.09154775583096,
+        "p1.potential_energy" : -205.391547755832,
+        "p1.mechanical_energy" : 64.69999999999897
+      }
+    }, {
+      "t" : 2.91,
+      "values" : {
+        "t" : 2.91,
+        "p1.x" : 22.291893294762264,
+        "p1.y" : -21.28857055812171,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -22.09012390313456,
+        "p1.speed" : 23.380675416659447,
+        "p1.kinetic_energy" : 273.32799146959167,
+        "p1.potential_energy" : -208.62799146959276,
+        "p1.mechanical_energy" : 64.69999999999891
+      }
+    }, {
+      "t" : 2.925,
+      "values" : {
+        "t" : 2.925,
+        "p1.x" : 22.40679996123011,
+        "p1.y" : -21.621024916668727,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -22.23712390313456,
+        "p1.speed" : 23.519610718859802,
+        "p1.kinetic_energy" : 276.58604418335244,
+        "p1.potential_energy" : -211.88604418335353,
+        "p1.mechanical_energy" : 64.69999999999891
+      }
+    }, {
+      "t" : 2.94,
+      "values" : {
+        "t" : 2.94,
+        "p1.x" : 22.521706627697956,
+        "p1.y" : -21.955684275215745,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -22.384123903134558,
+        "p1.speed" : 23.65864349015443,
+        "p1.kinetic_energy" : 279.86570589711323,
+        "p1.potential_energy" : -215.16570589711432,
+        "p1.mechanical_energy" : 64.69999999999891
+      }
+    }, {
+      "t" : 2.955,
+      "values" : {
+        "t" : 2.955,
+        "p1.x" : 22.6366132941658,
+        "p1.y" : -22.292548633762763,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -22.531123903134556,
+        "p1.speed" : 23.79777202222401,
+        "p1.kinetic_energy" : 283.1669766108739,
+        "p1.potential_energy" : -218.4669766108751,
+        "p1.mechanical_energy" : 64.69999999999882
+      }
+    }, {
+      "t" : 2.97,
+      "values" : {
+        "t" : 2.97,
+        "p1.x" : 22.751519960633647,
+        "p1.y" : -22.63161799230978,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -22.678123903134555,
+        "p1.speed" : 23.936994645303102,
+        "p1.kinetic_energy" : 286.4898563246347,
+        "p1.potential_energy" : -221.78985632463588,
+        "p1.mechanical_energy" : 64.6999999999988
+      }
+    }, {
+      "t" : 2.985,
+      "values" : {
+        "t" : 2.985,
+        "p1.x" : 22.866426627101493,
+        "p1.y" : -22.9728923508568,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -22.825123903134553,
+        "p1.speed" : 24.076309727132,
+        "p1.kinetic_energy" : 289.83434503839544,
+        "p1.potential_energy" : -225.13434503839665,
+        "p1.mechanical_energy" : 64.6999999999988
+      }
+    }, {
+      "t" : 3.0,
+      "values" : {
+        "t" : 3.0,
+        "p1.x" : 22.98133329356934,
+        "p1.y" : -23.316371709403818,
+        "p1.vx" : 7.66044443118978,
+        "p1.vy" : -22.972123903134552,
+        "p1.speed" : 24.21571567194148,
+        "p1.kinetic_energy" : 293.20044275215616,
+        "p1.potential_energy" : -228.50044275215743,
+        "p1.mechanical_energy" : 64.69999999999874
+      }
+    } ]
+  },
+  "solverValidation" : {
+    "flags" : [ ],
+    "assumptions" : [ "Air resistance is neglected.", "Gravity is uniform." ],
+    "convergenceEvidence" : [ "p1: compared 201 checkpoints using independent approved closed-form AST" ],
+    "invariantResults" : { },
+    "solverVersion" : "schema-ast-rk4/1.0",
+    "formulaSource" : "APPROVED_TOPIC_SCHEMA",
+    "verificationScope" : "Các đại lượng chuẩn đã được liên kết; các giả định vẫn được hiển thị để kiểm tra",
+    "status" : "VERIFIED_ANALYTICAL",
+    "executionMethod" : "NUMERICAL",
+    "solverMethod" : "RK4",
+    "verificationMethod" : "CLOSED_FORM_CHECKPOINTS",
+    "absoluteError" : 1.3073986337985843E-12,
+    "relativeError" : 3.8133929218635673E-13,
+    "maxOdeResidual" : 1.8118839761882555E-13,
+    "benchmarkSummary" : "Đã kiểm tra 0 liên kết kiểm chuẩn được phê duyệt",
+    "referenceSolverVersion" : "schema-ast-closed-form/1.0"
+  }
+}

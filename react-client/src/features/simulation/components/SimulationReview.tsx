@@ -22,6 +22,12 @@ export function SimulationParameterControl({ parameter, value, onChange }: Reado
 }>) {
   const { min, max, step } = parameter;
   const [draft, setDraft] = useState<string | null>(null);
+  // While the thumb moves only the number follows it; the value is sent once, when the thumb is let go.
+  const [dragging, setDragging] = useState<number | null>(null);
+  const release = () => {
+    if (dragging !== null && dragging !== value) onChange(dragging);
+    setDragging(null);
+  };
   const commit = () => {
     const numeric = draft?.trim() ? Number(draft) : NaN;
     if (Number.isFinite(numeric) && numeric !== value) onChange(numeric);
@@ -32,22 +38,24 @@ export function SimulationParameterControl({ parameter, value, onChange }: Reado
   const label = rawLabel;
   const validBounds = typeof min === "number" && Number.isFinite(min) && typeof max === "number" && Number.isFinite(max) && min <= max;
   const showSlider = validBounds && min! < max! && value >= min! && value <= max!;
-  const fill = showSlider ? Math.min(100, Math.max(0, ((value - min!) / (max! - min!)) * 100)) : 0;
+  const shown = dragging ?? value;
+  const fill = showSlider ? Math.min(100, Math.max(0, ((shown - min!) / (max! - min!)) * 100)) : 0;
   return <div className="simulation-control">
     <div className="simulation-control__head">
       <label htmlFor={`sim-param-${parameter.name}`}>{label}</label>
       <span className="simulation-control__value">
         <input id={`sim-param-${parameter.name}`} type="number" inputMode="decimal" step="any"
-          value={draft ?? String(value)}
+          value={draft ?? String(shown)}
           onFocus={(event) => { setDraft(String(value)); event.currentTarget.select(); }} onChange={(event) => setDraft(event.target.value)}
           onBlur={commit} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} />
         {unit && <span className="simulation-control__unit">{unit}</span>}
       </span>
     </div>
     {showSlider && <>
-      <input className="simulation-control__range" type="range" aria-label={`Điều chỉnh ${rawLabel}`} min={min} max={max} step={step ?? "any"} value={value}
+      <input className="simulation-control__range" type="range" aria-label={`Điều chỉnh ${rawLabel}`} min={min} max={max} step={step ?? "any"} value={shown}
         style={{ "--fill": `${fill}%` } as CSSProperties}
-        onChange={(event) => onChange(Number(event.target.value))} />
+        onChange={(event) => setDragging(Number(event.target.value))}
+        onPointerUp={release} onKeyUp={release} onBlur={release} />
       <div className="simulation-control__scale" aria-hidden="true"><span>{formatBound(min!)}</span><span>{formatBound(max!)}</span></div>
     </>}
   </div>;

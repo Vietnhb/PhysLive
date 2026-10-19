@@ -76,9 +76,13 @@ export default function SvgPixiScene({ program, timeline, parameters, parameterI
   const send = useCallback((message: Record<string, unknown>) => iframe.current?.contentWindow?.postMessage(
     { channel: "pixi-host", ...message }, "*"), []);
 
+  // A new timeline is a new run: the scene starts it over from t = 0 in place, without reloading the sandbox.
+  const shownTimeline = useRef(timeline);
   useEffect(() => {
     dataRef.current = { timeline, parameters, verificationStatus, fieldMeta, models, observables, parameterInfo, presentation };
-    send({ type: "data", ...dataRef.current });
+    if (shownTimeline.current === timeline) { send({ type: "data", ...dataRef.current }); return; }
+    shownTimeline.current = timeline;
+    send({ type: "replace", ...dataRef.current }); // the worker restarts at t = 0 and reports it through its ticks
   }, [timeline, parameters, verificationStatus, fieldMeta, models, observables, parameterInfo, presentation, send]);
   useEffect(() => { send({ type: "theme", theme }); }, [theme, send]);
   useEffect(() => {

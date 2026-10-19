@@ -3,7 +3,7 @@
 export const PIXI_WORKER = String.raw`
 (() => {
 let app, lifecycle, data, playing = true, loop = false, speed = 1, t = 0, last = performance.now(), nextAsset = 0;
-let frames = 0, lastSent = -1, dirty = true, disposed = false;
+let frames = 0, lastSent = -1, dirty = true, disposed = false, mountScene = null, sceneApi = null;
 const assets = new Map(), textureIds = new WeakMap();
 const QUIET_KEYS = new Set(['toJSON', 'then', 'asymmetricMatch', 'nodeType', '$$typeof']);
 const send = (type, extra = {}) => postMessage({type, ...extra,
@@ -94,6 +94,7 @@ async function start(message) {
   const AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
   const mount = await new AsyncFunction('"use strict"; return (' + message.code + '\n);')();
   if (typeof mount !== 'function') throw Error('PixiJS code must be a mount function.');
+  mountScene = mount; sceneApi = api;
   lifecycle = await mount(PIXI, app, api);
   if (!lifecycle || typeof lifecycle.update !== 'function') throw Error('PixiJS code must return update(frame).');
   render(); checkVisible();
@@ -123,6 +124,20 @@ async function start(message) {
     setInterval(() => send('tick', {t}), 1000);
   } else setInterval(renderFrame, 1000 / 60);
 }
+// A new run of the same program (new parameters): a scene that rebuilds itself from api values (setData) gets the new
+// data; any other scene is mounted again in this worker, exactly as on start, without reloading the page or PixiJS.
+async function replace(message) {
+  setData(message); t = 0;
+  if (typeof lifecycle?.setData === 'function') {
+    await lifecycle.setData(); await lifecycle?.resize?.(app.screen.width, app.screen.height);
+  } else if (mountScene) {
+    try {await lifecycle?.destroy?.();} catch {}
+    for (const child of app.stage.removeChildren()) child.destroy({children: true});
+    lifecycle = await mountScene(PIXI, app, sceneApi);
+    if (!lifecycle || typeof lifecycle.update !== 'function') throw Error('PixiJS code must return update(frame).');
+  }
+  if (lifecycle) {render(); checkVisible();}
+}
 if (typeof addEventListener === 'function') addEventListener('unhandledrejection', event => fail(event.reason));
 onmessage = async ({data: message}) => {
   dirty = true;
@@ -133,6 +148,7 @@ onmessage = async ({data: message}) => {
         setData(message); t = Math.min(t, data.timeline.durationSeconds);
         await lifecycle?.setData?.(); await lifecycle?.resize?.(app.screen.width, app.screen.height);
         if (lifecycle) render(); break;
+      case 'replace': await replace(message); break;
       case 'theme': data.theme = message.theme; await lifecycle?.setData?.(); if (lifecycle) render(); break;
       case 'play': if (message.playing && t >= data.timeline.durationSeconds) t = 0; playing = message.playing; break;
       case 'speed': speed = Math.max(1e-15, Math.min(1e15, Number(message.speed) || 1)); break;

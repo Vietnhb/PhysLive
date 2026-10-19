@@ -139,7 +139,7 @@ export default function SimulationInspector({ experiment, explanation, save, lib
                   <summary>Đã đối chiếu {validation.lawChecks.filter(check => check.status === "PASSED").length}/{validation.lawChecks.length} định luật</summary>
                   <ul>
                     {[...new Map(validation.lawChecks.map(check => [check.title, check])).values()].map(check => (
-                      <li key={check.law}>{check.status === "PASSED" ? "✓" : "✗"} {check.title}</li>
+                      <li key={check.law}>{check.status === "PASSED" ? "✓" : check.status === "AMBIGUOUS" ? "?" : "✗"} {check.title}{check.status === "AMBIGUOUS" && " (chưa xác định được đại lượng để đối chiếu)"}</li>
                     ))}
                   </ul>
                 </details>
