@@ -35,7 +35,7 @@ class LibraryPublishingScopeTest {
     private final SimulationRepository simulations = mock(SimulationRepository.class);
     private final LessonRepository lessons = mock(LessonRepository.class);
     private final CurrentUserService current = mock(CurrentUserService.class);
-    private final LibraryService service = new LibraryService(items, folders, simulations, lessons, current);
+    private final LibraryService service = new LibraryService(items, folders, simulations, lessons, current, mock(com.example.backend.system.simulation.service.SimulationCopier.class));
     private final UUID simulationId = UUID.randomUUID(), folderId = UUID.randomUUID(), lessonId = UUID.randomUUID();
 
     private LibraryItem fixture() {

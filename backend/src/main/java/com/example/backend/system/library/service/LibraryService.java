@@ -35,6 +35,7 @@ public class LibraryService {
     private final SimulationRepository simulationRepository;
     private final LessonRepository lessonRepository;
     private final CurrentUserService currentUserService;
+    private final com.example.backend.system.simulation.service.SimulationCopier copier;
 
     @Transactional
     public LibraryItemResponse save(LibraryRequests.Save request) {
@@ -89,9 +90,11 @@ public class LibraryService {
                 .orElseThrow(() -> ApiException.notFound("Không tìm thấy mục trong thư viện chia sẻ"));
         LibraryFolder folder = folderRepository.findByIdAndOwnerIdAndActiveTrue(folderId, user.getId())
                 .orElseThrow(() -> ApiException.notFound("Không tìm thấy thư mục thư viện"));
+        // the clone is the teacher's own: a copy of the whole saved simulation, so changing it never touches the original
+        var simulation = copier.copyFor(user, source.getSimulation());
         LibraryItem copy = new LibraryItem();
-        copy.setSimulation(source.getSimulation()); copy.setFolder(folder); copy.setLesson(source.getLesson());
-        copy.setSpecification(source.getSpecification()); copy.setOwner(user);
+        copy.setSimulation(simulation); copy.setFolder(folder); copy.setLesson(source.getLesson());
+        copy.setSpecification(simulation.getSpecification()); copy.setOwner(user);
         copy.setTitle(title == null || title.isBlank() ? source.getTitle() + " (bản sao)" : title.trim());
         copy.setVisibility(Visibility.PERSONAL); copy.setSharedInstitutionId(null);
         copy.setModerationStatus(LibraryModerationStatus.APPROVED); copy.setActive(true);

@@ -28,7 +28,7 @@ class CommunityLibraryScopeTest {
     private final LibraryItemRepository items = mock(LibraryItemRepository.class);
     private final CurrentUserService currentUser = mock(CurrentUserService.class);
     private final LibraryService service = new LibraryService(items, mock(LibraryFolderRepository.class),
-            mock(SimulationRepository.class), mock(LessonRepository.class), currentUser);
+            mock(SimulationRepository.class), mock(LessonRepository.class), currentUser, mock(com.example.backend.system.simulation.service.SimulationCopier.class));
 
     @Test
     void communityIncludesApprovedSystemAndSameSchoolOnly() {
