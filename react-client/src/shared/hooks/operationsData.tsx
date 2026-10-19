@@ -1,0 +1,36 @@
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import api from "../api/client";
+
+export function message(error: unknown) {
+  if (axios.isAxiosError<{ message?: string }>(error)) return error.response?.data?.message || "Không thể kết nối máy chủ. Vui lòng thử lại.";
+  if (error instanceof Error) return error.message;
+  return "Thao tác chưa hoàn tất.";
+}
+
+export function useResource<T>(url: string) {
+  const [revision, setRevision] = useState(0);
+  const key = `${url}:${revision}`;
+  const [result, setResult] = useState<{ key: string; data?: T; error?: string }>({ key: "" });
+  useEffect(() => {
+    const controller = new AbortController();
+    void api.get<T>(url, { signal: controller.signal }).then((response) => { if (!controller.signal.aborted) setResult({ key, data: response.data }); }).catch((error) => { if (!controller.signal.aborted) setResult({ key, error: message(error) }); });
+    return () => controller.abort();
+  }, [url, key]);
+  return { data: result.key === key ? result.data : undefined, error: result.key === key ? result.error : undefined, loading: result.key !== key, refresh: () => setRevision((value) => value + 1) };
+}
+
+export function useAction() {
+  const lock = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
+  const run = async (action: () => Promise<unknown>, success = "Đã lưu thay đổi.") => {
+    if (lock.current) return false;
+    lock.current = true; setBusy(true); setError(""); setNotice("");
+    try { await action(); setNotice(success); return true; }
+    catch (exception) { setError(message(exception)); return false; }
+    finally { lock.current = false; setBusy(false); }
+  };
+  return { busy, run, feedback: <>{error && <div className="ops-alert" role="alert">{error}</div>}{notice && <output className="ops-success">{notice}</output>}</> };
+}

@@ -1,6 +1,7 @@
-import axiosClient from "../../../api/axios";
+import axiosClient from "../../../shared/api/client";
 import type { SolverTimeline, PixiVisualProgram } from "../model/svgScene";
 import type { TeacherPresentation } from "../model/teacherPresentation";
+import type { LibraryItem } from "../../../shared/types/physlive";
 
 export type SimulationSourceMode = "TEXT" | "LATEX" | "IMAGE";
 export type RecognitionResult = {
@@ -76,6 +77,17 @@ export function hasSavedScene(value: unknown): value is GeneratedSimulationResul
   const spec = (value as GeneratedSimulationResult | null | undefined)?.simulationSpec;
   return Boolean(spec?.visualProgram && spec.solverTimeline);
 }
+export const saveGeneratedSimulation = (simulation: GeneratedSimulationResult, parameters: Record<string, number>,
+  title: string, folderId: string, lessonId: string) =>
+  axiosClient.post<LibraryItem>("/simulation/saved", { simulation, parameters, title, folderId, lessonId }).then(r => r.data);
+
+export const openGeneratedSimulation = (id: string) =>
+  axiosClient.get<GeneratedSimulationResult>(`/simulation/saved/${id}`).then(r => r.data);
+/** A shared simulation as its author built it; rejects for older saves that have no stored scene. */
+export const openSharedGeneratedSimulation = (id: string) =>
+  axiosClient.get<GeneratedSimulationResult>(`/simulations/shared/${id}`, { params: { view: "generated" } }).then(r => r.data);
+export const updateSavedSimulationVisual = (id: string, simulation: GeneratedSimulationResult) =>
+  axiosClient.patch<void>(`/simulation/saved/${id}/visual`, simulation);
 export const reportSimulationRenderFailure = (simulation: GeneratedSimulationResult, message: string,
   parameters?: Record<string, number>, timeline?: SolverTimeline) =>
   axiosClient.post<void>("/simulation/render-diagnostics", { simulation, message, ...(parameters ? { runtime: { parameters, timeline } } : {}) });

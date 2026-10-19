@@ -1,11 +1,12 @@
 package com.example.backend.system.physics.service;
 
+import com.example.backend.base.crud.model.enums.LifecycleStatus;
 import com.example.backend.exception.ApiException;
 import com.example.backend.exception.SchemaCompilationException;
-import com.example.backend.entity.Topic;
-import com.example.backend.repository.TopicRepository;
-import com.example.backend.entity.SchemaVersion;
-import com.example.backend.repository.SchemaVersionRepository;
+import com.example.backend.system.curriculum.model.entity.Topic;
+import com.example.backend.system.curriculum.repository.TopicRepository;
+import com.example.backend.system.physics.model.entity.SchemaVersion;
+import com.example.backend.system.physics.repository.SchemaVersionRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -23,7 +24,6 @@ import org.springframework.util.StringUtils;
 
 /** Access and integrity boundary for reviewer-managed topic definitions. */
 @Service
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "physlive.staff.preview-enabled", havingValue = "true")
 public class SchemaDefinitionService {
     private final SchemaVersionRepository schemas;
     private final TopicRepository topics;
@@ -36,13 +36,22 @@ public class SchemaDefinitionService {
     }
 
     @Transactional(readOnly = true)
+    /**
+     * A mark that changes whenever the approved schemas could have changed (a schema version or a topic added or
+     * changed), cheap enough to read on every request: what is built from the approved schemas can be kept until it moves.
+     */
+    public String approvedFingerprint() {
+        var s = schemas.changeMark();
+        var t = topics.changeMark();
+        return (s == null ? "-" : s.getCount() + "@" + s.getUpdated()) + "|" + (t == null ? "-" : t.getCount() + "@" + t.getUpdated());
+    }
+
     public List<SchemaVersion> approvedSchemas() {
         List<String> enabledTopics = topics.findByEnabledTrueOrderBySortOrderAsc().stream().map(Topic::getName).toList();
         if (enabledTopics.isEmpty()) return List.of();
         Map<String, SchemaVersion> latest = schemas
                 .findAllByLifecycleStatusAndTopicInOrderByTopicAscSchemaIdAscCreatedAtDesc(
-                        "APPROVED", enabledTopics).stream()
-                .filter(SchemaVersion::isActive).filter(SchemaVersion::isEnabled)
+                        LifecycleStatus.APPROVED, enabledTopics).stream()
                 .collect(java.util.stream.Collectors.toMap(s -> s.getSchemaId().toLowerCase(), s -> s,
                         SchemaVersionOrdering::newer));
         return new java.util.TreeMap<>(latest).values().stream().toList();
@@ -50,8 +59,8 @@ public class SchemaDefinitionService {
 
     @Transactional(readOnly = true)
     public SchemaVersion requireCurrentApproved(String schemaId, String version) {
-        SchemaVersion schema = schemas.findBySchemaIdAndVersion(schemaId, version)
-                .filter(s -> "APPROVED".equals(s.getLifecycleStatus()))
+        SchemaVersion schema = schemas.findFirstBySchemaIdAndVersion(schemaId, version)
+                .filter(s -> s.getLifecycleStatus() == LifecycleStatus.APPROVED)
                 .orElseThrow(() -> ApiException.conflict("Mô hình đã chọn không còn được phê duyệt: " + schemaId + "@" + version));
         if (approvedSchemas().stream().noneMatch(s -> s.getSchemaId().equalsIgnoreCase(schemaId)
                 && s.getVersion().equals(version))) {

@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.6-pg16-bookworm
+    environment:
+      POSTGRES_DB: physlive
+      POSTGRES_USER: physlive
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-physlive-dev}
+    ports: ["5432:5432"]
+    volumes: ["physlive-postgres:/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U physlive -d physlive"], interval: 5s, timeout: 5s, retries: 10 }
+  backend:
+    build: ./backend
+    env_file:
+      - ./backend/.env.local
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/physlive
+      SUPABASE_DB_USERNAME: physlive
+      SUPABASE_DB_PASSWORD: ${POSTGRES_PASSWORD:-physlive-dev}
+      JWT_SECRET: ${JWT_SECRET:-local-only-change-this-secret-32bytes}
+      # Steady-state startup is migration-owned. Use the documented
+      # empty-database bootstrap sequence before bringing up a new volume.
+      JPA_DDL_AUTO: validate
+    ports: ["8080:8080"]
+    depends_on: { postgres: { condition: service_healthy } }
+  web:
+    build: ./react-client
+    ports: ["5173:80"]
+    depends_on: [backend]
+volumes:
+  physlive-postgres:

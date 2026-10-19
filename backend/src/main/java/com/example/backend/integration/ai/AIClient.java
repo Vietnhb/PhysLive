@@ -19,13 +19,14 @@ import org.springframework.stereotype.Component;
 
 /** Provider protocols and transport; simulation planning stays in its business service. */
 @Component
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "physlive.staff.preview-enabled", havingValue = "true")
 @lombok.extern.slf4j.Slf4j
 public class AIClient {
     private final AIProperties ai;
     private final JevProperties jev;
     private final ObjectMapper json;
     private final HttpClient http;
+    /** Counts each provider call against the caller's allowance; absent where nothing is metered. */
+    private AiUsageMeter meter;
 
     public AIClient(AIProperties ai, JevProperties jev, ObjectMapper json) {
         this.ai = ai;
@@ -34,6 +35,9 @@ public class AIClient {
         this.http = HttpClient.newBuilder().connectTimeout(ai.provider().connectTimeout()).build();
     }
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setUsageMeter(AiUsageMeter meter) { this.meter = meter; }
+
     public JsonNode route(String state, JsonNode questions) {
         ObjectNode body = json.createObjectNode();
         body.put("model", jev.model());
@@ -41,7 +45,7 @@ public class AIClient {
         body.set("questions", questions);
         if (body.toString().length() > jev.maximumPromptCharacters())
             throw ApiException.unprocessable("Dữ liệu chọn mô hình vượt quá giới hạn xử lý");
-        return post(endpoint(jev.baseUrl(), "systemone"), jev.apiKey(), body, jev.timeout()).path("answers");
+        return post("ROUTE", endpoint(jev.baseUrl(), "systemone"), jev.apiKey(), body, jev.timeout()).path("answers");
     }
 
     public JsonNode text(JsonNode input, Supplier<String> prompt) {
@@ -55,7 +59,7 @@ public class AIClient {
             messages.addObject().put("role", "system").put("content", prompt.get());
             messages.addObject().put("role", "user").put("content", json.writeValueAsString(input));
             body.set("response_format", json.createObjectNode().put("type", "json_object"));
-            JsonNode completion = post(endpoint(ai.provider().baseUrl(), "chat/completions"), ai.provider().apiKey(),
+            JsonNode completion = post("MODEL", endpoint(ai.provider().baseUrl(), "chat/completions"), ai.provider().apiKey(),
                     body, ai.provider().readTimeout());
             return json.readTree(completion.path("choices").path(0).path("message").path("content").asText(""));
         } catch (IOException ex) {
@@ -81,7 +85,7 @@ public class AIClient {
                     : "Transcribe the image. User context, only to help read unclear symbols: " + context);
             content.addObject().put("type", "image_url").putObject("image_url").put("url", dataUrl);
             body.set("response_format", json.createObjectNode().put("type", "json_object"));
-            JsonNode completion = post(endpoint(ai.provider().baseUrl(), "chat/completions"), ai.provider().apiKey(),
+            JsonNode completion = post("OCR", endpoint(ai.provider().baseUrl(), "chat/completions"), ai.provider().apiKey(),
                     body, ai.provider().readTimeout());
             return json.readTree(completion.path("choices").path(0).path("message").path("content").asText(""));
         } catch (IOException ex) {
@@ -139,7 +143,7 @@ public class AIClient {
                 if (openRouter)
                     structured.putObject("provider").put("require_parameters", true);
                 try {
-                    completion = post(endpoint(ai.visual().baseUrl(), "chat/completions"), ai.visual().apiKey(), structured,
+                    completion = post("SCENE", endpoint(ai.visual().baseUrl(), "chat/completions"), ai.visual().apiKey(), structured,
                             ai.visual().readTimeout());
                 } catch (ApiException ex) {
                     // No endpoint accepts the structured-output parameters: fall back to the
@@ -147,10 +151,10 @@ public class AIClient {
                     String message = String.valueOf(ex.getMessage());
                     if (!(message.contains("HTTP 400") || message.contains("HTTP 404") || message.contains("HTTP 422")))
                         throw ex;
-                    completion = post(endpoint(ai.visual().baseUrl(), "chat/completions"), ai.visual().apiKey(), body, ai.visual().readTimeout());
+                    completion = post("SCENE", endpoint(ai.visual().baseUrl(), "chat/completions"), ai.visual().apiKey(), body, ai.visual().readTimeout());
                 }
             } else {
-                completion = post(endpoint(ai.visual().baseUrl(), "chat/completions"), ai.visual().apiKey(), body, ai.visual().readTimeout());
+                completion = post("SCENE", endpoint(ai.visual().baseUrl(), "chat/completions"), ai.visual().apiKey(), body, ai.visual().readTimeout());
             }
             JsonNode choice = completion.path("choices").path(0);
             if ("length".equals(choice.path("finish_reason").asText()))
@@ -224,7 +228,7 @@ public class AIClient {
             format.put("type", "text");
             format.put("mime_type", "application/json");
             format.set("schema", contract);
-            JsonNode completion = post(ai.visual().baseUrl(), ai.visual().apiKey(), body, ai.visual().readTimeout(), true);
+            JsonNode completion = post("SCENE", ai.visual().baseUrl(), ai.visual().apiKey(), body, ai.visual().readTimeout(), true);
             JsonNode result = parseJsonObject(geminiInteractionText(completion));
             if (result == null || !result.isObject())
                 throw ApiException.upstream("Phản hồi của dịch vụ AI không đúng định dạng");
@@ -256,13 +260,14 @@ public class AIClient {
         throw ApiException.upstream("Dịch vụ AI không trả về nội dung");
     }
 
-    private JsonNode post(URI uri, String apiKey, JsonNode payload, Duration timeout) {
-        return post(uri, apiKey, payload, timeout, false);
+    private JsonNode post(String operation, URI uri, String apiKey, JsonNode payload, Duration timeout) {
+        return post(operation, uri, apiKey, payload, timeout, false);
     }
 
-    private JsonNode post(URI uri, String apiKey, JsonNode payload, Duration timeout, boolean gemini) {
+    private JsonNode post(String operation, URI uri, String apiKey, JsonNode payload, Duration timeout, boolean gemini) {
         if (apiKey == null || apiKey.isBlank())
             throw ApiException.unavailable("Dịch vụ AI chưa được cấu hình");
+        if (meter != null) meter.requireAllowance();
         try {
             HttpRequest.Builder builder = HttpRequest.newBuilder(uri).timeout(timeout)
                     .header("Content-Type", MediaType.APPLICATION_JSON_VALUE);
@@ -282,13 +287,30 @@ public class AIClient {
                 log.warn("AI provider returned HTTP {}{}", response.statusCode(), detail);
                 throw ApiException.upstream("Yêu cầu đến dịch vụ AI thất bại với mã HTTP " + response.statusCode() + ". Vui lòng thử lại.");
             }
-            return json.readTree(response.body());
+            JsonNode answer = json.readTree(response.body());
+            if (meter != null) {
+                try { meter.record(operation, tokensUsed(answer, request, response.body())); }
+                // the answer is paid for already; a count that cannot be written must not lose it
+                catch (RuntimeException failure) { log.warn("AI_USAGE_NOT_RECORDED {}", failure.getMessage()); }
+            }
+            return answer;
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw ApiException.unavailable("Yêu cầu AI bị gián đoạn. Vui lòng thử lại");
         } catch (IOException ex) {
             throw ApiException.upstream("Không thể hoàn tất yêu cầu AI. Vui lòng thử lại");
         }
+    }
+
+    /** The provider's own count where it reports one, otherwise an estimate of about four characters per token. */
+    private static long tokensUsed(JsonNode answer, HttpRequest request, String body) {
+        JsonNode usage = answer.path("usage");
+        if (usage.path("total_tokens").canConvertToLong()) return usage.path("total_tokens").asLong();
+        if (usage.path("prompt_tokens").canConvertToLong() || usage.path("completion_tokens").canConvertToLong())
+            return usage.path("prompt_tokens").asLong(0) + usage.path("completion_tokens").asLong(0);
+        if (answer.path("usageMetadata").path("totalTokenCount").canConvertToLong()) return answer.path("usageMetadata").path("totalTokenCount").asLong();
+        long sent = request.bodyPublisher().map(publisher -> publisher.contentLength()).orElse(0L);
+        return Math.max(1, (Math.max(0, sent) + (body == null ? 0 : body.length())) / 4);
     }
 
     private URI endpoint(URI base, String path) {

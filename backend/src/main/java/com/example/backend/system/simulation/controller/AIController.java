@@ -2,6 +2,7 @@ package com.example.backend.system.simulation.controller;
 
 import com.example.backend.config.UploadProperties;
 import com.example.backend.exception.ApiException;
+import com.example.backend.system.library.dto.LibraryItemResponse;
 import com.example.backend.system.simulation.dto.SimulationRequests;
 import com.example.backend.system.simulation.service.AIService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "physlive.staff.preview-enabled", havingValue = "true")
-@org.springframework.security.access.prepost.PreAuthorize("@staffAccess.requireTeaching() != null")
 @RequestMapping("/api/simulation")
 @RequiredArgsConstructor
 public class AIController {
@@ -52,5 +51,14 @@ public class AIController {
 
     @PostMapping(path = "/compute", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ObjectNode compute(@RequestBody JsonNode request) { return ai.compute(request); }
+
+    @PostMapping(path = "/saved", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public LibraryItemResponse save(@Valid @RequestBody SimulationRequests.Save request) { return ai.save(request); }
+
+    @GetMapping("/saved/{id}")
+    public ObjectNode openSaved(@PathVariable UUID id) { return ai.openSaved(id); }
+
+    @PatchMapping("/saved/{id}/visual")
+    public void updateSavedVisual(@PathVariable UUID id, @RequestBody ObjectNode generated) { ai.updateSavedVisual(id, generated); }
 
 }

@@ -22,7 +22,10 @@ public record JevProperties(
         if (apiKey.isBlank() || model.isBlank()) {
             throw new IllegalArgumentException("JEV API key and model must be configured in the environment");
         }
-        if (baseUrl == null || !"https".equalsIgnoreCase(baseUrl.getScheme())) {
+        // HTTPS everywhere; plain HTTP only for a stand-in served on this machine (local development and research runs)
+        boolean loopback = baseUrl != null && "http".equalsIgnoreCase(baseUrl.getScheme())
+                && java.util.Set.of("localhost", "127.0.0.1", "[::1]").contains(String.valueOf(baseUrl.getHost()));
+        if (baseUrl == null || !("https".equalsIgnoreCase(baseUrl.getScheme()) || loopback)) {
             throw new IllegalArgumentException("Jev base URL must be an HTTPS URL");
         }
         if (timeout == null || timeout.isZero() || timeout.isNegative()) {

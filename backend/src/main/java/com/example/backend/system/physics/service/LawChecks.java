@@ -19,6 +19,8 @@ import java.util.Set;
 public final class LawChecks {
     private static final String AMBIGUOUS = "\u0000ambiguous";
     private static final double RELATIVE = 0.02, FRACTION = 0;
+    /** System property that switches starting-value disambiguation off, for the research ablation only. */
+    public static final String ROLE_DISAMBIGUATION = "physlive.laws.roleDisambiguation";
 
     /** One quantity of the model over the run, with the role attributes laws match on; given: a slider or constant. */
     public record Symbol(String id, String label, String unit, Map<String, String> attributes, double[] values, boolean given) {
@@ -102,7 +104,8 @@ public final class LawChecks {
                 if (i > 0 && time[i] > time[i - 1]) worth.merge("d/dt " + symbol.unit() + "@" + symbol.get("of"), Math.abs(values[i] - values[i - 1]) / (time[i] - time[i - 1]), Math::max);
             }
         }
-        Set<String> evolving = evolvingRoles(catalogue);
+        // on by default; switched off only to measure what it changes (research ablation)
+        Set<String> evolving = Boolean.parseBoolean(System.getProperty(ROLE_DISAMBIGUATION, "true")) ? evolvingRoles(catalogue) : null;
         for (JsonNode law : catalogue.path("laws")) {
             List<String> scope = new ArrayList<>();
             law.path("scope").forEach(attribute -> scope.add(attribute.asText()));
@@ -197,7 +200,7 @@ public final class LawChecks {
             List<Symbol> found = new ArrayList<>();
             for (Symbol symbol : symbols) if (matches(symbol, variable.getValue(), scope, where)) found.add(symbol);
             boolean many = variable.getValue().path("many").asBoolean();
-            found = new ArrayList<>(withoutStartingValues(found, many, evolving));
+            if (evolving != null) found = new ArrayList<>(withoutStartingValues(found, many, evolving));
             if (many ? found.size() < variable.getValue().path("min").asInt(0) : found.isEmpty()) return null;
             if (!many && found.size() > 1) unclear = found;
             bound.put(variable.getKey(), found);
