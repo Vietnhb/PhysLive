@@ -8,6 +8,7 @@ import CountUp from "../../../shared/effects/reactbits/CountUp";
 import styles from "./CommunityLibrary.module.css";
 import "../../assignments/styles/assignment-flow.css";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
+import { canTeach } from "../../../shared/auth/permissions";
 
 export default function CommunityLibrary() {
   const library = useCommunityLibrary();
@@ -33,6 +34,7 @@ export default function CommunityLibrary() {
       <ResourceDiscovery
         {...library}
         allowSchoolScope={Boolean(user)}
+        canClone={canTeach(user)}
         onRetry={() => void library.load()}
         vectors={{
           grid: true,

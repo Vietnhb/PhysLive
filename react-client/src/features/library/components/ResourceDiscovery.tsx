@@ -10,6 +10,7 @@ import type { Curriculum, LibraryItem, Simulation } from "../../../shared/types/
 import { SpotlightCard } from "../../../shared/effects/Motion";
 import { buildCatalog, filterLibrary, indexLessonPaths, type CatalogSelection, type CatalogSubject, type LibraryScope } from "../model/catalogModel";
 import { ResourceDiscussion } from "./ResourceDiscussion";
+import { CloneToLibrary } from "./CloneToLibrary";
 import styles from "./ResourceDiscovery.module.css";
 
 type Props = {
@@ -23,6 +24,8 @@ type Props = {
   onFrameChange: (frame: number) => void; onTimeChange: (time: number) => void; onPlaybackEnd: () => void;
   error?: string;
   allowSchoolScope?: boolean;
+  /** Offer a copy of the open simulation for the viewer's own library. */
+  canClone?: boolean;
   onRetry?: () => void;
 };
 
@@ -111,7 +114,7 @@ function CatalogNav({ catalog, selection, total, counts, onSelect }: Readonly<Ca
   </nav>;
 }
 
-export function ResourceDiscovery({ items, curriculum = null, generated = null, loading, selectedItem, simulation, time, simulationLoading, simulationError, frame, playing, vectors, onOpen, onClose, onTogglePlaying, onReset, onFrameChange, onTimeChange, onPlaybackEnd, error = "", onRetry, allowSchoolScope = true }: Readonly<Props>) {
+export function ResourceDiscovery({ items, curriculum = null, generated = null, loading, selectedItem, simulation, time, simulationLoading, simulationError, frame, playing, vectors, onOpen, onClose, onTogglePlaying, onReset, onFrameChange, onTimeChange, onPlaybackEnd, error = "", onRetry, allowSchoolScope = true, canClone = false }: Readonly<Props>) {
   const [selection, setSelection] = useState<CatalogSelection>({});
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<LibraryScope>("ALL");
@@ -187,6 +190,7 @@ export function ResourceDiscovery({ items, curriculum = null, generated = null, 
         <SavedScene scene={generated} />
       </div>}
       {!simulationLoading && !simulationError && !generated && simulation && <motion.div initial={reducedMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={transition}><div className={styles.scene}><PhysicsScene simulation={simulation} index={frame} overlays={vectors} time={time} playing={playing} onTimeChange={onTimeChange} onPlaybackEnd={onPlaybackEnd} /></div><div className={styles.playback}><Button onClick={onTogglePlaying}>{playing ? <PauseIcon /> : <PlayIcon />}{playing ? "Tạm dừng" : "Chạy mô phỏng"}</Button><Button color="gray" variant="soft" onClick={onReset}><ResetIcon /> Về đầu</Button><input aria-label="Thời gian mô phỏng" type="range" min={0} max={Math.max(0, simulation.time.length - 1)} value={frame} onChange={event => onFrameChange(Number(event.target.value))} /><span>{time.toFixed(2)} s</span></div></motion.div>}
+      {selectedItem && canClone && <CloneToLibrary key={`clone-${selectedItem.id}`} item={selectedItem} />}
       {selectedItem && <ResourceDiscussion key={selectedItem.id} resourceId={selectedItem.id} />}
     </Dialog.Content></Dialog.Root>
   </motion.section></Theme>;

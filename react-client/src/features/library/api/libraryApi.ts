@@ -61,6 +61,10 @@ export const renameLibraryItem = (id: string, title: string) =>
 export const deleteLibraryItem = (id: string) => 
   axiosClient.delete(`/library/${id}`);
 
+/** The teacher's own copy of a shared simulation, saved into one of their folders. */
+export const cloneSharedLibrary = (id: string, folderId: string, title?: string) =>
+  axiosClient.post<LibraryItem>(`/library/${id}/clone`, { folderId, title }).then(r => r.data);
+
 export const libraryFolders = () => 
   axiosClient.get<LibraryFolder[]>("/library/folders").then(r => r.data);
 
