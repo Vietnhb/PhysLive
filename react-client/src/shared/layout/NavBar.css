@@ -1,0 +1,270 @@
+/* Site navigation. One flat bar: brand, text links with a sliding underline,
+ * then theme + account on the right. No nested pills or capsules. */
+.site-nav {
+  --nav-ink: var(--ink);
+  --nav-muted: var(--muted);
+  --nav-hover: var(--surface-3);
+  --nav-line: var(--line);
+  --nav-surface: var(--chrome);
+  --nav-cta: var(--inverse);
+  --nav-cta-hover: var(--inverse-hover);
+  --nav-cta-ink: var(--on-inverse);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--nav-line);
+  background: var(--nav-surface);
+  backdrop-filter: saturate(1.4) blur(14px);
+  transition: background-color 0.25s ease, border-color 0.25s ease, backdrop-filter 0.25s ease;
+}
+/* Over a full-bleed hero: clear at the top of the page, surfaced once scrolled. */
+.site-nav--hero {
+  --nav-ink: var(--stage-ink);
+  --nav-muted: var(--stage-muted);
+  --nav-hover: rgb(var(--stage-rgb) / 7%);
+  --nav-line: var(--stage-line);
+  --nav-surface: var(--stage-glass);
+  --nav-cta: var(--stage-cta);
+  --nav-cta-hover: var(--stage-cta-hover);
+  --nav-cta-ink: var(--stage-cta-ink);
+}
+.site-nav--hero:not([data-scrolled]) {
+  border-bottom-color: transparent;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.site-nav__inner {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  max-width: calc(var(--page-max) + 64px);
+  height: var(--header-h);
+  margin: 0 auto;
+  padding: 0 32px;
+}
+.site-nav__brand {
+  display: inline-flex;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.site-nav .brand-mark {
+  color: var(--nav-ink);
+}
+
+/* Links */
+.site-nav__links {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+  height: 100%;
+}
+.site-nav__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  color: var(--nav-muted);
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+.site-nav__link > span:not(.active-pill) {
+  position: relative;
+}
+.site-nav__link:hover,
+.site-nav__link.active {
+  color: var(--nav-ink);
+}
+.site-nav__link:focus-visible,
+.site-nav__button:focus-visible,
+.site-nav__profile:focus-visible {
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
+}
+/* ActivePill slides between links (Motion layoutId); here it is a short underline. */
+.site-nav__link .active-pill {
+  position: absolute;
+  inset: auto 12px 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--nav-ink);
+}
+
+/* Right side */
+.site-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.site-nav__account {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.site-nav .theme-menu {
+  --theme-menu-ink: var(--nav-muted);
+  --theme-menu-ink-strong: var(--nav-ink);
+  --theme-menu-hover: var(--nav-hover);
+}
+.site-nav__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  color: var(--nav-ink);
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.site-nav__button:hover {
+  background: var(--nav-hover);
+}
+.site-nav__button--primary {
+  margin-left: 4px;
+  padding: 0 16px;
+  background: var(--nav-cta);
+  color: var(--nav-cta-ink);
+  font-weight: 600;
+}
+.site-nav__button--primary:hover {
+  background: var(--nav-cta-hover);
+  color: var(--nav-cta-ink);
+}
+.site-nav__profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 999px;
+  color: var(--nav-ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+.site-nav__profile:hover {
+  background: var(--nav-hover);
+}
+.site-nav__profile > span:last-child {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.site-nav__avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 700;
+}
+.site-nav__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+button.site-nav__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--nav-muted);
+}
+button.site-nav__icon:hover:not(:disabled) {
+  background: var(--nav-hover);
+  color: var(--nav-ink);
+}
+.site-nav__icon .learn-icon {
+  width: 18px;
+  height: 18px;
+}
+button.site-nav__menu-toggle {
+  display: none;
+}
+
+/* Mobile sheet */
+.site-nav__sheet {
+  display: grid;
+  gap: 2px;
+  padding: 8px 16px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.site-nav__sheet-link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  color: var(--ink-2);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.site-nav__sheet-link.active {
+  background: var(--surface-3);
+  color: var(--ink);
+  font-weight: 600;
+}
+button.site-nav__sheet-logout {
+  justify-content: flex-start;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--danger);
+  font-weight: 500;
+}
+button.site-nav__sheet-logout:hover:not(:disabled) {
+  background: var(--danger-soft);
+}
+.site-nav__sheet-divider {
+  height: 1px;
+  margin: 6px 0;
+  background: var(--line);
+}
+.site-nav__sheet .site-nav__button--primary {
+  min-height: 44px;
+  margin: 6px 0 0;
+  background: var(--inverse);
+  color: var(--on-inverse);
+}
+
+@media (max-width: 960px) {
+  .site-nav__inner {
+    gap: 16px;
+    padding: 0 16px 0 20px;
+  }
+  .site-nav__links,
+  .site-nav__account {
+    display: none;
+  }
+  button.site-nav__menu-toggle {
+    display: inline-flex;
+  }
+}

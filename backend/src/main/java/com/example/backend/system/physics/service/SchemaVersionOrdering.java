@@ -1,6 +1,6 @@
 package com.example.backend.system.physics.service;
 
-import com.example.backend.entity.SchemaVersion;
+import com.example.backend.system.physics.model.entity.SchemaVersion;
 import java.math.BigInteger;
 import java.time.Instant;
 

@@ -1,0 +1,146 @@
+import { useEffect, useRef, useState } from "react";
+import { getSharedSimulation } from "../../simulation/api/simulationApi";
+import { openSharedGeneratedSimulation, type GeneratedSimulationResult } from "../../simulation/api/simulationUnderstandingApi";
+import SavedScene from "../../simulation/components/SavedScene";
+import "../styles/simulation-thumb.css";
+
+/** A lightweight curve drawn from the simulation's own data, used when the live scene is not mounted. */
+type Curve = { paths: string[]; ends: [number, number][]; label: string };
+type Preview = { scene: GeneratedSimulationResult | null; curve: Curve | null };
+
+const WIDTH = 240;
+const HEIGHT = 112;
+const PAD = 14;
+const POINTS = 48;
+const MAX_TRACKS = 3;
+const MAX_PARALLEL = 2;
+/** Each live scene is a sandboxed frame with its own renderer, so only a handful run at once. */
+const MAX_LIVE = 6;
+
+const cache = new Map<string, Promise<Preview>>();
+let running = 0;
+const waiting: (() => void)[] = [];
+const slot = () => new Promise<void>(resolve => { if (running < MAX_PARALLEL) { running += 1; resolve(); } else waiting.push(resolve); });
+const release = () => { const next = waiting.shift(); if (next) next(); else running -= 1; };
+let live = 0;
+
+function pick(series: number[], count: number) {
+  if (series.length <= count) return series;
+  return Array.from({ length: count }, (_, index) => series[Math.round(index * (series.length - 1) / (count - 1))]);
+}
+const usable = (series: number[] | undefined): series is number[] => Array.isArray(series) && series.length > 1 && series.every(Number.isFinite);
+const varies = (series: number[]) => Math.max(...series) - Math.min(...series) > 1e-9;
+
+type Series = Record<string, number[]>;
+type Meta = Record<string, { label?: string; unit?: string } | undefined>;
+
+/**
+ * The simulation's own results over time: the values its plan asks the learner to watch (in the plan's order), or
+ * its results in the order the solver lists them. Lines drawn together share the unit of the first, so they can be compared.
+ */
+function buildCurve(time: number[], series: Series, meta: Meta = {}, watched: readonly string[] = []): Curve | null {
+  const drawable = (key: string) => usable(series[key]) && usable(time) && series[key].length === time.length && varies(series[key]);
+  const keys = [...watched, ...Object.keys(series)].filter((key, index, all) => all.indexOf(key) === index && drawable(key));
+  if (keys.length === 0) return null;
+  const first = keys[0], unit = meta[first]?.unit;
+  const tracks = keys.filter(key => meta[key]?.unit === unit).slice(0, MAX_TRACKS).map(key => ({ xs: time, ys: series[key] }));
+  const name = meta[first]?.label?.trim();
+  const label = `${name ? name.charAt(0).toUpperCase() + name.slice(1) : "Kết quả"} theo thời gian`;
+  const chosen = tracks.slice(0, MAX_TRACKS).map(track => ({ xs: pick(track.xs, POINTS), ys: pick(track.ys, POINTS) }));
+  const allX = chosen.flatMap(track => track.xs), allY = chosen.flatMap(track => track.ys);
+  const minX = Math.min(...allX), maxX = Math.max(...allX), minY = Math.min(...allY), maxY = Math.max(...allY);
+  const sx = (WIDTH - 2 * PAD) / (maxX - minX || 1), sy = (HEIGHT - 2 * PAD) / (maxY - minY || 1);
+  const point = (x: number, y: number): [number, number] => [PAD + (x - minX) * sx, HEIGHT - PAD - (y - minY) * sy];
+  return {
+    label,
+    paths: chosen.map(track => track.xs.map((x, index) => { const [px, py] = point(x, track.ys[index]); return `${index ? "L" : "M"}${px.toFixed(1)},${py.toFixed(1)}`; }).join(" ")),
+    ends: chosen.map(track => point(track.xs.at(-1)!, track.ys.at(-1)!)),
+  };
+}
+
+async function fetchPreview(simulationId: string): Promise<Preview> {
+  const scene = await openSharedGeneratedSimulation(simulationId).catch(() => null);
+  const frames = scene?.simulationSpec?.solverTimeline?.frames as { t: number; values: Record<string, number> }[] | undefined;
+  if (scene && frames && frames.length > 1) {
+    const series: Series = {};
+    for (const key of Object.keys(frames[0].values ?? {})) if (key !== "t") series[key] = frames.map(frame => frame.values?.[key]);
+    return { scene, curve: buildCurve(frames.map(frame => frame.t), series, scene.simulationSpec.solverFieldMeta as Meta | undefined,
+      (scene.simulationSpec.observables ?? []).map(item => item.field)) };
+  }
+  // Saves that predate stored scenes only have the plain solver series.
+  const plain = await getSharedSimulation(simulationId).catch(() => null);
+  return { scene: null, curve: plain ? buildCurve(plain.time ?? [], { ...plain.values, ...plain.velocities, ...plain.positions }) : null };
+}
+
+function load(simulationId: string) {
+  let entry = cache.get(simulationId);
+  if (!entry) {
+    entry = slot().then(() => fetchPreview(simulationId)).catch(() => ({ scene: null, curve: null })).finally(release);
+    cache.set(simulationId, entry);
+  }
+  return entry;
+}
+
+/**
+ * Card cover showing the shared simulation itself. While the card is on screen it mounts the author's
+ * real scene (resting on the first frame, playing on hover); at most MAX_LIVE scenes exist at once and
+ * a card that scrolls away gives its scene up. Cards beyond that limit show a curve drawn from the same
+ * simulation data. Nothing here is a stock illustration.
+ */
+export default function SimulationThumb({ simulationId }: Readonly<{ simulationId: string }>) {
+  const host = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<{ id: string; preview: Preview } | null>(null);
+  /* without an IntersectionObserver every card counts as on screen */
+  const [visible, setVisible] = useState(() => typeof IntersectionObserver === "undefined");
+  const [hover, setHover] = useState(false);
+  const [hasSlot, setHasSlot] = useState(false);
+  /** The live scene could not be drawn (for example the tab was in the background); show the data curve instead. */
+  const [failedId, setFailedId] = useState("");
+
+  useEffect(() => {
+    const element = host.current;
+    if (!element) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(entries => setVisible(entries.some(entry => entry.isIntersecting)), { rootMargin: "120px" });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!visible) return;
+    let active = true;
+    void load(simulationId).then(preview => { if (active) setState({ id: simulationId, preview }); });
+    return () => { active = false; };
+  }, [visible, simulationId]);
+
+  const preview = state?.id === simulationId ? state.preview : null;
+  const scene = preview?.scene ?? null;
+  // Take a live-scene slot only while on screen, and hand it back on leaving.
+  useEffect(() => {
+    if (!visible || !scene || failedId === simulationId || live >= MAX_LIVE) return;
+    live += 1;
+    let held = true;
+    // the slot is announced once it is taken, not while the effect is still running
+    queueMicrotask(() => { if (held) setHasSlot(true); });
+    return () => { held = false; live -= 1; setHasSlot(false); };
+  }, [visible, scene, failedId, simulationId]);
+
+  const curve = preview?.curve ?? null;
+  const timeline = scene?.simulationSpec.solverTimeline;
+  return <div ref={host} className="simulation-thumb" data-state={!preview ? "loading" : hasSlot ? "live" : curve ? "curve" : "none"}
+    onPointerEnter={() => setHover(true)} onPointerLeave={() => setHover(false)}>
+    {hasSlot && scene && timeline ? <SavedScene scene={scene} cover coverPlaying={hover} onCoverFailed={() => setFailedId(simulationId)} />
+      : curve ? <>
+        <svg className="simulation-thumb__plot" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={`Bản xem trước: ${curve.label.toLocaleLowerCase("vi")}`} preserveAspectRatio="xMidYMid meet">
+          <line className="simulation-thumb__axis" x1={PAD} x2={WIDTH - PAD} y1={HEIGHT - PAD} y2={HEIGHT - PAD} />
+          <line className="simulation-thumb__axis" x1={PAD} x2={PAD} y1={PAD} y2={HEIGHT - PAD} />
+          {curve.paths.map((d, index) => <path key={index} className="simulation-thumb__curve" data-track={index} d={d} />)}
+          {curve.ends.map(([x, y], index) => <circle key={index} className="simulation-thumb__end" data-track={index} cx={x} cy={y} r={3} />)}
+          {hover && <circle className="simulation-thumb__runner" r={4.5}><animateMotion dur="2.4s" repeatCount="indefinite" path={curve.paths[0]} /></circle>}
+        </svg>
+        <span className="simulation-thumb__label">{curve.label}</span>
+      </>
+      : preview ? <span className="simulation-thumb__none">Chưa có bản xem trước</span>
+      : <span className="simulation-thumb__skeleton" aria-hidden="true" />}
+  </div>;
+}

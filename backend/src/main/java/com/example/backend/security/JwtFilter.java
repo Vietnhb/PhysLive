@@ -1,136 +1,159 @@
 package com.example.backend.security;
 
-import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
+import com.example.backend.base.web.dto.ErrorResponse;
+import com.example.backend.system.account.model.enums.RoleName;
+import com.example.backend.system.account.repository.UserRepository;
+import com.example.backend.system.school.service.LicenseCheckService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.util.Collections;
-
-/**
- * Intercepts every request, extracts the Bearer JWT from the Authorization header,
- * validates it, and populates the {@link SecurityContextHolder} with the user's
- * email and role authority.
- *
- * <p>If the header is absent the filter passes the request through unchanged –
- * Spring Security's own rules will decide whether the endpoint is public or not.
- *
- * <p>If the token is present but invalid, the filter short-circuits with a
- * {@code 401 Unauthorized} JSON response so clients get a machine-readable error
- * instead of a Spring redirect.
- */
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
-
-    private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
+    private static final String ACCOUNT_LOCKED_MESSAGE =
+            "Tài khoản đang bị khóa. Vui lòng liên hệ quản trị viên.";
+    private static final String SCHOOL_DISABLED_MESSAGE =
+            "Trường đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.";
+    private static final String LICENSE_REQUIRED_MESSAGE =
+            "Gói của trường chưa có hiệu lực. Vui lòng liên hệ quản lý trường.";
 
     private final JwtUtil jwtUtil;
-    private final com.example.backend.repository.UserRepository users;
-    private final com.example.backend.service.school.LicenseCheckService licenses;
+    private final UserRepository userRepository;
+    private final com.example.backend.system.school.service.LicenseCheckService licenseCheckService;
+    private final ObjectMapper objectMapper;
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
-
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            Claims claims;
+            try {
+                claims = jwtUtil.extractClaims(authHeader.substring(7));
+            } catch (JwtException | IllegalArgumentException ignored) {
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-        // No token – let the request pass; Spring Security will enforce access rules
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String token = authHeader.substring(7);
-
-        try {
-            Claims claims = jwtUtil.extractClaims(token);
             String email = claims.getSubject();
-            var user = users.findByEmail(email).filter(u -> u.isEnabled() && Boolean.TRUE.equals(u.getActive()))
-                    .filter(u -> u.getSchool() == null || u.getSchool().isActive()).orElse(null);
-            if (user == null || user.getRole() == null) {
-                SecurityContextHolder.clearContext();
-                sendUnauthorized(response, "Account or school is disabled");
-                return;
-            }
-            var role = com.example.backend.entity.enums.RoleName.from(user.getRole().getName()).orElse(null);
-            String path = request.getRequestURI().substring(request.getContextPath().length());
-            boolean passwordLifecycle = ("GET".equals(request.getMethod()) && "/api/user/me".equals(path))
-                    || ("PUT".equals(request.getMethod()) && "/api/user/me/password".equals(path));
-            if (user.isMustChangePassword() && !passwordLifecycle) {
-                SecurityContextHolder.clearContext();
-                sendPasswordChangeRequired(response);
-                return;
-            }
-            boolean write = !java.util.List.of("GET", "HEAD", "OPTIONS").contains(request.getMethod());
-            boolean profile = "/api/user/me".equals(path) || path.startsWith("/api/user/me/");
-            boolean renewal = role == com.example.backend.entity.enums.RoleName.SCHOOL
-                    && "POST".equals(request.getMethod())
-                    && java.util.List.of("/api/school/billing/quote", "/api/school/billing/checkout").contains(path);
-            if (write && path.startsWith("/api/") && !path.startsWith("/api/auth/")
-                    && !profile && !renewal && !licenses.canPerformWriteOperations(user)) {
-                response.setStatus(403);
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                response.getWriter().write("{\"status\":403,\"message\":\"School license does not allow writes\"}");
-                return;
-            }
-            var authorities = new java.util.ArrayList<SimpleGrantedAuthority>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + (role == null ? user.getRole().getName() : role.name())));
-            if (role == com.example.backend.entity.enums.RoleName.REVIEWER)
-                authorities.add(new SimpleGrantedAuthority("ROLE_CONTENT_REVIEWER"));
-            if (role == com.example.backend.entity.enums.RoleName.SCHOOL)
-                authorities.add(new SimpleGrantedAuthority("ROLE_SCHOOL_MANAGER"));
-            if (role == com.example.backend.entity.enums.RoleName.STAFF && StaffAccess.canTeach(user))
-                authorities.add(new SimpleGrantedAuthority("ROLE_TEACHER"));
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(email, null, authorities);
+            var currentUser = userRepository.findByEmail(email);
+            if (currentUser.isPresent()) {
+                var user = currentUser.get();
+                boolean isSuspended = user.isSuspendedReadOnly();
+                String path = request.getRequestURI().substring(request.getContextPath().length());
+                boolean isRead = List.of("GET", "HEAD", "OPTIONS").contains(request.getMethod());
+                boolean isAppeal = path.startsWith("/api/appeals") || path.startsWith("/api/account/appeals");
+                boolean isAuthMe = "/api/user/me".equals(path) || "/api/auth/logout".equals(path);
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
-
-        } catch (JwtException | IllegalArgumentException e) {
-            log.warn("Invalid JWT token: {}", e.getMessage());
-            sendUnauthorized(response, "Invalid or expired token");
-            return;
+                if (isSuspended && !isRead && !isAppeal && !isAuthMe) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                    String reasonMsg = user.getSuspensionReason() != null ? " Lý do: " + user.getSuspensionReason() : "";
+                    objectMapper.writeValue(response.getOutputStream(), new ErrorResponse(
+                            HttpServletResponse.SC_FORBIDDEN,
+                            "Tài khoản đang trong trạng thái tạm khóa (chỉ xem)." + reasonMsg + " Bạn có thể xem lý do hoặc gửi khiếu nại."));
+                    return;
+                }
+            }
+            if (currentUser.isPresent() && currentUser.get().getSchool() != null
+                    && !currentUser.get().getSchool().isActive()) {
+                writeForbidden(response, SCHOOL_DISABLED_MESSAGE);
+                return;
+            }
+            if (currentUser.isPresent() && currentUser.get().getRole() != null) {
+                var user = currentUser.get();
+                RoleName currentRole = RoleName.from(user.getRole().getName()).orElse(null);
+                if (currentRole == null) {
+                    writeForbidden(response, "Tài khoản chưa được thiết lập vai trò");
+                    return;
+                }
+                String role = currentRole.name();
+                boolean schoolRole = RoleName.from(role).map(RoleName::isSchoolRole).orElse(false);
+                boolean write = !List.of("GET", "HEAD", "OPTIONS").contains(request.getMethod());
+                String path = request.getRequestURI().substring(request.getContextPath().length());
+                boolean passwordLifecyclePath = isPasswordLifecyclePath(request.getMethod(), path);
+                if (user.isMustChangePassword() && !passwordLifecyclePath) {
+                    SecurityContextHolder.clearContext();
+                    writePasswordChangeRequired(response);
+                    return;
+                }
+                boolean licenseActive = licenseCheckService.isLicenseActive(user);
+                if (!passwordLifecyclePath && (RoleName.STAFF.matches(role) || RoleName.STUDENT.matches(role)) && !licenseActive) {
+                    writeForbidden(response, LICENSE_REQUIRED_MESSAGE);
+                    return;
+                }
+                if (!passwordLifecyclePath && RoleName.SCHOOL.matches(role) && !licenseActive && !isManagerBillingPath(path)) {
+                    writeForbidden(response, "Vui lòng mua hoặc gia hạn gói để tiếp tục sử dụng PhysLive.");
+                    return;
+                }
+                boolean managerRenewalRequest = RoleName.SCHOOL.matches(role)
+                        && "POST".equals(request.getMethod())
+                        && ("/api/school/billing/quote".equals(path)
+                                || "/api/school/billing/checkout".equals(path));
+                if (schoolRole && write && path.startsWith("/api/")
+                        && !path.startsWith("/api/auth/") && !path.startsWith("/api/user/me/")
+                        && !managerRenewalRequest
+                        && !licenseActive) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                    objectMapper.writeValue(response.getOutputStream(), new ErrorResponse(
+                            HttpServletResponse.SC_FORBIDDEN, "Gói sử dụng của trường hiện không cho phép thay đổi dữ liệu"));
+                    return;
+                }
+                String authority = currentRole.authority();
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(email, null,
+                                List.of(new SimpleGrantedAuthority(authority)));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
-
         filterChain.doFilter(request, response);
     }
 
-    // ------------------------------------------------------------------ //
-    // Helper
-    // ------------------------------------------------------------------ //
-
-    private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(
-                "{\"status\":401,\"message\":\"" + message + "\"}");
+    private static boolean isManagerBillingPath(String path) {
+        return path.startsWith("/api/auth/")
+                || "/api/user/me".equals(path)
+                || "/api/user/me/license".equals(path)
+                || "/api/school/billing".equals(path)
+                || path.startsWith("/api/school/billing/");
     }
 
-    private void sendPasswordChangeRequired(HttpServletResponse response) throws IOException {
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(
-                "{\"status\":403,\"error\":\"PASSWORD_CHANGE_REQUIRED\","
-                        + "\"message\":\"Password change is required before continuing\"}");
+    private static boolean isPasswordLifecyclePath(String method, String path) {
+        return "GET".equals(method) && "/api/user/me".equals(path)
+                || "PUT".equals(method) && "/api/user/me/password".equals(path)
+                || "POST".equals(method) && "/api/auth/logout".equals(path);
+    }
+
+    private void writePasswordChangeRequired(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType("application/json");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        objectMapper.writeValue(response.getOutputStream(), new ErrorResponse(HttpServletResponse.SC_FORBIDDEN,
+                "Vui lòng đổi mật khẩu khởi tạo trước khi sử dụng hệ thống.", "PASSWORD_CHANGE_REQUIRED", null));
+    }
+
+    private void writeForbidden(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType("application/json");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        objectMapper.writeValue(response.getOutputStream(), new ErrorResponse(
+                HttpServletResponse.SC_FORBIDDEN, message));
     }
 }

@@ -53,7 +53,7 @@ class AIServiceTest {
 
     private AIService service(String visualProtocol, boolean structured) {
         return new AIService(mock(SchemaDefinitionService.class), mock(SchemaEquationRuntime.class),
-                routing(), json, settings(visualProtocol, structured),
+                mock(GeneratedSimulationStorage.class), routing(), json, settings(visualProtocol, structured),
                 client(visualProtocol, structured), new UploadProperties(1024, Set.of("image/png")), "test-plan-key", 50000);
     }
 

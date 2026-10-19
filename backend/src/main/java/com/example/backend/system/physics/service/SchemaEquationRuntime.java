@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
  * how a description with several stages or a stopping condition is computed from the same approved laws.
  */
 @Service
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "physlive.staff.preview-enabled", havingValue = "true")
 public class SchemaEquationRuntime {
     private final ObjectMapper json;
     private final double defaultStep;

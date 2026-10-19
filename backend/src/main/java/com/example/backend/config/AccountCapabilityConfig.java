@@ -10,7 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class AccountCapabilityConfig implements WebMvcConfigurer {
     private final AccountCapabilityInterceptor interceptor;
-
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(interceptor).addPathPatterns(AccountCapabilityInterceptor.PATHS);

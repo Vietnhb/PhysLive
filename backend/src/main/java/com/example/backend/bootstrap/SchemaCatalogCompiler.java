@@ -1,6 +1,6 @@
 package com.example.backend.bootstrap;
 
-import com.example.backend.entity.Topic;
+import com.example.backend.system.curriculum.model.entity.Topic;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;

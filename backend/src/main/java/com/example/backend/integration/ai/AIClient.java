@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 /** Provider protocols and transport; simulation planning stays in its business service. */
 @Component
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "physlive.staff.preview-enabled", havingValue = "true")
 @lombok.extern.slf4j.Slf4j
 public class AIClient {
     private final AIProperties ai;

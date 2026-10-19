@@ -1,0 +1,70 @@
+/* The law book: a topic's laws laid out like a formula sheet. Colours come from styles/tokens.css. */
+.lawbook { display: grid; gap: 14px; min-width: 0; color: var(--ink); }
+.lawbook-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.lawbook-count { color: var(--muted); font-size: 14px; margin-right: auto; }
+.lawbook-count b { color: var(--warning); font-weight: 600; }
+.lawbook-empty, .lawbook-hint { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.lawbook-empty { padding: 22px; text-align: center; border: 1px dashed var(--line-strong); border-radius: var(--radius); }
+
+.lawbook-input { box-sizing: border-box; width: 100%; min-height: 38px; padding: 7px 11px; font: inherit; font-size: 15px; color: var(--ink); background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); }
+.lawbook-input:focus-visible { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
+.lawbook-input[aria-invalid="true"] { border-color: var(--danger); }
+.lawbook-bar > .lawbook-input { flex: 1 1 260px; width: auto; max-width: 420px; }
+
+.lawbook-button { flex-shrink: 0; min-height: 36px; padding: 0 14px; font: inherit; font-size: 14px; font-weight: 500; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); cursor: pointer; }
+.lawbook-button:hover { background: var(--surface-3); }
+.lawbook-button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.lawbook-button:disabled { opacity: .5; cursor: default; }
+.lawbook-button.is-primary { color: #fff; background: var(--accent); border-color: var(--accent); }
+.lawbook-button.is-primary:hover { background: var(--accent-hover); }
+.lawbook-button.is-danger { color: var(--danger); border-color: var(--danger-line); }
+.lawbook-button.is-quiet { min-height: 30px; padding: 0 10px; border-color: transparent; color: var(--muted); }
+
+/* One part of the programme: a heading that folds, then its laws. */
+.lawbook-part { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); overflow: hidden; }
+.lawbook-part > summary { display: flex; align-items: baseline; gap: 10px; padding: 12px 18px; cursor: pointer; background: var(--surface-2); font-size: 16px; font-weight: 600; }
+.lawbook-part > summary small { font-size: 13px; font-weight: 400; color: var(--muted); }
+.lawbook-part[open] > summary { border-bottom: 1px solid var(--line); }
+.lawbook-roles > :not(summary) { margin: 14px 18px; }
+
+.law { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) auto; align-items: start; gap: 8px 24px; padding: 16px 18px; }
+.law + .law { border-top: 1px solid var(--line); }
+.law h4 { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.45; }
+.law-lesson { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.law-note { margin: 8px 0 0; font-size: 13px; line-height: 1.55; color: var(--ink-2); }
+.law-gap { margin: 8px 0 0; padding: 6px 10px; font-size: 13px; color: var(--warning); background: var(--warning-soft); border: 1px solid var(--warning-line); border-radius: var(--radius-xs); }
+.law-formula { padding: 10px 14px; font: 500 19px/1.4 "Cambria Math", "STIX Two Math", Cambria, Georgia, serif; letter-spacing: .01em; color: var(--ink); background: var(--accent-soft); border-radius: var(--radius-sm); overflow-x: auto; white-space: nowrap; }
+.law-legend { display: grid; gap: 3px; margin: 8px 0 0; font-size: 13px; line-height: 1.5; }
+.law-legend > div { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 8px; }
+.law-legend dt { font: italic 600 14px "Cambria Math", Cambria, Georgia, serif; color: var(--accent); text-align: right; }
+.law-legend dd { margin: 0; color: var(--ink-2); }
+
+.law.is-editing { display: block; background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
+.lawform { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
+.lawform-field { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.lawform-field.is-wide { grid-column: 1 / -1; }
+.lawform-field > span { font-size: 14px; font-weight: 600; color: var(--ink-2); }
+.lawform-field small { font-size: 13px; line-height: 1.9; color: var(--muted); }
+.lawform-field kbd { padding: 1px 6px; font: 13px var(--font-mono); color: var(--ink-2); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 5px; }
+.lawform-formula { min-height: 48px; font: 500 19px "Cambria Math", "STIX Two Math", Cambria, Georgia, serif; }
+.lawform-problem { font-size: 13px; font-style: normal; color: var(--danger); }
+.lawform-symbols { width: 100%; border-collapse: collapse; font-size: 14px; }
+.lawform-symbols th { white-space: nowrap; padding: 6px 8px; text-align: left; font-size: 13px; font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--line); }
+.lawform-symbols td { padding: 6px 8px; vertical-align: middle; border-bottom: 1px solid var(--line); }
+.lawform-symbols td:first-child b { font: italic 600 17px "Cambria Math", Cambria, Georgia, serif; color: var(--accent); }
+.lawform .lawform-symbols td:first-child { width: 56px; }
+.lawform .lawform-symbols td:nth-child(3) { width: 210px; }
+.lawbook-roles .lawform-symbols td:first-child { width: 70%; }
+.lawbook-uses { color: var(--muted); white-space: nowrap; }
+.lawform-checks { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; }
+.lawform-checks label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.lawform-checks input { width: 17px; height: 17px; accent-color: var(--accent); }
+.lawform-advanced { margin-top: 16px; font-size: 14px; }
+.lawform-advanced > summary { cursor: pointer; color: var(--muted); }
+.lawform-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+
+@media (max-width: 900px) {
+  .law { grid-template-columns: minmax(0, 1fr) auto; }
+  .law-maths { grid-column: 1 / -1; grid-row: 2; }
+  .lawform { grid-template-columns: minmax(0, 1fr); }
+}

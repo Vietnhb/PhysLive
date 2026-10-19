@@ -5,7 +5,8 @@ import com.example.backend.config.JevProperties;
 import com.example.backend.config.UploadProperties;
 import com.example.backend.exception.ApiException;
 import com.example.backend.integration.ai.AIClient;
-import com.example.backend.entity.SchemaVersion;
+import com.example.backend.system.library.dto.LibraryItemResponse;
+import com.example.backend.system.physics.model.entity.SchemaVersion;
 import com.example.backend.system.physics.service.FreeModel;
 import com.example.backend.system.physics.service.LawChecks;
 import com.example.backend.system.physics.service.SchemaDefinitionService;
@@ -27,7 +28,6 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.stereotype.Service;
 
 @Service
-@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "physlive.staff.preview-enabled", havingValue = "true")
 public class AIService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AIService.class);
     /** The reviewers' list of what the law catalogues are missing; absent where no such list is kept. */
@@ -39,6 +39,7 @@ public class AIService {
     private final SchemaDefinitionService schemas;
     private final SchemaEquationRuntime equations;
     private final FreeModel models;
+    private final GeneratedSimulationStorage storage;
     private static final int ROUTING_SUMMARY_MAX = 1400;
     private final JevProperties jev;
     private final ObjectMapper json;
@@ -49,12 +50,13 @@ public class AIService {
     private final int maxProgramCharacters;
 
     public AIService(SchemaDefinitionService schemas, SchemaEquationRuntime equations,
-            JevProperties jev, ObjectMapper json,
+            GeneratedSimulationStorage storage, JevProperties jev, ObjectMapper json,
             AIProperties ai, AIClient client, UploadProperties upload, @Value("${jwt.secret}") String signingKey,
             @Value("${physlive.simulation.runtime.max-program-part-characters}") int maxProgramCharacters) {
         this.schemas = schemas;
         this.equations = equations;
         this.models = new FreeModel(json, equations);
+        this.storage = storage;
         this.jev = jev;
         this.json = json;
         this.ai = ai;
@@ -249,6 +251,26 @@ public class AIService {
             }
         });
         return all;
+    }
+
+    public LibraryItemResponse save(SimulationRequests.Save request) {
+        requireSignedPlan(request.simulation());
+        SchemaVersion schema = selectedSchema(request.simulation());
+        return storage.save(request, schema, solve(request.simulation(), schema, request.parameters()));
+    }
+
+    public ObjectNode openSaved(UUID id) {
+        ObjectNode opened = storage.open(id);
+        JsonNode spec = opened.path("simulationSpec");
+        if (spec.path("solverTimeline").path("frames").isArray() && !spec.path("solverTimeline").path("frames").isEmpty())
+            opened.set("presentation", TeacherSimulationPresentation.create((ObjectNode) spec.path("solverTimeline"), spec,
+                    perMember(spec.path("solverFieldMeta")), opened.path("savedParameters").isObject() ? opened.path("savedParameters") : null));
+        return opened;
+    }
+
+    public void updateSavedVisual(UUID id, ObjectNode generated) {
+        requireSignedPlan(generated);
+        storage.updateVisual(id, generated);
     }
 
     /** True for a plan whose physics was written for its description; false for a plan saved when plans bound library laws. */

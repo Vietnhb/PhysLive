@@ -392,7 +392,7 @@ public final class FreeModel {
             if (quantity.has("along") || quantity.has("bookkeeping") || quantity.has("unsampled")) continue;
             double[] values = new double[time.length];
             for (int i = 0; i < time.length; i++) values[i] = frames.get(i).path("values").path(ID + "." + quantity.path("id").asText()).asDouble();
-            symbols.add(new LawChecks.Symbol(quantity.path("id").asText(), quantity.path("label").asText(), equations.canonical(quantity.path("unit").asText()), attributes(quantity), values, false));
+            symbols.add(new LawChecks.Symbol(quantity.path("id").asText(), quantity.path("label").asText(), equations.canonical(quantity.path("unit").asText()), attributes(quantity), values));
         }
         for (JsonNode parameter : spec.path("parameters")) if (parameter.hasNonNull("role")) {
             String name = parameter.path("name").asText(), unit = parameter.path("unit").asText();
@@ -1117,7 +1117,7 @@ public final class FreeModel {
     private static LawChecks.Symbol constant(String id, JsonNode source, String unit, double value, int count) {
         double[] values = new double[count];
         java.util.Arrays.fill(values, value);
-        return new LawChecks.Symbol(id, source.path("label").asText(), unit, attributes(source), values, true);
+        return new LawChecks.Symbol(id, source.path("label").asText(), unit, attributes(source), values);
     }
 
     private static Map<String, String> attributes(JsonNode source) {
