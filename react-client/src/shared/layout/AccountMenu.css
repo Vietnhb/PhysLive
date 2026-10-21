@@ -210,6 +210,49 @@
   min-height: 32px;
 }
 
+.account-menu--sidebar {
+  width: 100%;
+}
+
+.account-menu--sidebar button.account-menu__trigger {
+  width: 100%;
+  min-height: 48px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.account-menu--sidebar .account-menu__avatar {
+  border-radius: 9px;
+}
+
+.account-menu--sidebar .account-menu__trigger-copy {
+  flex: 1;
+}
+
+.account-menu--sidebar .account-menu__trigger-copy small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-menu--sidebar button.account-menu__trigger > .learn-icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  color: var(--subtle);
+}
+
+.account-menu--sidebar .account-menu__panel {
+  top: auto;
+  right: auto;
+  bottom: calc(100% + 10px);
+  left: 0;
+  width: min(320px, calc(100vw - 24px));
+  transform-origin: bottom left;
+}
+
 @media (max-width: 600px) {
   .account-menu--navbar .account-menu__trigger-copy { display: none; }
   .account-menu--navbar button.account-menu__trigger { padding-right: 3px; }

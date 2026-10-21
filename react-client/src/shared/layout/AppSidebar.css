@@ -334,6 +334,14 @@
 .app-shell[data-collapsed] .app-user-menu {
   right: auto;
 }
+.app-shell[data-collapsed] .account-menu--sidebar .account-menu__trigger-copy,
+.app-shell[data-collapsed] .account-menu--sidebar button.account-menu__trigger > .learn-icon {
+  display: none;
+}
+.app-shell[data-collapsed] .account-menu--sidebar button.account-menu__trigger {
+  justify-content: center;
+  padding-inline: 0;
+}
 
 /* ---- Main column ---- */
 .app-main {
@@ -452,13 +460,16 @@
   }
   /* The drawer always shows the full menu, even if the rail was chosen on desktop. */
   .app-shell[data-collapsed] .app-sidebar__brand-copy,
-  .app-shell[data-collapsed] .app-sidebar__user-copy { display: grid; }
+  .app-shell[data-collapsed] .app-sidebar__user-copy,
+  .app-shell[data-collapsed] .account-menu--sidebar .account-menu__trigger-copy { display: grid; }
   .app-shell[data-collapsed] .app-sidebar__label,
   .app-shell[data-collapsed] .app-sidebar__text,
-  .app-shell[data-collapsed] .app-sidebar__caret { display: block; }
+  .app-shell[data-collapsed] .app-sidebar__caret,
+  .app-shell[data-collapsed] .account-menu--sidebar button.account-menu__trigger > .learn-icon { display: block; }
   .app-shell[data-collapsed] .app-sidebar__head,
   .app-shell[data-collapsed] .app-sidebar__item,
-  .app-shell[data-collapsed] button.app-sidebar__user { justify-content: flex-start; padding-inline: 10px; }
+  .app-shell[data-collapsed] button.app-sidebar__user,
+  .app-shell[data-collapsed] .account-menu--sidebar button.account-menu__trigger { justify-content: flex-start; padding-inline: 8px; }
   .app-shell[data-collapsed] .app-sidebar__badge { position: static; width: auto; height: auto; min-width: 20px; padding: 1px 6px; color: #fff; box-shadow: none; }
   .app-shell button.app-topbar__toggle--desktop { display: none; }
   .app-shell button.app-topbar__toggle--mobile { display: grid; }

@@ -8,7 +8,7 @@ import { clearToken } from "../lib/token";
 import { ThemeSegmented } from "../theme/ThemeToggle";
 import "./AccountMenu.css";
 
-type AccountMenuVariant = "navbar" | "workspace";
+type AccountMenuVariant = "navbar" | "workspace" | "sidebar";
 
 export default function AccountMenu({ variant }: Readonly<{ variant: AccountMenuVariant }>) {
   const { pathname } = useLocation();
@@ -60,11 +60,13 @@ export default function AccountMenu({ variant }: Readonly<{ variant: AccountMenu
         <span className="account-menu__avatar" aria-hidden="true">
           {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials}
         </span>
-        {variant === "navbar" && (
+        {variant !== "workspace" && (
           <span className="account-menu__trigger-copy">
             <strong>{user.fullName || "Tài khoản"}</strong>
+            {variant === "sidebar" && <small>{getRoleLabel(user.role)}</small>}
           </span>
         )}
+        {variant === "sidebar" && <LearningIcon name={open ? "chevronDown" : "chevronRight"} />}
       </button>
 
       <AnimatePresence>

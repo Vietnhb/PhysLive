@@ -105,6 +105,10 @@ export default function AppSidebarLayout({ id, subtitle, home, groups, actions, 
           ))}
         </nav>
 
+        <div className="app-sidebar__foot">
+          <AccountMenu variant="sidebar" />
+        </div>
+
       </aside>
 
       <div className="app-main">
@@ -113,7 +117,7 @@ export default function AppSidebarLayout({ id, subtitle, home, groups, actions, 
           <button type="button" className="app-topbar__toggle app-topbar__toggle--mobile" onClick={() => setDrawerPath(drawerOpen ? null : pathname)} aria-label="Mở menu" aria-expanded={drawerOpen}><LearningIcon name="menu" /></button>
           <span className="app-topbar__divider" aria-hidden="true" />
           <p className="app-topbar__title"><span>{subtitle}</span>{current && <><span aria-hidden="true">/</span><strong>{current.title ?? current.label}</strong></>}</p>
-          <div className="app-topbar__actions">{actions}<ThemeToggle /><AccountMenu variant="workspace" /></div>
+          <div className="app-topbar__actions">{actions}<ThemeToggle /></div>
         </header>
         <div className={`app-content ${contentClassName}`}>{children ?? <Outlet />}</div>
       </div>
