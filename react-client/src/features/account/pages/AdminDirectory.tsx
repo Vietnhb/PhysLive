@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Avatar, Badge, Button, Card, Flex, Heading, IconButton, Select, Table, Text, TextField } from "@radix-ui/themes";
+import { Avatar, Badge, Button, Card, Flex, Heading, IconButton, Select, Spinner, Table, Text, TextField } from "@radix-ui/themes";
 import { ArrowRightIcon, CheckCircledIcon, Cross2Icon, ExclamationTriangleIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from "motion/react";
 import { adminUsers } from "../api/userApi";
@@ -13,11 +13,13 @@ import "../styles/admin-directory.css";
 type UserTier = "ALL" | "SYSTEM" | "SCHOOL" | "INDIVIDUAL";
 
 const USER_TIERS: Record<UserTier, { id: UserTier; label: string; roles: string[]; icon: Parameters<typeof LearningIcon>[0]["name"]; desc: string }> = {
-  ALL: { id: "ALL", label: "Tất cả cấp bậc", roles: [], icon: "grid", desc: "Toàn bộ tài khoản trong nền tảng" },
-  SCHOOL: { id: "SCHOOL", label: "Trường học (School)", roles: [ROLE_NAMES.SCHOOL, ROLE_NAMES.STAFF], icon: "book", desc: "Tài khoản đại diện trường và giáo viên bộ môn" },
-  SYSTEM: { id: "SYSTEM", label: "Hệ thống (System)", roles: [ROLE_NAMES.ADMIN, ROLE_NAMES.MANAGER], icon: "shield", desc: "Quản trị viên nền tảng và quản lý vận hành" },
-  INDIVIDUAL: { id: "INDIVIDUAL", label: "Cá nhân (Individual)", roles: [ROLE_NAMES.STUDENT, ROLE_NAMES.REVIEWER], icon: "users", desc: "Học sinh và chuyên gia thẩm định độc lập" },
+  ALL: { id: "ALL", label: "Tất cả tài khoản", roles: [], icon: "grid", desc: "Toàn bộ tài khoản trong nền tảng" },
+  SYSTEM: { id: "SYSTEM", label: "Quản trị hệ thống", roles: [ROLE_NAMES.ADMIN, ROLE_NAMES.MANAGER], icon: "shield", desc: "Quản trị viên nền tảng và quản lý vận hành" },
+  SCHOOL: { id: "SCHOOL", label: "Trường học", roles: [ROLE_NAMES.SCHOOL, ROLE_NAMES.STAFF], icon: "book", desc: "Tài khoản đại diện trường và giáo viên bộ môn" },
+  INDIVIDUAL: { id: "INDIVIDUAL", label: "Cá nhân", roles: [ROLE_NAMES.STUDENT, ROLE_NAMES.REVIEWER], icon: "users", desc: "Học sinh và chuyên gia thẩm định độc lập" },
 };
+
+const TIER_ORDER: UserTier[] = ["ALL", "SYSTEM", "SCHOOL", "INDIVIDUAL"];
 
 function getUserTier(role: string): "SYSTEM" | "SCHOOL" | "INDIVIDUAL" {
   if (role === ROLE_NAMES.ADMIN || role === ROLE_NAMES.MANAGER) return "SYSTEM";
@@ -26,6 +28,7 @@ function getUserTier(role: string): "SYSTEM" | "SCHOOL" | "INDIVIDUAL" {
 }
 
 const formatDate = (date?: string | null) => date ? new Date(date).toLocaleString("vi-VN") : "Chưa có thông tin";
+const organizationLabel = (user: User) => user.schoolName || user.schoolId || user.institutionId || (getUserTier(user.role) === "SYSTEM" ? "Nền tảng PhysLive" : "Chưa cập nhật");
 const roleColors: Record<string, "iris" | "indigo" | "amber" | "cyan" | "green" | "gray"> = {
   ADMIN: "iris", MANAGER: "indigo", REVIEWER: "amber", SCHOOL: "cyan", STAFF: "green", STUDENT: "gray"
 };
@@ -100,7 +103,7 @@ export default function AdminDirectory() {
               </Badge>
             </Flex>
             <Text as="p" size="2" color="gray" mt="1">
-              Tra cứu và kiểm toán tài khoản toàn hệ thống theo 3 cấp độ: Trường học, Hệ thống và Cá nhân. Toàn bộ thao tác sửa đổi đã được khóa an toàn.
+              Tra cứu và kiểm toán tài khoản theo nhóm quản lý. Toàn bộ thao tác sửa đổi được khóa để bảo vệ dữ liệu hệ thống.
             </Text>
           </div>
         </div>
@@ -109,9 +112,9 @@ export default function AdminDirectory() {
         <div className="directory-stats" aria-label="Thống kê tài khoản">
           {[
             { label: "Tổng tài khoản", value: users.length, icon: <PersonIcon /> },
-            { label: "Trường học (School)", value: tierCounts.SCHOOL, icon: <LearningIcon name="book" /> },
-            { label: "Hệ thống (System)", value: tierCounts.SYSTEM, icon: <LearningIcon name="shield" /> },
-            { label: "Cá nhân (Individual)", value: tierCounts.INDIVIDUAL, icon: <PersonIcon /> },
+            { label: "Trường học", value: tierCounts.SCHOOL, icon: <LearningIcon name="book" /> },
+            { label: "Hệ thống", value: tierCounts.SYSTEM, icon: <LearningIcon name="shield" /> },
+            { label: "Cá nhân", value: tierCounts.INDIVIDUAL, icon: <PersonIcon /> },
           ].map((stat, i) => (
             <motion.div key={stat.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * .035 }} whileHover={{ y: -2 }}>
               <Card size="3" className="directory-stat">
@@ -128,48 +131,11 @@ export default function AdminDirectory() {
         {/* View-Only Audit Callout */}
         <div className="directory-readonly-notice" role="status">
           <LockClosedIcon />
-          <span><strong>Ràng buộc bảo mật:</strong> Màn hình này ở chế độ chỉ đọc (View-only). Mọi tác vụ thêm mới, sửa đổi hoặc xóa người dùng đều bị khóa để bảo toàn tính toàn vẹn dữ liệu kiểm toán.</span>
+          <span><strong>Chế độ kiểm toán:</strong> Chỉ cho phép tra cứu và xem chi tiết. Mọi thao tác thêm, sửa hoặc xóa tài khoản đều bị khóa.</span>
         </div>
 
-        {/* 2-Column Layout with Tier Sidebar on the left */}
-        <div className="directory-layout-with-sidebar">
-          {/* Left Tier Hierarchy Sidebar */}
-          <aside className="directory-tier-sidebar" aria-label="Phân cấp tài khoản">
-            <div className="directory-tier-sidebar-header">
-              <Text size="2" weight="bold" color="gray">CẤP BẬC TÀI KHOẢN</Text>
-              <Text as="p" size="1" color="gray" mt="1">Chọn phân cấp để lọc danh sách</Text>
-            </div>
-
-            {(["ALL", "SCHOOL", "SYSTEM", "INDIVIDUAL"] as UserTier[]).map(key => {
-              const item = USER_TIERS[key];
-              const isActive = tier === key;
-              return (
-                <button
-                  type="button"
-                  key={key}
-                  className={`directory-tier-btn ${isActive ? "active" : ""}`}
-                  onClick={() => { setTier(key); setRole(""); }}
-                  aria-pressed={isActive}
-                >
-                  <div className="directory-tier-btn-left">
-                    <LearningIcon name={item.icon} />
-                    <div>
-                      <div>{item.label}</div>
-                      <Text as="div" size="1" color={isActive ? "indigo" : "gray"}>
-                        {key === "ALL" ? "Toàn bộ" : item.roles.join(", ")}
-                      </Text>
-                    </div>
-                  </div>
-                  <Badge color={isActive ? "indigo" : "gray"} variant="soft" size="1">
-                    {loading ? "…" : tierCounts[key]}
-                  </Badge>
-                </button>
-              );
-            })}
-          </aside>
-
-          {/* Main User List & Detail Panel */}
-          <div className={`directory-workspace ${selected ? "with-detail" : ""}`}>
+        {/* Full-width User List & Detail Panel */}
+        <div className="directory-workspace">
             <Card className="directory-panel" size="1" aria-label="Danh sách tài khoản">
               <div className="directory-panel-heading">
                 <div>
@@ -180,28 +146,29 @@ export default function AdminDirectory() {
                     {loading ? "Đang tải dữ liệu…" : `${filtered.length} / ${users.length} tài khoản`}
                   </Text>
                 </div>
-                <IconButton variant="soft" color="gray" onClick={() => void load()} disabled={loading} aria-label="Làm mới danh sách">
-                  <ReloadIcon />
-                </IconButton>
               </div>
 
-              {/* 3-Tier Filter Pills */}
-              <div className="directory-tier-tabs" role="tablist" aria-label="Bộ lọc 3 cấp độ">
-                {(["ALL", "SCHOOL", "SYSTEM", "INDIVIDUAL"] as UserTier[]).map(key => (
-                  <button
-                    type="button"
-                    key={key}
-                    role="tab"
-                    aria-selected={tier === key}
-                    className={`directory-tier-pill ${tier === key ? "active" : ""}`}
-                    onClick={() => { setTier(key); setRole(""); }}
-                  >
-                    <span>{USER_TIERS[key].label}</span>
-                    <Badge color={tier === key ? "indigo" : "gray"} size="1" variant="soft">
-                      {tierCounts[key]}
-                    </Badge>
-                  </button>
-                ))}
+              <div className="directory-tier-tabs" role="tablist" aria-label="Lọc theo cấp bậc tài khoản">
+                {TIER_ORDER.map(key => {
+                  const item = USER_TIERS[key];
+                  const isActive = tier === key;
+                  return (
+                    <button
+                      type="button"
+                      role="tab"
+                      key={key}
+                      aria-selected={isActive}
+                      className={`directory-tier-tab ${isActive ? "active" : ""}`}
+                      onClick={() => { setTier(key); setRole(""); }}
+                    >
+                      <LearningIcon name={item.icon} />
+                      <span>{item.label}</span>
+                      <Badge color={isActive ? "indigo" : "gray"} variant="soft" size="1">
+                        {loading ? "…" : tierCounts[key]}
+                      </Badge>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Search & Dropdown Filters */}
@@ -229,6 +196,10 @@ export default function AdminDirectory() {
                     <Select.Item value="SUSPENDED">Tạm khóa (SUSPENDED)</Select.Item>
                   </Select.Content>
                 </Select.Root>
+
+                <IconButton className="directory-refresh" variant="soft" color="gray" size="3" onClick={() => void load()} disabled={loading} aria-label="Làm mới danh sách">
+                  <ReloadIcon />
+                </IconButton>
               </div>
 
               {error ? (
@@ -237,12 +208,16 @@ export default function AdminDirectory() {
                   <Button variant="soft" onClick={() => void load()}>Thử lại</Button>
                 </div>
               ) : loading ? (
-                <div className="directory-empty" role="status">Đang tải danh sách tài khoản…</div>
+                <div className="directory-empty directory-loading" role="status">
+                  <Spinner size="3" />
+                  <Heading as="h3" size="4">Đang tải tài khoản</Heading>
+                  <p>Dữ liệu người dùng đang được đồng bộ từ hệ thống.</p>
+                </div>
               ) : filtered.length === 0 ? (
                 <div className="directory-empty">
                   <MagnifyingGlassIcon />
                   <Heading as="h3" size="4">Chưa tìm thấy tài khoản</Heading>
-                  <p>Thử tìm theo từ khóa khác hoặc thay đổi bộ lọc cấp bậc.</p>
+                  <p>Thử tìm theo từ khóa khác hoặc thay đổi nhóm, vai trò hay trạng thái.</p>
                   <Button variant="soft" onClick={() => { setQuery(""); setTier("ALL"); setRole(""); setStatus(""); }}>
                     Xóa bộ lọc
                   </Button>
@@ -252,7 +227,8 @@ export default function AdminDirectory() {
                   <Table.Header>
                     <Table.Row>
                       <Table.ColumnHeaderCell>Người dùng</Table.ColumnHeaderCell>
-                      <Table.ColumnHeaderCell>Cấp bậc & Vai trò</Table.ColumnHeaderCell>
+                      <Table.ColumnHeaderCell>Vai trò</Table.ColumnHeaderCell>
+                      <Table.ColumnHeaderCell>Đơn vị trực thuộc</Table.ColumnHeaderCell>
                       <Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell>
                       <Table.ColumnHeaderCell><span className="sr-only">Chi tiết</span></Table.ColumnHeaderCell>
                     </Table.Row>
@@ -272,9 +248,10 @@ export default function AdminDirectory() {
                         <Table.Cell>
                           <Flex direction="column" gap="1" align="start">
                             <Badge color={roleColors[item.role]}>{getRoleLabel(item.role)}</Badge>
-                            <Text size="1" color="gray">{USER_TIERS[getUserTier(item.role)].label.split(" ")[0]}</Text>
+                            <Text size="1" color="gray">{item.role}</Text>
                           </Flex>
                         </Table.Cell>
+                        <Table.Cell><Text size="2" color="gray">{organizationLabel(item)}</Text></Table.Cell>
                         <Table.Cell>
                           {accountStatusBadge(item)}
                         </Table.Cell>
@@ -287,6 +264,28 @@ export default function AdminDirectory() {
                     ))}
                   </Table.Body>
                 </Table.Root>
+              )}
+
+              {!error && !loading && filtered.length > 0 && (
+                <div className="directory-mobile-list" aria-label="Danh sách tài khoản">
+                  {filtered.map(item => (
+                    <article key={item.id} className={`directory-user-card ${selectedId === item.id ? "selected" : ""}`}>
+                      <div className="directory-user-card__identity">
+                        <Avatar size="3" src={item.avatarUrl || undefined} color={roleColors[item.role]} fallback={(item.fullName || item.email).slice(0, 1).toUpperCase()} />
+                        <div>
+                          <Text as="div" weight="medium">{item.fullName || "Chưa có họ tên"}</Text>
+                          <Text as="div" color="gray" size="2">{item.email}</Text>
+                        </div>
+                      </div>
+                      <div className="directory-user-card__meta">
+                        <Badge color={roleColors[item.role]}>{getRoleLabel(item.role)}</Badge>
+                        {accountStatusBadge(item)}
+                      </div>
+                      <Text as="p" size="2" color="gray" className="directory-user-card__organization">{organizationLabel(item)}</Text>
+                      <Button variant="soft" onClick={() => setSelectedId(item.id)}>Xem chi tiết <ArrowRightIcon /></Button>
+                    </article>
+                  ))}
+                </div>
               )}
 
               <footer className="directory-table-footer">
@@ -323,12 +322,12 @@ export default function AdminDirectory() {
                       {[
                         ["Mã tài khoản", `#${selected.id}`],
                         ["Email", selected.email],
-                        ["Phân cấp", USER_TIERS[getUserTier(selected.role)].label],
+                        ["Nhóm tài khoản", USER_TIERS[getUserTier(selected.role)].label],
                         ["Vai trò", `${getRoleLabel(selected.role)} (${selected.role})`],
                         ["Trạng thái", selected.accountStatus ?? (selected.active === false ? "SUSPENDED_READ_ONLY" : "ACTIVE")],
                         ...(selected.suspensionReason ? [["Lý do tạm khóa", selected.suspensionReason]] : []),
                         ...(selected.suspendedUntil ? [["Thời hạn khóa", formatDate(selected.suspendedUntil)]] : []),
-                        ["Trường / Tổ chức", selected.schoolName || selected.schoolId || selected.institutionId || "Tài khoản cấp nền tảng"],
+                        ["Trường / Tổ chức", organizationLabel(selected)],
                         ["Ngày sinh", selected.dateOfBirth ? new Date(`${selected.dateOfBirth}T00:00:00`).toLocaleDateString("vi-VN") : "Chưa cập nhật"],
                         ["Đăng nhập gần nhất", formatDate(selected.lastLogin)],
                         ...(permissionsForRole(selected.role).length > 0 ? [["Quyền cấp phát", permissionSummary(selected)]] : []),
@@ -344,7 +343,6 @@ export default function AdminDirectory() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
         </div>
       </div>
     </div>
