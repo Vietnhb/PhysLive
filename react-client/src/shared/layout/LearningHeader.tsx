@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Icon from "../ui/LearningIcon";
 import BrandMark from "../ui/BrandMark";
 import { ActivePill } from "../effects/Motion";
 import { ThemeSegmented } from "../theme/ThemeToggle";
+import AccountMenu from "./AccountMenu";
 import { useSessionStore } from "../auth/sessionStore";
-import { getRoleLabel } from "../auth/roles";
-import { clearToken } from "../lib/token";
 
 type HeaderVariant = "workspace" | "submissions";
 
@@ -32,25 +31,14 @@ export default function LearningHeader({
   const pathname = useLocation().pathname;
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
   const user = useSessionStore(state => state.user);
-  // The account menu belongs to the page it was opened on, so navigating closes it.
-  const [accountPath, setAccountPath] = useState<string | null>(null);
-  const accountOpen = accountPath === pathname;
-  const accountRef = useRef<HTMLDivElement>(null);
-  const logout = () => {
-    clearToken();
-    useSessionStore.getState().setUser(null);
-    navigate("/login", { replace: true });
-  };
   useEffect(() => {
-    if (!settingsOpen && !accountOpen) return;
+    if (!settingsOpen) return;
     const closeOnOutsidePress = (event: PointerEvent) => {
       if (!settingsRef.current?.contains(event.target as Node)) setSettingsOpen(false);
-      if (!accountRef.current?.contains(event.target as Node)) setAccountPath(null);
     };
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { setSettingsOpen(false); setAccountPath(null); }
+      if (event.key === "Escape") setSettingsOpen(false);
     };
     document.addEventListener("pointerdown", closeOnOutsidePress);
     document.addEventListener("keydown", closeOnEscape);
@@ -58,7 +46,7 @@ export default function LearningHeader({
       document.removeEventListener("pointerdown", closeOnOutsidePress);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [settingsOpen, accountOpen]);
+  }, [settingsOpen]);
 
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) await document.exitFullscreen();
@@ -105,16 +93,7 @@ export default function LearningHeader({
           </fieldset>}
           <button type="button" className="learn-header-icon" aria-label="Phóng to mô phỏng toàn màn hình" title="Phóng to mô phỏng toàn màn hình" onClick={() => void toggleFullscreen()}><Icon name="fullscreen" /></button>
         </>}
-        {user ? <div className="learn-account-anchor" ref={accountRef}>
-          <button type="button" className="learn-account" aria-haspopup="menu" aria-expanded={accountOpen} aria-label={`Tài khoản ${user.fullName ?? ""}`} title={user.fullName ?? "Tài khoản"} onClick={() => setAccountPath(accountOpen ? null : pathname)}>
-            {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : (user.fullName?.trim().slice(0, 1).toUpperCase() || "U")}
-          </button>
-          {accountOpen && <div className="learn-account-menu" role="menu" aria-label="Tài khoản">
-            <div className="learn-account-who"><strong>{user.fullName || "Tài khoản"}</strong><small>{user.email}</small><small>{getRoleLabel(user.role ?? "")}</small></div>
-            <Link role="menuitem" to="/profile"><Icon name="settings" />Hồ sơ cá nhân</Link>
-            <button type="button" role="menuitem" className="learn-account-logout" onClick={logout}><Icon name="logout" />Đăng xuất</button>
-          </div>}
-        </div> : <Link className="learn-back" to="/login"><Icon name="login" />Đăng nhập</Link>}
+        {user ? <AccountMenu variant="workspace" /> : <Link className="learn-back" to="/login"><Icon name="login" />Đăng nhập</Link>}
       </div>
     </header>
   );

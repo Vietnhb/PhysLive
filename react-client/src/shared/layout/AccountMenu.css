@@ -1,0 +1,226 @@
+.account-menu {
+  position: relative;
+  min-width: 0;
+}
+
+.account-menu button.account-menu__trigger,
+.account-menu button.account-menu__trigger:hover:not(:disabled) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 3px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.account-menu button.account-menu__trigger:hover:not(:disabled),
+.account-menu button.account-menu__trigger[aria-expanded="true"] {
+  background: var(--surface-3);
+}
+
+.account-menu__avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.account-menu__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.account-menu__avatar--large {
+  width: 44px;
+  height: 44px;
+  font-size: 16px;
+}
+
+.account-menu__trigger-copy,
+.account-menu__identity-copy {
+  display: grid;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.account-menu__trigger-copy strong,
+.account-menu__identity-copy strong,
+.account-menu__identity-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-menu__trigger-copy strong {
+  max-width: 170px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.account-menu__trigger-copy small,
+.account-menu__identity-copy small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.account-menu__panel {
+  position: absolute;
+  z-index: 140;
+  top: calc(100% + 10px);
+  right: 0;
+  display: grid;
+  gap: 4px;
+  width: min(340px, calc(100vw - 24px));
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  color: var(--ink);
+  transform-origin: top right;
+}
+
+.account-menu__identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 4px 4px 10px;
+}
+
+.account-menu__identity-copy {
+  flex: 1;
+}
+
+.account-menu__identity-copy strong {
+  font-size: 14px;
+}
+
+.account-menu__profile-link,
+.account-menu .account-menu__item,
+.account-menu .account-menu__item:hover:not(:disabled) {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.account-menu__profile-link {
+  justify-content: center;
+  min-height: 38px;
+  background: var(--surface-3);
+}
+
+.account-menu__profile-link:hover,
+.account-menu .account-menu__item:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.account-menu__profile-link .learn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.account-menu__item > span:nth-child(2) {
+  flex: 1;
+}
+
+.account-menu__item-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-4);
+}
+
+.account-menu__item-icon .learn-icon,
+.account-menu__item > .learn-icon {
+  width: 17px;
+  height: 17px;
+}
+
+.account-menu__item > .learn-icon {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.account-menu__divider {
+  height: 1px;
+  margin: 6px 2px;
+  background: var(--line);
+}
+
+.account-menu__appearance {
+  padding: 2px 6px 8px 48px;
+}
+
+.account-menu .account-menu__item--logout,
+.account-menu .account-menu__item--logout:hover:not(:disabled) {
+  color: var(--danger);
+}
+
+.account-menu .account-menu__item--logout:hover:not(:disabled) {
+  background: var(--danger-soft);
+}
+
+.account-menu button:focus-visible,
+.account-menu a:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.account-menu--navbar button.account-menu__trigger {
+  padding-right: 10px;
+  color: var(--nav-ink, var(--ink));
+}
+
+.account-menu--workspace button.account-menu__trigger {
+  min-height: 32px;
+}
+
+@media (max-width: 600px) {
+  .account-menu--navbar .account-menu__trigger-copy { display: none; }
+  .account-menu--navbar button.account-menu__trigger { padding-right: 3px; }
+  .account-menu--navbar .account-menu__panel,
+  .account-menu--workspace .account-menu__panel {
+    position: fixed;
+    top: 64px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+  }
+}

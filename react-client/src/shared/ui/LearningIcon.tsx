@@ -40,7 +40,9 @@ type IconName =
   | "activity"
   | "shield"
   | "refresh"
-  | "bell";
+  | "bell"
+  | "chevronRight"
+  | "chevronDown";
 
 const paths: Record<IconName, string> = {
   atom: "M12 3c4 0 7 4 7 9s-3 9-7 9-7-4-7-9 3-9 7-9 M3 8c2-3 7-3 11-1s8 6 6 9-7 3-11 1S1 11 3 8 M3 16c-2-3 2-7 6-9s9-2 11 1-2 7-6 9-9 2-11-1",
@@ -88,6 +90,8 @@ const paths: Record<IconName, string> = {
   shield: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z",
   refresh: "M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5",
   bell: "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4",
+  chevronRight: "m9 18 6-6-6-6",
+  chevronDown: "m6 9 6 6 6-6",
 };
 
 export default function LearningIcon({ name }: Readonly<{ name: IconName }>) {

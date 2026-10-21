@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import "./NavBar.css";
-import { clearToken } from "../lib/token";
 import { useSessionStore } from "../auth/sessionStore";
 import type { User } from "../auth/types";
 import LearningIcon from "../ui/LearningIcon";
 import BrandMark from "../ui/BrandMark";
 import { ActivePill } from "../effects/Motion";
 import ThemeToggle from "../theme/ThemeToggle";
+import AccountMenu from "./AccountMenu";
 import { canReviewContent, canViewUsers, isAdminRole, isStudentRole, ROLE_NAMES, roleHome } from "../auth/roles";
 import { canTeach, isDepartmentHead, userHome } from "../auth/permissions";
 
@@ -35,19 +35,9 @@ function itemsFor(user: User | null): NavItem[] {
   return items;
 }
 
-function Avatar({ user }: Readonly<{ user: User }>) {
-  return (
-    <span className="site-nav__avatar" aria-hidden="true">
-      {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : (user.fullName?.trim().slice(0, 1).toUpperCase() || "U")}
-    </span>
-  );
-}
-
 export default function NavBar() {
-  const navigate = useNavigate();
   const { pathname } = useLocation();
   const user = useSessionStore((state) => state.user);
-  const setUser = useSessionStore((state) => state.setUser);
   // The menu belongs to the page it was opened on, so navigating closes it without an effect.
   const [menuPath, setMenuPath] = useState<string | null>(null);
   const menuOpen = menuPath === pathname;
@@ -62,12 +52,6 @@ export default function NavBar() {
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
   }, [pathname]);
-
-  const logout = () => {
-    clearToken();
-    setUser(null);
-    navigate("/login");
-  };
 
   return (
     <header className={`site-nav${overHero ? " site-nav--hero" : ""}`} data-scrolled={scrolled || menuOpen ? "true" : undefined}>
@@ -85,15 +69,7 @@ export default function NavBar() {
         <div className="site-nav__actions">
           <ThemeToggle className="site-nav__theme" />
           {user ? (
-            <div className="site-nav__account">
-              <Link to="/profile" className="site-nav__profile" title="Hồ sơ cá nhân">
-                <Avatar user={user} />
-                <span>{user.fullName}</span>
-              </Link>
-              <button type="button" className="site-nav__icon" onClick={logout} aria-label="Đăng xuất" title="Đăng xuất">
-                <LearningIcon name="logout" />
-              </button>
-            </div>
+            <AccountMenu variant="navbar" />
           ) : (
             <div className="site-nav__account">
               <Link to="/login" className="site-nav__button">Đăng nhập</Link>
@@ -119,12 +95,7 @@ export default function NavBar() {
             </NavLink>
           ))}
           <div className="site-nav__sheet-divider" />
-          {user ? (
-            <>
-              <Link to="/profile" className="site-nav__sheet-link">Hồ sơ cá nhân</Link>
-              <button type="button" className="site-nav__sheet-link site-nav__sheet-logout" onClick={logout}>Đăng xuất</button>
-            </>
-          ) : (
+          {!user && (
             <>
               <Link to="/login" className="site-nav__sheet-link">Đăng nhập</Link>
               <Link to="/signup" className="site-nav__button site-nav__button--primary">Đăng ký cho trường</Link>

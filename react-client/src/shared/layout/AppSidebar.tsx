@@ -1,12 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { motion, useReducedMotion } from "motion/react";
 import LearningIcon from "../ui/LearningIcon";
 import BrandMark from "../ui/BrandMark";
-import { useSessionStore } from "../auth/sessionStore";
-import { clearToken } from "../lib/token";
-import { getRoleLabel } from "../auth/roles";
-import ThemeToggle, { ThemeSegmented } from "../theme/ThemeToggle";
+import ThemeToggle from "../theme/ThemeToggle";
+import AccountMenu from "./AccountMenu";
 import "./AppSidebar.css";
 
 type IconName = Parameters<typeof LearningIcon>[0]["name"];
@@ -53,16 +51,11 @@ function isActive(pathname: string, item: SidebarItem) {
  */
 export default function AppSidebarLayout({ id, subtitle, home, groups, actions, contentClassName = "", shellClassName = "", children }: Readonly<Props>) {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const reduced = useReducedMotion();
-  const user = useSessionStore(state => state.user);
   const [collapsed, setCollapsed] = useState(readCollapsed);
-  // The drawer and the user menu belong to the page they were opened on; navigating closes them.
+  // The drawer belongs to the page it was opened on; navigating closes it.
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
-  const [menuPath, setMenuPath] = useState<string | null>(null);
   const drawerOpen = drawerPath === pathname;
-  const menuOpen = menuPath === pathname;
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleCollapsed = () => setCollapsed(value => {
     try { localStorage.setItem(STORAGE_KEY, value ? "expanded" : "collapsed"); } catch { /* keep for this visit */ }
@@ -72,28 +65,14 @@ export default function AppSidebarLayout({ id, subtitle, home, groups, actions, 
   useEffect(() => {
     const keys = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "b") { event.preventDefault(); toggleCollapsed(); }
-      if (event.key === "Escape") { setDrawerPath(null); setMenuPath(null); }
+      if (event.key === "Escape") setDrawerPath(null);
     };
     document.addEventListener("keydown", keys);
     return () => document.removeEventListener("keydown", keys);
   }, []);
 
-  useEffect(() => {
-    if (!menuOpen) return;
-    const outside = (event: PointerEvent) => { if (!menuRef.current?.contains(event.target as Node)) setMenuPath(null); };
-    document.addEventListener("pointerdown", outside);
-    return () => document.removeEventListener("pointerdown", outside);
-  }, [menuOpen]);
-
-  const logout = () => {
-    clearToken();
-    useSessionStore.getState().setUser(null);
-    navigate("/login", { replace: true });
-  };
-
   const items = groups.flatMap(group => group.items);
   const current = items.filter(item => isActive(pathname, item)).sort((a, b) => b.to.length - a.to.length)[0];
-  const initials = user?.fullName?.trim().slice(0, 1).toUpperCase() || "U";
   const spring = reduced ? { duration: 0 } : { type: "spring" as const, stiffness: 420, damping: 36 };
 
   return (
@@ -126,25 +105,6 @@ export default function AppSidebarLayout({ id, subtitle, home, groups, actions, 
           ))}
         </nav>
 
-        <div className="app-sidebar__foot" ref={menuRef}>
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div className="app-user-menu" role="menu" aria-label="Tài khoản"
-                initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={reduced ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }} transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}>
-                <div className="app-user-menu__who"><strong>{user?.fullName || "Tài khoản"}</strong><small>{user?.email}</small></div>
-                <Link to="/profile" role="menuitem" className="app-user-menu__item"><LearningIcon name="users" />Hồ sơ cá nhân</Link>
-                <div className="app-user-menu__theme"><span>Giao diện</span><ThemeSegmented /></div>
-                <button type="button" role="menuitem" className="app-user-menu__item app-user-menu__item--danger" onClick={logout}><LearningIcon name="logout" />Đăng xuất</button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <button type="button" className="app-sidebar__user" aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuPath(menuOpen ? null : pathname)} title={collapsed ? user?.fullName : undefined}>
-            <span className="app-sidebar__avatar" aria-hidden="true">{user?.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials}</span>
-            <span className="app-sidebar__user-copy"><strong>{user?.fullName || "Tài khoản"}</strong><small>{getRoleLabel(user?.role ?? "")}</small></span>
-            <svg className="app-sidebar__caret" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m8 9 4-4 4 4M8 15l4 4 4-4" /></svg>
-          </button>
-        </div>
       </aside>
 
       <div className="app-main">
@@ -153,7 +113,7 @@ export default function AppSidebarLayout({ id, subtitle, home, groups, actions, 
           <button type="button" className="app-topbar__toggle app-topbar__toggle--mobile" onClick={() => setDrawerPath(drawerOpen ? null : pathname)} aria-label="Mở menu" aria-expanded={drawerOpen}><LearningIcon name="menu" /></button>
           <span className="app-topbar__divider" aria-hidden="true" />
           <p className="app-topbar__title"><span>{subtitle}</span>{current && <><span aria-hidden="true">/</span><strong>{current.title ?? current.label}</strong></>}</p>
-          <div className="app-topbar__actions">{actions}<ThemeToggle /></div>
+          <div className="app-topbar__actions">{actions}<ThemeToggle /><AccountMenu variant="workspace" /></div>
         </header>
         <div className={`app-content ${contentClassName}`}>{children ?? <Outlet />}</div>
       </div>

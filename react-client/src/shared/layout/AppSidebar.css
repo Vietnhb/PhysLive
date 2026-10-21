@@ -1,5 +1,5 @@
-/* Signed-in application shell: collapsible sidebar (groups, badges, user menu)
- * + top bar. Colours come from tokens.css, so it follows the theme. */
+/* Signed-in application shell: collapsible navigation sidebar + top bar.
+ * Colours come from tokens.css, so it follows the theme. */
 .app-shell {
   --sidebar-w: 264px;
   --sidebar-rail: 68px;
