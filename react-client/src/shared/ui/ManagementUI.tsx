@@ -9,8 +9,8 @@ export function PageHeader({ title, action }: Readonly<{ title: string; descript
   return <header className="admin-content-header"><div><Heading as="h1" size="7" className="admin-content-title">{title}</Heading></div>{action}</header>;
 }
 
-export function Panel({ title, description, children, action, className }: Readonly<{ title: string; description?: string; children: ReactNode; action?: ReactNode; className?: string }>) {
-  return <Card asChild size="3" className={`admin-panel ${className ?? ""}`}><section><div className="admin-panel-heading"><div><Heading as="h2" size="4">{title}</Heading>{description && <Text as="p" color="gray" size="2" className="admin-panel-description">{description}</Text>}</div>{action}</div>{children}</section></Card>;
+export function Panel({ title, description, children, action, className, hideHeader = false }: Readonly<{ title: string; description?: string; children: ReactNode; action?: ReactNode; className?: string; hideHeader?: boolean }>) {
+  return <Card asChild size="3" className={`admin-panel ${className ?? ""}`}><section>{!hideHeader && <div className="admin-panel-heading"><div><Heading as="h2" size="4">{title}</Heading>{description && <Text as="p" color="gray" size="2" className="admin-panel-description">{description}</Text>}</div>{action}</div>}{children}</section></Card>;
 }
 
 export function Loading({ text = "Đang tải dữ liệu…" }: Readonly<{ text?: string }>) { return <div className="admin-loading compact" role="status"><Spinner size="3" /><Text as="p" color="gray">{text}</Text></div>; }

@@ -47,6 +47,64 @@
   padding-inline: 22px;
 }
 
+.tokenToolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(190px, 0.55fr) minmax(165px, 0.45fr) auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.tokenSearch,
+.tokenSelect {
+  min-width: 0;
+  width: 100%;
+}
+
+.clearFilters {
+  white-space: nowrap;
+}
+
+.tokenFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+  padding: 14px 0 18px;
+}
+
+.tokenFooter > p {
+  margin: 0;
+  color: var(--gray-11);
+  font-size: 13px;
+}
+
+.tokenPagingControls,
+.pageSizeControl,
+.pagination {
+  display: flex;
+  align-items: center;
+}
+
+.tokenPagingControls {
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pageSizeControl,
+.pagination {
+  gap: 10px;
+  color: var(--gray-11);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.pageSizeControl :global(.rt-SelectTrigger) {
+  min-width: 68px;
+}
+
 .dataPanel :global(.admin-table) {
   min-width: 640px;
 }
@@ -54,6 +112,12 @@
 .dataPanel :global(.admin-table tbody td:first-child strong) {
   color: var(--admin-heading);
   font-weight: 650;
+}
+
+@media (max-width: 980px) {
+  .tokenToolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 0.7fr);
+  }
 }
 
 @media (max-width: 700px) {
@@ -64,5 +128,28 @@
   .dataPanel :global(.admin-table-scroll) {
     margin-inline: -18px;
     padding-inline: 18px;
+  }
+
+  .tokenToolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .clearFilters {
+    width: 100%;
+  }
+
+  .tokenFooter,
+  .tokenPagingControls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tokenPagingControls {
+    gap: 12px;
+  }
+
+  .pageSizeControl,
+  .pagination {
+    justify-content: space-between;
   }
 }

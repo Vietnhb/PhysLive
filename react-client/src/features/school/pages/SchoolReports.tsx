@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { Badge, Button, Card, Spinner, Table } from "@radix-ui/themes";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Badge, Button, Card, Select, Spinner, Table, TextField } from "@radix-ui/themes";
 import { motion, useReducedMotion } from "motion/react";
 import { downloadSchoolClassesCsv, schoolReportClasses, schoolReportSummary, schoolReportTokenAudit, type SchoolReportClass, type SchoolReportSummary, type SchoolTokenAudit } from "../api/schoolApi";
 import { apiMessage } from "../../../shared/lib/apiError";
@@ -7,6 +7,13 @@ import LearningIcon from "../../../shared/ui/LearningIcon";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
 import s from "./SchoolReports.module.css";
 import SchoolBulkImport from "../dataio/components/SchoolBulkImport";
+
+const TOKEN_PAGE_SIZES = [10, 25, 50, 100] as const;
+
+function formatUsageMonth(value: string) {
+  const match = /^(\d{4})-(\d{2})/.exec(value);
+  return match ? `Tháng ${Number(match[2])}/${match[1]}` : value;
+}
 
 function ReportSummaryCard({ label, value, detail, icon, tone }: Readonly<{ label: string; value: string; detail: string; icon: "users" | "book" | "activity" | "chart"; tone: string }>) {
   const reducedMotion = useReducedMotion();
@@ -22,6 +29,11 @@ export default function SchoolReports() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [tokenQuery, setTokenQuery] = useState("");
+  const [tokenOperation, setTokenOperation] = useState("ALL");
+  const [tokenMonth, setTokenMonth] = useState("ALL");
+  const [tokenPageSize, setTokenPageSize] = useState<number>(25);
+  const [tokenPage, setTokenPage] = useState(1);
 
   const load = useCallback(async () => {
     if (!schoolId) return;
@@ -61,6 +73,42 @@ export default function SchoolReports() {
     }
   };
 
+  const tokenOperations = useMemo(
+    () => [...new Set(tokens.map((item) => item.operation))].sort((a, b) => a.localeCompare(b)),
+    [tokens],
+  );
+  const tokenMonths = useMemo(
+    () => [...new Set(tokens.map((item) => item.usageMonth))].sort((a, b) => b.localeCompare(a)),
+    [tokens],
+  );
+  const filteredTokens = useMemo(() => {
+    const query = tokenQuery.trim().toLocaleLowerCase("vi");
+    return tokens.filter((item) => {
+      const matchesQuery = !query
+        || item.userEmail.toLocaleLowerCase("vi").includes(query)
+        || item.operation.toLocaleLowerCase("vi").includes(query);
+      return matchesQuery
+        && (tokenOperation === "ALL" || item.operation === tokenOperation)
+        && (tokenMonth === "ALL" || item.usageMonth === tokenMonth);
+    });
+  }, [tokenMonth, tokenOperation, tokenQuery, tokens]);
+
+  useEffect(() => {
+    setTokenPage(1);
+  }, [tokenMonth, tokenOperation, tokenPageSize, tokenQuery]);
+
+  const tokenPageCount = Math.max(1, Math.ceil(filteredTokens.length / tokenPageSize));
+  const currentTokenPage = Math.min(tokenPage, tokenPageCount);
+  const tokenPageStart = (currentTokenPage - 1) * tokenPageSize;
+  const visibleTokens = filteredTokens.slice(tokenPageStart, tokenPageStart + tokenPageSize);
+  const hasTokenFilters = Boolean(tokenQuery.trim()) || tokenOperation !== "ALL" || tokenMonth !== "ALL";
+
+  const clearTokenFilters = () => {
+    setTokenQuery("");
+    setTokenOperation("ALL");
+    setTokenMonth("ALL");
+  };
+
   if (!schoolId) return null;
 
   return <div className={`admin-content school-reports ${s.reports}`}>
@@ -84,7 +132,61 @@ export default function SchoolReports() {
 
       <Card size="3" asChild><section className={`admin-panel ${s.dataPanel}`}>
         <div className="admin-panel-heading"><div><h2>Lịch sử token AI</h2><p className="admin-panel-description">Tối đa 200 lượt sử dụng gần nhất của trường.</p></div></div>
-        <div className="admin-table-scroll"><Table.Root size="2" variant="surface"><Table.Header><Table.Row><Table.ColumnHeaderCell>Thời điểm</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Tài khoản</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Hoạt động</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Tháng</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Token</Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>{tokens.length === 0 ? <Table.Row><Table.Cell colSpan={5}>Chưa có dữ liệu sử dụng.</Table.Cell></Table.Row> : tokens.map((item, index) => <Table.Row key={`${item.recordedAt}-${index}`}><Table.Cell>{new Date(item.recordedAt).toLocaleString("vi-VN")}</Table.Cell><Table.Cell>{item.userEmail}</Table.Cell><Table.Cell>{item.operation}</Table.Cell><Table.Cell>{item.usageMonth}</Table.Cell><Table.Cell>{item.tokens.toLocaleString("vi-VN")}</Table.Cell></Table.Row>)}</Table.Body></Table.Root></div>
+
+        <div className={s.tokenToolbar}>
+          <TextField.Root className={s.tokenSearch} type="search" size="3" value={tokenQuery} onChange={(event) => setTokenQuery(event.target.value)} placeholder="Tìm theo tài khoản hoặc hoạt động..." aria-label="Tìm lịch sử token AI">
+            <TextField.Slot><LearningIcon name="search" /></TextField.Slot>
+          </TextField.Root>
+
+          <Select.Root size="3" value={tokenOperation} onValueChange={setTokenOperation}>
+            <Select.Trigger className={s.tokenSelect} aria-label="Lọc theo hoạt động" />
+            <Select.Content>
+              <Select.Item value="ALL">Tất cả hoạt động</Select.Item>
+              {tokenOperations.map((operation) => <Select.Item key={operation} value={operation}>{operation}</Select.Item>)}
+            </Select.Content>
+          </Select.Root>
+
+          <Select.Root size="3" value={tokenMonth} onValueChange={setTokenMonth}>
+            <Select.Trigger className={s.tokenSelect} aria-label="Lọc theo tháng" />
+            <Select.Content>
+              <Select.Item value="ALL">Tất cả tháng</Select.Item>
+              {tokenMonths.map((month) => <Select.Item key={month} value={month}>{formatUsageMonth(month)}</Select.Item>)}
+            </Select.Content>
+          </Select.Root>
+
+          <Button className={s.clearFilters} type="button" size="3" variant="soft" color="gray" disabled={!hasTokenFilters} onClick={clearTokenFilters}>Xóa bộ lọc</Button>
+        </div>
+
+        <div className="admin-table-scroll">
+          <Table.Root size="2" variant="surface">
+            <Table.Header><Table.Row><Table.ColumnHeaderCell>Thời điểm</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Tài khoản</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Hoạt động</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Tháng</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Token</Table.ColumnHeaderCell></Table.Row></Table.Header>
+            <Table.Body>
+              {tokens.length === 0
+                ? <Table.Row><Table.Cell colSpan={5}>Chưa có dữ liệu sử dụng.</Table.Cell></Table.Row>
+                : visibleTokens.length === 0
+                  ? <Table.Row><Table.Cell colSpan={5}>Không có lượt sử dụng phù hợp với bộ lọc.</Table.Cell></Table.Row>
+                  : visibleTokens.map((item, index) => <Table.Row key={`${item.recordedAt}-${item.userEmail}-${tokenPageStart + index}`}><Table.Cell>{new Date(item.recordedAt).toLocaleString("vi-VN")}</Table.Cell><Table.Cell>{item.userEmail}</Table.Cell><Table.Cell>{item.operation}</Table.Cell><Table.Cell>{formatUsageMonth(item.usageMonth)}</Table.Cell><Table.Cell>{item.tokens.toLocaleString("vi-VN")}</Table.Cell></Table.Row>)}
+            </Table.Body>
+          </Table.Root>
+        </div>
+
+        <div className={s.tokenFooter}>
+          <p aria-live="polite">{filteredTokens.length === 0 ? "0 kết quả" : `Hiển thị ${tokenPageStart + 1}–${Math.min(tokenPageStart + tokenPageSize, filteredTokens.length)} / ${filteredTokens.length} lượt`}</p>
+          <div className={s.tokenPagingControls}>
+            <div className={s.pageSizeControl}>
+              <span>Số dòng/trang</span>
+              <Select.Root size="2" value={String(tokenPageSize)} onValueChange={(value) => setTokenPageSize(Number(value))}>
+                <Select.Trigger aria-label="Số dòng trên mỗi trang" />
+                <Select.Content>{TOKEN_PAGE_SIZES.map((size) => <Select.Item key={size} value={String(size)}>{size}</Select.Item>)}</Select.Content>
+              </Select.Root>
+            </div>
+            <div className={s.pagination}>
+              <Button type="button" size="2" variant="soft" color="gray" disabled={currentTokenPage <= 1} onClick={() => setTokenPage((page) => Math.max(1, page - 1))}>Trước</Button>
+              <span>Trang {currentTokenPage}/{tokenPageCount}</span>
+              <Button type="button" size="2" variant="soft" color="gray" disabled={currentTokenPage >= tokenPageCount} onClick={() => setTokenPage((page) => Math.min(tokenPageCount, page + 1))}>Sau</Button>
+            </div>
+          </div>
+        </div>
       </section></Card>
       </motion.div>
     </>}

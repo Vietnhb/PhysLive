@@ -53,6 +53,7 @@ function UserActionMenu({ item, open, disabled, onToggleMenu, onToggle, onEdit, 
 type UserForm = AccountDetails & { email: string; password: string; fullName: string; role: string; institutionId: string };
 
 const blankUser: UserForm = { email: "", password: "", fullName: "", role: "STUDENT", institutionId: "", ...blankAccountDetails };
+const USER_PAGE_SIZES = [10, 25, 50, 100] as const;
 
 export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
   const actorRole = useSessionStore(state => state.user?.role);
@@ -64,6 +65,8 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
   const [resetUser, setResetUser] = useState<User | null>(null);
   const [notice, setNotice] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("ALL");
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [page, setPage] = useState(1);
   const busyRef = useRef(false);
   const load = useCallback(async () => { setLoading(true); try { const [users, schools] = await Promise.all([adminUsers(schoolId), (schoolId || adminOnly) ? Promise.resolve([]) : adminSchools()]); setItems(users); setAvailableSchools(schools); setError(""); } catch (e) { setError(apiMessage(e, "Không thể tải danh sách người dùng.")); } finally { setLoading(false); } }, [schoolId, adminOnly]);
   useEffect(() => { void load(); }, [load]);
@@ -76,6 +79,10 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
       return !q || item.email.toLowerCase().includes(q) || item.fullName.toLowerCase().includes(q);
     });
   }, [scopedItems, query, selectedRole]);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageStart = (currentPage - 1) * pageSize;
+  const visibleItems = filtered.slice(pageStart, pageStart + pageSize);
   const updateDetails = (details: Partial<AccountDetails>) => setForm(current => ({ ...current, ...details }));
   const submit = async (event: FormEvent) => {
     event.preventDefault(); if (busyRef.current) return;
@@ -94,21 +101,6 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
   const toggle = async (item: User) => { if (busyRef.current) return; busyRef.current = true; setBusy(true); setError(""); setNotice(""); try { const updated = await setManagedUserActive(item.id, item.active === false, schoolId); setItems(current => current.map(user => user.id === updated.id ? updated : user)); } catch (e) { setError(apiMessage(e, "Không thể cập nhật trạng thái tài khoản.")); } finally { busyRef.current = false; setBusy(false); } };
   return <div className="admin-content">
     <PageHeader title="Tài khoản người dùng" description="" action={<div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>{schoolId && (actorRole === "SCHOOL" || actorRole === "MANAGER") && <SchoolBulkImport schoolId={schoolId} kind="USERS" disabled={busy} onImported={load} />}<Button primary disabled={busy} onClick={() => { setError(""); setNotice(""); setEditing(null); setForm(newUser()); setShowForm(true); }}><LearningIcon name="plus" />Tạo tài khoản</Button></div>} />
-    <div className="admin-toolbar">
-      <TextField.Root type="search" size="3" aria-label="Tìm theo email hoặc họ tên" placeholder={schoolScoped ? "Tìm giáo viên, học sinh…" : "Tìm họ tên hoặc email…"} value={query} onChange={event => setQuery(event.target.value)} style={{ width: "min(100%, 360px)" }}><TextField.Slot><LearningIcon name="search" /></TextField.Slot></TextField.Root>
-      <Select.Root size="3" value={selectedRole} onValueChange={setSelectedRole} aria-label="Lọc theo đối tượng người dùng">
-        <Select.Trigger style={{ minWidth: 180 }} />
-        <Select.Content>
-          <Select.Item value="ALL">Tất cả đối tượng</Select.Item>
-          <Select.Item value="SCHOOL">Quản trị trường (SCHOOL)</Select.Item>
-          <Select.Item value="STAFF">Giáo viên (STAFF)</Select.Item>
-          <Select.Item value="STUDENT">Học sinh (STUDENT)</Select.Item>
-          <Select.Item value="REVIEWER">Người thẩm định (REVIEWER)</Select.Item>
-          <Select.Item value="MANAGER">Quản lý vận hành (MANAGER)</Select.Item>
-        </Select.Content>
-      </Select.Root>
-      <IconButton type="button" variant="surface" size="3" aria-label="Làm mới danh sách tài khoản" onClick={() => void load()} disabled={loading}><LearningIcon name="refresh" /></IconButton>
-    </div>
     {error && <ErrorNotice error={error} onRetry={() => void load()} />}
     {notice && <Callout.Root color="green" role="status"><Callout.Text>{notice}</Callout.Text></Callout.Root>}
     <div className="admin-stats-grid">
@@ -116,6 +108,26 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
       <Stat label="Giáo viên" value={scopedItems.filter(item => item.role === "STAFF").length} icon="book" tone="orange" />
       <Stat label="Học sinh" value={scopedItems.filter(item => item.role === "STUDENT").length} icon="users" tone="green" />
       <Stat label="Tạm khóa" value={scopedItems.filter(item => item.active === false).length} icon="close" tone="red" />
+    </div>
+    <div className="admin-toolbar admin-user-filters">
+      <TextField.Root type="search" size="3" aria-label="Tìm theo email hoặc họ tên" placeholder={schoolScoped ? "Tìm giáo viên, học sinh…" : "Tìm họ tên hoặc email…"} value={query} onChange={event => { setQuery(event.target.value); setPage(1); setOpenActions(null); }} style={{ width: "min(100%, 360px)" }}><TextField.Slot><LearningIcon name="search" /></TextField.Slot></TextField.Root>
+      <Select.Root size="3" value={selectedRole} onValueChange={value => { setSelectedRole(value); setPage(1); setOpenActions(null); }} aria-label="Lọc theo đối tượng người dùng">
+        <Select.Trigger style={{ minWidth: 180 }} />
+        <Select.Content position="popper" side="bottom" align="start" sideOffset={6} avoidCollisions={false}>
+          <Select.Item value="ALL">Tất cả đối tượng</Select.Item>
+          {schoolScoped ? <>
+            <Select.Item value="STAFF">Giáo viên</Select.Item>
+            <Select.Item value="STUDENT">Học sinh</Select.Item>
+          </> : <>
+            <Select.Item value="SCHOOL">Quản trị trường (SCHOOL)</Select.Item>
+            <Select.Item value="STAFF">Giáo viên (STAFF)</Select.Item>
+            <Select.Item value="STUDENT">Học sinh (STUDENT)</Select.Item>
+            <Select.Item value="REVIEWER">Người thẩm định (REVIEWER)</Select.Item>
+            <Select.Item value="MANAGER">Quản lý vận hành (MANAGER)</Select.Item>
+          </>}
+        </Select.Content>
+      </Select.Root>
+      <IconButton type="button" variant="surface" size="3" aria-label="Làm mới danh sách tài khoản" onClick={() => void load()} disabled={loading}><LearningIcon name="refresh" /></IconButton>
     </div>
     <Dialog.Root open={showForm} onOpenChange={open => { if (!busyRef.current) setShowForm(open); }}><Dialog.Content maxWidth="620px" aria-describedby={undefined} onEscapeKeyDown={event => { if (busyRef.current) event.preventDefault(); }} onInteractOutside={event => { if (busyRef.current) event.preventDefault(); }}>
       <Dialog.Title>{editing === null ? "Tạo tài khoản" : "Cập nhật tài khoản"}</Dialog.Title>
@@ -132,14 +144,14 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
         <div className="admin-form-actions"><Button disabled={busy} onClick={() => setShowForm(false)}>Hủy</Button><ThemeButton type="submit" size="3" disabled={busy || missingPermission(form, form.role)} loading={busy}>{busy ? "Đang lưu…" : "Lưu tài khoản"}</ThemeButton></div>
       </form>
     </Dialog.Content></Dialog.Root>
-    <Panel title={`Danh sách tài khoản · ${filtered.length}`} className="admin-users-panel">{loading ? <Loading text="Đang tải danh sách tài khoản…" /> : <Table.Root className="admin-user-table" size="2" variant="ghost"><Table.Header><Table.Row><Table.ColumnHeaderCell>Họ tên / Email</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Vai trò</Table.ColumnHeaderCell>{!schoolScoped && <Table.ColumnHeaderCell>Trường</Table.ColumnHeaderCell>}<Table.ColumnHeaderCell>Đăng nhập gần nhất</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Thao tác</Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>{filtered.length === 0 ? <Table.Row><Table.Cell colSpan={schoolScoped ? 5 : 6} className="admin-empty-table">Không tìm thấy tài khoản phù hợp.</Table.Cell></Table.Row> : filtered.map(item => <Table.Row key={item.id}>
+    <Panel title="Danh sách tài khoản" className="admin-users-panel" hideHeader>{loading ? <Loading text="Đang tải danh sách tài khoản…" /> : <><Table.Root className="admin-user-table" size="2" variant="ghost"><Table.Header><Table.Row><Table.ColumnHeaderCell>Họ tên / Email</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Vai trò</Table.ColumnHeaderCell>{!schoolScoped && <Table.ColumnHeaderCell>Trường</Table.ColumnHeaderCell>}<Table.ColumnHeaderCell>Đăng nhập gần nhất</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Thao tác</Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>{filtered.length === 0 ? <Table.Row><Table.Cell colSpan={schoolScoped ? 5 : 6} className="admin-empty-table">Không tìm thấy tài khoản phù hợp.</Table.Cell></Table.Row> : visibleItems.map(item => <Table.Row key={item.id}>
       <Table.Cell><div className="admin-table-user"><Avatar size="3" radius="full" src={item.avatarUrl || undefined} color={roleColor(item.role)} fallback={(item.fullName || item.email).slice(0, 1).toUpperCase()} /><span><Text as="div" size="3" weight="medium">{item.fullName || "Chưa có họ tên"}</Text><Text as="div" color="gray" size="2">{item.email}</Text>{item.dateOfBirth && <Text as="div" color="gray" size="1">{new Date(`${item.dateOfBirth}T00:00:00`).toLocaleDateString("vi-VN")}</Text>}</span></div></Table.Cell>
       <Table.Cell><div style={{ display: "grid", gap: 6, justifyItems: "start" }}><Badge color={roleColor(item.role)} size="2" title={item.role}>{getRoleLabel(item.role)}</Badge>{permissionsForRole(item.role).length > 0 && <Text size="1" color="gray">{permissionSummary(item)}</Text>}</div></Table.Cell>
       {!schoolScoped && <Table.Cell>{availableSchools.find(school => school.id === item.institutionId)?.name || "—"}</Table.Cell>}
       <Table.Cell><Text size="2" color="gray">{item.lastLogin ? new Date(item.lastLogin).toLocaleString("vi-VN") : "Chưa đăng nhập"}</Text></Table.Cell>
       <Table.Cell><div style={{ display: "grid", gap: 6, justifyItems: "start" }}><Badge color={item.active === false ? "amber" : "cyan"} size="2">{item.active === false ? "Tạm khóa" : "Hoạt động"}</Badge>{item.mustChangePassword && <Text size="1" color="gray">Cần đổi mật khẩu</Text>}</div></Table.Cell>
       <Table.Cell>{canEditUser(actorRole, item.role) && <UserActionMenu item={item} open={openActions === item.id} disabled={busy} onToggleMenu={() => setOpenActions(openActions === item.id ? null : item.id)} onToggle={() => void toggle(item)} onEdit={() => edit(item)} onResetPassword={() => setResetUser(item)} onClose={() => setOpenActions(null)} />}</Table.Cell>
-    </Table.Row>)}</Table.Body></Table.Root>}</Panel>
+    </Table.Row>)}</Table.Body></Table.Root><div className="admin-table-pagination"><span aria-live="polite">{filtered.length === 0 ? "0 kết quả" : `Hiển thị ${pageStart + 1}–${Math.min(pageStart + pageSize, filtered.length)} / ${filtered.length} tài khoản`}</span><div><label>Số dòng/trang<Select.Root size="2" value={String(pageSize)} onValueChange={value => { setPageSize(Number(value)); setPage(1); setOpenActions(null); }}><Select.Trigger aria-label="Số tài khoản trên mỗi trang" /><Select.Content>{USER_PAGE_SIZES.map(size => <Select.Item key={size} value={String(size)}>{size}</Select.Item>)}</Select.Content></Select.Root></label><ThemeButton type="button" size="2" variant="soft" color="gray" disabled={currentPage <= 1} onClick={() => { setPage(Math.max(1, currentPage - 1)); setOpenActions(null); }}>Trước</ThemeButton><span>Trang {currentPage}/{pageCount}</span><ThemeButton type="button" size="2" variant="soft" color="gray" disabled={currentPage >= pageCount} onClick={() => { setPage(Math.min(pageCount, currentPage + 1)); setOpenActions(null); }}>Sau</ThemeButton></div></div></>}</Panel>
     <ResetManagedPasswordDialog user={resetUser} schoolId={schoolId} onClose={() => setResetUser(null)} onUpdated={updated => { setItems(current => current.map(user => user.id === updated.id ? updated : user)); setNotice(`Đã đặt lại mật khẩu cho ${updated.email}.`); }} />
   </div>;
 }
