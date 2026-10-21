@@ -44,9 +44,10 @@
   pointer-events: none;
 }
 .heroCopy {
-  max-width: 980px;
+  box-sizing: border-box;
+  width: min(1240px, 100%);
   margin: 0 auto;
-  padding: clamp(56px, 9vw, 120px) var(--gutter) 56px;
+  padding: clamp(56px, 9vw, 120px) clamp(20px, 4vw, 48px) 56px;
   text-align: center;
 }
 .home h1 {
@@ -72,10 +73,9 @@
 }
 .rotWord {
   overflow: hidden;
-}
-.rotWord :global(.text-shine) {
-  margin-block: 0;
-  padding-block: 0;
+  /* Keep the rolling-word mask without clipping Vietnamese tone marks. */
+  margin-block: -0.34em -0.22em;
+  padding-block: 0.34em 0.22em;
 }
 .lead {
   max-width: 44ch;
