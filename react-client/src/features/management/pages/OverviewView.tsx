@@ -1,25 +1,93 @@
 import { useEffect, useState } from "react";
-import LearningIcon from "../../../shared/ui/LearningIcon";
 import { Badge, Heading, Progress, Text } from "@radix-ui/themes";
 import { adminUsers } from "../../account/api/userApi";
+import { adminSchools, type ManagedSchool } from "../../school/api/schoolApi";
 import { validationMetrics } from "../api/operationsApi";
 import type { User } from "../../../shared/auth/types";
 import { apiMessage } from "../../../shared/lib/apiError";
-import { PageHeader, Panel, Loading, ErrorNotice, Button, Stat } from "../../../shared/ui/ManagementUI";
+import LearningIcon from "../../../shared/ui/LearningIcon";
+import { Button, ErrorNotice, Loading, PageHeader, Panel, Stat } from "../../../shared/ui/ManagementUI";
+
+const SYSTEM_ROLES = new Set(["ADMIN", "MANAGER"]);
+const SCHOOL_ROLES = new Set(["SCHOOL", "STAFF"]);
 
 export function OverviewView() {
   const [users, setUsers] = useState<User[]>([]);
+  const [schools, setSchools] = useState<ManagedSchool[]>([]);
   const [metrics, setMetrics] = useState<{ total: number; failed: number; failureRate: number } | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const load = async () => { setLoading(true); try { const [nextUsers, nextMetrics] = await Promise.all([adminUsers(), validationMetrics()]); setUsers(nextUsers); setMetrics(nextMetrics); setError(""); } catch (e) { setError(apiMessage(e, "Không thể tải tổng quan.")); } finally { setLoading(false); } };
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [nextUsers, nextSchools, nextMetrics] = await Promise.all([
+        adminUsers(),
+        adminSchools(),
+        validationMetrics(),
+      ]);
+      setUsers(nextUsers);
+      setSchools(nextSchools);
+      setMetrics(nextMetrics);
+      setError("");
+    } catch (e) {
+      setError(apiMessage(e, "Không thể tải tổng quan."));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => { void load(); }, []);
+
+  const activeUsers = users.filter(item => item.active !== false).length;
+  const teachers = users.filter(item => item.role === "STAFF").length;
+  const systemAccounts = users.filter(item => SYSTEM_ROLES.has(item.role)).length;
+  const schoolAccounts = users.filter(item => SCHOOL_ROLES.has(item.role)).length;
+  const individualAccounts = users.length - systemAccounts - schoolAccounts;
+  const activeSchools = schools.filter(item => item.active).length;
   const passed = metrics ? metrics.total - metrics.failed : 0;
-  const rate = metrics?.total ? (passed / metrics.total) * 100 : 0;
+  const hasValidationData = Boolean(metrics?.total);
+  const rate = hasValidationData && metrics ? (passed / metrics.total) * 100 : 0;
+
   if (loading) return <div className="admin-content"><Loading /></div>;
-  return <div className="admin-content"><PageHeader title="Tổng quan" description="Theo dõi người dùng và chất lượng mô phỏng trong PhysLive." action={<Button onClick={() => void load()}><LearningIcon name="refresh" /> Làm mới</Button>} />{error && <ErrorNotice error={error} onRetry={() => void load()} />}
-    <div className="admin-stats-grid"><Stat label="Tổng người dùng" value={users.length} icon="users" tone="blue" /><Stat label="Đang hoạt động" value={users.filter(item => item.active !== false).length} icon="activity" tone="green" /><Stat label="Giáo viên" value={users.filter(item => item.role === "STAFF").length} icon="book" tone="orange" /><Stat label="Kiểm định đạt" value={`${rate.toFixed(1)}%`} icon="shield" tone="purple" /></div>
-    <div className="admin-dashboard-grid"><Panel title="Kết quả kiểm định"><Heading as="h3" size="8" color="indigo" className="admin-health-value">{rate.toFixed(1)}%</Heading><Progress value={Math.max(0, Math.min(100, rate))} color="indigo" aria-label="Tỷ lệ kiểm định đạt" /><div className="admin-health-meta"><Badge color="green" size="2">{passed} lượt đạt</Badge><Badge color="amber" size="2">{metrics?.failed ?? 0} lượt lỗi</Badge></div></Panel><Panel title="Phân bổ tài khoản"><div className="admin-breakdown-list"><div><Text>Giáo viên</Text><Badge color="gray" size="2">{users.filter(item => item.role === "STAFF").length}</Badge></div><div><Text>Học sinh</Text><Badge color="gray" size="2">{users.filter(item => item.role === "STUDENT").length}</Badge></div><div><Text>Người kiểm duyệt</Text><Badge color="gray" size="2">{users.filter(item => item.role === "REVIEWER").length}</Badge></div></div></Panel></div>
-  </div>;
+
+  return (
+    <div className="admin-content">
+      <PageHeader
+        title="Tổng quan"
+        description="Theo dõi quy mô người dùng, trường học và chất lượng kiểm định trên toàn hệ thống."
+        action={<Button onClick={() => void load()}><LearningIcon name="refresh" /> Làm mới</Button>}
+      />
+      {error && <ErrorNotice error={error} onRetry={() => void load()} />}
+
+      <div className="admin-stats-grid">
+        <Stat label="Tổng người dùng" value={users.length} icon="users" tone="blue" />
+        <Stat label="Đang hoạt động" value={activeUsers} icon="activity" tone="green" note={`${users.length - activeUsers} tài khoản tạm khóa`} />
+        <Stat label="Giáo viên" value={teachers} icon="book" tone="orange" />
+        <Stat label="Trường học" value={schools.length} icon="grid" tone="purple" note={`${activeSchools} đang hoạt động`} />
+      </div>
+
+      <div className="admin-dashboard-grid">
+        <Panel title="Kết quả kiểm định" description="Tổng hợp các lượt kiểm tra solver và lời giải tham chiếu.">
+          <Heading as="h3" size="8" color="indigo" className="admin-health-value">
+            {hasValidationData ? `${rate.toFixed(1)}%` : "—"}
+          </Heading>
+          <Progress value={Math.max(0, Math.min(100, rate))} color="indigo" aria-label="Tỷ lệ kiểm định đạt" />
+          <div className="admin-health-meta">
+            <Badge color="green" size="2">{passed} lượt đạt</Badge>
+            <Badge color="amber" size="2">{metrics?.failed ?? 0} lượt lỗi</Badge>
+          </div>
+        </Panel>
+
+        <Panel title="Phân bổ tài khoản" description={`Ba nhóm bao phủ toàn bộ ${users.length} tài khoản.`}>
+          <div className="admin-breakdown-list">
+            <div><Text>Quản trị hệ thống</Text><Badge color="gray" size="2">{systemAccounts}</Badge></div>
+            <div><Text>Trường học</Text><Badge color="gray" size="2">{schoolAccounts}</Badge></div>
+            <div><Text>Cá nhân</Text><Badge color="gray" size="2">{individualAccounts}</Badge></div>
+          </div>
+        </Panel>
+      </div>
+    </div>
+  );
 }
 

@@ -5,8 +5,8 @@ import LearningIcon from "./LearningIcon";
 
 type IconName = "grid" | "users" | "book" | "activity" | "shield" | "refresh" | "plus" | "check" | "search" | "close";
 
-export function PageHeader({ title, action }: Readonly<{ title: string; description: string; action?: ReactNode }>) {
-  return <header className="admin-content-header"><div><Heading as="h1" size="7" className="admin-content-title">{title}</Heading></div>{action}</header>;
+export function PageHeader({ title, description, action }: Readonly<{ title: string; description: string; action?: ReactNode }>) {
+  return <header className="admin-content-header"><div><Heading as="h1" size="7" className="admin-content-title">{title}</Heading>{description && <Text as="p" size="2" color="gray" className="admin-content-description">{description}</Text>}</div>{action}</header>;
 }
 
 export function Panel({ title, description, children, action, className, hideHeader = false }: Readonly<{ title: string; description?: string; children: ReactNode; action?: ReactNode; className?: string; hideHeader?: boolean }>) {
