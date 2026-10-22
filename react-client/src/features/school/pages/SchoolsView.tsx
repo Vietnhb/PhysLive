@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import LearningIcon from "../../../shared/ui/LearningIcon";
-import { Badge, Button as ThemeButton, Callout, Checkbox, Dialog, Table, Text, TextField } from "@radix-ui/themes";
+import { Badge, Button as ThemeButton, Callout, Checkbox, Dialog, Select, Table, Text, TextField } from "@radix-ui/themes";
 import { adminSchools, createSchool, updateSchool, type ManagedSchool } from "../api/schoolApi";
 import { apiMessage } from "../../../shared/lib/apiError";
 import { PageHeader, Panel, Loading, ErrorNotice, Button, FormField } from "../../../shared/ui/ManagementUI";
@@ -8,10 +8,17 @@ import { PageHeader, Panel, Loading, ErrorNotice, Button, FormField } from "../.
 type SchoolForm = { code: string; name: string; address: string; active: boolean; licenseStart: string; licenseEnd: string; monthlyTokenQuota: string };
 
 const blankSchool: SchoolForm = { code: "", name: "", address: "", active: true, licenseStart: "", licenseEnd: "", monthlyTokenQuota: "0" };
+const SCHOOL_PAGE_SIZES = [10, 25, 50] as const;
 
 export function SchoolsView() {
   const [items, setItems] = useState<ManagedSchool[]>([]); const [form, setForm] = useState<SchoolForm>(blankSchool); const [editing, setEditing] = useState<string | null>(null); const [showForm, setShowForm] = useState(false); const [loading, setLoading] = useState(true); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [page, setPage] = useState(1);
   const load = async () => { setLoading(true); try { setItems(await adminSchools()); setError(""); } catch (e) { setError(apiMessage(e, "Không thể tải danh sách trường học.")); } finally { setLoading(false); } }; useEffect(() => { void load(); }, []);
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageStart = (currentPage - 1) * pageSize;
+  const visibleItems = items.slice(pageStart, pageStart + pageSize);
   const submit = async (event: FormEvent) => { event.preventDefault(); setBusy(true); try { const payload = { ...form, licenseStart: form.licenseStart || null, licenseEnd: form.licenseEnd || null, monthlyTokenQuota: form.monthlyTokenQuota === "" ? null : Number(form.monthlyTokenQuota) }; if (editing) { await updateSchool(editing, payload); } else { await createSchool(payload); } setShowForm(false); setEditing(null); setForm(blankSchool); await load(); } catch (e) { setError(apiMessage(e, "Không thể lưu trường học.")); } finally { setBusy(false); } };
   return <div className="admin-content">
     <PageHeader title="Trường học" description="" action={<Button primary onClick={() => { setEditing(null); setForm(blankSchool); setShowForm(true); }}><LearningIcon name="plus" />Thêm trường</Button>} />
@@ -29,6 +36,6 @@ export function SchoolsView() {
         <div className="admin-form-actions"><Button onClick={() => setShowForm(false)}>Hủy</Button><ThemeButton type="submit" size="3" loading={busy} disabled={busy}>{busy ? "Đang lưu…" : "Lưu trường"}</ThemeButton></div>
       </form>
     </Dialog.Content></Dialog.Root>
-    {loading ? <Loading /> : <Panel title={`${items.length} trường học`}><Table.Root size="2" variant="ghost"><Table.Header><Table.Row><Table.ColumnHeaderCell>Mã</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Tên trường</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Địa chỉ</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell /></Table.Row></Table.Header><Table.Body>{items.map(item => <Table.Row key={item.id}><Table.Cell><Text weight="medium">{item.code}</Text></Table.Cell><Table.Cell>{item.name}</Table.Cell><Table.Cell>{item.address || "—"}</Table.Cell><Table.Cell><Badge color={item.active ? "cyan" : "gray"} size="2">{item.active ? "Hoạt động" : "Đã tắt"}</Badge></Table.Cell><Table.Cell><Button onClick={() => { setEditing(item.id); setForm({ code: item.code, name: item.name, address: item.address ?? "", active: item.active, licenseStart: item.licenseStart ?? "", licenseEnd: item.licenseEnd ?? "", monthlyTokenQuota: item.monthlyTokenQuota == null ? "" : String(item.monthlyTokenQuota) }); setShowForm(true); }}>Sửa</Button></Table.Cell></Table.Row>)}</Table.Body></Table.Root></Panel>}
+    {loading ? <Loading /> : <Panel title={`${items.length} trường học`}><Table.Root size="2" variant="ghost"><Table.Header><Table.Row><Table.ColumnHeaderCell>Mã</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Tên trường</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Địa chỉ</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell /></Table.Row></Table.Header><Table.Body>{visibleItems.map(item => <Table.Row key={item.id}><Table.Cell><Text weight="medium">{item.code}</Text></Table.Cell><Table.Cell>{item.name}</Table.Cell><Table.Cell>{item.address || "—"}</Table.Cell><Table.Cell><Badge color={item.active ? "cyan" : "gray"} size="2">{item.active ? "Hoạt động" : "Đã tắt"}</Badge></Table.Cell><Table.Cell><Button onClick={() => { setEditing(item.id); setForm({ code: item.code, name: item.name, address: item.address ?? "", active: item.active, licenseStart: item.licenseStart ?? "", licenseEnd: item.licenseEnd ?? "", monthlyTokenQuota: item.monthlyTokenQuota == null ? "" : String(item.monthlyTokenQuota) }); setShowForm(true); }}>Sửa</Button></Table.Cell></Table.Row>)}</Table.Body></Table.Root><div className="admin-table-pagination"><span aria-live="polite">{items.length === 0 ? "0 trường học" : `Hiển thị ${pageStart + 1}–${Math.min(pageStart + pageSize, items.length)} / ${items.length} trường học`}</span><div><label>Số dòng/trang<Select.Root size="2" value={String(pageSize)} onValueChange={value => { setPageSize(Number(value)); setPage(1); }}><Select.Trigger aria-label="Số trường học trên mỗi trang" /><Select.Content>{SCHOOL_PAGE_SIZES.map(size => <Select.Item key={size} value={String(size)}>{size}</Select.Item>)}</Select.Content></Select.Root></label><ThemeButton type="button" size="2" variant="soft" color="gray" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>Trước</ThemeButton><span>Trang {currentPage}/{pageCount}</span><ThemeButton type="button" size="2" variant="soft" color="gray" disabled={currentPage >= pageCount} onClick={() => setPage(currentPage + 1)}>Sau</ThemeButton></div></div></Panel>}
   </div>;
 }
