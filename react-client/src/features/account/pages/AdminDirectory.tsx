@@ -20,6 +20,7 @@ const USER_TIERS: Record<UserTier, { id: UserTier; label: string; roles: string[
 };
 
 const TIER_ORDER: UserTier[] = ["ALL", "SYSTEM", "SCHOOL", "INDIVIDUAL"];
+const DIRECTORY_PAGE_SIZES = [10, 25, 50, 100] as const;
 
 function getUserTier(role: string): "SYSTEM" | "SCHOOL" | "INDIVIDUAL" {
   if (role === ROLE_NAMES.ADMIN || role === ROLE_NAMES.MANAGER) return "SYSTEM";
@@ -53,6 +54,8 @@ export default function AdminDirectory() {
   const [role, setRole] = useState("");
   const [status, setStatus] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [page, setPage] = useState(1);
 
   const selected = users.find(item => item.id === selectedId);
 
@@ -89,6 +92,10 @@ export default function AdminDirectory() {
     SYSTEM: users.filter(u => USER_TIERS.SYSTEM.roles.includes(u.role)).length,
     INDIVIDUAL: users.filter(u => USER_TIERS.INDIVIDUAL.roles.includes(u.role)).length,
   };
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pageStart = (currentPage - 1) * pageSize;
+  const visibleUsers = filtered.slice(pageStart, pageStart + pageSize);
 
   return (
     <div className="directory-main">
@@ -159,7 +166,7 @@ export default function AdminDirectory() {
                       key={key}
                       aria-selected={isActive}
                       className={`directory-tier-tab ${isActive ? "active" : ""}`}
-                      onClick={() => { setTier(key); setRole(""); }}
+                      onClick={() => { setTier(key); setRole(""); setPage(1); }}
                     >
                       <LearningIcon name={item.icon} />
                       <span>{item.label}</span>
@@ -173,11 +180,11 @@ export default function AdminDirectory() {
 
               {/* Search & Dropdown Filters */}
               <div className="directory-filters">
-                <TextField.Root aria-label="Tìm tài khoản" placeholder="Tìm tên, email, mã hoặc trường…" value={query} onChange={e => setQuery(e.target.value)} size="3">
+                <TextField.Root aria-label="Tìm tài khoản" placeholder="Tìm tên, email, mã hoặc trường…" value={query} onChange={e => { setQuery(e.target.value); setPage(1); }} size="3">
                   <TextField.Slot><MagnifyingGlassIcon /></TextField.Slot>
                 </TextField.Root>
 
-                <Select.Root value={role || "all"} onValueChange={value => setRole(value === "all" ? "" : value)} size="3">
+                <Select.Root value={role || "all"} onValueChange={value => { setRole(value === "all" ? "" : value); setPage(1); }} size="3">
                   <Select.Trigger aria-label="Lọc vai trò" />
                   <Select.Content>
                     <Select.Item value="all">Tất cả vai trò</Select.Item>
@@ -187,7 +194,7 @@ export default function AdminDirectory() {
                   </Select.Content>
                 </Select.Root>
 
-                <Select.Root value={status || "all"} onValueChange={value => setStatus(value === "all" ? "" : value)} size="3">
+                <Select.Root value={status || "all"} onValueChange={value => { setStatus(value === "all" ? "" : value); setPage(1); }} size="3">
                   <Select.Trigger aria-label="Lọc trạng thái" />
                   <Select.Content>
                     <Select.Item value="all">Tất cả trạng thái</Select.Item>
@@ -218,7 +225,7 @@ export default function AdminDirectory() {
                   <MagnifyingGlassIcon />
                   <Heading as="h3" size="4">Chưa tìm thấy tài khoản</Heading>
                   <p>Thử tìm theo từ khóa khác hoặc thay đổi nhóm, vai trò hay trạng thái.</p>
-                  <Button variant="soft" onClick={() => { setQuery(""); setTier("ALL"); setRole(""); setStatus(""); }}>
+                  <Button variant="soft" onClick={() => { setQuery(""); setTier("ALL"); setRole(""); setStatus(""); setPage(1); }}>
                     Xóa bộ lọc
                   </Button>
                 </div>
@@ -234,7 +241,7 @@ export default function AdminDirectory() {
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
-                    {filtered.map(item => (
+                    {visibleUsers.map(item => (
                       <Table.Row key={item.id} className={selectedId === item.id ? "selected" : ""}>
                         <Table.Cell>
                           <div className="directory-person">
@@ -268,7 +275,7 @@ export default function AdminDirectory() {
 
               {!error && !loading && filtered.length > 0 && (
                 <div className="directory-mobile-list" aria-label="Danh sách tài khoản">
-                  {filtered.map(item => (
+                  {visibleUsers.map(item => (
                     <article key={item.id} className={`directory-user-card ${selectedId === item.id ? "selected" : ""}`}>
                       <div className="directory-user-card__identity">
                         <Avatar size="3" src={item.avatarUrl || undefined} color={roleColors[item.role]} fallback={(item.fullName || item.email).slice(0, 1).toUpperCase()} />
@@ -285,6 +292,28 @@ export default function AdminDirectory() {
                       <Button variant="soft" onClick={() => setSelectedId(item.id)}>Xem chi tiết <ArrowRightIcon /></Button>
                     </article>
                   ))}
+                </div>
+              )}
+
+              {!error && !loading && filtered.length > 0 && (
+                <div className="directory-pagination">
+                  <Text size="2" color="gray" aria-live="polite">
+                    Hiển thị {pageStart + 1}–{Math.min(pageStart + pageSize, filtered.length)} / {filtered.length} tài khoản
+                  </Text>
+                  <div className="directory-pagination__controls">
+                    <label>
+                      <Text size="2" color="gray">Số dòng/trang</Text>
+                      <Select.Root value={String(pageSize)} onValueChange={value => { setPageSize(Number(value)); setPage(1); }} size="2">
+                        <Select.Trigger aria-label="Số tài khoản trên mỗi trang" />
+                        <Select.Content>
+                          {DIRECTORY_PAGE_SIZES.map(size => <Select.Item key={size} value={String(size)}>{size}</Select.Item>)}
+                        </Select.Content>
+                      </Select.Root>
+                    </label>
+                    <Button variant="soft" color="gray" size="2" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>Trước</Button>
+                    <Text size="2">Trang {currentPage}/{pageCount}</Text>
+                    <Button variant="soft" color="gray" size="2" disabled={currentPage >= pageCount} onClick={() => setPage(currentPage + 1)}>Sau</Button>
+                  </div>
                 </div>
               )}
 
