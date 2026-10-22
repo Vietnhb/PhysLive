@@ -163,7 +163,7 @@
 /* Footer user button + menu */
 .app-sidebar__foot {
   position: relative;
-  padding: 10px;
+  padding: 8px 10px;
   border-top: 1px solid var(--line);
 }
 .app-shell button.app-sidebar__user,
@@ -342,6 +342,10 @@
   justify-content: center;
   padding-inline: 0;
 }
+.app-shell[data-collapsed] .account-menu--sidebar .account-menu__panel {
+  right: auto;
+  width: min(288px, calc(100vw - 24px));
+}
 
 /* ---- Main column ---- */
 .app-main {
@@ -470,6 +474,7 @@
   .app-shell[data-collapsed] .app-sidebar__item,
   .app-shell[data-collapsed] button.app-sidebar__user,
   .app-shell[data-collapsed] .account-menu--sidebar button.account-menu__trigger { justify-content: flex-start; padding-inline: 8px; }
+  .app-shell[data-collapsed] .account-menu--sidebar .account-menu__panel { right: 0; width: auto; }
   .app-shell[data-collapsed] .app-sidebar__badge { position: static; width: auto; height: auto; min-width: 20px; padding: 1px 6px; color: #fff; box-shadow: none; }
   .app-shell button.app-topbar__toggle--desktop { display: none; }
   .app-shell button.app-topbar__toggle--mobile { display: grid; }

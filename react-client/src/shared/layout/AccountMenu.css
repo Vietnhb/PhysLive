@@ -84,11 +84,15 @@
   top: calc(100% + 10px);
   right: 0;
   display: grid;
-  gap: 4px;
-  width: min(340px, calc(100vw - 24px));
-  padding: 12px;
+  gap: 2px;
+  width: min(300px, calc(100vw - 24px));
+  max-height: calc(100dvh - 80px);
+  padding: 8px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--surface);
   box-shadow: var(--shadow-lg);
   color: var(--ink);
@@ -98,9 +102,10 @@
 .account-menu__identity {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
-  padding: 4px 4px 10px;
+  min-height: 48px;
+  padding: 6px 8px;
 }
 
 .account-menu__identity-copy {
@@ -108,7 +113,8 @@
 }
 
 .account-menu__identity-copy strong {
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .account-menu__profile-link,
@@ -117,27 +123,25 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  min-height: 44px;
-  padding: 0 10px;
+  min-height: 42px;
+  padding: 0 9px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   background: transparent;
   box-shadow: none;
   color: var(--ink-2);
   font: inherit;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   text-align: left;
   text-decoration: none;
   cursor: pointer;
 }
 
 .account-menu__profile-link {
-  justify-content: center;
-  min-height: 38px;
-  background: var(--surface-3);
+  justify-content: flex-start;
 }
 
 .account-menu__profile-link:hover,
@@ -146,9 +150,8 @@
   color: var(--ink);
 }
 
-.account-menu__profile-link .learn-icon {
-  width: 16px;
-  height: 16px;
+.account-menu__profile-link > span:nth-child(2) {
+  flex: 1;
 }
 
 .account-menu__item > span:nth-child(2) {
@@ -159,18 +162,18 @@
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--surface-4);
+  width: 20px;
+  height: 20px;
 }
 
+.account-menu__profile-link .learn-icon,
 .account-menu__item-icon .learn-icon,
 .account-menu__item > .learn-icon {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
 }
 
+.account-menu__profile-link > .learn-icon:last-child,
 .account-menu__item > .learn-icon {
   flex: 0 0 auto;
   color: var(--muted);
@@ -178,12 +181,39 @@
 
 .account-menu__divider {
   height: 1px;
-  margin: 6px 2px;
+  margin: 6px 8px;
   background: var(--line);
 }
 
 .account-menu__appearance {
-  padding: 2px 6px 8px 48px;
+  min-width: 0;
+  padding: 4px 8px 8px;
+}
+
+.account-menu__theme-control {
+  grid-auto-flow: initial;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  min-width: 0;
+}
+
+.account-menu__theme-control button,
+.account-menu__theme-control button:hover:not(:disabled) {
+  min-width: 0;
+  gap: 3px;
+  padding-inline: 3px;
+  font-size: 11px;
+}
+
+.account-menu__theme-control button > svg {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+}
+
+.account-menu__theme-control button > span:last-child {
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .account-menu .account-menu__item--logout,
@@ -216,8 +246,8 @@
 
 .account-menu--sidebar button.account-menu__trigger {
   width: 100%;
-  min-height: 48px;
-  padding: 6px 8px;
+  min-height: 52px;
+  padding: 7px 8px;
   border-radius: 10px;
 }
 
@@ -246,10 +276,11 @@
 
 .account-menu--sidebar .account-menu__panel {
   top: auto;
-  right: auto;
-  bottom: calc(100% + 10px);
+  right: 0;
+  bottom: calc(100% + 8px);
   left: 0;
-  width: min(320px, calc(100vw - 24px));
+  width: auto;
+  max-height: calc(100dvh - 92px);
   transform-origin: bottom left;
 }
 

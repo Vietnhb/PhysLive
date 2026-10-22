@@ -80,20 +80,20 @@ export default function AccountMenu({ variant }: Readonly<{ variant: AccountMenu
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="account-menu__identity">
-              <span className="account-menu__avatar account-menu__avatar--large" aria-hidden="true">
+            <div className="account-menu__identity" title={user.email}>
+              <span className="account-menu__avatar" aria-hidden="true">
                 {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials}
               </span>
               <span className="account-menu__identity-copy">
                 <strong>{user.fullName || "Tài khoản"}</strong>
-                <small>{user.email}</small>
                 <small>{getRoleLabel(user.role)}</small>
               </span>
             </div>
 
             <Link role="menuitem" className="account-menu__profile-link" to="/profile#profile-details" onClick={close}>
-              <LearningIcon name="users" />
-              <span>Xem hồ sơ cá nhân</span>
+              <span className="account-menu__item-icon"><LearningIcon name="users" /></span>
+              <span>Hồ sơ cá nhân</span>
+              <LearningIcon name="chevronRight" />
             </Link>
 
             <div className="account-menu__divider" />
@@ -115,7 +115,9 @@ export default function AccountMenu({ variant }: Readonly<{ variant: AccountMenu
               <span>Giao diện và trợ năng</span>
               <LearningIcon name={appearanceOpen ? "chevronDown" : "chevronRight"} />
             </button>
-            {appearanceOpen && <div className="account-menu__appearance"><ThemeSegmented /></div>}
+            {appearanceOpen && <div className="account-menu__appearance"><ThemeSegmented className="account-menu__theme-control" /></div>}
+
+            <div className="account-menu__divider" />
 
             <button type="button" role="menuitem" className="account-menu__item account-menu__item--logout" onClick={logout}>
               <span className="account-menu__item-icon"><LearningIcon name="logout" /></span>
