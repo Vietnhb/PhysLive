@@ -50,6 +50,14 @@ public final class SchoolPaymentContracts {
     public record PaymentRow(UUID id, String planCode, String purpose, Long amountVnd, String status, Instant createdAt, Instant paidAt) { }
     public record AdminPaymentRow(UUID id, String schoolName, String managerEmail, String planCode, String purpose, Long amountVnd, String status, Instant createdAt, Instant paidAt) { }
     public record RevenueSummary(long paidTransactions, long pendingTransactions, long reviewTransactions, long grossPaidVnd) { }
+    public record PaymentKpis(long grossPaidVnd, long paidTransactions, long pendingTransactions,
+                              long reviewTransactions, long failedTransactions, long totalTransactions) { }
+    public record RevenuePoint(String key, String label, long revenueVnd, long transactions) { }
+    public record PackageRevenue(String planCode, long revenueVnd, long transactions) { }
+    public record PaymentStatusBreakdown(String status, long transactions) { }
+    public record PaymentAnalytics(String period, int year, Integer month, Integer quarter, String timezone,
+                                   Instant from, Instant to, PaymentKpis kpis, List<RevenuePoint> trend,
+                                   List<PackageRevenue> packages, List<PaymentStatusBreakdown> statuses) { }
     public record PlanChoice(String planCode, boolean allowed, String purpose, String reason) { }
     public record Billing(String planCode, String nextPlanCode, LocalDate licenseStart, LocalDate licenseEnd,
         Integer studentQuota, long studentsUsed, Integer monthlyTokenQuota, long tokensUsed, List<PaymentRow> payments,

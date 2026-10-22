@@ -62,7 +62,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/user/me", "/api/user/me/**").hasAnyRole(ADMIN, MANAGER, REVIEWER, SCHOOL, STAFF, STUDENT)
                 .requestMatchers("/api/appeals", "/api/appeals/**").hasAnyRole(ADMIN, MANAGER, REVIEWER, SCHOOL, STAFF, STUDENT)
                 // ADMIN manages only MANAGER accounts; target-role restrictions remain in the service.
-                .requestMatchers(GET, "/api/admin/users", "/api/admin/analytics", "/api/admin/appeals", "/api/admin/payments", "/api/admin/payment-report").hasAnyRole(ADMIN, MANAGER)
+                .requestMatchers(GET, "/api/admin/users", "/api/admin/analytics", "/api/admin/appeals", "/api/admin/payments", "/api/admin/payment-report", "/api/admin/payment-analytics").hasAnyRole(ADMIN, MANAGER)
                 .requestMatchers(PUT, "/api/admin/appeals/**").hasAnyRole(ADMIN, MANAGER)
                 .requestMatchers(POST, "/api/admin/users").hasAnyRole(ADMIN, MANAGER)
                 .requestMatchers(PUT, "/api/admin/users/**").hasAnyRole(ADMIN, MANAGER)

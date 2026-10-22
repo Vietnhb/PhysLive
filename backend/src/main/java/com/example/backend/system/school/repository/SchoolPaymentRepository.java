@@ -2,11 +2,20 @@ package com.example.backend.system.school.repository;
 
 import com.example.backend.system.school.model.entity.SchoolPayment;
 import jakarta.persistence.LockModeType;
+import java.time.Instant;
 import java.util.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 public interface SchoolPaymentRepository extends JpaRepository<SchoolPayment, UUID> {
+    interface PaymentAnalyticsRow {
+        String getPlanCode();
+        Long getAmountVnd();
+        String getStatus();
+        Instant getCreatedAt();
+        Instant getPaidAt();
+    }
+
     interface RevenueTotals {
         Long getPaidTransactions();
         Long getPendingTransactions();
@@ -23,6 +32,33 @@ public interface SchoolPaymentRepository extends JpaRepository<SchoolPayment, UU
             from SchoolPayment p
             """)
     RevenueTotals summarizeRevenue();
+
+    @Query("""
+            select p.planCode as planCode, p.amountVnd as amountVnd, p.status as status,
+                   p.createdAt as createdAt, p.paidAt as paidAt
+            from SchoolPayment p
+            where (p.status = 'PAID' and coalesce(p.paidAt, p.createdAt) >= :from and coalesce(p.paidAt, p.createdAt) < :to)
+               or (p.status <> 'PAID' and p.createdAt >= :from and p.createdAt < :to)
+            """)
+    List<PaymentAnalyticsRow> findAnalyticsRows(@Param("from") Instant from, @Param("to") Instant to);
+
+    @Query("""
+            select p from SchoolPayment p
+            left join fetch p.school
+            left join fetch p.manager
+            order by p.createdAt desc
+            """)
+    List<SchoolPayment> findAllForAdmin();
+
+    @Query("""
+            select p from SchoolPayment p
+            left join fetch p.school
+            left join fetch p.manager
+            where (p.status = 'PAID' and coalesce(p.paidAt, p.createdAt) >= :from and coalesce(p.paidAt, p.createdAt) < :to)
+               or (p.status <> 'PAID' and p.createdAt >= :from and p.createdAt < :to)
+            order by case when p.status = 'PAID' then coalesce(p.paidAt, p.createdAt) else p.createdAt end desc
+            """)
+    List<SchoolPayment> findAllForAdminPeriod(@Param("from") Instant from, @Param("to") Instant to);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from SchoolPayment p where p.id = :id")

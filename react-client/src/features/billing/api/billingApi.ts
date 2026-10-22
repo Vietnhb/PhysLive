@@ -14,6 +14,41 @@ export type PaymentNotification = { id: string; schoolName: string; planCode: st
 
 export const paymentNotifications = () => axiosClient.get<PaymentNotification[]>("/admin/payment-notifications").then(r => r.data);
 
+export type PaymentPeriod = "MONTH" | "QUARTER" | "YEAR";
+export type PaymentStatus = "PAID" | "PENDING" | "FAILED" | "REQUIRES_REVIEW";
+export type PaymentPeriodFilter = { period: PaymentPeriod; year: number; month?: number; quarter?: number; timezone: string };
+export type AdminPayment = { id: string; schoolName: string; managerEmail: string; planCode: string; purpose: string; amountVnd: number; status: string; createdAt: string; paidAt: string | null };
+export type PaymentAnalytics = {
+    period: PaymentPeriod;
+    year: number;
+    month: number | null;
+    quarter: number | null;
+    timezone: string;
+    from: string;
+    to: string;
+    kpis: { grossPaidVnd: number; paidTransactions: number; pendingTransactions: number; reviewTransactions: number; failedTransactions: number; totalTransactions: number };
+    trend: Array<{ key: string; label: string; revenueVnd: number; transactions: number }>;
+    packages: Array<{ planCode: string; revenueVnd: number; transactions: number }>;
+    statuses: Array<{ status: PaymentStatus; transactions: number }>;
+};
+
+const paymentPeriodParams = (filter: PaymentPeriodFilter) => ({
+    period: filter.period,
+    year: filter.year,
+    ...(filter.period === "MONTH" ? { month: filter.month } : {}),
+    ...(filter.period === "QUARTER" ? { quarter: filter.quarter } : {}),
+    timezone: filter.timezone,
+});
+
+export const adminPayments = (filter: PaymentPeriodFilter) =>
+    axiosClient.get<AdminPayment[]>("/admin/payments", { params: paymentPeriodParams(filter) }).then(response => response.data);
+
+export const adminPaymentAnalytics = (filter: PaymentPeriodFilter) =>
+    axiosClient.get<PaymentAnalytics>("/admin/payment-analytics", { params: paymentPeriodParams(filter) }).then(response => response.data);
+
+export const reconcileAdminPayment = (id: string) =>
+    axiosClient.post<{ status: string }>(`/admin/payments/${id}/reconcile`).then(response => response.data);
+
 export type LicensePlan = {
     code: string; name: string; description: string; annualPriceVnd: number;
     studentQuota: number; monthlyTokenQuota: number | null;

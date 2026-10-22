@@ -372,7 +372,16 @@ public class SchoolPaymentService {
 
     @Transactional(readOnly = true)
     public List<AdminPaymentRow> adminPayments() {
-        return payments.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt")).stream()
+        return adminPaymentRows(payments.findAllForAdmin());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminPaymentRow> adminPayments(Instant from, Instant to) {
+        return adminPaymentRows(payments.findAllForAdminPeriod(from, to));
+    }
+
+    private List<AdminPaymentRow> adminPaymentRows(List<SchoolPayment> source) {
+        return source.stream()
                 .map(payment -> new AdminPaymentRow(payment.getId(),
                     payment.getSchool() == null ? payment.getRegistrationSchoolName() : payment.getSchool().getName(),
                     payment.getManager() == null ? payment.getRegistrationEmail() : payment.getManager().getEmail(),

@@ -5,6 +5,7 @@ import com.example.backend.system.school.dto.SchoolPaymentContracts.SchoolPaymen
 import com.example.backend.system.school.dto.SchoolPaymentContracts.SchoolRegistrationRequest;
 import com.example.backend.system.school.dto.SchoolPaymentContracts;
 import com.example.backend.system.school.service.SchoolPaymentService;
+import com.example.backend.system.school.service.PaymentAnalyticsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.*;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class SchoolPaymentController {
     private final SchoolPaymentService payments;
+    private final PaymentAnalyticsService paymentAnalytics;
 
     @PostMapping("/api/auth/school-checkout")
     public SchoolPaymentContracts.Checkout checkout(@Valid @RequestBody SchoolRegistrationRequest request,
@@ -49,10 +51,29 @@ public class SchoolPaymentController {
     }
 
     @GetMapping("/api/admin/payments")
-    public List<SchoolPaymentContracts.AdminPaymentRow> adminPayments() { return payments.adminPayments(); }
+    public List<SchoolPaymentContracts.AdminPaymentRow> adminPayments(
+            @RequestParam(required = false) String period,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer quarter,
+            @RequestParam(required = false) String timezone) {
+        if (period == null) return payments.adminPayments();
+        var range = paymentAnalytics.resolvePeriod(period, year, month, quarter, timezone);
+        return payments.adminPayments(range.from(), range.to());
+    }
 
     @GetMapping("/api/admin/payment-report")
     public SchoolPaymentContracts.RevenueSummary paymentReport() { return payments.revenueSummary(); }
+
+    @GetMapping("/api/admin/payment-analytics")
+    public SchoolPaymentContracts.PaymentAnalytics paymentAnalytics(
+            @RequestParam(defaultValue = "YEAR") String period,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer quarter,
+            @RequestParam(required = false) String timezone) {
+        return paymentAnalytics.analytics(period, year, month, quarter, timezone);
+    }
 
     @PostMapping("/api/admin/payments/{id}/reconcile")
     public Map<String, String> reconcile(@PathVariable UUID id) { return Map.of("status", payments.reconcilePayment(id)); }
