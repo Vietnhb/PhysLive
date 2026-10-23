@@ -6,6 +6,7 @@ import BrandMark from "../ui/BrandMark";
 import ThemeToggle from "../theme/ThemeToggle";
 import AccountMenu from "./AccountMenu";
 import "./AppSidebar.css";
+import { PageBreadcrumbContext, type PageBreadcrumb } from "./PageBreadcrumbContext";
 
 type IconName = Parameters<typeof LearningIcon>[0]["name"];
 
@@ -19,6 +20,8 @@ export type SidebarItem = {
   badge?: number;
   /** Page heading when it should differ from the menu label. */
   title?: string;
+  /** Optional breadcrumb shown when the current URL is below this item's route. */
+  childTitle?: string;
 };
 export type SidebarGroup = { label?: string; items: SidebarItem[] };
 
@@ -39,7 +42,6 @@ type Props = {
 
 const STORAGE_KEY = "physlive.sidebar";
 const readCollapsed = () => { try { return localStorage.getItem(STORAGE_KEY) === "collapsed"; } catch { return false; } };
-
 function isActive(pathname: string, item: SidebarItem) {
   return item.end ? pathname === item.to : pathname === item.to || pathname.startsWith(`${item.to}/`);
 }
@@ -55,6 +57,7 @@ export default function AppSidebarLayout({ id, subtitle, home, groups, actions, 
   const [collapsed, setCollapsed] = useState(readCollapsed);
   // The drawer belongs to the page it was opened on; navigating closes it.
   const [drawerPath, setDrawerPath] = useState<string | null>(null);
+  const [pageBreadcrumb, setPageBreadcrumb] = useState<PageBreadcrumb>();
   const drawerOpen = drawerPath === pathname;
 
   const toggleCollapsed = () => setCollapsed(value => {
@@ -76,6 +79,7 @@ export default function AppSidebarLayout({ id, subtitle, home, groups, actions, 
   const spring = reduced ? { duration: 0 } : { type: "spring" as const, stiffness: 420, damping: 36 };
 
   return (
+    <PageBreadcrumbContext.Provider value={setPageBreadcrumb}>
     <div className={`app-shell ${shellClassName}`} data-collapsed={collapsed || undefined} data-drawer={drawerOpen || undefined}>
       <button type="button" className="app-scrim" aria-label="Đóng menu" tabIndex={drawerOpen ? 0 : -1} onClick={() => setDrawerPath(null)} />
       <aside className="app-sidebar" aria-label={`Điều hướng ${subtitle}`}>
@@ -116,11 +120,12 @@ export default function AppSidebarLayout({ id, subtitle, home, groups, actions, 
           <button type="button" className="app-topbar__toggle app-topbar__toggle--desktop" onClick={toggleCollapsed} aria-label={collapsed ? "Mở rộng thanh bên" : "Thu gọn thanh bên"} aria-pressed={collapsed} title="Thu gọn / mở rộng (Ctrl+B)"><LearningIcon name="panel" /></button>
           <button type="button" className="app-topbar__toggle app-topbar__toggle--mobile" onClick={() => setDrawerPath(drawerOpen ? null : pathname)} aria-label="Mở menu" aria-expanded={drawerOpen}><LearningIcon name="menu" /></button>
           <span className="app-topbar__divider" aria-hidden="true" />
-          <p className="app-topbar__title"><span>{subtitle}</span>{current && <><span aria-hidden="true">/</span><strong>{current.title ?? current.label}</strong></>}</p>
+          <p className="app-topbar__title"><span>{subtitle}</span>{current && <><span aria-hidden="true">/</span><strong>{current.title ?? current.label}</strong>{current.childTitle && pathname.startsWith(`${current.to}/`) && <><span aria-hidden="true">/</span><strong>{pageBreadcrumb?.path === pathname ? pageBreadcrumb.title : current.childTitle}</strong></>}</>}</p>
           <div className="app-topbar__actions">{actions}<ThemeToggle /></div>
         </header>
         <div className={`app-content ${contentClassName}`}>{children ?? <Outlet />}</div>
       </div>
     </div>
+    </PageBreadcrumbContext.Provider>
   );
 }

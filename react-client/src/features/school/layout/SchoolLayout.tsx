@@ -11,7 +11,8 @@ export default function SchoolLayout() {
       { items: [{ to: "/school", label: "Tổng quan", icon: "grid", end: true }] },
       { label: "Nhà trường", items: [
         { to: "/school/users", label: "Tài khoản", icon: "users" },
-        { to: "/school/classes", label: "Lớp học", icon: "book" },
+        { to: "/school/classes", label: "Quản lý lớp học", icon: "book", childTitle: "Chi tiết lớp học" },
+        { to: "/school/import", label: "Nhập dữ liệu", icon: "upload" },
         { to: "/school/reports", label: "Báo cáo", icon: "chart" },
       ] },
       { label: "Gói dịch vụ", items: [{ to: "/school/billing", label: "Mua / gia hạn gói", icon: "activity" }] },

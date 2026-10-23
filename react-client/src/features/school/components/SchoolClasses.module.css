@@ -1,0 +1,408 @@
+.filters {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 180px 200px;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pageToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -6px 0 16px;
+}
+
+.feedbackToast {
+  position: fixed;
+  z-index: 1000;
+  top: 72px;
+  right: 24px;
+  min-width: 260px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border: 1px solid;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgb(15 23 42 / 16%);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  animation: feedback-enter 180ms ease-out;
+}
+
+.feedbackSuccess {
+  border-color: var(--success-line);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.feedbackError {
+  border-color: var(--danger-line);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+@keyframes feedback-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: max-content;
+}
+
+.loading,
+.empty {
+  padding: 24px;
+  color: var(--admin-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pagination,
+.pagination > div,
+.studentFooter {
+  display: flex;
+  align-items: center;
+}
+
+.pagination {
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 14px;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.pagination > div {
+  gap: 8px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 4px 0 24px;
+}
+
+.summary article {
+  display: grid;
+  align-content: center;
+  min-height: 86px;
+  padding: 16px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: var(--admin-surface-muted);
+}
+
+.summary span,
+.sectionHeading span {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.summary strong {
+  margin-top: 5px;
+  color: var(--admin-heading);
+  font-size: 22px;
+}
+
+.summary article > :global(.rt-Badge) {
+  width: max-content;
+  margin-top: 8px;
+}
+
+.memberSection + .memberSection {
+  margin-top: 26px;
+}
+
+.editForm {
+  padding: 0;
+  margin: 4px 0 28px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: var(--admin-surface-muted);
+}
+
+.editFormFields {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 18px;
+  row-gap: 16px;
+  padding: 20px 20px 0;
+}
+
+.editFormFields > label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  color: var(--admin-heading);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.editForm :global(.rt-TextFieldRoot) {
+  height: 40px;
+  background: var(--admin-surface);
+}
+
+.editForm :global(.rt-SelectTrigger) {
+  width: 100%;
+  height: 40px;
+}
+
+.gradeSelectContent {
+  width: var(--radix-select-trigger-width);
+  min-width: var(--radix-select-trigger-width) !important;
+  max-width: var(--radix-select-trigger-width);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgb(15 23 42 / 14%);
+}
+
+.editForm :global(.rt-TextFieldInput),
+.editForm :global(.rt-TextFieldInput:focus) {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 14px;
+}
+
+.editForm :global(.admin-form-actions) {
+  padding: 16px 20px 20px;
+}
+
+.editSection {
+  padding: 20px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: var(--admin-surface-muted);
+}
+
+.editSection :global(.admin-member-add) {
+  margin-bottom: 14px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sectionHeading h3 {
+  margin: 0;
+  color: var(--admin-heading);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sectionHeading span {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--gray-a3);
+}
+
+.teacherList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.manageList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.manageList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: var(--admin-surface);
+}
+
+.manageList li div {
+  min-width: 0;
+}
+
+.manageList strong,
+.manageList small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actionColumn {
+  width: 210px;
+}
+
+.studentActions {
+  display: grid;
+  grid-template-columns: 126px max-content;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+}
+
+.transferSelect {
+  width: 126px;
+}
+
+.manageList small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
+.teacherList li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+}
+
+.teacherList li div {
+  min-width: 0;
+}
+
+.teacherList strong,
+.teacherList small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teacherList strong {
+  color: var(--admin-heading);
+  font-size: 13px;
+}
+
+.teacherList small {
+  margin-top: 2px;
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
+.avatar {
+  display: grid;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--indigo-3);
+  color: var(--indigo-11);
+  font-weight: 700;
+}
+
+.studentFooter {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.compactPagination {
+  flex: 1 1 auto;
+}
+
+@media (max-width: 860px) {
+  .filters {
+    grid-template-columns: minmax(0, 1fr) 150px;
+  }
+
+  .filters > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .manageList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .filters,
+  .summary,
+  .teacherList,
+  .manageList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filters > :first-child {
+    grid-column: auto;
+  }
+
+  .pagination,
+  .studentFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagination > div {
+    justify-content: space-between;
+  }
+
+  .editSection,
+  .editForm {
+    padding: 14px;
+  }
+
+  .editForm {
+    padding: 0;
+  }
+
+  .editFormFields {
+    grid-template-columns: 1fr;
+    padding: 14px 14px 0;
+  }
+
+  .editForm :global(.admin-form-actions) {
+    padding: 14px;
+  }
+}

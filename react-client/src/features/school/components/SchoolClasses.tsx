@@ -1,165 +1,211 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { Badge, Button, Card, Dialog, IconButton, Popover, Select, Spinner, Table, TextField } from "@radix-ui/themes";
-import { CheckIcon, ChevronDownIcon, Cross2Icon, MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";
+import { AlertDialog, Badge, Button, Card, Dialog, Flex, IconButton, Select, Table, TextField } from "@radix-ui/themes";
+import { Cross2Icon, EyeOpenIcon, MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";
 import { motion, useReducedMotion } from "motion/react";
-import { adminUsers } from "../../account/api/userApi";
-import { archiveSchoolClass, assignClassTeacher, createSchoolClass, enrollClassStudent, removeClassStudent, removeClassTeacher, schoolClass, schoolClasses, transferClassStudent, updateSchoolClass } from "../api/schoolApi";
-import type { SchoolClassDetail, SchoolClassRequest, SchoolClassSummary } from "../types";
-import type { User } from "../../../shared/auth/types";
+import { useNavigate } from "react-router-dom";
+import { archiveSchoolClass, createSchoolClass, schoolClasses } from "../api/schoolApi";
+import type { SchoolClassRequest, SchoolClassSummary } from "../types";
 import { apiMessage } from "../../../shared/lib/apiError";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
-import SchoolBulkImport from "../dataio/components/SchoolBulkImport";
+import s from "./SchoolClasses.module.css";
+import { ClassTableLoading } from "./SchoolLoading";
 
+const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("vi");
 const defaultSchoolYear = () => {
   const now = new Date();
   const start = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
   return `${start}-${start + 1}`;
 };
-const blank = (): SchoolClassRequest => ({ name: "", gradeLevel: 10, schoolYear: defaultSchoolYear(), subject: "Vật lý" });
-type SchoolOption = { value: string; label: string };
-
-const searchableText = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("vi");
-
-function SchoolSelect({ value, disabled, label, placeholder, options, onValueChange }: Readonly<{ value?: string; disabled?: boolean; label: string; placeholder: string; options: SchoolOption[]; onValueChange: (value: string) => void }>) {
-  return <Select.Root size="2" value={value} defaultValue="" disabled={disabled} onValueChange={onValueChange}><Select.Trigger className="admin-school-select" placeholder={placeholder} aria-label={label} /><Select.Content>{options.map(option => <Select.Item key={option.value} value={option.value}>{option.label}</Select.Item>)}</Select.Content></Select.Root>;
-}
-
-function SearchableSchoolPicker({ value, disabled, label, placeholder, emptyLabel, options, onValueChange }: Readonly<{ value?: string; disabled?: boolean; label: string; placeholder: string; emptyLabel: string; options: SchoolOption[]; onValueChange: (value: string) => void }>) {
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const selected = options.find(option => option.value === value);
-  const normalizedQuery = searchableText(query.trim());
-  const filtered = normalizedQuery ? options.filter(option => searchableText(option.label).includes(normalizedQuery)) : options;
-
-  return <Popover.Root open={open} onOpenChange={next => { setOpen(next); if (!next) setQuery(""); }}>
-    <Popover.Trigger>
-      <Button type="button" variant="surface" color="gray" className="admin-search-picker-trigger" disabled={disabled} aria-label={label} aria-expanded={open}>
-        <span>{selected?.label ?? placeholder}</span><ChevronDownIcon aria-hidden="true" />
-      </Button>
-    </Popover.Trigger>
-    <Popover.Content className="admin-search-picker-content" align="start" sideOffset={6} collisionPadding={16}>
-      <TextField.Root autoFocus type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Tìm theo tên hoặc email…" aria-label={`Tìm trong ${label.toLocaleLowerCase("vi")}`}>
-        <TextField.Slot><MagnifyingGlassIcon /></TextField.Slot>
-      </TextField.Root>
-      <div className="admin-search-picker-options" role="listbox" aria-label={label}>
-        {filtered.length === 0 ? <p>{emptyLabel}</p> : filtered.map(option => <button type="button" role="option" aria-selected={option.value === value} key={option.value} onClick={() => { onValueChange(option.value); setOpen(false); setQuery(""); }}><span>{option.label}</span>{option.value === value && <CheckIcon aria-hidden="true" />}</button>)}
-      </div>
-      <small>{filtered.length}/{options.length} tài khoản</small>
-    </Popover.Content>
-  </Popover.Root>;
-}
+const blankClass = (): SchoolClassRequest => ({ name: "", gradeLevel: 10, schoolYear: defaultSchoolYear(), subject: "Vật lý" });
 
 export default function SchoolClasses() {
   const reducedMotion = useReducedMotion();
+  const navigate = useNavigate();
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const returnFocusRef = useRef<HTMLButtonElement | null>(null);
   const schoolId = useSessionStore(state => state.user?.schoolId);
-  const canCreateClass = useSessionStore(state => state.user?.role === "SCHOOL");
   const [items, setItems] = useState<SchoolClassSummary[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [detail, setDetail] = useState<SchoolClassDetail | null>(null);
-  const [form, setForm] = useState<SchoolClassRequest>(blank);
-  const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [teacherId, setTeacherId] = useState("");
-  const [studentId, setStudentId] = useState("");
-  const [studentPageSize, setStudentPageSize] = useState(10);
-  const [studentPage, setStudentPage] = useState(1);
+  const [query, setQuery] = useState("");
+  const [grade, setGrade] = useState("ALL");
+  const [schoolYear, setSchoolYear] = useState("ALL");
+  const [classPage, setClassPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
-  const teachers = useMemo(() => users.filter(item => item.role === "STAFF" && item.active !== false), [users]);
-  const students = useMemo(() => users.filter(item => item.role === "STUDENT" && item.active !== false), [users]);
-  const studentPageCount = Math.max(1, Math.ceil((detail?.students.length ?? 0) / studentPageSize));
-  const currentStudentPage = Math.min(studentPage, studentPageCount);
-  const studentPageStart = (currentStudentPage - 1) * studentPageSize;
-  const visibleStudents = detail?.students.slice(studentPageStart, studentPageStart + studentPageSize) ?? [];
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState<SchoolClassRequest>(blankClass);
+  const [archiveTarget, setArchiveTarget] = useState<SchoolClassSummary | null>(null);
+
   const load = useCallback(async () => {
     if (!schoolId) return;
     setLoading(true);
     setError("");
     try {
-      const [next, people] = await Promise.all([schoolClasses(schoolId), adminUsers(schoolId)]);
-      setItems(next);
-      setUsers(people);
+      setItems(await schoolClasses(schoolId));
     } catch (err) {
       setError(apiMessage(err, "Không thể tải danh sách lớp."));
     } finally {
       setLoading(false);
     }
   }, [schoolId]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => { void load(); }, 0);
     return () => window.clearTimeout(timer);
   }, [load]);
-  const submit = async (event: FormEvent) => {
-    event.preventDefault(); if (!schoolId || busy) return; setBusy(true); setFormError("");
-    try { const next = editing && detail ? await updateSchoolClass(schoolId, detail.id, form) : await createSchoolClass(schoolId, form); setDetail(next); setStudentPage(1); setEditing(false); setForm(blank()); setShowForm(false); await load(); }
-    catch (err) { setFormError(apiMessage(err, "Không thể lưu lớp.")); } finally { setBusy(false); }
+
+  const years = useMemo(() => [...new Set(items.map(item => item.schoolYear))].sort((a, b) => b.localeCompare(a)), [items]);
+  const filteredItems = useMemo(() => {
+    const needle = normalize(query.trim());
+    return items.filter(item => {
+      const matchesQuery = !needle || normalize(`${item.name} ${item.subject ?? ""}`).includes(needle);
+      return matchesQuery && (grade === "ALL" || String(item.gradeLevel) === grade) && (schoolYear === "ALL" || item.schoolYear === schoolYear);
+    });
+  }, [grade, items, query, schoolYear]);
+
+  const classPageSize = 10;
+  const classPageCount = Math.max(1, Math.ceil(filteredItems.length / classPageSize));
+  const currentClassPage = Math.min(classPage, classPageCount);
+  const classPageStart = (currentClassPage - 1) * classPageSize;
+  const visibleClasses = filteredItems.slice(classPageStart, classPageStart + classPageSize);
+
+  const updateQuery = (value: string) => { setQuery(value); setClassPage(1); };
+  const updateGrade = (value: string) => { setGrade(value); setClassPage(1); };
+  const updateSchoolYear = (value: string) => { setSchoolYear(value); setClassPage(1); };
+
+  const openCreate = () => {
+    setForm(blankClass());
+    setFormError("");
+    setShowForm(true);
   };
-  const openCreateForm = () => { setEditing(false); setForm(blank()); setFormError(""); setShowForm(true); };
-  const closeForm = () => { if (busy) return; setShowForm(false); setEditing(false); setForm(blank()); setFormError(""); };
-  const action = async (work: () => Promise<unknown>) => {
+
+  const closeForm = () => {
     if (busy) return;
+    setShowForm(false);
+    setForm(blankClass());
+    setFormError("");
+  };
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!schoolId || busy) return;
     setBusy(true);
-    setError("");
+    setFormError("");
     try {
-      await work();
+      await createSchoolClass(schoolId, form);
+      setShowForm(false);
+      setForm(blankClass());
       await load();
-      if (schoolId && detail) {
-        const refreshed = await schoolClass(schoolId, detail.id).catch(() => null);
-        setDetail(refreshed);
-      }
     } catch (err) {
-      setError(apiMessage(err, "Không thể cập nhật lớp."));
+      setFormError(apiMessage(err, "Không thể lưu lớp học."));
     } finally {
       setBusy(false);
     }
   };
-  const refreshImported = async () => {
-    await load();
-    if (schoolId && detail) setDetail(await schoolClass(schoolId, detail.id));
+
+  const confirmArchive = async () => {
+    if (!schoolId || !archiveTarget || busy) return;
+    const target = archiveTarget;
+    setArchiveTarget(null);
+    setBusy(true);
+    setError("");
+    try {
+      await archiveSchoolClass(schoolId, target.id);
+      await load();
+    } catch (err) {
+      setError(apiMessage(err, "Không thể tắt lớp học."));
+    } finally {
+      setBusy(false);
+    }
   };
+
   if (!schoolId) return null;
+
   return <div className="admin-content">
-    <header className="admin-content-header"><div><h1 className="admin-content-title">Lớp học</h1></div></header>
+    <header className="admin-content-header">
+      <div>
+        <h1 className="admin-content-title">Quản lý lớp học</h1>
+        <p className="admin-content-description">Xem chi tiết, tạo mới, cập nhật hoặc tắt lớp học trong trường.</p>
+      </div>
+      <Button onClick={openCreate}><PlusIcon />Tạo lớp</Button>
+    </header>
+
     {error && <div className="admin-error-banner" role="alert">{error}<Button variant="soft" color="red" onClick={() => void load()}>Tải lại</Button></div>}
+
     <motion.div className="school-classes-grid" initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .18 }}>
       <Card asChild size="3"><section className="admin-panel">
-        <div className="admin-panel-heading"><div><h2>Danh sách lớp</h2></div><div className="school-bulk-tools">{canCreateClass && <><SchoolBulkImport schoolId={schoolId} kind="CLASSES" onImported={refreshImported} /><Button onClick={event => { returnFocusRef.current = event.currentTarget; openCreateForm(); }}><PlusIcon /> Tạo lớp</Button></>}</div></div>
-        {loading ? <p role="status"><Spinner /> Đang tải…</p> : <div className="admin-table-scroll"><Table.Root size="2" variant="surface"><Table.Header><Table.Row><Table.ColumnHeaderCell>Lớp</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Khối</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Năm học</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Giáo viên</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Học sinh</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Thao tác</Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>
-          {items.length === 0 ? <Table.Row><Table.Cell colSpan={6}>{canCreateClass ? "Chưa có lớp. Chọn Tạo lớp hoặc Nhập CSV để bắt đầu." : "Trường chưa có lớp đang hoạt động."}</Table.Cell></Table.Row> : items.map(item => <Table.Row key={item.id} className={detail?.id === item.id ? "admin-row-selected" : ""} style={detail?.id === item.id ? { backgroundColor: "var(--indigo-3)" } : undefined}>
-            <Table.RowHeaderCell><Button variant="ghost" onClick={() => void schoolClass(schoolId, item.id).then(next => { setDetail(next); setStudentPage(1); }).catch(err => setError(apiMessage(err, "Không thể tải lớp.")))}>{item.name}</Button></Table.RowHeaderCell>
-            <Table.Cell><Badge color="indigo" variant="soft">{item.gradeLevel}</Badge></Table.Cell><Table.Cell>{item.schoolYear}</Table.Cell><Table.Cell>{item.teacherCount}</Table.Cell><Table.Cell>{item.studentCount}</Table.Cell>
-            <Table.Cell><Button size="1" variant="soft" color="cyan" mr="2" onClick={event => {
-              returnFocusRef.current = event.currentTarget;
-              void schoolClass(schoolId, item.id).then(next => { setDetail(next); setStudentPage(1); setEditing(true); setForm({ name: next.name, gradeLevel: next.gradeLevel, schoolYear: next.schoolYear, subject: next.subject ?? "" }); setFormError(""); setShowForm(true); }).catch(err => setError(apiMessage(err, "Không thể tải lớp.")));
-            }}>Sửa</Button><Button size="1" variant="soft" color="red" disabled={busy} onClick={() => { if (window.confirm(`Tắt lớp ${item.name}?`)) void action(() => archiveSchoolClass(schoolId, item.id)); }}>Tắt</Button></Table.Cell>
-          </Table.Row>)}
-        </Table.Body></Table.Root></div>}
+        <div className="admin-panel-heading">
+          <div><h2>Danh sách lớp</h2><p className="admin-panel-description">{loading ? "Đang tải dữ liệu lớp học…" : `${filteredItems.length.toLocaleString("vi-VN")} lớp đang hoạt động`}</p></div>
+        </div>
+
+        <div className={s.filters}>
+          <TextField.Root type="search" value={query} onChange={event => updateQuery(event.target.value)} placeholder="Tìm theo tên lớp hoặc môn học…" aria-label="Tìm lớp học">
+            <TextField.Slot><MagnifyingGlassIcon /></TextField.Slot>
+          </TextField.Root>
+          <Select.Root value={grade} onValueChange={updateGrade}>
+            <Select.Trigger aria-label="Lọc theo khối" />
+            <Select.Content><Select.Item value="ALL">Tất cả khối</Select.Item>{[10, 11, 12].map(value => <Select.Item key={value} value={String(value)}>Khối {value}</Select.Item>)}</Select.Content>
+          </Select.Root>
+          <Select.Root value={schoolYear} onValueChange={updateSchoolYear}>
+            <Select.Trigger aria-label="Lọc theo năm học" />
+            <Select.Content><Select.Item value="ALL">Tất cả năm học</Select.Item>{years.map(value => <Select.Item key={value} value={value}>{value}</Select.Item>)}</Select.Content>
+          </Select.Root>
+        </div>
+
+        {loading ? <ClassTableLoading headers={["Lớp", "Khối", "Năm học", "Môn học", "Giáo viên", "Học sinh", "Trạng thái", "Thao tác"]} /> : <>
+          <div className="admin-table-scroll"><Table.Root size="2" variant="surface">
+            <Table.Header><Table.Row>
+              <Table.ColumnHeaderCell>Lớp</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Khối</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Năm học</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Môn học</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Giáo viên</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Học sinh</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Thao tác</Table.ColumnHeaderCell>
+            </Table.Row></Table.Header>
+            <Table.Body>
+              {visibleClasses.length === 0 ? <Table.Row><Table.Cell colSpan={8}><div className={s.empty}>Không tìm thấy lớp phù hợp với bộ lọc.</div></Table.Cell></Table.Row> : visibleClasses.map(item => <Table.Row key={item.id}>
+                <Table.RowHeaderCell>{item.name}</Table.RowHeaderCell>
+                <Table.Cell><Badge color="indigo" variant="soft">{item.gradeLevel}</Badge></Table.Cell>
+                <Table.Cell>{item.schoolYear}</Table.Cell>
+                <Table.Cell>{item.subject || "—"}</Table.Cell>
+                <Table.Cell>{item.teacherCount}</Table.Cell>
+                <Table.Cell>{item.studentCount}</Table.Cell>
+                <Table.Cell><Badge color="green" variant="soft">Hoạt động</Badge></Table.Cell>
+                <Table.Cell><div className={s.actions}>
+                  <Button size="1" variant="soft" disabled={busy} onClick={() => navigate(`/school/classes/${item.id}`)}><EyeOpenIcon />Xem</Button>
+                  <Button size="1" variant="soft" color="cyan" disabled={busy} onClick={() => navigate(`/school/classes/${item.id}?mode=edit`)}>Sửa</Button>
+                  <Button size="1" variant="soft" color="red" disabled={busy} onClick={() => setArchiveTarget(item)}>Tắt</Button>
+                </div></Table.Cell>
+              </Table.Row>)}
+            </Table.Body>
+          </Table.Root></div>
+          {filteredItems.length > 0 && <Pagination start={classPageStart} pageSize={classPageSize} total={filteredItems.length} page={currentClassPage} pageCount={classPageCount} onPageChange={setClassPage} />}
+        </>}
       </section></Card>
-      {detail && <Card asChild size="3"><motion.section className="admin-panel" initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .18 }}>
-        <div className="admin-panel-heading"><div><h2>{detail.name}</h2><p className="admin-panel-description">Khối {detail.gradeLevel} · {detail.schoolYear} · {detail.subject || "Chưa chọn môn"}</p></div><Button variant="ghost" color="gray" onClick={() => setDetail(null)}>Đóng</Button></div>
-        <div className="admin-class-members"><div className="admin-panel-heading"><h3>Giáo viên</h3><SchoolBulkImport schoolId={schoolId} kind="TEACHER_ASSIGNMENTS" label="Phân công bằng CSV" disabled={busy} onImported={refreshImported} /></div><div className="admin-member-add"><SearchableSchoolPicker value={teacherId} disabled={busy} label="Chọn giáo viên" placeholder="Chọn giáo viên" emptyLabel="Không tìm thấy giáo viên phù hợp." options={teachers.filter(user => !detail.teachers.some(item => item.id === user.id)).map(user => ({ value: String(user.id), label: `${user.fullName} · ${user.email}` }))} onValueChange={setTeacherId} /><Button variant="soft" disabled={!teacherId || busy} onClick={() => void action(async () => { await assignClassTeacher(schoolId, detail.id, Number(teacherId)); setTeacherId(""); })}>Phân công</Button></div>
-          <ul>{detail.teachers.map(item => <li key={item.id}><span>{item.fullName} <small>{item.email}</small></span><Button size="1" variant="soft" color="red" disabled={busy} onClick={() => void action(() => removeClassTeacher(schoolId, detail.id, item.id))}>Gỡ</Button></li>)}</ul>
-        </div>
-        <div className="admin-class-members"><div className="admin-panel-heading"><h3>Học sinh <Badge color="cyan" ml="2">{detail.students.length}</Badge></h3><SchoolBulkImport schoolId={schoolId} kind="ENROLLMENTS" label="Xếp lớp bằng CSV" disabled={busy} onImported={refreshImported} /></div><div className="admin-member-add"><SearchableSchoolPicker value={studentId} disabled={busy} label="Chọn học sinh" placeholder="Chọn học sinh" emptyLabel="Không tìm thấy học sinh phù hợp." options={students.filter(user => !detail.students.some(item => item.id === user.id)).map(user => ({ value: String(user.id), label: `${user.fullName} · ${user.email}` }))} onValueChange={setStudentId} /><Button variant="soft" color="cyan" disabled={!studentId || busy} onClick={() => void action(async () => { await enrollClassStudent(schoolId, detail.id, Number(studentId)); setStudentId(""); })}>Thêm vào lớp</Button></div>
-          <ul>{visibleStudents.map(item => <li key={item.id}><span>{item.fullName} <small>{item.email}</small></span><span>{items.some(candidate => candidate.id !== detail.id && candidate.schoolYear === detail.schoolYear) && <SchoolSelect label={`Lớp đích của ${item.fullName}`} placeholder="Chuyển lớp…" disabled={busy} options={items.filter(candidate => candidate.id !== detail.id && candidate.schoolYear === detail.schoolYear).map(candidate => ({ value: candidate.id, label: candidate.name }))} onValueChange={targetClassId => { if (targetClassId) void action(() => transferClassStudent(schoolId, targetClassId, item.id)); }} />}<Button size="1" variant="soft" color="red" disabled={busy} onClick={() => void action(() => removeClassStudent(schoolId, detail.id, item.id))}>Gỡ</Button></span></li>)}</ul>
-          {detail.students.length > 0 && <div className="admin-member-pagination"><span>Hiển thị {studentPageStart + 1}–{Math.min(studentPageStart + studentPageSize, detail.students.length)} / {detail.students.length}</span><div><label>Số dòng<Select.Root size="1" value={String(studentPageSize)} onValueChange={value => { setStudentPageSize(Number(value)); setStudentPage(1); }}><Select.Trigger aria-label="Số học sinh trên mỗi trang" /><Select.Content>{[10, 20, 30].map(size => <Select.Item key={size} value={String(size)}>{size}</Select.Item>)}</Select.Content></Select.Root></label><Button type="button" size="1" variant="soft" color="gray" disabled={currentStudentPage <= 1} onClick={() => setStudentPage(Math.max(1, currentStudentPage - 1))}>Trước</Button><span>Trang {currentStudentPage}/{studentPageCount}</span><Button type="button" size="1" variant="soft" color="gray" disabled={currentStudentPage >= studentPageCount} onClick={() => setStudentPage(Math.min(studentPageCount, currentStudentPage + 1))}>Sau</Button></div></div>}
-        </div>
-      </motion.section></Card>}
+
     </motion.div>
-    <Dialog.Root open={showForm} onOpenChange={open => { if (!open) closeForm(); }}><Dialog.Content maxWidth="620px" size="3" onEscapeKeyDown={event => { if (busy) event.preventDefault(); }} onPointerDownOutside={event => { if (busy) event.preventDefault(); }} onOpenAutoFocus={event => { event.preventDefault(); nameInputRef.current?.focus(); }} onCloseAutoFocus={event => { event.preventDefault(); returnFocusRef.current?.focus(); }}>
-      <div className="admin-modal-header"><div><Dialog.Title>{editing ? "Cập nhật lớp" : "Tạo lớp mới"}</Dialog.Title><Dialog.Description size="2">Học sinh chỉ có một lớp đang hoạt động trong cùng năm học.</Dialog.Description></div><Dialog.Close><IconButton variant="soft" color="gray" aria-label="Đóng" disabled={busy}><Cross2Icon /></IconButton></Dialog.Close></div>
+
+    <Dialog.Root open={showForm} onOpenChange={open => { if (!open) closeForm(); }}><Dialog.Content maxWidth="620px" size="3" onOpenAutoFocus={event => { event.preventDefault(); nameInputRef.current?.focus(); }} onEscapeKeyDown={event => { if (busy) event.preventDefault(); }} onPointerDownOutside={event => { if (busy) event.preventDefault(); }}>
+      <div className="admin-modal-header"><div><Dialog.Title>Tạo lớp học mới</Dialog.Title><Dialog.Description size="2">Nhập thông tin cơ bản của lớp học.</Dialog.Description></div><Dialog.Close><IconButton variant="soft" color="gray" aria-label="Đóng" disabled={busy}><Cross2Icon /></IconButton></Dialog.Close></div>
       {formError && <div className="admin-error-banner" role="alert">{formError}</div>}
       <form className="admin-form-grid" onSubmit={submit}>
         <label>Tên lớp<TextField.Root ref={nameInputRef} required maxLength={100} value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="Ví dụ: 10A1" aria-label="Tên lớp" /></label>
-        <label>Khối<SchoolSelect value={String(form.gradeLevel)} label="Khối" placeholder="Chọn khối" options={[10, 11, 12].map(value => ({ value: String(value), label: String(value) }))} onValueChange={value => setForm({ ...form, gradeLevel: Number(value) })} /></label>
+        <label>Khối<Select.Root size="2" value={String(form.gradeLevel)} onValueChange={value => setForm({ ...form, gradeLevel: Number(value) })}><Select.Trigger aria-label="Khối" /><Select.Content>{[10, 11, 12].map(value => <Select.Item key={value} value={String(value)}>Khối {value}</Select.Item>)}</Select.Content></Select.Root></label>
         <label>Năm học<TextField.Root required maxLength={20} value={form.schoolYear} onChange={event => setForm({ ...form, schoolYear: event.target.value })} placeholder="2026-2027" aria-label="Năm học" /></label>
         <label>Môn học<TextField.Root maxLength={50} value={form.subject} onChange={event => setForm({ ...form, subject: event.target.value })} aria-label="Môn học" /></label>
-        <div className="admin-form-actions"><Button variant="soft" color="gray" type="button" disabled={busy} onClick={closeForm}>Hủy</Button><Button type="submit" loading={busy} disabled={busy}>{editing ? "Lưu thay đổi" : "Tạo lớp"}</Button></div>
+        <div className="admin-form-actions"><Button variant="soft" color="gray" type="button" disabled={busy} onClick={closeForm}>Hủy</Button><Button type="submit" loading={busy} disabled={busy}>Tạo lớp</Button></div>
       </form>
     </Dialog.Content></Dialog.Root>
+
+    <AlertDialog.Root open={archiveTarget !== null} onOpenChange={open => { if (!open) setArchiveTarget(null); }}><AlertDialog.Content maxWidth="460px"><AlertDialog.Title>Tắt lớp học?</AlertDialog.Title><AlertDialog.Description size="2">Lớp “{archiveTarget?.name}” sẽ không còn xuất hiện trong danh sách lớp đang hoạt động.</AlertDialog.Description><Flex gap="3" mt="4" justify="end"><AlertDialog.Cancel><Button variant="soft" color="gray">Hủy</Button></AlertDialog.Cancel><AlertDialog.Action><Button color="red" disabled={busy} onClick={() => void confirmArchive()}>Tắt lớp</Button></AlertDialog.Action></Flex></AlertDialog.Content></AlertDialog.Root>
+  </div>;
+}
+
+function Pagination({ start, pageSize, total, page, pageCount, onPageChange, compact = false }: Readonly<{ start: number; pageSize: number; total: number; page: number; pageCount: number; onPageChange: (page: number) => void; compact?: boolean }>) {
+  return <div className={`${s.pagination} ${compact ? s.compactPagination : ""}`}>
+    <span>Hiển thị {start + 1}–{Math.min(start + pageSize, total)} / {total}</span>
+    <div><Button type="button" size="1" variant="soft" color="gray" disabled={page <= 1} onClick={() => onPageChange(Math.max(1, page - 1))}>Trước</Button><span>Trang {page}/{pageCount}</span><Button type="button" size="1" variant="soft" color="gray" disabled={page >= pageCount} onClick={() => onPageChange(Math.min(pageCount, page + 1))}>Sau</Button></div>
   </div>;
 }

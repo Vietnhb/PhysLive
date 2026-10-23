@@ -5,6 +5,7 @@ import { isStudentRole, ROLE_NAMES, LEARNING_MANAGER_ROLES, CONTENT_REVIEW_ROLES
 import { canTeach, isDepartmentHead, userHome } from "../shared/auth/permissions";
 import RequireAccess from "./RequireAccess";
 import AccountSuspendedBanner from "../features/account/components/AccountSuspendedBanner";
+import { CardLoadingSkeleton } from "../shared/ui/LoadingSkeleton";
 
 const AdminDirectory = lazy(() => import("../features/account/pages/AdminDirectory"));
 const Admin = lazy(() => import("../features/management/pages/OverviewView").then(module => ({ default: module.OverviewView })));
@@ -36,6 +37,8 @@ const Signup = lazy(() => import("../features/auth/pages/Signup"));
 const SchoolPaymentResult = lazy(() => import("../features/billing/pages/SchoolPaymentResult"));
 const SchoolBilling = lazy(() => import("../features/billing/pages/SchoolBilling"));
 const SchoolClasses = lazy(() => import("../features/school/components/SchoolClasses"));
+const SchoolClassDetailPage = lazy(() => import("../features/school/pages/SchoolClassDetailPage"));
+const SchoolImportPage = lazy(() => import("../features/school/pages/SchoolImportPage"));
 const SchoolReports = lazy(() => import("../features/school/pages/SchoolReports"));
 const SchoolLayout = lazy(() => import("../features/school/layout/SchoolLayout"));
 const SchoolDashboard = lazy(() => import("../features/school/pages/SchoolDashboard"));
@@ -54,6 +57,10 @@ const StudentTasks = lazy(() => studentModule().then(module => ({ default: modul
 const StudentCommunity = lazy(() => studentModule().then(module => ({ default: module.StudentCommunityPage })));
 const ProfilePage = lazy(() => import("../features/account/pages/ProfilePage"));
 const SiteInfo = lazy(() => import("../features/public/pages/SiteInfo"));
+
+function RouteLoading() {
+  return <main className="route-loading" aria-busy="true"><CardLoadingSkeleton cards={3} label="Đang mở trang…" /></main>;
+}
 
 
 export default function AppRoutes({ authReady }: { authReady: boolean }) {
@@ -91,11 +98,11 @@ export default function AppRoutes({ authReady }: { authReady: boolean }) {
   }
   if (managerBillingOnly && !user?.mustChangePassword) return <Navigate to="/school/billing" replace />;
 
-  return <Suspense fallback={<main className="route-loading" aria-busy="true" />}>
+  return <Suspense fallback={<RouteLoading />}>
         <AccountSuspendedBanner />
         <Routes>
           {/* Home is the guest landing page; signed-in accounts go to their own area. */}
-          <Route path="/" element={!authReady ? <main className="route-loading" aria-busy="true" /> : user ? <Navigate to={userHome(user)} replace /> : <Home />} />
+          <Route path="/" element={!authReady ? <RouteLoading /> : user ? <Navigate to={userHome(user)} replace /> : <Home />} />
           <Route path="/change-password" element={<RequireAccess ready={authReady}><ForcedPasswordChange /></RequireAccess>} />
           <Route path="/department" element={roleElement([ROLE_NAMES.STAFF],
             isDepartmentHead(user) && user?.schoolId ? <DepartmentWorkspace /> : <Navigate to="/assignments" replace />)} />
@@ -124,12 +131,15 @@ export default function AppRoutes({ authReady }: { authReady: boolean }) {
           </Route>
           {/* Teachers use the library inside their management area, next to submissions and complaints. */}
           <Route path="/library" element={<RequireAccess ready={authReady} roles={APPLICATION_ROLES}>{user?.role === ROLE_NAMES.STAFF && canTeach(user) ? <Navigate to="/lab/library" replace /> : <Library />}</RequireAccess>} />
-          <Route path="/community" element={authReady ? <CommunityLibrary /> : <main className="route-loading" aria-busy="true" />} />
+          <Route path="/community" element={authReady ? <CommunityLibrary /> : <RouteLoading />} />
           <Route path="/assignments" element={assignmentsElement} />
           <Route path="/school" element={roleElement([ROLE_NAMES.SCHOOL], user?.schoolId ? <SchoolLayout /> : <Navigate to="/" replace />)}>
             <Route index element={<SchoolDashboard />} />
             <Route path="users" element={user?.schoolId ? <UserAccounts key={user.schoolId} schoolId={user.schoolId} /> : <Navigate to="/" replace />} />
             <Route path="classes" element={<SchoolClasses />} />
+            <Route path="classes/:classId" element={<SchoolClassDetailPage />} />
+            <Route path="class-management" element={<Navigate to="/school/classes" replace />} />
+            <Route path="import" element={<SchoolImportPage />} />
             <Route path="reports" element={<SchoolReports />} />
             <Route path="billing" element={<SchoolBilling />} />
             <Route path="*" element={<Navigate to="/school" replace />} />
