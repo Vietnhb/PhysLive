@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Badge, Button, Callout, Card, Heading, SegmentedControl, Select, Spinner, Table, Text, TextField, VisuallyHidden } from "@radix-ui/themes";
+import { Badge, Button, Callout, Card, Heading, SegmentedControl, Select, Table, Text, TextField, VisuallyHidden } from "@radix-ui/themes";
 import { motion, useReducedMotion } from "motion/react";
 import type { Assignment, AssignmentActivityType } from "../../../shared/types/physlive";
 import { useAssignmentClock } from "../hooks/useAssignmentClock";
 import LearningIcon from "../../../shared/ui/LearningIcon";
+import { TableLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 type AssignmentListProps = {
   assignments: Assignment[];
@@ -49,7 +50,7 @@ export function AssignmentList({ assignments, loading, error, onRefresh, onSelec
       </div>
     </div>
     {error && <Callout.Root color="red" size="1" className="student-inline-alert"><Callout.Text>{error}</Callout.Text><Button type="button" variant="ghost" color="red" onClick={onRefresh}>Thử lại</Button></Callout.Root>}
-    {loading ? <div className="student-list-state" role="status"><Spinner size="3" /><Text color="gray">Đang tải bài tập…</Text></div> : !error && visible.length === 0 ? <div className="student-list-state"><span className="student-empty-icon"><LearningIcon name="book" /></span><Heading as="h3" size="4">{assignments.length === 0 ? "Chưa có bài tập được giao" : "Không tìm thấy bài tập"}</Heading><Text as="p" color="gray">{assignments.length === 0 ? "Bài tập của giáo viên sẽ xuất hiện tại đây." : "Thử đổi từ khóa hoặc bộ lọc."}</Text>{assignments.length > 0 && <Button type="button" variant="soft" onClick={() => { setFilter("all"); setSearch(""); setClassFilter(""); }}>Xem tất cả</Button>}</div> : !error && <Table.Root className="student-assignment-table" variant="ghost" size="2"><Table.Header><Table.Row><Table.ColumnHeaderCell>Bài tập</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Hạn nộp</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell><VisuallyHidden>Thao tác</VisuallyHidden></Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>{visible.map(item => {
+    {loading ? <TableLoadingSkeleton label="Đang tải bài tập…" headers={["Bài tập", "Hạn nộp", "Trạng thái", "Thao tác"]} /> : !error && visible.length === 0 ? <div className="student-list-state"><span className="student-empty-icon"><LearningIcon name="book" /></span><Heading as="h3" size="4">{assignments.length === 0 ? "Chưa có bài tập được giao" : "Không tìm thấy bài tập"}</Heading><Text as="p" color="gray">{assignments.length === 0 ? "Bài tập của giáo viên sẽ xuất hiện tại đây." : "Thử đổi từ khóa hoặc bộ lọc."}</Text>{assignments.length > 0 && <Button type="button" variant="soft" onClick={() => { setFilter("all"); setSearch(""); setClassFilter(""); }}>Xem tất cả</Button>}</div> : !error && <Table.Root className="student-assignment-table" variant="ghost" size="2"><Table.Header><Table.Row><Table.ColumnHeaderCell>Bài tập</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Hạn nộp</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell><VisuallyHidden>Thao tác</VisuallyHidden></Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>{visible.map(item => {
       const overdue = Boolean(item.dueAt && new Date(item.dueAt).getTime() < now);
       const status = item.retryAllowed ? "Cần làm lại" : item.gradingStatus === "TEACHER_CONFIRMED" ? "Đã chấm" : item.submissionCompleted ? "Chờ chấm" : item.predictionSubmitted ? "Đang làm" : overdue ? "Quá hạn" : "Chưa làm";
       const color = item.retryAllowed || (!item.submissionCompleted && overdue) ? "amber" : item.submissionCompleted ? "cyan" : item.predictionSubmitted ? "indigo" : "gray";

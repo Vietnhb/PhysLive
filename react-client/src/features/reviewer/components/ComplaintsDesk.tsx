@@ -3,6 +3,7 @@ import axios from "axios";
 import { Button, Card, Heading, SegmentedControl, Text, TextArea } from "@radix-ui/themes";
 import { complaintsForReview, resolveComplaint, type SimulationComplaint, type SupportStatus } from "../../support/api/supportApi";
 import { COMPLAINT_STATUS } from "../../support/model/complaintStatus";
+import { CardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 type Filter = "todo" | "done";
 
@@ -59,7 +60,7 @@ export function ComplaintsDesk() {
       </SegmentedControl.Root>
     </div>
     {error && <Card><Text color="red" role="alert">{error}</Text></Card>}
-    {loading && items.length === 0 && <Card><Text color="gray" role="status">Đang tải khiếu nại…</Text></Card>}
+    {loading && items.length === 0 && <CardLoadingSkeleton cards={3} label="Đang tải khiếu nại…" />}
     {!loading && !error && visible.length === 0 && <Card size="3"><Text color="gray">{filter === "todo" ? "Không có khiếu nại nào đang chờ. " : "Chưa có khiếu nại nào được giải quyết."}</Text></Card>}
     <div className="complaint-desk">
       {visible.map(item => {

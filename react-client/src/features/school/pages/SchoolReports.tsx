@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Badge, Button, Card, Select, Spinner, Table, TextField } from "@radix-ui/themes";
+import { Badge, Button, Card, Select, Table, TextField } from "@radix-ui/themes";
 import { motion, useReducedMotion } from "motion/react";
 import { downloadSchoolClassesCsv, schoolReportClasses, schoolReportSummary, schoolReportTokenAudit, type SchoolReportClass, type SchoolReportSummary, type SchoolTokenAudit } from "../api/schoolApi";
 import { apiMessage } from "../../../shared/lib/apiError";
 import LearningIcon from "../../../shared/ui/LearningIcon";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
 import s from "./SchoolReports.module.css";
-import SchoolBulkImport from "../dataio/components/SchoolBulkImport";
+import { DashboardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 const TOKEN_PAGE_SIZES = [10, 25, 50, 100] as const;
 
@@ -114,7 +114,7 @@ export default function SchoolReports() {
   return <div className={`admin-content school-reports ${s.reports}`}>
     <header className="admin-content-header"><div><h1 className="admin-content-title">Báo cáo</h1></div></header>
     {error && <div className="admin-error-banner" role="alert">{error}<Button variant="soft" color="red" onClick={() => void load()}>Thử lại</Button></div>}
-    {loading && !summary ? <div className="admin-loading"><Spinner size="3" /><p>Đang tải báo cáo…</p></div> : summary && <>
+    {loading && !summary ? <DashboardLoadingSkeleton cards={4} label="Đang tải báo cáo…" /> : summary && <>
       <section className={`admin-stats-grid school-summary-grid ${s.summary}`} aria-label="Tổng quan trường">
         <ReportSummaryCard label="Học sinh" value={summary.students.toLocaleString("vi-VN")} detail={`${summary.enrolledStudents.toLocaleString("vi-VN")} lượt xếp lớp`} icon="users" tone="blue" />
         <ReportSummaryCard label="Giáo viên" value={summary.teachers.toLocaleString("vi-VN")} detail="Tài khoản thuộc trường" icon="book" tone="purple" />
@@ -123,8 +123,6 @@ export default function SchoolReports() {
       </section>
 
       <motion.div style={{ display: "grid", gap: 20, minWidth: 0 }} initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .18 }}>
-      <Card size="3" asChild><section className={`admin-panel ${s.importPanel}`}><div className="admin-panel-heading"><h2>Nhập dữ liệu CSV</h2></div><div className="school-bulk-tools"><SchoolBulkImport schoolId={schoolId} kind="USERS" label="Tài khoản" onImported={load} /><SchoolBulkImport schoolId={schoolId} kind="CLASSES" label="Lớp học" onImported={load} /><SchoolBulkImport schoolId={schoolId} kind="ENROLLMENTS" label="Xếp lớp học sinh" onImported={load} /><SchoolBulkImport schoolId={schoolId} kind="TEACHER_ASSIGNMENTS" label="Phân công giáo viên" onImported={load} /></div></section></Card>
-
       <Card size="3" asChild><section className={`admin-panel ${s.dataPanel}`}>
         <div className="admin-panel-heading"><div><h2>Danh sách lớp</h2></div><Button variant="soft" onClick={() => void exportClasses()} loading={exporting} disabled={exporting || loading}><LearningIcon name="download" />{exporting ? "Đang xuất…" : "Xuất CSV"}</Button></div>
         <div className="admin-table-scroll"><Table.Root size="2" variant="surface"><Table.Header><Table.Row><Table.ColumnHeaderCell>Lớp</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Khối</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Năm học</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Giáo viên</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Học sinh</Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>{classes.length === 0 ? <Table.Row><Table.Cell colSpan={5}>Chưa có lớp đang hoạt động.</Table.Cell></Table.Row> : classes.map(item => <Table.Row key={item.id}><Table.RowHeaderCell>{item.name}</Table.RowHeaderCell><Table.Cell><Badge color="indigo" variant="soft">{item.gradeLevel}</Badge></Table.Cell><Table.Cell>{item.schoolYear}</Table.Cell><Table.Cell>{item.teachers}</Table.Cell><Table.Cell>{item.students}</Table.Cell></Table.Row>)}</Table.Body></Table.Root></div>

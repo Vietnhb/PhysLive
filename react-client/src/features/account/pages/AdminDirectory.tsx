@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Avatar, Badge, Button, Card, Flex, Heading, IconButton, Select, Spinner, Table, Text, TextField } from "@radix-ui/themes";
+import { Avatar, Badge, Button, Card, Flex, Heading, IconButton, Select, Table, Text, TextField } from "@radix-ui/themes";
 import { ArrowRightIcon, CheckCircledIcon, Cross2Icon, ExclamationTriangleIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from "motion/react";
 import { adminUsers } from "../api/userApi";
@@ -9,6 +9,7 @@ import { ROLE_NAMES, getRoleLabel } from "../../../shared/auth/roles";
 import type { User, AccountStatus } from "../../../shared/auth/types";
 import { permissionSummary, permissionsForRole } from "../../../shared/auth/permissions";
 import "../styles/admin-directory.css";
+import { TableLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 type UserTier = "ALL" | "SYSTEM" | "SCHOOL" | "INDIVIDUAL";
 
@@ -215,11 +216,7 @@ export default function AdminDirectory() {
                   <Button variant="soft" onClick={() => void load()}>Thử lại</Button>
                 </div>
               ) : loading ? (
-                <div className="directory-empty directory-loading" role="status">
-                  <Spinner size="3" />
-                  <Heading as="h3" size="4">Đang tải tài khoản</Heading>
-                  <p>Dữ liệu người dùng đang được đồng bộ từ hệ thống.</p>
-                </div>
+                <TableLoadingSkeleton label="Đang tải tài khoản…" headers={["Người dùng", "Vai trò", "Đơn vị trực thuộc", "Trạng thái", "Chi tiết"]} />
               ) : filtered.length === 0 ? (
                 <div className="directory-empty">
                   <MagnifyingGlassIcon />

@@ -1,7 +1,8 @@
 import { type ReactNode } from "react";
-import { Button as ThemeButton, Callout, Card, Heading, Spinner, Text } from "@radix-ui/themes";
+import { Button as ThemeButton, Callout, Card, Heading, Text } from "@radix-ui/themes";
 import { motion, useReducedMotion } from "motion/react";
 import LearningIcon from "./LearningIcon";
+import { CardLoadingSkeleton, TableLoadingSkeleton } from "./LoadingSkeleton";
 
 type IconName = "grid" | "users" | "book" | "activity" | "shield" | "refresh" | "plus" | "check" | "search" | "close";
 
@@ -13,7 +14,11 @@ export function Panel({ title, description, children, action, className, hideHea
   return <Card asChild size="3" className={`admin-panel ${className ?? ""}`}><section>{!hideHeader && <div className="admin-panel-heading"><div><Heading as="h2" size="4">{title}</Heading>{description && <Text as="p" color="gray" size="2" className="admin-panel-description">{description}</Text>}</div>{action}</div>}{children}</section></Card>;
 }
 
-export function Loading({ text = "Đang tải dữ liệu…" }: Readonly<{ text?: string }>) { return <div className="admin-loading compact" role="status"><Spinner size="3" /><Text as="p" color="gray">{text}</Text></div>; }
+export function Loading({ text = "Đang tải dữ liệu…", headers, rows = 6 }: Readonly<{ text?: string; headers?: readonly string[]; rows?: number }>) {
+  return headers
+    ? <TableLoadingSkeleton headers={headers} rows={rows} label={text} />
+    : <CardLoadingSkeleton cards={3} label={text} />;
+}
 
 export function ErrorNotice({ error, onRetry }: Readonly<{ error: string; onRetry?: () => void }>) { return <Callout.Root color="red" className="admin-error-banner" role="alert"><Callout.Text>{error}</Callout.Text>{onRetry && <ThemeButton type="button" variant="ghost" color="red" onClick={onRetry}>Thử lại</ThemeButton>}</Callout.Root>; }
 

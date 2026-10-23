@@ -11,6 +11,7 @@ import { COMPLAINT_STATUS } from "../../support/model/complaintStatus";
 import "../../support/styles/complaints.css";
 import "../../simulation/styles/learning.css";
 import "../../simulation/styles/lab.css";
+import { CardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 const complaintsOnly = (items: SimulationComplaint[]) => items.filter(item => item.kind === "COMPLAINT");
 
@@ -87,7 +88,7 @@ export function TeacherComplaintsPage() {
       {(["OPEN", "READ", "RESOLVED"] as const).map(status => <button type="button" key={status} aria-pressed={filter === status} onClick={() => setFilter(status)}>{COMPLAINT_STATUS[status]} · {count(status)}</button>)}
     </div>
     {error && <p className="complaint-error" role="alert">{error}</p>}
-    {items === null ? <p className="complaint-page__empty" role="status">Đang tải…</p>
+    {items === null ? <CardLoadingSkeleton cards={3} label="Đang tải danh sách khiếu nại…" />
       : visible.length === 0 ? <p className="complaint-page__empty">{items.length === 0 ? <>Bạn chưa gửi khiếu nại nào. <Link to="/workspace">Mở trang Mô phỏng</Link></> : "Không có khiếu nại ở trạng thái này."}</p>
       : <div className="complaint-page__list">{visible.map(item => {
         const [detail, context] = item.content.split("\n— Đề bài —");

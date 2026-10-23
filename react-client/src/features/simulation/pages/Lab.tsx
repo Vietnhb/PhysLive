@@ -10,6 +10,7 @@ import type { AssignmentRecord, SubmissionFilter } from "../../assignments/model
 import { formatDate } from "../../assignments/model/teacherSubmissionUtils";
 import "../styles/learning.css";
 import "../styles/lab.css";
+import { CardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 export default function Lab() {
   const [records, setRecords] = useState<AssignmentRecord[]>([]);
@@ -157,11 +158,7 @@ export default function Lab() {
               {error}
             </div>
           )}
-          {loading && records.length === 0 && (
-            <div className="lab-loading" aria-live="polite">
-              Đang tải bài giao và bài nộp…
-            </div>
-          )}
+          {loading && records.length === 0 && <CardLoadingSkeleton cards={3} label="Đang tải bài giao và bài nộp…" />}
           {!loading && !error && records.length === 0 && (
             <div className="lab-empty-card">
               <Icon name="message" />

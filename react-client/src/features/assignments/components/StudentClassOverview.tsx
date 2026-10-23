@@ -1,8 +1,9 @@
-import { Avatar, Badge, Card, Heading, Spinner, Text } from "@radix-ui/themes";
+import { Avatar, Badge, Card, Heading, Text } from "@radix-ui/themes";
 import { motion, useReducedMotion } from "motion/react";
 import type { StudentClassSummary } from "../../school/api/schoolApi";
 import LearningIcon from "../../../shared/ui/LearningIcon";
 import DotField from "../../../shared/effects/DotField";
+import { CardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 type Props = {
   studentName: string;
@@ -42,7 +43,7 @@ export function StudentClassOverview({ studentName, schoolName, classes, loading
     </section>
     <section className="student-classes" aria-labelledby="student-classes-title">
       <div className="student-section-title"><Heading as="h2" size="4" id="student-classes-title">Lớp của tôi</Heading><Badge color="indigo" variant="soft">{loading ? "Đang tải…" : `${classes.length} lớp`}</Badge></div>
-      {loading ? <Card className="student-quiet-state"><Spinner size="2" /><Text color="gray">Đang tải thông tin lớp…</Text></Card> : classes.length === 0 ? <Card className="student-quiet-state"><Text color="gray">Chưa được xếp vào lớp học.</Text></Card> :
+      {loading ? <CardLoadingSkeleton cards={3} label="Đang tải thông tin lớp…" /> : classes.length === 0 ? <Card className="student-quiet-state"><Text color="gray">Chưa được xếp vào lớp học.</Text></Card> :
         <div className="student-class-list">{classes.map(item => <Card asChild className="student-class-card" key={item.id} size="3"><motion.article whileHover={reducedMotion ? undefined : { y: -2 }} transition={{ duration: .18 }}>
           <div className="student-class-code"><Heading as="h3" size="5">{item.name}</Heading></div>
           <div className="student-class-heading"><Badge color="indigo" variant="soft" size="2">Lớp {item.gradeLevel}</Badge><Text as="p" size="3" weight="medium">{item.subject || "Vật lý"}</Text><Text size="1" color="gray">{item.schoolYear}</Text></div>

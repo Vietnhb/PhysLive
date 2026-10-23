@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Badge, Button, Card, Progress, Spinner, Table } from "@radix-ui/themes";
+import { Badge, Button, Card, Progress, Table } from "@radix-ui/themes";
 import { motion, useReducedMotion } from "motion/react";
 import { getLicenseStatus, type LicenseStatus } from "../../account/api/userApi";
 import { schoolReportClasses, schoolReportSummary, type SchoolReportClass, type SchoolReportSummary } from "../api/schoolApi";
 import { apiMessage } from "../../../shared/lib/apiError";
 import LearningIcon from "../../../shared/ui/LearningIcon";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
+import { DashboardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 const dateLabel = (value: string | null) => value
   ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN")
@@ -74,7 +75,7 @@ export default function SchoolDashboard() {
   return <div className="admin-content school-dashboard">
     <header className="admin-content-header"><div><h1 className="admin-content-title">Tổng quan</h1></div></header>
     {error && <div className="admin-error-banner" role="alert">{error}<Button variant="soft" color="red" onClick={() => void load()}>Thử lại</Button></div>}
-    {loading && !summary ? <div className="admin-loading"><Spinner size="3" /><p>Đang tải dữ liệu trường…</p></div> : summary && <>
+    {loading && !summary ? <DashboardLoadingSkeleton cards={4} label="Đang tải dữ liệu trường…" /> : summary && <>
       <section className="admin-stats-grid school-summary-grid" aria-label="Chỉ số trường học">
         <SummaryCard label="Học sinh đang hoạt động" value={summary.students.toLocaleString("vi-VN")} icon="users" tone="blue" detail={`${summary.enrolledStudents.toLocaleString("vi-VN")} lượt xếp lớp`} />
         <SummaryCard label="Giáo viên" value={summary.teachers.toLocaleString("vi-VN")} icon="book" tone="purple" detail="Tài khoản thuộc trường" />
@@ -103,7 +104,7 @@ export default function SchoolDashboard() {
           <div className="school-quick-actions">
             <Link to="/school/users"><LearningIcon name="users" /><span><strong>Quản lý tài khoản</strong><small>Tạo hoặc tạm khóa tài khoản</small></span><LearningIcon name="arrow" /></Link>
             <Link to="/school/classes"><LearningIcon name="book" /><span><strong>Quản lý lớp học</strong><small>Phân giáo viên và xếp học sinh</small></span><LearningIcon name="arrow" /></Link>
-            <Link to="/school/reports"><LearningIcon name="chart" /><span><strong>Xem báo cáo</strong><small>Nhập dữ liệu và theo dõi sử dụng</small></span><LearningIcon name="arrow" /></Link>
+            <Link to="/school/reports"><LearningIcon name="chart" /><span><strong>Xem báo cáo</strong><small>Theo dõi lớp học và mức sử dụng</small></span><LearningIcon name="arrow" /></Link>
           </div>
         </section></Card>
 

@@ -12,6 +12,7 @@ import { Magnetic, Marquee, Reveal, SplitWords, SpotlightCard, TiltCard } from "
 import RotatingText from "../../../shared/effects/reactbits/RotatingText";
 import { Circuit, Collision, Pendulum, Wave } from "../components/PhysicsVignettes";
 import s from "./Home.module.css";
+import { CardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 const money = (value: number) =>
   new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value);
@@ -55,7 +56,7 @@ function HomePlanCatalog() {
     return () => { active = false; };
   }, []);
 
-  if (loading) return <p className={s.state} aria-live="polite">Đang tải danh mục gói…</p>;
+  if (loading) return <CardLoadingSkeleton cards={3} label="Đang tải danh mục gói…" />;
   if (error) return <p className={s.state} role="status">{error} Bạn vẫn có thể mở trang đăng ký để thử lại.</p>;
   if (plans.length === 0) return <p className={s.state}>Hiện chưa có gói đăng ký khả dụng.</p>;
   return (

@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { Button, Card, Heading, SegmentedControl, Text, TextArea } from "@radix-ui/themes";
 import api from "../../../shared/api/client";
+import { CardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 type Gap = {
   id: string; kind: "UNCHECKED" | "NO_ROLE" | "AMBIGUOUS"; schemaId?: string; topic?: string; role?: string; unit?: string; label?: string;
@@ -55,7 +56,7 @@ export function LawGapsDesk() {
       <SegmentedControl.Item value="DISMISSED">Không cần bổ sung</SegmentedControl.Item>
     </SegmentedControl.Root>
     {error && <div className="ops-alert" role="alert">{error}</div>}
-    {loading && <Text as="p" color="gray">Đang tải…</Text>}
+    {loading && items.length === 0 && <CardLoadingSkeleton cards={3} label="Đang tải danh sách định luật còn thiếu…" />}
     {!loading && items.length === 0 && <Card size="3"><Text as="p" color="gray">{filter === "OPEN" ? "Không có mục nào cần xử lý. Các mục mới sẽ xuất hiện khi giáo viên tạo mô phỏng có đại lượng chưa được kiểm." : "Chưa có mục nào."}</Text></Card>}
     {items.map(gap => <Card key={gap.id} size="3">
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>

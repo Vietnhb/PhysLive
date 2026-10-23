@@ -152,6 +152,9 @@ h3:where(:not(.rt-Heading)) {
 }
 .route-loading {
   min-height: 60vh;
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 48px 0;
 }
 .sr-only {
   position: absolute;

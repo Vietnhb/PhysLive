@@ -7,6 +7,7 @@ import BrandMark from "../../../shared/ui/BrandMark";
 import DotField from "../../../shared/effects/DotField";
 import Aurora from "../../../shared/effects/Aurora";
 import "../styles/account.css";
+import { CardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 const money = (value: number) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value);
 const count = (value: number) => value.toLocaleString("vi-VN");
@@ -55,7 +56,7 @@ export default function Signup() {
       {error && <div className="school-signup-error" role="alert">{error}{step === 0 && <button type="button" onClick={() => void loadPlans()}>Thử lại</button>}</div>}
       {step === 0 ? <section aria-labelledby="plans-heading">
         <div className="school-signup-section-heading"><div><h2 id="plans-heading">Một gói cho cả nhà trường</h2><p>Thanh toán theo năm. Quota AI tính theo token thực tế.</p></div><span className="school-signup-billing">Gói năm</span></div>
-        {loading ? <p role="status">Đang tải các gói…</p> : plans.length === 0 ? (error ? null : <p>Chưa có gói đăng ký khả dụng.</p>) : <div className="school-signup-plans" role="radiogroup" aria-label="Gói đăng ký">{plans.map(plan => <PlanCard key={plan.code} plan={plan} name="plan" selected={selected?.code === plan.code} onSelect={(code) => field("planCode", code)} />)}</div>}
+        {loading ? <CardLoadingSkeleton cards={3} label="Đang tải các gói…" /> : plans.length === 0 ? (error ? null : <p>Chưa có gói đăng ký khả dụng.</p>) : <div className="school-signup-plans" role="radiogroup" aria-label="Gói đăng ký">{plans.map(plan => <PlanCard key={plan.code} plan={plan} name="plan" selected={selected?.code === plan.code} onSelect={(code) => field("planCode", code)} />)}</div>}
         <div className="school-signup-bottom"><p>Giáo viên và học sinh nhận tài khoản từ quản lý trường.</p><button type="button" className="school-signup-primary" disabled={!selected || loading} onClick={() => setStep(1)}>Tiếp tục <span aria-hidden="true">→</span></button></div>
       </section> : <div className="school-signup-layout"><section className="school-signup-card">
         {step === 1 ? <form onSubmit={next}>

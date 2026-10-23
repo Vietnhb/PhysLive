@@ -6,7 +6,8 @@ import { validationMetrics } from "../api/operationsApi";
 import type { User } from "../../../shared/auth/types";
 import { apiMessage } from "../../../shared/lib/apiError";
 import LearningIcon from "../../../shared/ui/LearningIcon";
-import { Button, ErrorNotice, Loading, PageHeader, Panel, Stat } from "../../../shared/ui/ManagementUI";
+import { Button, ErrorNotice, PageHeader, Panel, Stat } from "../../../shared/ui/ManagementUI";
+import { DashboardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 const SYSTEM_ROLES = new Set(["ADMIN", "MANAGER"]);
 const SCHOOL_ROLES = new Set(["SCHOOL", "STAFF"]);
@@ -49,7 +50,7 @@ export function OverviewView() {
   const hasValidationData = Boolean(metrics?.total);
   const rate = hasValidationData && metrics ? (passed / metrics.total) * 100 : 0;
 
-  if (loading) return <div className="admin-content"><Loading /></div>;
+  if (loading) return <div className="admin-content"><DashboardLoadingSkeleton cards={4} label="Đang tải tổng quan hệ thống…" /></div>;
 
   return (
     <div className="admin-content">

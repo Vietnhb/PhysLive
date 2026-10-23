@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { adminSupportItems, updateSupportItem, type SupportItem, type SupportKind, type SupportStatus } from "../api/supportApi";
+import { TableLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 export default function AdminSupport({ kind }: Readonly<{ kind: SupportKind }>) {
   const [items, setItems] = useState<SupportItem[]>([]);
@@ -41,7 +42,7 @@ export default function AdminSupport({ kind }: Readonly<{ kind: SupportKind }>) 
     <section className="admin-panel">
       <div className="admin-panel-heading"><div><h2>{kind === "FEEDBACK" ? "Phản hồi" : "Tin nhắn"}</h2></div><button className="admin-secondary-button" type="button" onClick={() => void load()}>Làm mới</button></div>
       {error && <p className="admin-error-banner" role="alert">{error}</p>}
-      {loading ? <p role="status">Đang tải…</p> : <div className="admin-table-scroll"><table className="admin-table">
+      {loading ? <TableLoadingSkeleton label="Đang tải yêu cầu hỗ trợ…" headers={["Người gửi", "Tiêu đề", "Trạng thái", "Ngày tạo", "Thao tác"]} /> : <div className="admin-table-scroll"><table className="admin-table">
         <thead><tr><th>Người gửi</th><th>Tiêu đề</th><th>Trạng thái</th><th>Ngày tạo</th><th /></tr></thead>
         <tbody>{items.length === 0 ? <tr><td colSpan={5}>Chưa có yêu cầu.</td></tr> : items.map((item) => <tr key={item.id}>
           <td><strong>{item.senderName}</strong><small>{item.senderEmail}</small></td><td>{item.subject}<p className="admin-cell-muted">{item.content}</p></td>

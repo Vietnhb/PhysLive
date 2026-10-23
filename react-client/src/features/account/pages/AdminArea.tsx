@@ -10,6 +10,7 @@ import { useSessionStore } from "../../../shared/auth/sessionStore";
 import AppSidebarLayout, { type SidebarGroup } from "../../../shared/layout/AppSidebar";
 import CountUp from "../../../shared/effects/reactbits/CountUp";
 import LearningIcon from "../../../shared/ui/LearningIcon";
+import { DashboardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 import "../styles/admin-directory.css";
 
 const groups: SidebarGroup[] = [
@@ -90,6 +91,8 @@ export function AdminOverviewPage() {
   const revenueDisplay = timeframe === "week"
     ? (analytics?.revenue.weeklyVnd ?? 0)
     : (analytics?.revenue.monthlyVnd ?? (analytics?.revenue.totalVnd ?? 0));
+
+  if (loading) return <div className="directory-content admin-home"><DashboardLoadingSkeleton cards={5} label="Đang tải tổng quan hệ thống…" /></div>;
 
   return (
     <div className="directory-content admin-home">

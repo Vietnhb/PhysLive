@@ -53,9 +53,9 @@ export function VersionsTab() {
       <ReviewerRefresh refresh={resource.refresh} loading={resource.loading} />
       <Button type="button" size="2" onClick={() => setEditor({ clone: false })}><ReviewerIcon name="add" size={16} />Thêm chủ đề</Button>
     </div>
-    <LoadState {...resource} />{action.feedback}
+    <LoadState {...resource} headers={["Chủ đề", "Phiên bản", "Trạng thái", "Thao tác"]} />{action.feedback}
 
-    <div className="reviewer-table-scroll"><Table.Root variant="surface" size="2">
+    {!resource.loading && <div className="reviewer-table-scroll"><Table.Root variant="surface" size="2">
       <Table.Header><Table.Row><Table.ColumnHeaderCell>Chủ đề</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Phiên bản</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell className="reviewer-col-actions">Thao tác</Table.ColumnHeaderCell></Table.Row></Table.Header>
       <Table.Body>
         {rows.map(version => <Table.Row key={version.id}>
@@ -70,7 +70,7 @@ export function VersionsTab() {
         </Table.Row>)}
         {!resource.loading && !resource.error && rows.length === 0 && <Table.Row><Table.Cell colSpan={4} className="reviewer-table-empty">{query || filter !== "ALL" ? `Không có ${noun} phù hợp.` : `Chưa có ${noun} nào. Bấm “Thêm chủ đề” để bắt đầu.`}</Table.Cell></Table.Row>}
       </Table.Body>
-    </Table.Root></div>
+    </Table.Root></div>}
 
     {decision && <ReviewerDialog title={decision.status === "APPROVED" ? "Phê duyệt phiên bản?" : "Ngừng sử dụng phiên bản?"} onClose={() => setDecision(null)}>
       <Text as="p" size="3"><strong>{decision.version.name || decision.version.schemaId}</strong> · v{decision.version.version}</Text>

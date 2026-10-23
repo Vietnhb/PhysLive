@@ -36,8 +36,8 @@ export function ModuleApprovalTab() {
       <ReviewerSearch aria-label="Tìm gói" placeholder="Tìm gói hoặc chủ đề" value={query} onChange={event => setQuery(event.target.value)} />
       <ReviewerRefresh refresh={resource.refresh} loading={resource.loading} />
     </div>
-    <LoadState {...resource} />{action.feedback}
-    <div className="reviewer-table-scroll"><Table.Root variant="surface" size="2">
+    <LoadState {...resource} headers={["Gói phát hành", "Dùng chủ đề", "Trạng thái", "Thao tác"]} />{action.feedback}
+    {!resource.loading && <div className="reviewer-table-scroll"><Table.Root variant="surface" size="2">
       <Table.Header><Table.Row><Table.ColumnHeaderCell>Gói phát hành</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Dùng chủ đề</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell className="reviewer-col-actions">Thao tác</Table.ColumnHeaderCell></Table.Row></Table.Header>
       <Table.Body>
         {rows.map(release => <Table.Row key={release.id}>
@@ -52,7 +52,7 @@ export function ModuleApprovalTab() {
         </Table.Row>)}
         {!resource.loading && !resource.error && rows.length === 0 && <Table.Row><Table.Cell colSpan={4} className="reviewer-table-empty">{query || filter !== "ALL" ? "Không có gói phù hợp." : "Chưa có gói phát hành nào."}</Table.Cell></Table.Row>}
       </Table.Body>
-    </Table.Root></div>
+    </Table.Root></div>}
     {decision && <ReviewerDialog title={decision.status === "APPROVED" ? "Phát hành gói?" : "Ngừng dùng gói?"} onClose={() => setDecision(null)}>
       <Text as="p" size="3"><strong>{decision.release.moduleName}</strong> · chủ đề {decision.release.schemaId} v{decision.release.schemaVersion}</Text>
       <ul className="reviewer-consequences">{decision.status === "APPROVED"

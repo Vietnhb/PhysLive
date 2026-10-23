@@ -22,13 +22,11 @@
   font-size: 30px;
 }
 
-.importPanel,
 .dataPanel {
   min-width: 0;
   margin: 0;
 }
 
-.importPanel :global(.admin-panel-heading),
 .dataPanel :global(.admin-panel-heading) {
   margin-bottom: 18px;
 }

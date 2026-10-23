@@ -1,0 +1,98 @@
+.status {
+  width: 100%;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.tableWrap {
+  overflow: hidden;
+  border: 1px solid var(--gray-a5);
+  border-radius: 12px;
+  background: var(--color-panel-solid);
+}
+
+.table {
+  min-width: 680px;
+}
+
+.cellSkeleton {
+  max-width: 100%;
+}
+
+.dashboard {
+  display: grid;
+  gap: 20px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(var(--skeleton-columns, 4), minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stat,
+.section,
+.card {
+  border: 1px solid var(--gray-a5);
+  border-radius: 14px;
+  background: var(--color-panel-solid);
+}
+
+.stat {
+  min-height: 116px;
+  padding: 20px;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+}
+
+.section {
+  min-height: 250px;
+  padding: 24px;
+  display: grid;
+  align-content: start;
+  gap: 20px;
+}
+
+.sectionLines {
+  display: grid;
+  gap: 14px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(var(--skeleton-columns, 3), minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card {
+  min-height: 150px;
+  padding: 20px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+@media (max-width: 1000px) {
+  .stats,
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .stats,
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}

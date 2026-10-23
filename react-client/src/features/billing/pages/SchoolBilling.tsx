@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Badge, Button, Card, Spinner, Table } from "@radix-ui/themes";
+import { Badge, Button, Card, Table } from "@radix-ui/themes";
 import { motion, useReducedMotion } from "motion/react";
 import { getRegistrationPlans, type LicensePlan } from "../api/billingApi";
 import { purchaseSchoolPlan, quoteSchoolPlan, schoolBilling } from "../api/billingApi";
@@ -10,6 +10,7 @@ import { apiMessage } from "../../../shared/lib/apiError";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
 import PlanCard from "../components/PlanCard";
 import s from "./SchoolBilling.module.css";
+import { CardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 const money = (amount: number) => `${amount.toLocaleString("vi-VN")} ₫`;
 const date = (value: string | null) =>
@@ -111,7 +112,7 @@ export default function SchoolBilling() {
     <header className="admin-content-header"><h1 className="admin-content-title">Gói và thanh toán</h1></header>
     {user?.billingRequired && <div className="admin-error-banner" role="status">Trường chưa có gói còn hiệu lực. Hãy chọn gói và hoàn tất thanh toán để mở các chức năng quản lý.</div>}
     {error && <div className="admin-error-banner" role="alert">{error}<Button variant="soft" color="red" onClick={() => void load()}>Tải lại</Button></div>}
-    {loading ? <p role="status"><Spinner /> Đang tải thông tin gói…</p> : billing && <>
+    {loading ? <CardLoadingSkeleton cards={3} label="Đang tải thông tin gói…" /> : billing && <>
       <Card asChild size="3"><section className={`admin-panel school-billing-plan-panel ${s.planPanel}`}>
         <div className={`school-signup-section-heading ${s.planHeading}`}><div><h2>{user?.billingRequired ? "Chọn gói để bắt đầu" : "Nâng gói hoặc gia hạn"}</h2></div><Badge size="2" color="indigo">Gói năm</Badge></div>
         <p style={{ margin: "0 0 18px", color: "var(--gray-11)", fontSize: 14 }}>Nâng gói có hiệu lực ngay sau khi thanh toán, thu chênh lệch theo thời hạn còn lại. Gia hạn gói hiện tại thêm một năm. Khi gói còn hiệu lực, không thể chuyển sang gói nhỏ hơn.</p>
