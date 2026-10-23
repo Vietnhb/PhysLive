@@ -91,6 +91,7 @@ export default function SimulationInspector({ experiment, explanation, save, lib
         {/* Tab 1: Parameters / Controls */}
         {!saveOpen && inspectorTab === "experiment" && (
           <div>
+            {simulation && <>
             <div className="learn-section-title">
               <h3>Thông số mô phỏng</h3>
               {simulation?.parameters?.length ? (
@@ -118,22 +119,16 @@ export default function SimulationInspector({ experiment, explanation, save, lib
                   ? "Mô phỏng này không có biến số điều chỉnh."
                   : (
                     <div>
-                      <p>Nhập đề bài để xem và điều chỉnh các thông số mô phỏng tại đây.</p>
+                      <p>Mô tả một tình huống để xem và điều chỉnh các thông số mô phỏng tại đây.</p>
                     </div>
                   )}
               </div>
             )}
 
             {/* Trạng thái kiểm chứng */}
-            <div className="simulation-validation" role="status" aria-live="polite" style={{ marginTop: 20 }}>
-              <strong>
-                {simulation?.simulationSpec?.runtimeKind === "VISUAL"
-                  ? "Trạng thái mô hình: "
-                  : "Kiểm tra vật lý: "}
-                {readVerification(validation?.status).sentence}
-              </strong>
-
-              {validation?.verificationScope && <p>Phạm vi xác minh: {validation.verificationScope}</p>}
+            <div className={`simulation-validation is-${readVerification(validation?.status).tone}`} role="status" aria-live="polite" style={{ marginTop: 20 }}>
+              <span className="simulation-validation__badge">{readVerification(validation?.status).badge}</span>
+              <strong>{readVerification(validation?.status).sentence}</strong>
               {!!validation?.lawChecks?.length && (
                 <details>
                   <summary>Đã đối chiếu {validation.lawChecks.filter(check => check.status === "PASSED").length}/{validation.lawChecks.length} định luật</summary>
@@ -145,25 +140,26 @@ export default function SimulationInspector({ experiment, explanation, save, lib
                 </details>
               )}
               {!!validation?.uncheckedQuantities?.length && (
-                <p>Chưa có định luật đối chiếu: {validation.uncheckedQuantities.map(id =>
+                <p>Chưa có định luật để đối chiếu: {validation.uncheckedQuantities.map(id =>
                   simulation?.simulationSpec?.model?.quantities.find(quantity => quantity.id === id)?.label || id).join("; ")}</p>
-              )}
-              {validation?.verificationMethod && (
-                <p>Phương pháp xác minh: {validation.verificationMethod}</p>
-              )}
-              {validation?.absoluteError !== undefined && validation.absoluteError !== null && (
-                <p>Sai số lớn nhất: {validation.absoluteError} (tương đối {validation.relativeError ?? "—"})</p>
               )}
               {!!validation?.assumptions?.length && (
                 <p>Giả định: {validation.assumptions.join("; ")}</p>
               )}
-              {validation?.flags?.map((flag, index) => (
-                <p key={index}>{flag}</p>
-              ))}
+              {(validation?.verificationScope || validation?.verificationMethod || validation?.absoluteError != null || !!validation?.flags?.length) && (
+                <details className="simulation-validation__technical">
+                  <summary>Chi tiết kiểm tra</summary>
+                  {validation?.verificationScope && <p>Phạm vi: {validation.verificationScope}</p>}
+                  {validation?.verificationMethod && <p>Phương pháp: {validation.verificationMethod}</p>}
+                  {validation?.absoluteError != null && <p>Sai số lớn nhất: {validation.absoluteError} (tương đối {validation.relativeError ?? "—"})</p>}
+                  {validation?.flags?.map((flag, index) => <p key={index}>{flag}</p>)}
+                </details>
+              )}
             </div>
+            </>}
             <section className="simulation-shortcuts" aria-labelledby="simulation-examples-heading">
               <h3 id="simulation-examples-heading">Ví dụ mô tả nhanh</h3>
-              <p className="simulation-muted">Chọn để điền đề bài, rồi chỉnh sửa theo ý bạn.</p>
+              <p className="simulation-muted">Chọn một ví dụ để điền sẵn mô tả, rồi chỉnh sửa theo ý bạn.</p>
               <div className="simulation-shortcut-list">
                 {QUICK_DESCRIPTIONS.map(example => <button key={example.label} type="button"
                   className="simulation-shortcut" disabled={busy || Boolean(library.openingId)}
@@ -183,7 +179,7 @@ export default function SimulationInspector({ experiment, explanation, save, lib
                     disabled={busy || Boolean(library.openingId)} aria-current={currentSimulationId === item.simulationId ? "true" : undefined}
                     onClick={() => void library.onOpen(item)}>
                     <Icon name="play" /><span><strong>{item.title}</strong>
-                      <small>{library.openingId === item.id ? "Đang mở…" : item.topic || "Mở mô phỏng đã lưu"}</small></span>
+                      <small>{library.openingId === item.id ? "Đang mở…" : library.topicName?.(item.topic) || "Mở mô phỏng đã lưu"}</small></span>
                   </button>)}
                 </div> : <p className="simulation-muted">Chưa có mô phỏng đã lưu. Các bài mới sẽ xuất hiện ở đây sau khi lưu.</p>}
             </section>}
@@ -201,7 +197,7 @@ export default function SimulationInspector({ experiment, explanation, save, lib
               </div>
             ) : (
               <p className="simulation-muted" style={{ padding: "12px 0" }}>
-                Phần giải thích hiện tượng và lý thuyết vật lý sẽ xuất hiện ở đây sau khi AI phân tích đề bài.
+                Phần giải thích hiện tượng và lý thuyết vật lý sẽ xuất hiện ở đây sau khi hệ thống hiểu tình huống bạn mô tả.
               </p>
             )}
 

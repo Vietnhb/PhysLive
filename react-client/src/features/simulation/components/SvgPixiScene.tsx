@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import pixiBundle from "../../../../node_modules/pixi.js/dist/webworker.min.js?raw";
 import Icon from "../../../shared/ui/LearningIcon";
 import { sampleTimeline, type SolverTimeline, type PixiVisualProgram } from "../model/svgScene";
-import { describeScene, formatNumber, formatTime, seriesColor,
+import { describeScene, formatNumber, formatTime, sentenceCase, seriesColor,
   type BackendFieldMeta, type SceneDescriptor, type SceneObservable, type SimulationModelRef } from "../model/sceneModel";
 import { PIXI_WORKER, PIXI_BRIDGE } from "../engine/pixiRuntime";
 import SimulationCharts from "./SimulationCharts";
@@ -192,11 +192,11 @@ function SceneReadouts({ scene, values, theme, exact = false }: {
   const focus = scene.observables.map(key => ({ key, label: scene.fields[key].caption ?? scene.fields[key].label }));
   const reading = (key: string) => {
     const meta = scene.fields[key];
-    return (exact ? String(values[key] ?? "—") : formatNumber(values[key], 4, Math.max(Math.abs(meta.min), Math.abs(meta.max)))) + (meta.unit ? " " + meta.unit : "");
+    return formatNumber(values[key], exact ? 6 : 4, Math.max(Math.abs(meta.min), Math.abs(meta.max))) + (meta.unit ? " " + meta.unit : "");
   };
   return <section className="sim-measurements" aria-label="Số liệu mô phỏng">
     {focus.length > 0 && <dl className="sim-focus-readouts">
-      {focus.map(item => <div key={item.key}><dt>{item.label}</dt><dd>{reading(item.key)}</dd></div>)}
+      {focus.map(item => <div key={item.key}><dt>{sentenceCase(item.label)}</dt><dd>{reading(item.key)}</dd></div>)}
     </dl>}
     <details className="sim-data-details">
       <summary>Toàn bộ đại lượng và kết quả tính ({Object.keys(scene.fields).length})</summary>

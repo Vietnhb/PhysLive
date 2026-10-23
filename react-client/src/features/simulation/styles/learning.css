@@ -16,7 +16,7 @@
 .learning-app * {
   box-sizing: border-box;
 }
-.learning-app button {
+.learning-app button:not(.rt-reset) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -31,12 +31,12 @@
   font-size: 12px;
   font-weight: 550;
 }
-.learning-app button:hover:not(:disabled) {
+.learning-app button:not(.rt-reset):hover:not(:disabled) {
   background: var(--surface-3);
   color: var(--learn-ink);
   box-shadow: none;
 }
-.learning-app button:disabled {
+.learning-app button:not(.rt-reset):disabled {
   opacity: 0.5;
 }
 .learning-app button:active:not(:disabled) {

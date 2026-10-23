@@ -8,6 +8,7 @@ import { getToken } from "../../../shared/lib/token";
 import Icon from "../../../shared/ui/LearningIcon";
 import { shareStatus } from "../model/shareStatus";
 import "../styles/library-actions.css";
+import { useTopicName } from "../../../shared/hooks/useTopicName";
 
 const SHARE_OPTIONS: { value: LibraryItem["visibility"]; label: string; help: string }[] = [
   { value: "PERSONAL", label: "Chỉ mình tôi", help: "Không chia sẻ với ai." },
@@ -16,6 +17,7 @@ const SHARE_OPTIONS: { value: LibraryItem["visibility"]; label: string; help: st
 ];
 
 export default function LibraryItemActions({ item, folders }: Readonly<{ item: LibraryItem; folders: LibraryFolder[] }>) {
+  const topicName = useTopicName();
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDialogElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
@@ -102,7 +104,7 @@ export default function LibraryItemActions({ item, folders }: Readonly<{ item: L
         <button type="button" className="library-menu-back" onClick={() => setMode("actions")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6" /></svg>Thông tin mô phỏng</button>
         <dl className="library-info">
           <div><dt>Tên</dt><dd>{item.title}</dd></div>
-          <div><dt>Chủ đề</dt><dd>{item.topic || "Chưa xác định"}</dd></div>
+          <div><dt>Chủ đề</dt><dd>{topicName(item.topic) || "Chưa xác định"}</dd></div>
           <div><dt>Thư mục</dt><dd>{folders.find(folder => folder.id === item.folderId)?.name ?? "Chưa phân loại"}</dd></div>
           <div><dt>Ngày lưu</dt><dd>{new Date(item.createdAt).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" })}</dd></div>
           <div><dt>Kiểm tra kết quả</dt><dd>{item.validationStatus === "PASSED" ? "Đã đạt, giao bài được" : "Chưa đạt, chưa giao bài được"}</dd></div>

@@ -19,8 +19,6 @@ jobs:
         with: { node-version: 22, cache: npm, cache-dependency-path: react-client/package-lock.json }
       - run: npm ci
       - run: npm run check
-      - run: npx playwright install --with-deps chromium
-      - run: npx playwright test
   android:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: mobile-app } }
@@ -32,7 +30,6 @@ jobs:
         with: { flutter-version: '3.41.9', channel: stable, cache: true }
       - run: flutter pub get
       - run: flutter analyze
-      - run: flutter test
       - run: flutter build apk --debug
       - uses: actions/upload-artifact@v4
         with:

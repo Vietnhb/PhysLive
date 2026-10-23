@@ -17,6 +17,8 @@ type LibraryWorkspaceState = {
   retryLibrary: () => void;
   setFolders: (change: (folders: LibraryFolder[]) => LibraryFolder[]) => void;
   setLibraryItems: (change: (items: LibraryItem[]) => LibraryItem[]) => void;
+  /** The Vietnamese name of a topic code; absent where no catalogue is loaded. */
+  topicName?: (code?: string | null) => string;
 };
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -400,6 +402,8 @@ export function useSimulationWorkspace(libraryState: LibraryWorkspaceState) {
     library: {
       folders, items: libraryItems, loading: libraryLoading, error: libraryError, currentSimulationId, openingId,
       onRetry: retryLibrary, onCreateFolder: createFolder, onOpen: openLibraryItem, onNewSimulation: reset,
+      // the Vietnamese name of a topic code, so panes that list saved simulations need no catalogue of their own
+      topicName: libraryState.topicName,
     },
     input: {
       sourceMode, setSourceMode, text, setText, sourceFile, previewUrl, busy, error, acceptImage,

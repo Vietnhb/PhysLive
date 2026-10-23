@@ -35,7 +35,8 @@ export function SimulationParameterControl({ parameter, value, onChange }: Reado
   };
   const unit = prettyUnit(parameter.unit ?? "");
   const rawLabel = parameter.label || parameter.name;
-  const label = rawLabel;
+  // labels come from the model as written ("vận tốc đầu"); shown with a capital like any field label
+  const label = rawLabel.charAt(0).toLocaleUpperCase("vi") + rawLabel.slice(1);
   const validBounds = typeof min === "number" && Number.isFinite(min) && typeof max === "number" && Number.isFinite(max) && min <= max;
   const showSlider = validBounds && min! < max! && value >= min! && value <= max!;
   const shown = dragging ?? value;

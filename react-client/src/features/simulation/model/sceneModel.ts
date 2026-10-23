@@ -118,6 +118,9 @@ export function niceStep(span: number, targetTicks = 6) {
  * scale: typical magnitude of the quantity (range or tick step). Only values negligible against it
  * print as 0, so 5×10⁻²⁹ kg (a mass defect) or 1.6×10⁻¹⁹ C are shown, while rounding noise at a zero tick is not.
  */
+/** A label as a heading reads: the model writes "vận tốc đầu", the page shows "Vận tốc đầu". Only the display changes. */
+export const sentenceCase = (text: string) => text ? text.charAt(0).toLocaleUpperCase("vi") + text.slice(1) : text;
+
 export function formatNumber(value: number, significant = 4, scale = 0) {
   if (!Number.isFinite(value)) return "—";
   if (value === 0 || Math.abs(value) < (scale > 0 ? scale * 1e-9 : 1e-300)) return "0";

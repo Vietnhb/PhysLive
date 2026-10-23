@@ -5,6 +5,7 @@ import { getToken } from "../../../shared/lib/token";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
 import type { LibraryFolder, LibraryItem } from "../../../shared/types/physlive";
 import { canTeach } from "../../../shared/auth/permissions";
+import { useTopicName } from "../../../shared/hooks/useTopicName";
 
 const FRESH_MS = 60_000;
 const emptyFolders: LibraryFolder[] = [];
@@ -59,6 +60,7 @@ export function loadTeacherLibrary(force = false): Promise<void> {
 }
 
 export function useTeacherLibrary() {
+  const topicName = useTopicName();
   const user = useSessionStore(state => state.user);
   const session = getToken();
   const state = teacherLibraryStore();
@@ -76,6 +78,7 @@ export function useTeacherLibrary() {
     libraryLoading: enabled && (!visible || (!state.loadedAt && state.loading)),
     libraryError: visible ? state.error : "",
     retryLibrary: () => { if (enabled) void loadTeacherLibrary(true); },
+    topicName,
     setLibraryError: (error: string) => update({ error }),
     setFolders: (change: (folders: LibraryFolder[]) => LibraryFolder[]) => update({ folders: change(teacherLibraryStore.getState().folders) }),
     setLibraryItems: (change: (items: LibraryItem[]) => LibraryItem[]) => update({ items: change(teacherLibraryStore.getState().items) }),

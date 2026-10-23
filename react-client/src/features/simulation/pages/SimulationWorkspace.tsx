@@ -18,7 +18,8 @@ export default function SimulationWorkspace() {
   return (
     <div className="learning-app simulation-workspace-app" onPaste={events.onPaste} onDrop={events.onDrop}
       onDragOver={event => { if (event.dataTransfer.types.includes("Files")) event.preventDefault(); }}>
-      <LearningHeader onNewSimulation={input.reset} libraryCollapsed={libraryCollapsed}
+      {/* "Mô phỏng mới" lives in the library pane; the header offers it only when that pane is not on screen */}
+      <LearningHeader onNewSimulation={!canManageLearningContent || libraryCollapsed ? input.reset : undefined} libraryCollapsed={libraryCollapsed}
         onToggleLibrary={canManageLearningContent ? () => setLibraryCollapsed(value => !value) : undefined} />
       <main className="learn-workspace" id="learning-workspace">
         <div className="learn-top-area" aria-hidden="true" />

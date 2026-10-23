@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { sampleTimeline, type SolverTimeline } from "../model/svgScene";
-import { formatNumber, niceStep, seriesColor, type FieldMeta, type SceneDescriptor, type ThemeName } from "../model/sceneModel";
+import { formatNumber, niceStep, sentenceCase, seriesColor, type FieldMeta, type SceneDescriptor, type ThemeName } from "../model/sceneModel";
 
 type Series = { key: string; name: string; color: string; dashed: boolean; meta: FieldMeta; points: Array<[number, number]> };
 type Group = { id: string; title: string; axis: string; unit: string; series: Series[] };
@@ -146,26 +146,27 @@ export default function SimulationCharts({ scene, timeline, time, theme, onSeek,
     if (backendSample) return backendSample.values;
     try { return sampleTimeline(timeline, time); } catch { return {} as Record<string, number>; }
   }, [timeline, time, backendSample]);
-  const labelNumber = (value: number, scale = 0) => backendSample ? String(value ?? "—") : formatNumber(value, 4, scale);
+  // a sample read back from the server keeps more digits than an interpolated one, but never the raw float
+  const labelNumber = (value: number, scale = 0) => formatNumber(value, backendSample ? 6 : 4, scale);
   if (!groups.length) return null;
   const labelOf = new Map(scene.participants.map(item => [item.id, item.label]));
   return <section className="sim-analysis" aria-label="Đồ thị và số liệu">
     <div className="sim-analysis__tabs" role="tablist">
       <button type="button" role="tab" aria-selected={!active} onClick={() => setTab("table")}>Bảng số liệu</button>
       {groups.map(group => <button key={group.id} type="button" role="tab" aria-selected={active?.id === group.id}
-        onClick={() => setTab(group.id)}>{group.title.split(" – ")[0]}</button>)}
+        onClick={() => setTab(group.id)}>{sentenceCase(group.title.split(" – ")[0])}</button>)}
     </div>
     {active ? <>
       <div className="sim-legend">
         {active.series.map(series => {
           return <span key={series.key} className="sim-legend__item">
             <i style={{ background: series.color }} data-dashed={series.dashed || undefined} />
-            {series.name}<b>{labelNumber(values[series.key], Math.max(Math.abs(series.meta.min), Math.abs(series.meta.max)))} {series.meta.unit}</b>
+            {sentenceCase(series.name)}<b>{labelNumber(values[series.key], Math.max(Math.abs(series.meta.min), Math.abs(series.meta.max)))} {series.meta.unit}</b>
           </span>;
         })}
       </div>
       <Chart group={active} duration={timeline.durationSeconds} time={backendSample?.t ?? time} onSeek={onSeek} values={backendSample?.values} />
-      <p className="sim-analysis__hint">Đồ thị {active.title.toLowerCase()} từ dữ liệu solver backend · kéo trên đồ thị để tua thời gian.</p>
+      <p className="sim-analysis__hint">Đồ thị {active.title.toLowerCase()} từ số liệu mô phỏng đã tính · kéo trên đồ thị để tua thời gian.</p>
     </> : <div className="sim-table-wrap">
       <label className="sim-analysis__hint" style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         Xem giá trị tại thời điểm
@@ -175,12 +176,12 @@ export default function SimulationCharts({ scene, timeline, time, theme, onSeek,
         s (từ 0 đến {formatNumber(timeline.durationSeconds, 4)} s)
       </label>
       <table className="sim-table">
-        <thead><tr><th>Đối tượng</th><th>Đại lượng</th><th>Tại t = {backendSample ? String(backendSample.t) : time.toFixed(2)} s</th><th>Nhỏ nhất</th><th>Lớn nhất</th></tr></thead>
+        <thead><tr><th>Đối tượng</th><th>Đại lượng</th><th>Tại t = {backendSample ? formatNumber(backendSample.t, 6) : time.toFixed(2)} s</th><th>Nhỏ nhất</th><th>Lớn nhất</th></tr></thead>
         <tbody>{Object.values(scene.fields).map(meta => {
           const scale = Math.max(Math.abs(meta.min), Math.abs(meta.max));
           return <tr key={meta.key}>
-            <td>{meta.object ?? labelOf.get(meta.participantId) ?? meta.participantId}</td>
-            <td>{meta.caption ?? meta.label}{!meta.caption && meta.symbol.toLowerCase() !== meta.label.toLowerCase() && <> <span className="sim-muted">({meta.symbol})</span></>}</td>
+            <td>{sentenceCase(meta.object ?? labelOf.get(meta.participantId) ?? meta.participantId)}</td>
+            <td>{sentenceCase(meta.caption ?? meta.label)}{!meta.caption && meta.symbol.toLowerCase() !== meta.label.toLowerCase() && <> <span className="sim-muted">({meta.symbol})</span></>}</td>
             <td className="sim-num">{labelNumber(values[meta.key], scale)} {meta.unit}</td>
             <td className="sim-num">{labelNumber(meta.min, scale)} {meta.unit}</td>
             <td className="sim-num">{labelNumber(meta.max, scale)} {meta.unit}</td>

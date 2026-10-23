@@ -2,7 +2,6 @@ import { useState } from "react";
 import Icon from "../../../shared/ui/LearningIcon";
 import SimulationComplaintDialog from "../../support/components/SimulationComplaintDialog";
 import SvgPixiScene from "./SvgPixiScene";
-import SimulationExport from "./SimulationExport";
 import ClarifyQuestion from "./ClarifyQuestion";
 import { RecognitionDisplay, FormulaReview } from "./SimulationReview";
 import { visualSource, type SimulationWorkspaceModel } from "../hooks/useSimulationWorkspace";
@@ -21,9 +20,14 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
   const { simulation, liveTimeline, presentation, runValues, sandboxKey, validation, renderError, setRenderError, restartPreview, recomputing } = preview;
   // "Báo lỗi" and "Dựng lại" live in the authored player's toolbar.
   const stageActions = <>
-    <SimulationExport preview={preview} />
     {complaint && <button type="button" className="sim-action" title="Báo cho người kiểm duyệt khi mô phỏng sai" onClick={() => setComplaintOpen(true)}><Icon name="message" />Báo lỗi</button>}
     <button type="button" className="sim-action" title="Dựng lại cảnh và phát từ đầu" onClick={restartPreview}><Icon name="reset" />Dựng lại</button>
+    <button type="button" className="sim-action" title="Phóng to mô phỏng (Esc để thoát)" aria-label="Phóng to mô phỏng toàn màn hình"
+      onClick={event => {
+        // full screen is for this player only, never the whole page
+        if (document.fullscreenElement) void document.exitFullscreen();
+        else void event.currentTarget.closest<HTMLElement>(".sim-player")?.requestFullscreen();
+      }}><Icon name="fullscreen" /></button>
   </>;
   return (
     <section className="learn-exploration" aria-label="Quan sát và khám phá">
@@ -54,33 +58,35 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
             ) : (
               <><div className="sim-player__actions">{stageActions}</div><p className="simulation-muted">Chưa có dữ liệu chuyển động để hiển thị. Hãy thử dựng lại mô phỏng.</p></>
             )}
-            {renderError && <button type="button" className="simulation-restart-button" disabled={busy}
-              onClick={() => void generate({ code: visualSource(simulation), message: renderError + "\n" + visualFeedback })}>
-              {busy ? "AI đang sửa cảnh minh họa…" : "Yêu cầu AI sửa cảnh minh họa"}
-            </button>}
-            <label className="simulation-muted">Yêu cầu chỉnh hình ảnh
-              <textarea aria-label="Yêu cầu chỉnh hình ảnh" value={visualFeedback} disabled={busy} rows={2} maxLength={3000}
-                placeholder="Ví dụ: làm rõ thiết bị, nhãn đang che vật, đổi bối cảnh…"
-                onChange={event => setVisualFeedback(event.target.value)} />
-            </label>
-            {!renderError && <button type="button" className="simulation-restart-button" disabled={busy} onClick={() => void generate({
-              code: visualSource(simulation),
-              message: visualFeedback,
-            })}>{busy ? "AI đang thiết kế lại…" : "Thiết kế lại hình ảnh bằng AI"}</button>}
+            {renderError && <div className="simulation-warning" role="alert">
+              <p>Hình minh họa chưa hiển thị được. Số liệu vật lý vẫn đúng; bạn có thể nhờ AI vẽ lại hình.</p>
+              <button type="button" className="simulation-restart-button" disabled={busy}
+                onClick={() => void generate({ code: visualSource(simulation), message: renderError + "\n" + visualFeedback })}>
+                {busy ? "AI đang vẽ lại…" : "Vẽ lại hình minh họa"}
+              </button>
+            </div>}
             <p className="simulation-muted">
-              Kéo thanh thông số để tính lại. Chuyển động, đồ thị và số liệu được tính từ mô hình vật lý; hình minh họa do AI vẽ chỉ để trình bày, không phải bằng chứng vật lý.
+              Kéo thanh trượt để đổi thông số. Chuyển động, số liệu và đồ thị được tính từ mô hình vật lý; hình vẽ chỉ để minh họa.
             </p>
-            <details>
-              <summary>Nâng cao: mã nguồn hình minh họa</summary>
-              <pre style={{ overflow: "auto", maxHeight: "28rem", whiteSpace: "pre-wrap" }}>{visualSource(simulation)}</pre>
-            </details>
+            {!renderError && <details className="simulation-visual-edit">
+              <summary>Chưa ưng hình minh họa? Nhờ AI vẽ lại</summary>
+              <label htmlFor="simulation-visual-feedback">Bạn muốn hình thay đổi thế nào?</label>
+              <textarea id="simulation-visual-feedback" value={visualFeedback} disabled={busy} rows={2} maxLength={3000}
+                placeholder="Ví dụ: vẽ rõ ròng rọc hơn, nhãn đang che vật, đổi sang bối cảnh phòng thí nghiệm…"
+                onChange={event => setVisualFeedback(event.target.value)} />
+              <button type="button" className="simulation-restart-button" disabled={busy || !visualFeedback.trim()} onClick={() => void generate({
+                code: visualSource(simulation),
+                message: visualFeedback,
+              })}>{busy ? "AI đang vẽ lại…" : "Vẽ lại hình minh họa"}</button>
+              <small className="simulation-muted">Chỉ hình vẽ thay đổi; số liệu vật lý giữ nguyên.</small>
+            </details>}
             {error && <p className="simulation-error" role="alert">{error}</p>}
           </div>
         ) : (
-          /* Layout giữa khi chưa có mô phỏng: Nhập đề, nhận diện, giải thích */
+          /* Layout giữa khi chưa có mô phỏng: mô tả, xác nhận, giải thích */
           <div className="simulation-stage-input-container">
             <ol className="simulation-steps" aria-label="Tiến trình dựng mô phỏng">
-              <li className={!recognition && !intent ? "active" : "done"}>1. Nhập đề</li>
+              <li className={!recognition && !intent ? "active" : "done"}>1. Mô tả tình huống</li>
               <li className={recognition ? "active" : intent ? "done" : ""}>2. Xác nhận</li>
               <li className={intent ? "active" : ""}>3. Dựng mô phỏng</li>
             </ol>
@@ -93,8 +99,9 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
 
             {!recognition && !intent && (
               <section className="simulation-card simulation-entry">
-                <h2>Nhập đề bài</h2>
-                <div className="simulation-source-tabs" role="group" aria-label="Cách nhập đề">
+                <h2>Bạn muốn mô phỏng tình huống nào?</h2>
+                <p className="simulation-muted">Mô tả tình huống bằng lời của bạn, dán một bài tập, hoặc chụp ảnh từ sách. Nếu mô tả chưa rõ, hệ thống sẽ hỏi lại trước khi dựng.</p>
+                <div className="simulation-source-tabs" role="group" aria-label="Cách mô tả tình huống">
                   {(["TEXT", "LATEX", "IMAGE"] as const).map((mode) => (
                     <button
                       key={mode}
@@ -103,7 +110,7 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
                       aria-pressed={sourceMode === mode}
                       onClick={() => setSourceMode(mode)}
                     >
-                      {mode === "TEXT" ? "Văn bản" : mode === "LATEX" ? "LaTeX" : "Ảnh"}
+                      {mode === "TEXT" ? "Gõ mô tả" : mode === "LATEX" ? "Công thức LaTeX" : "Ảnh chụp"}
                     </button>
                   ))}
                 </div>
@@ -112,7 +119,7 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
                   {sourceMode === "IMAGE" && (
                     <div className="simulation-image-drop">
                       {previewUrl ? (
-                        <img src={previewUrl} alt="Ảnh đề bài đã chọn" />
+                        <img src={previewUrl} alt="Ảnh đã chọn" />
                       ) : (
                         <p>Kéo thả hoặc dán ảnh PNG, JPEG, WebP (tối đa 8 MB), hoặc chọn tệp.</p>
                       )}
@@ -146,7 +153,7 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
                       sourceMode === "IMAGE"
                         ? "Thông tin bổ sung nếu cần"
                         : sourceMode === "LATEX"
-                        ? "Dán biểu thức LaTeX hoặc đề bài"
+                        ? "Dán nội dung LaTeX mô tả tình huống"
                         : "Ví dụ: Một vật được ném ngang từ độ cao 20 m với vận tốc 15 m/s, bỏ qua sức cản không khí."
                     }
                   />
@@ -159,7 +166,7 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
                         (sourceMode !== "IMAGE" && !text.trim())
                       }
                     >
-                      {busy ? "Đang nhận diện…" : "Nhận diện đề bài"}
+                      {busy ? "Đang đọc mô tả…" : "Tiếp tục"}
                     </button>
                   </div>
                 </form>
@@ -168,8 +175,8 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
 
             {recognition && (
               <section className="simulation-card">
-                <span className="simulation-eyebrow">Xác nhận nhận diện</span>
-                <h2>Đây có đúng là đề bài của bạn?</h2>
+                <span className="simulation-eyebrow">Xác nhận</span>
+                <h2>Hệ thống hiểu mô tả của bạn như sau, đúng chưa?</h2>
                 {recognitionLowConfidence && (
                   <p className="simulation-warning" role="status">
                     Hệ thống chưa chắc chắn về kết quả nhận diện. Hãy sửa lại nội dung trước khi tiếp tục.
@@ -229,7 +236,7 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
 
             {intent && !simulation && (
               <section className="simulation-card">
-                <span className="simulation-eyebrow">Hiểu tình huống vật lý</span>
+                <span className="simulation-eyebrow">Trước khi dựng</span>
                 {intent.stage === "CLARIFY" && (
                   <>
                     <h2>Cần làm rõ một chút</h2>
@@ -268,7 +275,7 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
                     <p className="simulation-explanation">{intent.explanation}</p>
                     <FormulaReview intent={intent} />
                     <p className="simulation-muted">
-                      Kết quả dự đoán ở đây chỉ là tạm thời cho tới khi mô phỏng được tính và kiểm tra.
+                      Số liệu chính xác sẽ có sau khi mô phỏng được tính và kiểm tra theo định luật.
                     </p>
                     <div className="simulation-actions">
                       <button
@@ -284,7 +291,7 @@ export default function SimulationStage({ input, preview, complaint, readoutsTar
                       </button>
                     </div>
                     <form className="simulation-revision-form" onSubmit={handleRevision}>
-                      <label htmlFor="simulation-change">Cần chỉnh gì?</label>
+                      <label htmlFor="simulation-change">Muốn chỉnh gì trước khi dựng? (không bắt buộc)</label>
                       <textarea
                         id="simulation-change"
                         rows={2}

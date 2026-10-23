@@ -48,11 +48,6 @@ export default function LearningHeader({
     };
   }, [settingsOpen]);
 
-  const toggleFullscreen = async () => {
-    if (document.fullscreenElement) await document.exitFullscreen();
-    // Full screen is for the simulation itself; without one on screen, fall back to the whole workspace.
-    else await (document.querySelector<HTMLElement>(".sim-player") ?? document.querySelector<HTMLElement>(".learning-app"))?.requestFullscreen();
-  };
   const isSubmissions = variant === "submissions";
 
   return (
@@ -86,12 +81,11 @@ export default function LearningHeader({
 
       <div className="learn-header-actions">
         {!isSubmissions && <>
-          {onNewSimulation && <button type="button" className="learn-header-action" onClick={onNewSimulation}><Icon name="plus" />Đề mới</button>}
+          {onNewSimulation && <button type="button" className="learn-header-action" onClick={onNewSimulation}><Icon name="plus" />Mô phỏng mới</button>}
           {onViewModeChange && <fieldset className="learn-view-switch"><legend className="learn-sr-only">Chế độ hiển thị</legend>
             <button type="button" className={viewMode === "2d" ? "active" : ""} aria-pressed={viewMode === "2d"} onClick={() => onViewModeChange("2d")} title="Hiển thị mặt phẳng 2D"><Icon name="view2d" />2D</button>
             <button type="button" className={viewMode === "3d" ? "active" : ""} aria-pressed={viewMode === "3d"} disabled={!threeDEnabled} onClick={() => onViewModeChange("3d")} title={threeDEnabled ? "Hiển thị không gian 3D" : "3D chưa được cung cấp cho schema này"}><Icon name="view3d" />3D</button>
           </fieldset>}
-          <button type="button" className="learn-header-icon" aria-label="Phóng to mô phỏng toàn màn hình" title="Phóng to mô phỏng toàn màn hình" onClick={() => void toggleFullscreen()}><Icon name="fullscreen" /></button>
         </>}
         {user ? <AccountMenu variant="workspace" /> : <Link className="learn-back" to="/login"><Icon name="login" />Đăng nhập</Link>}
       </div>

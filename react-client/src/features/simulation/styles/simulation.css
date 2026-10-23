@@ -891,3 +891,24 @@
 .sim-data-details { margin-top: 10px; }
 .sim-data-details > summary { cursor: pointer; color: var(--sim-muted); font-size: 13px; padding: 6px 2px; }
 .sim-data-details[open] > summary { margin-bottom: 6px; }
+
+/* Verification status as a labelled card: the badge names the state, colour only repeats it. */
+.simulation-validation { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-left-width: 4px; border-radius: 10px; background: var(--surface); }
+.simulation-validation.is-ok { border-left-color: var(--success); }
+.simulation-validation.is-partial { border-left-color: var(--accent); }
+.simulation-validation.is-info, .simulation-validation.is-pending { border-left-color: var(--muted); }
+.simulation-validation.is-warn { border-left-color: var(--warning); }
+.simulation-validation__badge { justify-self: start; padding: 2px 8px; border-radius: 999px; background: var(--surface-3); color: var(--ink-2); font-size: 11px; font-weight: 600; }
+.simulation-validation.is-ok .simulation-validation__badge { background: var(--success-soft); color: var(--success); }
+.simulation-validation.is-warn .simulation-validation__badge { background: var(--warning-soft); color: var(--warning); }
+.simulation-validation.is-partial .simulation-validation__badge { background: var(--accent-soft); color: var(--accent-strong); }
+.simulation-validation p { margin: 0; font-size: 12px; color: var(--ink-2); }
+.simulation-validation__technical summary { color: var(--muted); font-size: 12px; cursor: pointer; }
+.simulation-validation__technical p { margin-top: 6px; color: var(--muted); overflow-wrap: anywhere; }
+
+.simulation-visual-edit { display: grid; gap: 8px; padding: 10px 12px; border: 1px dashed var(--line-strong); border-radius: 10px; }
+.simulation-visual-edit > summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--accent); }
+.simulation-visual-edit[open] > summary { margin-bottom: 4px; }
+.simulation-visual-edit label { font-size: 12px; color: var(--ink-2); }
+.simulation-visual-edit textarea { width: 100%; }
+.simulation-visual-edit .simulation-restart-button { justify-self: start; }
