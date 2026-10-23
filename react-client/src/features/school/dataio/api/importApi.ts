@@ -1,6 +1,12 @@
 import axiosClient from "../../../../shared/api/client";
 
 export type ImportKind = "USERS" | "CLASSES" | "ENROLLMENTS" | "TEACHER_ASSIGNMENTS";
+export const IMPORT_LABELS: Record<ImportKind, string> = {
+  USERS: "Tài khoản",
+  CLASSES: "Lớp học",
+  ENROLLMENTS: "Xếp lớp học sinh",
+  TEACHER_ASSIGNMENTS: "Phân công giáo viên",
+};
 export type ImportRow = { row: number; data: Record<string, string> };
 export type PreviewRow = ImportRow & { errors: string[]; warnings: string[]; matches: { id: number; email: string; fullName: string; dateOfBirth: string }[] };
 export type ImportPreview = { kind: ImportKind; columns: string[]; rows: PreviewRow[]; validRows: number; invalidRows: number; canCommit: boolean; previewToken: string | null };
