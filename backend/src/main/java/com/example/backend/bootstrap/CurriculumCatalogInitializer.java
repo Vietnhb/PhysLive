@@ -33,6 +33,12 @@ public class CurriculumCatalogInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws IOException {
+        // the curriculum source file is kept out of the repository; the database already holds the curriculum
+        if (!new ClassPathResource(CATALOG_PATH).exists()) {
+            org.slf4j.LoggerFactory.getLogger(CurriculumCatalogInitializer.class)
+                    .info("Curriculum catalogue file is not on the classpath; using the curriculum stored in the database");
+            return;
+        }
         CurriculumCatalog catalog = objectMapper.readValue(
                 new ClassPathResource(CATALOG_PATH).getInputStream(), CurriculumCatalog.class);
         disableRetiredTopics(catalog);

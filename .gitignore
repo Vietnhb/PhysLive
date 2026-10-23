@@ -52,3 +52,20 @@ Thumbs.db
 /Claude outputs/
 /react-client/test-results/
 /react-client/playwright-report/
+
+# Local agent settings and dev-server launch configs
+**/.claude/
+
+# Test data files (fixtures, timelines, generated responses) stay local
+react-client/tests/**/*.json
+
+# Test suites, documentation and runtime logs stay local
+react-client/tests/
+react-client/e2e/
+mobile-app/test/
+docs/
+backend/logs/
+
+# Physics catalogue sources live in the database; the files stay local
+backend/src/main/resources/schemas/
+backend/src/main/resources/curriculum/

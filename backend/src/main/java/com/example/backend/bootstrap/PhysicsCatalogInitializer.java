@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.InputStream;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ConditionalOnProperty(prefix = "physlive.bootstrap", name = "catalogs-enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class PhysicsCatalogInitializer implements CommandLineRunner {
+    private static final Logger log = LoggerFactory.getLogger(PhysicsCatalogInitializer.class);
     private final SchemaVersionRepository schemaRepository;
     private final ObjectMapper objectMapper;
     private final SchemaDefinitionService schemaDefinitions;
@@ -27,6 +30,11 @@ public class PhysicsCatalogInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        // the catalogue source files are kept out of the repository; the database already holds the topics and laws
+        if (!new ClassPathResource(SchemaCatalogCompiler.LIBRARY + "defaults.json").exists()) {
+            log.info("Physics catalogue files are not on the classpath; using the topics and laws stored in the database");
+            return;
+        }
         JsonNode activeCatalog = SchemaCatalogCompiler.loadFromClasspath(objectMapper);
         if (!activeCatalog.isArray() || activeCatalog.isEmpty()) {
             throw new IllegalStateException("Conceptual topic catalog must contain approved templates");
