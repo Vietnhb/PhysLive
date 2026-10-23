@@ -73,9 +73,17 @@
 }
 .rotWord {
   overflow: hidden;
-  /* Keep the rolling-word mask without clipping Vietnamese tone marks. */
+  /* Keep the rolling-word mask without clipping Vietnamese tone marks above and below, nor the side of a
+   * glyph that the tight letter-spacing pushes past its box (the "t" of "thử", "thấy"). */
   margin-block: -0.34em -0.22em;
   padding-block: 0.34em 0.22em;
+  margin-inline: -0.22em;
+  padding-inline: 0.22em;
+}
+/* Each letter paints its gradient only inside its own box; widen that box so the gradient reaches the whole glyph. */
+.lineTwo :global(.text-shine) {
+  margin-inline: -0.18em;
+  padding-inline: 0.18em;
 }
 .lead {
   max-width: 44ch;
