@@ -187,7 +187,6 @@ export default function AdminPayments() {
   const kpis = analytics?.kpis;
   return <div className="admin-content">
     <header className={styles.pageHeader}>
-      <div><h1>Thanh toán &amp; Doanh thu</h1><p>Theo dõi doanh thu, giao dịch và các khoản cần đối soát.</p></div>
       <div className={styles.headerActions}>
         <div className={styles.periodFilters} aria-label="Bộ lọc thời gian">
           <Select.Root value={period} onValueChange={value => setPeriod(value as PaymentPeriod)}><Select.Trigger aria-label="Loại kỳ thống kê" /><Select.Content><Select.Item value="MONTH">Theo tháng</Select.Item><Select.Item value="QUARTER">Theo quý</Select.Item><Select.Item value="YEAR">Theo năm</Select.Item></Select.Content></Select.Root>

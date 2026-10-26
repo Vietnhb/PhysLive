@@ -73,7 +73,6 @@ export default function SchoolDashboard() {
     : tokenUsage > 0 ? 100 : 0;
 
   return <div className="admin-content school-dashboard">
-    <header className="admin-content-header"><div><h1 className="admin-content-title">Tổng quan</h1></div></header>
     {error && <div className="admin-error-banner" role="alert">{error}<Button variant="soft" color="red" onClick={() => void load()}>Thử lại</Button></div>}
     {loading && !summary ? <DashboardLoadingSkeleton cards={4} label="Đang tải dữ liệu trường…" /> : summary && <>
       <section className="admin-stats-grid school-summary-grid" aria-label="Chỉ số trường học">

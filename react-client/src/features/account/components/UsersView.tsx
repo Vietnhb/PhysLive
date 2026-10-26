@@ -11,8 +11,7 @@ import { apiMessage } from "../../../shared/lib/apiError";
 import { AccountPermissionFields, AccountProfileFields, ResetManagedPasswordDialog } from "./ManagedAccountFields";
 import { accountDetails, accountDetailsPayload, blankAccountDetails, missingPermission, type AccountDetails } from "../model/accountDetailsModel";
 import { permissionSummary, permissionsForRole } from "../../../shared/auth/permissions";
-import SchoolBulkImport from "../../school/dataio/components/SchoolBulkImport";
-import { PageHeader, Panel, Loading, ErrorNotice, Button, FormField, Stat } from "../../../shared/ui/ManagementUI";
+import { Panel, Loading, ErrorNotice, Button, FormField, Stat } from "../../../shared/ui/ManagementUI";
 
 function roleColor(role: string): NonNullable<BadgeProps["color"]> {
   switch (role) {
@@ -100,7 +99,6 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
   const edit = (item: User) => { setError(""); setNotice(""); setEditing(item.id); setForm({ email: item.email, password: "", fullName: item.fullName, role: item.role, institutionId: item.schoolId ?? item.institutionId ?? "", ...accountDetails(item) }); setShowForm(true); };
   const toggle = async (item: User) => { if (busyRef.current) return; busyRef.current = true; setBusy(true); setError(""); setNotice(""); try { const updated = await setManagedUserActive(item.id, item.active === false, schoolId); setItems(current => current.map(user => user.id === updated.id ? updated : user)); } catch (e) { setError(apiMessage(e, "Không thể cập nhật trạng thái tài khoản.")); } finally { busyRef.current = false; setBusy(false); } };
   return <div className="admin-content">
-    <PageHeader title="Tài khoản người dùng" description="" action={<div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>{schoolId && (actorRole === "SCHOOL" || actorRole === "MANAGER") && <SchoolBulkImport schoolId={schoolId} kind="USERS" disabled={busy} onImported={load} />}<Button primary disabled={busy} onClick={() => { setError(""); setNotice(""); setEditing(null); setForm(newUser()); setShowForm(true); }}><LearningIcon name="plus" />Tạo tài khoản</Button></div>} />
     {error && <ErrorNotice error={error} onRetry={() => void load()} />}
     {notice && <Callout.Root color="green" role="status"><Callout.Text>{notice}</Callout.Text></Callout.Root>}
     <div className="admin-stats-grid">
@@ -146,7 +144,7 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
     </Dialog.Content></Dialog.Root>
     <Panel title="Danh sách tài khoản" className="admin-users-panel" hideHeader>{loading ? <Loading text="Đang tải danh sách tài khoản…" headers={schoolScoped ? ["Họ tên / Email", "Vai trò", "Đăng nhập gần nhất", "Trạng thái", "Thao tác"] : ["Họ tên / Email", "Vai trò", "Trường", "Đăng nhập gần nhất", "Trạng thái", "Thao tác"]} /> : <><Table.Root className="admin-user-table" size="2" variant="ghost"><Table.Header><Table.Row><Table.ColumnHeaderCell>Họ tên / Email</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Vai trò</Table.ColumnHeaderCell>{!schoolScoped && <Table.ColumnHeaderCell>Trường</Table.ColumnHeaderCell>}<Table.ColumnHeaderCell>Đăng nhập gần nhất</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Thao tác</Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>{filtered.length === 0 ? <Table.Row><Table.Cell colSpan={schoolScoped ? 5 : 6} className="admin-empty-table">Không tìm thấy tài khoản phù hợp.</Table.Cell></Table.Row> : visibleItems.map(item => <Table.Row key={item.id}>
       <Table.Cell><div className="admin-table-user"><Avatar size="3" radius="full" src={item.avatarUrl || undefined} color={roleColor(item.role)} fallback={(item.fullName || item.email).slice(0, 1).toUpperCase()} /><span><Text as="div" size="3" weight="medium">{item.fullName || "Chưa có họ tên"}</Text><Text as="div" color="gray" size="2">{item.email}</Text>{item.dateOfBirth && <Text as="div" color="gray" size="1">{new Date(`${item.dateOfBirth}T00:00:00`).toLocaleDateString("vi-VN")}</Text>}</span></div></Table.Cell>
-      <Table.Cell><div style={{ display: "grid", gap: 6, justifyItems: "start" }}><Badge color={roleColor(item.role)} size="2" title={item.role}>{getRoleLabel(item.role)}</Badge>{permissionsForRole(item.role).length > 0 && <Text size="1" color="gray">{permissionSummary(item)}</Text>}</div></Table.Cell>
+      <Table.Cell><div style={{ display: "grid", gap: 6, justifyItems: "start" }}><Badge color={roleColor(item.role)} size="2" title={item.role}>{getRoleLabel(item.role)}</Badge>{permissionsForRole(item.role).length > 0 && permissionSummary(item) !== getRoleLabel(item.role) && <Text size="1" color="gray">{permissionSummary(item)}</Text>}</div></Table.Cell>
       {!schoolScoped && <Table.Cell>{availableSchools.find(school => school.id === item.institutionId)?.name || "—"}</Table.Cell>}
       <Table.Cell><Text size="2" color="gray">{item.lastLogin ? new Date(item.lastLogin).toLocaleString("vi-VN") : "Chưa đăng nhập"}</Text></Table.Cell>
       <Table.Cell><div style={{ display: "grid", gap: 6, justifyItems: "start" }}><Badge color={item.active === false ? "amber" : "cyan"} size="2">{item.active === false ? "Tạm khóa" : "Hoạt động"}</Badge>{item.mustChangePassword && <Text size="1" color="gray">Cần đổi mật khẩu</Text>}</div></Table.Cell>

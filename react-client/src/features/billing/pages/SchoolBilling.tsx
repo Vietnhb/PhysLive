@@ -109,7 +109,6 @@ export default function SchoolBilling() {
   };
   const selectedChoice = billing?.planChoices?.find(choice => choice.planCode === selected);
   return <motion.div className={`admin-content ${s.billing}`} initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .18 }}>
-    <header className="admin-content-header"><h1 className="admin-content-title">Gói và thanh toán</h1></header>
     {user?.billingRequired && <div className="admin-error-banner" role="status">Trường chưa có gói còn hiệu lực. Hãy chọn gói và hoàn tất thanh toán để mở các chức năng quản lý.</div>}
     {error && <div className="admin-error-banner" role="alert">{error}<Button variant="soft" color="red" onClick={() => void load()}>Tải lại</Button></div>}
     {loading ? <CardLoadingSkeleton cards={3} label="Đang tải thông tin gói…" /> : billing && <>

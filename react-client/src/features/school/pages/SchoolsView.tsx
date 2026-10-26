@@ -21,7 +21,7 @@ export function SchoolsView() {
   const visibleItems = items.slice(pageStart, pageStart + pageSize);
   const submit = async (event: FormEvent) => { event.preventDefault(); setBusy(true); try { const payload = { ...form, licenseStart: form.licenseStart || null, licenseEnd: form.licenseEnd || null, monthlyTokenQuota: form.monthlyTokenQuota === "" ? null : Number(form.monthlyTokenQuota) }; if (editing) { await updateSchool(editing, payload); } else { await createSchool(payload); } setShowForm(false); setEditing(null); setForm(blankSchool); await load(); } catch (e) { setError(apiMessage(e, "Không thể lưu trường học.")); } finally { setBusy(false); } };
   return <div className="admin-content">
-    <PageHeader title="Trường học" description="" action={<Button primary onClick={() => { setEditing(null); setForm(blankSchool); setShowForm(true); }}><LearningIcon name="plus" />Thêm trường</Button>} />
+    <PageHeader title="" description="" action={<Button primary onClick={() => { setEditing(null); setForm(blankSchool); setShowForm(true); }}><LearningIcon name="plus" />Thêm trường</Button>} />
     {error && <ErrorNotice error={error} onRetry={() => void load()} />}
     <Dialog.Root open={showForm} onOpenChange={setShowForm}><Dialog.Content maxWidth="620px" aria-describedby={undefined}><Dialog.Title>{editing ? "Cập nhật trường" : "Thêm trường"}</Dialog.Title>
       {error && <Callout.Root color="red" size="1" mb="4" role="alert"><Callout.Text>{error}</Callout.Text></Callout.Root>}

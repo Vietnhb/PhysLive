@@ -14,7 +14,7 @@
   transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
-.card:hover {
+.card:not([data-disabled="true"]):hover {
   border-color: var(--admin-border-strong, var(--line-strong));
   box-shadow: var(--shadow-sm);
 }
@@ -29,7 +29,7 @@
 }
 
 .card[data-disabled="true"] {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.62;
 }
 

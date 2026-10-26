@@ -54,11 +54,7 @@ export function OverviewView() {
 
   return (
     <div className="admin-content">
-      <PageHeader
-        title="Tổng quan"
-        description="Theo dõi quy mô người dùng, trường học và chất lượng kiểm định trên toàn hệ thống."
-        action={<Button onClick={() => void load()}><LearningIcon name="refresh" /> Làm mới</Button>}
-      />
+      
       {error && <ErrorNotice error={error} onRetry={() => void load()} />}
 
       <div className="admin-stats-grid">

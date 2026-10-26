@@ -33,9 +33,7 @@ export default function SchoolImportPage() {
   };
 
   return <div className={`admin-content ${s.page}`}>
-    <header className="admin-content-header">
-      <div><h1 className="admin-content-title">Nhập dữ liệu</h1><p className="admin-content-description">Nhập và quản lý dữ liệu hàng loạt từ tệp CSV.</p></div>
-    </header>
+    
 
     <Card size="3" className={s.card}>
       <div className={s.tabsScroll}>

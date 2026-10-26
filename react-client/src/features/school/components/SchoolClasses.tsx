@@ -1,27 +1,19 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { AlertDialog, Badge, Button, Card, Dialog, Flex, IconButton, Select, Table, TextField } from "@radix-ui/themes";
-import { Cross2Icon, EyeOpenIcon, MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { AlertDialog, Badge, Button, Card, Flex, Select, Table, TextField } from "@radix-ui/themes";
+import { EyeOpenIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
-import { archiveSchoolClass, createSchoolClass, schoolClasses } from "../api/schoolApi";
-import type { SchoolClassRequest, SchoolClassSummary } from "../types";
+import { archiveSchoolClass, schoolClasses } from "../api/schoolApi";
+import type { SchoolClassSummary } from "../types";
 import { apiMessage } from "../../../shared/lib/apiError";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
 import s from "./SchoolClasses.module.css";
 import { ClassTableLoading } from "./SchoolLoading";
 
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("vi");
-const defaultSchoolYear = () => {
-  const now = new Date();
-  const start = now.getMonth() >= 7 ? now.getFullYear() : now.getFullYear() - 1;
-  return `${start}-${start + 1}`;
-};
-const blankClass = (): SchoolClassRequest => ({ name: "", gradeLevel: 10, schoolYear: defaultSchoolYear(), subject: "Vật lý" });
-
 export default function SchoolClasses() {
   const reducedMotion = useReducedMotion();
   const navigate = useNavigate();
-  const nameInputRef = useRef<HTMLInputElement>(null);
   const schoolId = useSessionStore(state => state.user?.schoolId);
   const [items, setItems] = useState<SchoolClassSummary[]>([]);
   const [query, setQuery] = useState("");
@@ -31,9 +23,6 @@ export default function SchoolClasses() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [formError, setFormError] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState<SchoolClassRequest>(blankClass);
   const [archiveTarget, setArchiveTarget] = useState<SchoolClassSummary | null>(null);
 
   const load = useCallback(async () => {
@@ -73,36 +62,6 @@ export default function SchoolClasses() {
   const updateGrade = (value: string) => { setGrade(value); setClassPage(1); };
   const updateSchoolYear = (value: string) => { setSchoolYear(value); setClassPage(1); };
 
-  const openCreate = () => {
-    setForm(blankClass());
-    setFormError("");
-    setShowForm(true);
-  };
-
-  const closeForm = () => {
-    if (busy) return;
-    setShowForm(false);
-    setForm(blankClass());
-    setFormError("");
-  };
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!schoolId || busy) return;
-    setBusy(true);
-    setFormError("");
-    try {
-      await createSchoolClass(schoolId, form);
-      setShowForm(false);
-      setForm(blankClass());
-      await load();
-    } catch (err) {
-      setFormError(apiMessage(err, "Không thể lưu lớp học."));
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const confirmArchive = async () => {
     if (!schoolId || !archiveTarget || busy) return;
     const target = archiveTarget;
@@ -122,14 +81,6 @@ export default function SchoolClasses() {
   if (!schoolId) return null;
 
   return <div className="admin-content">
-    <header className="admin-content-header">
-      <div>
-        <h1 className="admin-content-title">Quản lý lớp học</h1>
-        <p className="admin-content-description">Xem chi tiết, tạo mới, cập nhật hoặc tắt lớp học trong trường.</p>
-      </div>
-      <Button onClick={openCreate}><PlusIcon />Tạo lớp</Button>
-    </header>
-
     {error && <div className="admin-error-banner" role="alert">{error}<Button variant="soft" color="red" onClick={() => void load()}>Tải lại</Button></div>}
 
     <motion.div className="school-classes-grid" initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .18 }}>
@@ -186,18 +137,6 @@ export default function SchoolClasses() {
       </section></Card>
 
     </motion.div>
-
-    <Dialog.Root open={showForm} onOpenChange={open => { if (!open) closeForm(); }}><Dialog.Content maxWidth="620px" size="3" onOpenAutoFocus={event => { event.preventDefault(); nameInputRef.current?.focus(); }} onEscapeKeyDown={event => { if (busy) event.preventDefault(); }} onPointerDownOutside={event => { if (busy) event.preventDefault(); }}>
-      <div className="admin-modal-header"><div><Dialog.Title>Tạo lớp học mới</Dialog.Title><Dialog.Description size="2">Nhập thông tin cơ bản của lớp học.</Dialog.Description></div><Dialog.Close><IconButton variant="soft" color="gray" aria-label="Đóng" disabled={busy}><Cross2Icon /></IconButton></Dialog.Close></div>
-      {formError && <div className="admin-error-banner" role="alert">{formError}</div>}
-      <form className="admin-form-grid" onSubmit={submit}>
-        <label>Tên lớp<TextField.Root ref={nameInputRef} required maxLength={100} value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="Ví dụ: 10A1" aria-label="Tên lớp" /></label>
-        <label>Khối<Select.Root size="2" value={String(form.gradeLevel)} onValueChange={value => setForm({ ...form, gradeLevel: Number(value) })}><Select.Trigger aria-label="Khối" /><Select.Content>{[10, 11, 12].map(value => <Select.Item key={value} value={String(value)}>Khối {value}</Select.Item>)}</Select.Content></Select.Root></label>
-        <label>Năm học<TextField.Root required maxLength={20} value={form.schoolYear} onChange={event => setForm({ ...form, schoolYear: event.target.value })} placeholder="2026-2027" aria-label="Năm học" /></label>
-        <label>Môn học<TextField.Root maxLength={50} value={form.subject} onChange={event => setForm({ ...form, subject: event.target.value })} aria-label="Môn học" /></label>
-        <div className="admin-form-actions"><Button variant="soft" color="gray" type="button" disabled={busy} onClick={closeForm}>Hủy</Button><Button type="submit" loading={busy} disabled={busy}>Tạo lớp</Button></div>
-      </form>
-    </Dialog.Content></Dialog.Root>
 
     <AlertDialog.Root open={archiveTarget !== null} onOpenChange={open => { if (!open) setArchiveTarget(null); }}><AlertDialog.Content maxWidth="460px"><AlertDialog.Title>Tắt lớp học?</AlertDialog.Title><AlertDialog.Description size="2">Lớp “{archiveTarget?.name}” sẽ không còn xuất hiện trong danh sách lớp đang hoạt động.</AlertDialog.Description><Flex gap="3" mt="4" justify="end"><AlertDialog.Cancel><Button variant="soft" color="gray">Hủy</Button></AlertDialog.Cancel><AlertDialog.Action><Button color="red" disabled={busy} onClick={() => void confirmArchive()}>Tắt lớp</Button></AlertDialog.Action></Flex></AlertDialog.Content></AlertDialog.Root>
   </div>;

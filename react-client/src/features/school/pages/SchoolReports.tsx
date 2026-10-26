@@ -112,7 +112,6 @@ export default function SchoolReports() {
   if (!schoolId) return null;
 
   return <div className={`admin-content school-reports ${s.reports}`}>
-    <header className="admin-content-header"><div><h1 className="admin-content-title">Báo cáo</h1></div></header>
     {error && <div className="admin-error-banner" role="alert">{error}<Button variant="soft" color="red" onClick={() => void load()}>Thử lại</Button></div>}
     {loading && !summary ? <DashboardLoadingSkeleton cards={4} label="Đang tải báo cáo…" /> : summary && <>
       <section className={`admin-stats-grid school-summary-grid ${s.summary}`} aria-label="Tổng quan trường">
