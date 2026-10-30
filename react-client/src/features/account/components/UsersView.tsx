@@ -93,6 +93,7 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
       const payload = { fullName: form.fullName.trim(), role: form.role, institutionId: form.institutionId || undefined, ...accountDetailsPayload(form, form.role) };
       if (editing === null) await createManagedUser({ ...payload, email: form.email.trim(), password: form.password }, schoolId);
       else await updateManagedUser(editing, payload, schoolId);
+      if (editing === null) { setQuery(""); setSelectedRole("ALL"); setPage(1); }
       setShowForm(false); setEditing(null); setForm(newUser()); await load();
       setNotice("Đã lưu tài khoản.");
     } catch (e) { setError(apiMessage(e, "Không thể lưu tài khoản.")); }
@@ -128,6 +129,7 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
         </Select.Content>
       </Select.Root>
       <IconButton type="button" variant="surface" size="3" aria-label="Làm mới danh sách tài khoản" onClick={() => void load()} disabled={loading}><LearningIcon name="refresh" /></IconButton>
+      {schoolScoped && actorRole === "SCHOOL" && <ThemeButton type="button" size="3" disabled={busy} style={{ marginLeft: "auto" }} onClick={() => { setError(""); setNotice(""); setEditing(null); setForm(newUser()); setOpenActions(null); setShowForm(true); }}><LearningIcon name="plus" />Tạo tài khoản</ThemeButton>}
     </div>
     <Dialog.Root open={showForm} onOpenChange={open => { if (!busyRef.current) setShowForm(open); }}><Dialog.Content className={modal.dialog} maxWidth="620px" aria-describedby={undefined} onEscapeKeyDown={event => { if (busyRef.current) event.preventDefault(); }} onInteractOutside={event => { if (busyRef.current) event.preventDefault(); }}>
       <div className={modal.body}>
