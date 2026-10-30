@@ -33,8 +33,6 @@ export default function AdminLayout() {
     { label: "Nội dung", items: [
       { to: "/manager/curriculum", label: "Chương trình học", icon: "file" },
       { to: "/manager/validation", label: "Kiểm định", icon: "activity" },
-      { to: "/reviewer", label: "Kiểm duyệt vật lý", icon: "shield" },
-      { to: "/workspace", label: "Mô phỏng", icon: "atom" },
     ] },
   ];
 

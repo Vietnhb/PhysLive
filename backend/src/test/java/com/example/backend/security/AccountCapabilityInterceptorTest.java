@@ -16,6 +16,30 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class AccountCapabilityInterceptorTest {
+    @ParameterizedTest @CsvSource({"MANAGER,true,false", "STAFF,true,true", "STAFF,false,false", "REVIEWER,true,false"})
+    void teachingWorkspaceBelongsOnlyToTeachers(String roleName, boolean teachPermission, boolean expected) {
+        User user = new User(); Role role = new Role(); role.setName(roleName); user.setRole(role);
+        user.setActive(true);
+        if (teachPermission) user.grantPermission(new Permission("TEACH"), null);
+        assertEquals(expected, TestPermissions.access().canTeach(user));
+    }
+
+    @ParameterizedTest @CsvSource({
+        "GET,/api/reviewer/library", "GET,/api/reviewer/library/page",
+        "PUT,/api/reviewer/library/id", "GET,/api/reviewer/library/id/history"
+    })
+    void managerCannotModerateEvenWithAnExplicitReviewPermission(String method, String path) {
+        User user = new User(); Role role = new Role(); role.setName("MANAGER"); user.setRole(role);
+        user.setActive(true);
+        user.grantPermission(new Permission("CONTENT_REVIEW"), null);
+        var current = mock(CurrentUserService.class); when(current.requireCurrentUser()).thenReturn(user);
+        var interceptor = new AccountCapabilityInterceptor(TestPermissions.access(), current);
+        var request = new MockHttpServletRequest(method, path); request.setServletPath(path);
+        assertFalse(TestPermissions.access().canReviewPublic(user));
+        assertEquals(HttpStatus.FORBIDDEN, assertThrows(ApiException.class,
+                () -> interceptor.preHandle(request, new MockHttpServletResponse(), new Object())).getStatus());
+    }
+
     @ParameterizedTest @CsvSource({
         "true,false,GET,/api/reviewer/solvers,true", "false,true,GET,/api/reviewer/solvers,false",
         "true,false,GET,/api/reviewer/library,false", "false,true,GET,/api/reviewer/library,true",

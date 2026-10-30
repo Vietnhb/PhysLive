@@ -28,8 +28,8 @@ public class AccountAccessService {
     }
 
     public boolean canReviewPublic(User user) {
-        return active(user) && (hasRole(user, RoleName.MANAGER)
-                || hasRole(user, RoleName.REVIEWER) && user.hasPermission(PermissionCode.CONTENT_REVIEW));
+        return active(user) && hasRole(user, RoleName.REVIEWER)
+                && user.hasPermission(PermissionCode.CONTENT_REVIEW);
     }
 
     public boolean isDepartmentHead(User user) {
@@ -38,8 +38,7 @@ public class AccountAccessService {
 
     /** Teaching: simulations, personal library, class assignments and grading. */
     public boolean canTeach(User user) {
-        return active(user) && (hasRole(user, RoleName.MANAGER)
-                || hasRole(user, RoleName.STAFF) && user.hasPermission(PermissionCode.TEACH));
+        return active(user) && hasRole(user, RoleName.STAFF) && user.hasPermission(PermissionCode.TEACH);
     }
 
     /** A STAFF account that holds only DEPARTMENT_HEAD_PHYSICS has no teaching workspace. */

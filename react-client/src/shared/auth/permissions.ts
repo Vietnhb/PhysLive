@@ -58,7 +58,7 @@ export function permissionSummary(user: PermissionHolder | null | undefined): st
 
 /** Simulations, personal library, class assignments and grading. */
 export function canTeach(user: PermissionHolder | null | undefined): boolean {
-  return user?.role === 'MANAGER' || hasPermission(user, 'TEACH');
+  return user?.role === 'STAFF' && hasPermission(user, 'TEACH');
 }
 
 export function isDepartmentHead(user: PermissionHolder | null | undefined): boolean {

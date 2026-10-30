@@ -33,7 +33,7 @@ export const PLATFORM_ROLES: RoleType[] = [ROLE_NAMES.ADMIN, ROLE_NAMES.MANAGER,
 export const SCHOOL_ROLES: RoleType[] = [ROLE_NAMES.SCHOOL, ROLE_NAMES.STAFF, ROLE_NAMES.STUDENT];
 
 /** Roles that may create simulations and manage learning activities. */
-export const LEARNING_MANAGER_ROLES = [ROLE_NAMES.STAFF, ROLE_NAMES.MANAGER] as const;
+export const LEARNING_MANAGER_ROLES = [ROLE_NAMES.STAFF] as const;
 
 /** Roles that may review shared simulation content. */
 export const CONTENT_REVIEW_ROLES = [ROLE_NAMES.REVIEWER, ROLE_NAMES.MANAGER] as const;

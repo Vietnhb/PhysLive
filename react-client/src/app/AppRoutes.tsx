@@ -80,7 +80,7 @@ export default function AppRoutes({ authReady }: { authReady: boolean }) {
     return <RequireAccess ready={authReady} roles={roles}>{element}</RequireAccess>;
   };
   const assignmentsElement =
-    roleElement([ROLE_NAMES.STAFF, ROLE_NAMES.STUDENT, ROLE_NAMES.MANAGER],
+    roleElement([ROLE_NAMES.STAFF, ROLE_NAMES.STUDENT],
       isStudentRole(user?.role) ? <Navigate to="/student/assignments" replace /> : teachingElement(<Navigate to={`/assignments/workspace${search}`} replace />));
 
   if (authReady && user?.mustChangePassword && pathname !== "/change-password") {
@@ -130,7 +130,7 @@ export default function AppRoutes({ authReady }: { authReady: boolean }) {
             <Route path="*" element={<Navigate to="/lab" replace />} />
           </Route>
           {/* Teachers use the library inside their management area, next to submissions and complaints. */}
-          <Route path="/library" element={<RequireAccess ready={authReady} roles={APPLICATION_ROLES}>{user?.role === ROLE_NAMES.STAFF && canTeach(user) ? <Navigate to="/lab/library" replace /> : <Library />}</RequireAccess>} />
+          <Route path="/library" element={<RequireAccess ready={authReady} roles={APPLICATION_ROLES}>{user?.role === ROLE_NAMES.MANAGER ? <Navigate to="/manager" replace /> : user?.role === ROLE_NAMES.STAFF && canTeach(user) ? <Navigate to="/lab/library" replace /> : <Library />}</RequireAccess>} />
           <Route path="/community" element={authReady ? <CommunityLibrary /> : <RouteLoading />} />
           <Route path="/assignments" element={assignmentsElement} />
           <Route path="/school" element={roleElement([ROLE_NAMES.SCHOOL], user?.schoolId ? <SchoolLayout /> : <Navigate to="/" replace />)}>
