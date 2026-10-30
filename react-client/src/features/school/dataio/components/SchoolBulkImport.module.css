@@ -21,8 +21,6 @@
 .dropzoneActive { border-color: var(--indigo-9); background: var(--indigo-3); transform: translateY(-1px); }
 .uploadIcon { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 14px; background: var(--indigo-4); color: var(--indigo-11); }
 .uploadIcon svg { width: 25px; height: 25px; }
-.fileRules { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.fileRules span { padding: 5px 10px; border-radius: 999px; background: var(--gray-3); color: var(--gray-11); font-size: 12px; }
 .guide { padding: 14px 16px; border: 1px solid var(--gray-5); border-radius: 12px; background: var(--gray-2); color: var(--gray-11); }
 .guide p { margin: 0; line-height: 1.55; }
 .summaryGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }

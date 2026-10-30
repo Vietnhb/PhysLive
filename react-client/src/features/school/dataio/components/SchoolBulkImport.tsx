@@ -216,7 +216,6 @@ export function SchoolImportWorkflow({ schoolId, kind, onImported, onPendingChan
         <Button type="button" variant="soft" disabled={busy} onClick={() => fileRef.current?.click()}><FileTextIcon />{selectedFile ? "Chọn tệp khác" : "Chọn tệp CSV"}</Button>
         <input ref={fileRef} type="file" accept=".csv,text/csv" hidden aria-label="Chọn tệp CSV" disabled={busy} onChange={chooseFile} />
       </div>
-      <div className={s.fileRules}><span>CSV mã hóa UTF-8</span><span>Tối đa 1 MB</span><span>Tối đa 200 dòng</span></div>
       <div className={s.guide}>{kind === "USERS" ? <Text as="p" size="2">Ngày sinh dùng định dạng yyyy-MM-dd. Có thể để trống mật khẩu để hệ thống tạo tự động. Email phải duy nhất; mã lớp và năm học là tùy chọn.</Text> : <Text as="p" size="2">Mã lớp là tên lớp trong trường. Năm học gồm hai năm liên tiếp, ví dụ 2026-2027. Xếp lớp và phân công chỉ dùng email tài khoản đã tồn tại trong trường.</Text>}</div>
       <div className={s.actions}><span /><Button size="3" disabled={!selectedFile || busy} loading={busy} onClick={() => void inspectFile()}>Tiếp tục kiểm tra</Button></div>
     </section>}
