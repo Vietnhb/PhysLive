@@ -134,10 +134,18 @@ public class SchoolClassService {
 
     @Transactional
     public TeacherAssignment assignTeacher(UUID schoolId, UUID classId, Integer teacherId) {
-        requireWriteAccess(schoolId); SchoolClass schoolClass = activeClassInSchool(schoolId, classId);
+        requireWriteAccess(schoolId);
+        // Serialize manual and CSV assignments in the same school before checking both sides.
+        schools.findByIdForUpdate(schoolId)
+                .orElseThrow(() -> ApiException.notFound("Không tìm thấy trường."));
+        SchoolClass schoolClass = activeClassInSchool(schoolId, classId);
         User teacher = userInSchool(schoolId, teacherId, RoleName.STAFF.name());
         if (!accountAccess.canTeach(teacher))
             throw ApiException.badRequest("Tài khoản này chưa được gắn quyền giáo viên nên không thể phân công giảng dạy.");
+        if (teacherAssignments.existsBySchoolClassIdAndTeacherIdNotAndIsActiveTrue(classId, teacherId))
+            throw ApiException.conflict("Lớp đã có giáo viên phụ trách. Hãy gỡ phân công hiện tại trước khi chọn giáo viên khác.");
+        if (teacherAssignments.existsByTeacherIdAndSchoolClassIdNotAndIsActiveTrue(teacherId, classId))
+            throw ApiException.conflict("Giáo viên đã được phân công cho lớp khác. Mỗi giáo viên chỉ được phụ trách một lớp.");
         ClassTeacherAssignment assignment = teacherAssignments.findBySchoolClassIdAndTeacherId(classId, teacherId).orElseGet(ClassTeacherAssignment::new);
         assignment.setSchoolClass(schoolClass); assignment.setTeacher(teacher); assignment.setIsActive(true);
         assignment = teacherAssignments.save(assignment);

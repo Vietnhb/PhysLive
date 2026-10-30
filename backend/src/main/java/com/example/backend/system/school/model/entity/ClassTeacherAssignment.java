@@ -16,9 +16,9 @@ import java.util.UUID;
 import lombok.Data;
 
 /**
- * Many-to-Many: Teacher <-> Class assignment.
- * SCHOOL assigns teachers to classes.
- * 1 teacher can teach multiple classes.
+ * Assignment history between teachers and classes.
+ * Each teacher and each class may have at most one active assignment.
+ * Inactive records are retained for reassignment and history.
  */
 @Entity
 @Table(
