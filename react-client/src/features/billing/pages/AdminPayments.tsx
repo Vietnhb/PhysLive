@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button as ThemeButton, Select, TextField } from "@radix-ui/themes";
 import { apiMessage } from "../../../shared/lib/apiError";
 import LearningIcon from "../../../shared/ui/LearningIcon";
@@ -51,6 +51,7 @@ function compactVnd(value: number) {
 }
 
 function periodDescription(filter: PaymentPeriodFilter) {
+  if (filter.period === "DAY") return `Ngày ${filter.date?.split("-").reverse().join("/") ?? ""}`;
   if (filter.period === "MONTH") return `Tháng ${filter.month}/${filter.year}`;
   if (filter.period === "QUARTER") return `Quý ${filter.quarter}/${filter.year}`;
   return `Năm ${filter.year}`;
@@ -129,6 +130,8 @@ export default function AdminPayments() {
   const [year, setYear] = useState(initialNow.getFullYear());
   const [month, setMonth] = useState(initialNow.getMonth() + 1);
   const [quarter, setQuarter] = useState(Math.floor(initialNow.getMonth() / 3) + 1);
+  const [date, setDate] = useState(() => `${initialNow.getFullYear()}-${String(initialNow.getMonth() + 1).padStart(2, "0")}-${String(initialNow.getDate()).padStart(2, "0")}`);
+  const requestRef = useRef(0);
   const [items, setItems] = useState<AdminPayment[]>([]);
   const [analytics, setAnalytics] = useState<PaymentAnalytics | null>(null);
   const [error, setError] = useState("");
@@ -139,25 +142,29 @@ export default function AdminPayments() {
   const [pageSize, setPageSize] = useState<number>(10);
   const [page, setPage] = useState(1);
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh";
-  const filter = useMemo<PaymentPeriodFilter>(() => ({ period, year, month, quarter, timezone }), [month, period, quarter, timezone, year]);
+  const filter = useMemo<PaymentPeriodFilter>(() => ({ period, year, month, quarter, date, timezone }), [date, month, period, quarter, timezone, year]);
   const years = useMemo(() => Array.from({ length: 11 }, (_, index) => initialNow.getFullYear() - index), [initialNow]);
 
   const load = useCallback(async () => {
+    const request = ++requestRef.current;
     setLoading(true);
+    setAnalytics(null);
+    setError("");
     try {
       const [payments, report] = await Promise.all([adminPayments(filter), adminPaymentAnalytics(filter)]);
+      if (request !== requestRef.current) return;
       setItems(payments);
       setAnalytics(report);
       setError("");
     } catch (err) {
-      setError(apiMessage(err, "Không thể tải dữ liệu thanh toán."));
+      if (request === requestRef.current) setError(apiMessage(err, "Không thể tải dữ liệu thanh toán."));
     } finally {
-      setLoading(false);
+      if (request === requestRef.current) setLoading(false);
     }
   }, [filter]);
 
-  useEffect(() => { void load(); }, [load]);
-  useEffect(() => { setPage(1); setActiveTab("ALL"); }, [period, year, month, quarter]);
+  useEffect(() => { const requests = requestRef; void load(); return () => { requests.current++; }; }, [load]);
+  useEffect(() => { setPage(1); setActiveTab("ALL"); }, [period, year, month, quarter, date]);
 
   const reconcile = async (id: string) => {
     setReconcilingId(id);
@@ -189,10 +196,12 @@ export default function AdminPayments() {
     <header className={styles.pageHeader}>
       <div className={styles.headerActions}>
         <div className={styles.periodFilters} aria-label="Bộ lọc thời gian">
-          <Select.Root value={period} onValueChange={value => setPeriod(value as PaymentPeriod)}><Select.Trigger aria-label="Loại kỳ thống kê" /><Select.Content><Select.Item value="MONTH">Theo tháng</Select.Item><Select.Item value="QUARTER">Theo quý</Select.Item><Select.Item value="YEAR">Theo năm</Select.Item></Select.Content></Select.Root>
+          <span>Phạm vi:</span>
+          <Select.Root value={period} onValueChange={value => setPeriod(value as PaymentPeriod)}><Select.Trigger aria-label="Loại kỳ thống kê" /><Select.Content><Select.Item value="DAY">Theo ngày</Select.Item><Select.Item value="MONTH">Theo tháng</Select.Item><Select.Item value="QUARTER">Theo quý</Select.Item><Select.Item value="YEAR">Theo năm</Select.Item></Select.Content></Select.Root>
+          {period === "DAY" && <TextField.Root type="date" aria-label="Chọn ngày thống kê doanh thu" value={date} min="2000-01-01" max="2100-12-31" onChange={event => { const value = event.target.value; if (/^\d{4}-\d{2}-\d{2}$/.test(value) && value >= "2000-01-01" && value <= "2100-12-31") setDate(value); }} />}
           {period === "MONTH" && <Select.Root value={String(month)} onValueChange={value => setMonth(Number(value))}><Select.Trigger aria-label="Chọn tháng" /><Select.Content>{MONTHS.map(value => <Select.Item key={value} value={String(value)}>Tháng {value}</Select.Item>)}</Select.Content></Select.Root>}
           {period === "QUARTER" && <Select.Root value={String(quarter)} onValueChange={value => setQuarter(Number(value))}><Select.Trigger aria-label="Chọn quý" /><Select.Content>{QUARTERS.map(value => <Select.Item key={value} value={String(value)}>Quý {value}</Select.Item>)}</Select.Content></Select.Root>}
-          <Select.Root value={String(year)} onValueChange={value => setYear(Number(value))}><Select.Trigger aria-label="Chọn năm" /><Select.Content>{years.map(value => <Select.Item key={value} value={String(value)}>{value}</Select.Item>)}</Select.Content></Select.Root>
+          {period !== "DAY" && <Select.Root value={String(year)} onValueChange={value => setYear(Number(value))}><Select.Trigger aria-label="Chọn năm" /><Select.Content>{years.map(value => <Select.Item key={value} value={String(value)}>{value}</Select.Item>)}</Select.Content></Select.Root>}
         </div>
         <ThemeButton type="button" variant="surface" size="2" disabled={loading} onClick={() => void load()}><LearningIcon name="refresh" />Làm mới</ThemeButton>
       </div>
@@ -208,7 +217,7 @@ export default function AdminPayments() {
         <article className={styles.kpiCard}><div className={`${styles.kpiIcon} ${styles.red}`}><LearningIcon name="close" /></div><span>Thanh toán thất bại</span><strong>{kpis?.failedTransactions ?? 0}</strong><small>Không ghi nhận doanh thu</small></article>
       </section>
 
-      <section className={`${styles.panel} ${styles.trendPanel}`}><div className={styles.panelHeading}><div><h2>Xu hướng doanh thu</h2><p>Doanh thu từ giao dịch đã thanh toán · {periodDescription(filter)}</p></div><span className={styles.periodBadge}>{analytics.period === "MONTH" ? "Theo ngày" : "Theo tháng"}</span></div><RevenueTrendChart data={analytics.trend} /></section>
+      <section className={`${styles.panel} ${styles.trendPanel}`}><div className={styles.panelHeading}><div><h2>Xu hướng doanh thu</h2><p>Doanh thu từ giao dịch đã thanh toán · {periodDescription(filter)}</p></div><span className={styles.periodBadge}>{analytics.period === "DAY" ? "Chi tiết theo giờ trong ngày" : analytics.period === "MONTH" ? "Chi tiết theo ngày trong tháng" : analytics.period === "QUARTER" ? "Chi tiết theo tháng trong quý" : "Chi tiết theo tháng trong năm"}</span></div><RevenueTrendChart key={`${period}-${date}-${year}-${month}-${quarter}`} data={analytics.trend} /></section>
 
       <div className={styles.insightGrid}>
         <section className={styles.panel}><div className={styles.panelHeading}><div><h2>Doanh thu theo gói</h2><p>Sắp xếp theo doanh thu giảm dần</p></div></div><PackageRevenueChart data={analytics.packages} total={analytics.kpis.grossPaidVnd} /></section>

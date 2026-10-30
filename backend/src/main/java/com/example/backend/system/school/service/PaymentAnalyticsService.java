@@ -38,7 +38,12 @@ public class PaymentAnalyticsService {
 
     @Transactional(readOnly = true)
     public PaymentAnalytics analytics(String period, Integer year, Integer month, Integer quarter, String timezone) {
-        PeriodRange range = resolvePeriod(period, year, month, quarter, timezone);
+        return analytics(period, year, month, quarter, timezone, null);
+    }
+
+    @Transactional(readOnly = true)
+    public PaymentAnalytics analytics(String period, Integer year, Integer month, Integer quarter, String timezone, String date) {
+        PeriodRange range = resolvePeriod(period, year, month, quarter, timezone, date);
         List<PaymentAnalyticsRow> rows = payments.findAnalyticsRows(range.from(), range.to());
 
         long grossPaidVnd = 0;
@@ -90,6 +95,11 @@ public class PaymentAnalyticsService {
 
     public PeriodRange resolvePeriod(String rawPeriod, Integer requestedYear, Integer requestedMonth,
                                      Integer requestedQuarter, String timezone) {
+        return resolvePeriod(rawPeriod, requestedYear, requestedMonth, requestedQuarter, timezone, null);
+    }
+
+    public PeriodRange resolvePeriod(String rawPeriod, Integer requestedYear, Integer requestedMonth,
+                                     Integer requestedQuarter, String timezone, String date) {
         ZoneId zone;
         try {
             zone = ZoneId.of(timezone == null || timezone.isBlank() ? "Asia/Ho_Chi_Minh" : timezone);
@@ -105,6 +115,16 @@ public class PaymentAnalyticsService {
         Integer month = null;
         Integer quarter = null;
         switch (period) {
+            case "DAY" -> {
+                try {
+                    start = LocalDate.parse(date == null ? "" : date);
+                } catch (DateTimeException exception) {
+                    throw ApiException.badRequest("Chọn ngày hợp lệ theo định dạng yyyy-MM-dd.");
+                }
+                year = start.getYear();
+                if (year < 2000 || year > 2100) throw ApiException.badRequest("Năm phải nằm trong khoảng 2000–2100.");
+                month = start.getMonthValue();
+            }
             case "MONTH" -> {
                 month = requestedMonth == null ? now.getMonthValue() : requestedMonth;
                 if (month < 1 || month > 12) throw ApiException.badRequest("Tháng phải nằm trong khoảng 1–12.");
@@ -116,10 +136,11 @@ public class PaymentAnalyticsService {
                 start = LocalDate.of(year, (quarter - 1) * 3 + 1, 1);
             }
             case "YEAR" -> start = LocalDate.of(year, 1, 1);
-            default -> throw ApiException.badRequest("Kỳ thống kê chỉ hỗ trợ MONTH, QUARTER hoặc YEAR.");
+            default -> throw ApiException.badRequest("Kỳ thống kê chỉ hỗ trợ DAY, MONTH, QUARTER hoặc YEAR.");
         }
 
         LocalDate end = switch (period) {
+            case "DAY" -> start.plusDays(1);
             case "MONTH" -> start.plusMonths(1);
             case "QUARTER" -> start.plusMonths(3);
             default -> start.plusYears(1);
@@ -130,7 +151,12 @@ public class PaymentAnalyticsService {
 
     private static Map<String, MutableRevenue> emptyTrend(PeriodRange range) {
         Map<String, MutableRevenue> trend = new LinkedHashMap<>();
-        if ("MONTH".equals(range.period())) {
+        if ("DAY".equals(range.period())) {
+            // Iterate actual hours to handle days with 23 or 25 hours at DST boundaries.
+            for (Instant hour = range.from(); hour.isBefore(range.to()); hour = hour.plusSeconds(3600)) {
+                trend.put(hour.toString(), new MutableRevenue());
+            }
+        } else if ("MONTH".equals(range.period())) {
             YearMonth selected = YearMonth.of(range.year(), range.month());
             for (int day = 1; day <= selected.lengthOfMonth(); day++) {
                 trend.put(selected.atDay(day).toString(), new MutableRevenue());
@@ -146,11 +172,18 @@ public class PaymentAnalyticsService {
     }
 
     private static String bucketKey(Instant timestamp, PeriodRange range) {
+        if ("DAY".equals(range.period())) {
+            long offset = java.time.Duration.between(range.from(), timestamp).toHours();
+            return range.from().plusSeconds(offset * 3600).toString();
+        }
         ZonedDateTime local = timestamp.atZone(range.zone());
         return "MONTH".equals(range.period()) ? local.toLocalDate().toString() : YearMonth.from(local).toString();
     }
 
     private static String bucketLabel(String key, PeriodRange range) {
+        if ("DAY".equals(range.period())) {
+            return Instant.parse(key).atZone(range.zone()).format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+        }
         if ("MONTH".equals(range.period())) {
             LocalDate date = LocalDate.parse(key);
             return "%02d/%02d".formatted(date.getDayOfMonth(), date.getMonthValue());

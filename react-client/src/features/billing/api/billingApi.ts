@@ -14,9 +14,9 @@ export type PaymentNotification = { id: string; schoolName: string; planCode: st
 
 export const paymentNotifications = () => axiosClient.get<PaymentNotification[]>("/admin/payment-notifications").then(r => r.data);
 
-export type PaymentPeriod = "MONTH" | "QUARTER" | "YEAR";
+export type PaymentPeriod = "DAY" | "MONTH" | "QUARTER" | "YEAR";
 export type PaymentStatus = "PAID" | "PENDING" | "FAILED" | "REQUIRES_REVIEW";
-export type PaymentPeriodFilter = { period: PaymentPeriod; year: number; month?: number; quarter?: number; timezone: string };
+export type PaymentPeriodFilter = { period: PaymentPeriod; year: number; month?: number; quarter?: number; date?: string; timezone: string };
 export type AdminPayment = { id: string; schoolName: string; managerEmail: string; planCode: string; purpose: string; amountVnd: number; status: string; createdAt: string; paidAt: string | null };
 export type PaymentAnalytics = {
     period: PaymentPeriod;
@@ -35,6 +35,7 @@ export type PaymentAnalytics = {
 const paymentPeriodParams = (filter: PaymentPeriodFilter) => ({
     period: filter.period,
     year: filter.year,
+    ...(filter.period === "DAY" ? { date: filter.date } : {}),
     ...(filter.period === "MONTH" ? { month: filter.month } : {}),
     ...(filter.period === "QUARTER" ? { quarter: filter.quarter } : {}),
     timezone: filter.timezone,

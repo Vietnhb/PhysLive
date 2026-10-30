@@ -69,6 +69,42 @@ class PaymentAnalyticsServiceTest {
         verifyNoInteractions(payments);
     }
 
+    @Test
+    void dailyAnalyticsUsesLocalDayBoundariesAndHourlyPaidBuckets() {
+        List<PaymentAnalyticsRow> rows = List.of(
+                row("STARTER", 30_000_000L, "PAID", "2026-09-24T10:00:00Z", "2026-09-24T17:15:00Z"),
+                row("STARTER", 20_000_000L, "PAID", "2026-09-25T16:59:59Z", null),
+                row("STARTER", 99_000_000L, "FAILED", "2026-09-25T04:00:00Z", null));
+        when(payments.findAnalyticsRows(any(), any())).thenReturn(rows);
+        var result = service.analytics("DAY", 2026, null, null, "Asia/Ho_Chi_Minh", "2026-09-25");
+        assertEquals(Instant.parse("2026-09-24T17:00:00Z"), result.from());
+        assertEquals(Instant.parse("2026-09-25T17:00:00Z"), result.to());
+        verify(payments).findAnalyticsRows(result.from(), result.to());
+        assertEquals(24, result.trend().size());
+        assertEquals("00:00", result.trend().get(0).label());
+        assertEquals(30_000_000L, result.trend().get(0).revenueVnd());
+        assertEquals(20_000_000L, result.trend().get(23).revenueVnd());
+        assertEquals(50_000_000L, result.kpis().grossPaidVnd());
+        assertEquals(2, result.kpis().paidTransactions());
+        assertEquals(1, result.kpis().failedTransactions());
+    }
+
+    @Test
+    void rejectsMissingOrInvalidDay() {
+        for (String date : new String[] {"", "2026-02-30", "invalid", "1999-12-31"}) {
+            assertThrows(ApiException.class, () -> service.analytics("DAY", 2026, null, null, "Asia/Ho_Chi_Minh", date));
+        }
+        assertThrows(ApiException.class, () -> service.analytics("DAY", 2026, null, null, "Asia/Ho_Chi_Minh", null));
+        verifyNoInteractions(payments);
+    }
+
+    @Test
+    void dailyTrendHandlesDaylightSavingTransitions() {
+        when(payments.findAnalyticsRows(any(), any())).thenReturn(List.of());
+        assertEquals(23, service.analytics("DAY", 2026, null, null, "America/New_York", "2026-03-08").trend().size());
+        assertEquals(25, service.analytics("DAY", 2026, null, null, "America/New_York", "2026-11-01").trend().size());
+    }
+
     private PaymentAnalyticsRow row(String plan, Long amount, String status, String createdAt, String paidAt) {
         PaymentAnalyticsRow row = mock(PaymentAnalyticsRow.class);
         when(row.getPlanCode()).thenReturn(plan);

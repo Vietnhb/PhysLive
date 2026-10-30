@@ -56,9 +56,10 @@ public class SchoolPaymentController {
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer quarter,
-            @RequestParam(required = false) String timezone) {
+            @RequestParam(required = false) String timezone,
+            @RequestParam(required = false) String date) {
         if (period == null) return payments.adminPayments();
-        var range = paymentAnalytics.resolvePeriod(period, year, month, quarter, timezone);
+        var range = paymentAnalytics.resolvePeriod(period, year, month, quarter, timezone, date);
         return payments.adminPayments(range.from(), range.to());
     }
 
@@ -71,8 +72,9 @@ public class SchoolPaymentController {
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer quarter,
-            @RequestParam(required = false) String timezone) {
-        return paymentAnalytics.analytics(period, year, month, quarter, timezone);
+            @RequestParam(required = false) String timezone,
+            @RequestParam(required = false) String date) {
+        return paymentAnalytics.analytics(period, year, month, quarter, timezone, date);
     }
 
     @PostMapping("/api/admin/payments/{id}/reconcile")
