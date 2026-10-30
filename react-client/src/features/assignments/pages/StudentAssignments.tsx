@@ -54,7 +54,11 @@ export function StudentHomePage() {
       loading={resources.classesLoading}
       pendingAssignments={practice.pending}
       completedAssignments={practice.completed}
-      sharedResources={resources.discovery.items.length}
+      assignmentsLoading={practice.list.loading}
+      assignmentsError={practice.list.error}
+      classesError={resources.classesError}
+      onRetryClasses={() => void resources.loadClasses()}
+      onAssignments={() => navigate("/student/assignments")}
       onExplore={() => navigate("/student/community")}
     />
     <AssignmentList {...practice.list} onSelect={assignment => { practice.list.onSelect(assignment); navigate("/student/assignments"); }} />

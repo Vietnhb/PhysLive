@@ -15,6 +15,7 @@ export function useStudentResources(userId: number | undefined) {
   const [catalog, setCatalog] = useState<Curriculum | null>(null);
   const [classes, setClasses] = useState<StudentClassSummary[]>([]);
   const [classesLoading, setClassesLoading] = useState(true);
+  const [classesError, setClassesError] = useState("");
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
   const [simulation, setSimulation] = useState<Simulation | null>(null);
   const [simulationLoading, setSimulationLoading] = useState(false);
@@ -44,24 +45,30 @@ export function useStudentResources(userId: number | undefined) {
     }
   }, [isCurrentSession]);
 
+  const loadClasses = useCallback(async () => {
+    if (!isCurrentSession()) return;
+    setClassesLoading(true);
+    setClassesError("");
+    try {
+      const data = await studentClasses();
+      if (isCurrentSession()) setClasses(data);
+    } catch {
+      if (isCurrentSession()) setClassesError("Không thể tải danh sách lớp học.");
+    } finally {
+      if (isCurrentSession()) setClassesLoading(false);
+    }
+  }, [isCurrentSession]);
+
   useEffect(() => {
     mountedRef.current = true;
-    let active = true;
     void load();
-    void studentClasses().then(data => {
-      if (active && isCurrentSession()) setClasses(data);
-    }).catch(() => {
-      if (active && isCurrentSession()) setClasses([]);
-    }).finally(() => {
-      if (active && isCurrentSession()) setClassesLoading(false);
-    });
+    void loadClasses();
     return () => {
-      active = false;
       mountedRef.current = false;
       listRequestRef.current += 1;
       simulationRequestRef.current += 1;
     };
-  }, [load, isCurrentSession]);
+  }, [load, loadClasses]);
 
   const close = () => {
     simulationRequestRef.current += 1;
@@ -119,5 +126,5 @@ export function useStudentResources(userId: number | undefined) {
     },
     onPlaybackEnd: () => setPlaying(false),
   };
-  return { classes, classesLoading, discovery, close };
+  return { classes, classesLoading, classesError, loadClasses, discovery, close };
 }
