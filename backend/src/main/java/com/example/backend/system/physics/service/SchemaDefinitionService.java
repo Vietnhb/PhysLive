@@ -47,7 +47,7 @@ public class SchemaDefinitionService {
     }
 
     public List<SchemaVersion> approvedSchemas() {
-        List<String> enabledTopics = topics.findByEnabledTrueOrderBySortOrderAsc().stream().map(Topic::getName).toList();
+        List<String> enabledTopics = topics.findByEnabledTrueOrderBySortOrderAsc().stream().map(Topic::getCode).toList();
         if (enabledTopics.isEmpty()) return List.of();
         Map<String, SchemaVersion> latest = schemas
                 .findAllByLifecycleStatusAndTopicInOrderByTopicAscSchemaIdAscCreatedAtDesc(

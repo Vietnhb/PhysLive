@@ -2,6 +2,7 @@ package com.example.backend.system.curriculum.service;
 
 import com.example.backend.exception.ApiException;
 import com.example.backend.system.curriculum.dto.CurriculumNodeRequest;
+import com.example.backend.system.curriculum.dto.CurriculumTopicRequest;
 import com.example.backend.system.curriculum.dto.CurriculumTreeResponse;
 import com.example.backend.system.curriculum.model.entity.ContentModule;
 import com.example.backend.system.curriculum.model.entity.GradeLevel;
@@ -26,11 +27,14 @@ public class CurriculumAdminService {
     private final CurriculumService curriculumService;
 
     @Transactional
-    public CurriculumTreeResponse createTopic(CurriculumNodeRequest request) {
+    public CurriculumTreeResponse createTopic(CurriculumTopicRequest request) {
         Topic topic = new Topic();
-        topic.setName(request.name().trim());
-        topic.setSlug(slug(request, request.name()));
-        topic.setSortOrder(order(request));
+        topic.setName(request.name());
+        String slug = slug(request.slug(), request.name().en());
+        if (slug.isBlank()) throw ApiException.badRequest("Tên tiếng Anh cần có chữ cái hoặc chữ số để tạo mã chủ đề.");
+        if (topicRepository.findBySlug(slug).isPresent()) throw ApiException.conflict("Mã chủ đề đã tồn tại.");
+        topic.setSlug(slug);
+        topic.setSortOrder(request.sortOrder() == null ? 0 : request.sortOrder());
         topic.setEnabled(true);
         topicRepository.save(topic);
         return tree();
@@ -111,8 +115,12 @@ public class CurriculumAdminService {
     }
 
     private static String slug(CurriculumNodeRequest request, String fallback) {
-        String value = request.slug() == null || request.slug().isBlank() ? fallback : request.slug();
-        return value.trim().toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("(^-)|(-$)", "");
+        return slug(request.slug(), fallback);
+    }
+
+    private static String slug(String requested, String fallback) {
+        String value = requested == null || requested.isBlank() ? fallback : requested;
+        return value.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("(^-)|(-$)", "");
     }
 
     private Topic topic(UUID id) {

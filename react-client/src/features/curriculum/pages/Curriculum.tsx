@@ -3,6 +3,7 @@ import { curriculum } from "../api/curriculumApi";
 import type { Curriculum as CurriculumTree } from "../../../shared/types/physlive";
 import { formatTopicCode, formatGradeCode, formatLessonCode } from "../model/curriculumCodeGenerator";
 import { CardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
+import { topicLabel } from "../../../shared/lib/topicLabel";
 
 type Topic = CurriculumTree["topics"][number];
 type Module = Topic["modules"][number];
@@ -41,7 +42,7 @@ function CurriculumTopic({ topic, topicCode }: Readonly<{ topic: Topic; topicCod
         <span style={{ display: "inline-block", background: "var(--accent-3)", color: "var(--accent-11)", padding: "2px 8px", borderRadius: "6px", fontSize: "14px", marginRight: "10px", verticalAlign: "middle" }}>
           {topicCode}
         </span>
-        {topic.name}
+        {topicLabel(topic.name)}
       </h2>
       <div className="curriculum-modules">
         {topic.modules.map(module => (

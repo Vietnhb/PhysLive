@@ -50,8 +50,7 @@ public class LibraryService {
                 .orElseThrow(() -> ApiException.notFound("Không tìm thấy thư mục thư viện"));
         Lesson lesson = lessonRepository.findById(request.lessonId())
                 .orElseThrow(() -> ApiException.notFound("Không tìm thấy bài học"));
-        String curriculumTopic = lesson.getLevel().getModule().getTopic().getName();
-        if (specification.getTopic() == null || !specification.getTopic().equalsIgnoreCase(curriculumTopic)) {
+        if (!lesson.getLevel().getModule().getTopic().matchesCode(specification.getTopic())) {
             throw ApiException.conflict("Chủ đề bài học không khớp với chủ đề mô phỏng đã kiểm định");
         }
         LibraryItem item = libraryRepository.findBySimulationIdAndOwnerId(simulation.getId(), user.getId())

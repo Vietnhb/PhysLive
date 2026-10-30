@@ -4,6 +4,7 @@ import { createLibraryFolder } from "../api/libraryApi";
 import { saveGeneratedSimulation, type GeneratedSimulationResult } from "../../simulation/api/simulationUnderstandingApi";
 import type { Curriculum, LibraryFolder, LibraryItem } from "../../../shared/types/physlive";
 import axios from "axios";
+import { topicLabel } from "../../../shared/lib/topicLabel";
 
 type Props = {
   simulation: GeneratedSimulationResult;
@@ -46,7 +47,7 @@ export default function SaveSimulationPanel({ simulation, parameters, folders, o
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; window.clearTimeout(timeout); controller.abort(); };
   }, [reload, simulation.schemaId, simulation.schemaVersion]);
-  const topic = catalog?.topics.map(item => item.name).join(", ") ?? "";
+  const topic = catalog?.topics.map(item => topicLabel(item.name)).join(", ") ?? "";
   const topics = catalog?.topics.filter(item => item.enabled) ?? [];
   const lessons = topics.flatMap(t => t.modules.flatMap(m => m.levels.flatMap(l => l.lessons.map(lesson => ({
     id: lesson.id, label: `${m.name} / ${l.name} / ${lesson.name}`,

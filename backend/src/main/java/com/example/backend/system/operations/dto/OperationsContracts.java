@@ -20,7 +20,7 @@ public final class OperationsContracts {
                               @NotNull @Positive Integer studentQuota,
                               @PositiveOrZero Integer monthlyTokenQuota, boolean active) { }
 
-    public record TopicStatus(UUID id, String name, boolean enabled) { }
+    public record TopicStatus(UUID id, com.example.backend.system.curriculum.dto.LocalizedName name, boolean enabled) { }
 
     public record ValidationMetrics(long total, long failed, double failureRate) { }
 

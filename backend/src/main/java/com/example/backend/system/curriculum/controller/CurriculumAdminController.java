@@ -1,6 +1,7 @@
 package com.example.backend.system.curriculum.controller;
 
 import com.example.backend.system.curriculum.dto.CurriculumNodeRequest;
+import com.example.backend.system.curriculum.dto.CurriculumTopicRequest;
 import com.example.backend.system.curriculum.dto.CurriculumTreeResponse;
 import com.example.backend.system.curriculum.service.CurriculumAdminService;
 import jakarta.validation.Valid;
@@ -15,7 +16,7 @@ public class CurriculumAdminController {
     private final CurriculumAdminService service;
 
     @PostMapping("/topics")
-    public CurriculumTreeResponse topic(@Valid @RequestBody CurriculumNodeRequest request) {
+    public CurriculumTreeResponse topic(@Valid @RequestBody CurriculumTopicRequest request) {
         return service.createTopic(request);
     }
 

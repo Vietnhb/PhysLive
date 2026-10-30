@@ -14,7 +14,7 @@ public interface TopicRepository extends JpaRepository<Topic, UUID> {
     ChangeMark changeMark();
 
     Optional<Topic> findBySlug(String slug);
-    List<Topic> findByNameIgnoreCaseAndEnabledTrueOrderBySortOrderAsc(String name);
+    List<Topic> findBySlugIgnoreCaseAndEnabledTrueOrderBySortOrderAsc(String slug);
 
     List<Topic> findAllByOrderBySortOrderAsc();
 

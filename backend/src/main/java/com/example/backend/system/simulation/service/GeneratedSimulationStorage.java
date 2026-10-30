@@ -51,10 +51,10 @@ public class GeneratedSimulationStorage {
                 || !lesson.getLevel().getModule().getTopic().isEnabled())
             throw ApiException.conflict("Bài học này không còn được sử dụng");
         // a simulation built from the laws of several topics belongs to a lesson of any of them
-        String lessonTopic = lesson.getLevel().getModule().getTopic().getName();
-        boolean ownTopic = lessonTopic.equalsIgnoreCase(schema.getTopic());
+        var lessonTopic = lesson.getLevel().getModule().getTopic();
+        boolean ownTopic = lessonTopic.matchesCode(schema.getTopic());
         for (var related : request.simulation().path("simulationSpec").path("relatedSchemas"))
-            ownTopic |= lessonTopic.equalsIgnoreCase(related.path("topic").asText());
+            ownTopic |= lessonTopic.matchesCode(related.path("topic").asText());
         if (!ownTopic)
             throw ApiException.conflict("Bài học không thuộc chủ đề của mô phỏng");
         String status = computed.path("validation").path("status").asText();

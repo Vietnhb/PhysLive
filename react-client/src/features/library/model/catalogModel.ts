@@ -1,4 +1,5 @@
 import type { Curriculum, LibraryItem } from "../../../shared/types/physlive";
+import { topicLabel } from "../../../shared/lib/topicLabel";
 
 export type CatalogLesson = { id: string; name: string };
 export type CatalogModule = { id: string; name: string; topicId: string; topic: string; lessons: CatalogLesson[] };
@@ -22,7 +23,7 @@ export function buildCatalog(curriculum: Curriculum | null): CatalogSubject[] {
       if (existing) {
         const ids = new Set(existing.lessons.map(lesson => lesson.id));
         existing.lessons.push(...level.lessons.filter(lesson => !ids.has(lesson.id)));
-      } else modules.push({ id: module.id, name: module.name, topicId: topic.id, topic: topic.name, lessons: [...level.lessons] });
+      } else modules.push({ id: module.id, name: module.name, topicId: topic.id, topic: topicLabel(topic.name), lessons: [...level.lessons] });
       grades.set(level.name, modules);
     }
   }

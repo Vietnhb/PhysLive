@@ -3,6 +3,8 @@ import { Badge, Button, Callout, Dialog, Select, Switch, TextField } from "@radi
 import { ChevronDownIcon, ChevronRightIcon, MagnifyingGlassIcon, PlusIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { adminCurriculum, createCurriculumNode, toggleCurriculum, type CurriculumTree, type CurriculumTopic, type CurriculumModule } from "../api/curriculumApi";
 import { apiMessage } from "../../../shared/lib/apiError";
+import { topicLabel } from "../../../shared/lib/topicLabel";
+import type { LocalizedName } from "../../../shared/types/localization";
 import { curriculumParentOptions, curriculumPath, type CurriculumKind } from "../model/curriculumUtils";
 import { extractGradeNumber, formatTopicCode, formatGradeCode, formatLessonCode } from "../model/curriculumCodeGenerator";
 import { PageHeader, Loading, ErrorNotice, FormField } from "../../../shared/ui/ManagementUI";
@@ -11,7 +13,7 @@ import s from "./CurriculumView.module.css";
 
 const normalize = (value: string) => value.toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
 const lessonCount = (topic: CurriculumTopic) => topic.modules.reduce((sum, module) => sum + module.levels.reduce((count, level) => count + level.lessons.length, 0), 0);
-const matches = (query: string, ...values: string[]) => normalize(values.join(" ")).includes(query);
+const matches = (query: string, ...values: (string | LocalizedName)[]) => normalize(values.flatMap(value => typeof value === "string" ? [value] : Object.values(value)).join(" ")).includes(query);
 
 export function CurriculumView() {
   const [tree, setTree] = useState<CurriculumTree | null>(null);
@@ -25,6 +27,7 @@ export function CurriculumView() {
   const [showCreate, setShowCreate] = useState(false);
   const [formError, setFormError] = useState("");
   const [name, setName] = useState("");
+  const [viName, setViName] = useState("");
   const [kind, setKind] = useState<CurriculumKind>("topic");
   const [parentId, setParentId] = useState("");
 
@@ -38,11 +41,11 @@ export function CurriculumView() {
 
   const create = async (event: FormEvent) => {
     event.preventDefault();
-    if (busy || !name.trim() || (kind !== "topic" && !parentId)) return;
+    if (busy || !name.trim() || (kind === "topic" ? !viName.trim() : !parentId)) return;
     setBusy(true); setFormError(""); setNotice("");
     try {
-      setTree(await createCurriculumNode(curriculumPath(kind, parentId), { name: name.trim() }));
-      setShowCreate(false); setName(""); setParentId("");
+      setTree(await createCurriculumNode(curriculumPath(kind, parentId), { name: kind === "topic" ? { en: name.trim(), vi: viName.trim() } : name.trim() }));
+      setShowCreate(false); setName(""); setViName(""); setParentId("");
       setNotice("Đã thêm nội dung vào chương trình học.");
     } catch (e) { setFormError(apiMessage(e, "Không thể tạo mục chương trình học mới.")); }
     finally { setBusy(false); }
@@ -77,12 +80,12 @@ export function CurriculumView() {
         <aside className={s.sidebar} aria-label="Chủ đề chương trình">
           <div className={s.sidebarHeading}>Chủ đề <Badge color="gray">{visibleTopics.length}</Badge></div>
           <div className={s.topicList}>{visibleTopics.map(({ topic, code }) => <button key={topic.id} type="button" className={`rt-reset ${s.topicButton} ${selected?.topic.id === topic.id ? s.selected : ""}`} aria-pressed={selected?.topic.id === topic.id} onClick={() => setSelectedId(topic.id)}>
-            <span className={s.topicCode}>{code}</span><span className={s.topicName}>{topic.name}<small>{topic.modules.length} chương · {lessonCount(topic)} bài học{!topic.enabled ? " · Đã ẩn" : ""}</small></span><ChevronRightIcon />
+            <span className={s.topicCode}>{code}</span><span className={s.topicName}>{topicLabel(topic.name)}<small>{topic.modules.length} chương · {lessonCount(topic)} bài học{!topic.enabled ? " · Đã ẩn" : ""}</small></span><ChevronRightIcon />
           </button>)}</div>
         </aside>
         <div className={s.content}>
           {selected ? <>
-            <div className={s.contentHeading}><div><div className={s.eyebrow}>{selected.code} · {selected.topic.modules.length} chương · {lessonCount(selected.topic)} bài học</div><h2>{selected.topic.name}</h2></div><StatusControl active={selected.topic.enabled} label={selected.topic.name} busy={busy} onToggle={() => void toggle("topic", selected.topic.id)} /></div>
+            <div className={s.contentHeading}><div><div className={s.eyebrow}>{selected.code} · {selected.topic.modules.length} chương · {lessonCount(selected.topic)} bài học</div><h2>{topicLabel(selected.topic.name)}</h2></div><StatusControl active={selected.topic.enabled} label={topicLabel(selected.topic.name)} busy={busy} onToggle={() => void toggle("topic", selected.topic.id)} /></div>
             <div className={s.chapterList} key={selected.topic.id}>
               {selected.topic.modules.map((module, index) => {
                 const levels = filterLevels(module, selected.topic, selected.code, search, grade);
@@ -101,8 +104,9 @@ export function CurriculumView() {
         {formError && <Callout.Root color="red" role="alert"><Callout.Text>{formError}</Callout.Text></Callout.Root>}
         <FormField label="Cấp nội dung" htmlFor="managed-curriculum-kind"><Select.Root size="3" value={kind} disabled={busy} onValueChange={value => { setKind(value as CurriculumKind); setParentId(""); }}><Select.Trigger id="managed-curriculum-kind" /><Select.Content position="popper"><Select.Item value="topic">Môn học / Chủ đề</Select.Item><Select.Item value="module">Chương / Học phần</Select.Item><Select.Item value="level">Khối lớp</Select.Item><Select.Item value="lesson">Bài học</Select.Item></Select.Content></Select.Root></FormField>
         {kind !== "topic" && <FormField label="Thuộc nội dung" htmlFor="managed-curriculum-parent"><Select.Root size="3" required value={parentId} disabled={busy} onValueChange={setParentId}><Select.Trigger id="managed-curriculum-parent" placeholder="Chọn nội dung cha" /><Select.Content position="popper">{parentOptions.map(item => <Select.Item key={item.id} value={item.id}>{item.label}</Select.Item>)}</Select.Content></Select.Root>{!parentOptions.length && <small>Chưa có nội dung cha. Hãy tạo cấp phía trên trước.</small>}</FormField>}
-        <FormField label="Tên nội dung" htmlFor="managed-curriculum-name"><TextField.Root id="managed-curriculum-name" size="3" required disabled={busy} value={name} onChange={event => setName(event.target.value)} placeholder="Nhập tên nội dung…" /></FormField>
-        <div className={s.formActions}><Button type="button" variant="soft" color="gray" disabled={busy} onClick={() => setShowCreate(false)}>Hủy</Button><Button type="submit" loading={busy} disabled={busy || !name.trim() || (kind !== "topic" && !parentId)}>Thêm nội dung</Button></div>
+        <FormField label={kind === "topic" ? "Tên tiếng Anh" : "Tên nội dung"} htmlFor="managed-curriculum-name"><TextField.Root id="managed-curriculum-name" size="3" required maxLength={kind === "topic" ? 80 : undefined} disabled={busy} value={name} onChange={event => setName(event.target.value)} placeholder={kind === "topic" ? "Ví dụ: Kinematics" : "Nhập tên nội dung…"} /></FormField>
+        {kind === "topic" && <FormField label="Tên tiếng Việt" htmlFor="managed-curriculum-name-vi"><TextField.Root id="managed-curriculum-name-vi" size="3" required maxLength={80} disabled={busy} value={viName} onChange={event => setViName(event.target.value)} placeholder="Ví dụ: Động học" /></FormField>}
+        <div className={s.formActions}><Button type="button" variant="soft" color="gray" disabled={busy} onClick={() => setShowCreate(false)}>Hủy</Button><Button type="submit" loading={busy} disabled={busy || !name.trim() || (kind === "topic" ? !viName.trim() : !parentId)}>Thêm nội dung</Button></div>
       </form>
     </div></Dialog.Content></Dialog.Root>
   </div>;

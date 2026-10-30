@@ -101,7 +101,7 @@ public class CurriculumCatalogInitializer implements CommandLineRunner {
     }
 
     public record CurriculumCatalog(List<TopicDefinition> topics, List<String> retiredTopicSlugs) { }
-    public record TopicDefinition(String name, String slug, List<ModuleDefinition> modules) { }
+    public record TopicDefinition(com.example.backend.system.curriculum.dto.LocalizedName name, String slug, List<ModuleDefinition> modules) { }
     public record ModuleDefinition(String name, String slug, List<LevelDefinition> levels) { }
     public record LevelDefinition(String name, List<LessonDefinition> lessons) { }
     public record LessonDefinition(String name, String slug) { }

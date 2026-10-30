@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record CurriculumTreeResponse(List<TopicItem> topics) {
 
-    public record TopicItem(UUID id, String name, String slug, boolean enabled, int sortOrder,
+    public record TopicItem(UUID id, LocalizedName name, String slug, boolean enabled, int sortOrder,
             List<ModuleItem> modules) {
     }
 

@@ -1,5 +1,6 @@
 import axiosClient from "../../../shared/api/client";
 import type { Curriculum } from "../../../shared/types/physlive";
+import type { LocalizedName } from "../../../shared/types/localization";
 
 /**
  * API endpoints for curriculum management
@@ -18,7 +19,7 @@ export type CurriculumLevel = { id: string; name: string; active: boolean; sortO
 
 export type CurriculumModule = { id: string; name: string; slug: string; active: boolean; sortOrder: number; levels: CurriculumLevel[] };
 
-export type CurriculumTopic = { id: string; name: string; slug: string; enabled: boolean; sortOrder: number; modules: CurriculumModule[] };
+export type CurriculumTopic = { id: string; name: LocalizedName; slug: string; enabled: boolean; sortOrder: number; modules: CurriculumModule[] };
 
 export type CurriculumTree = { topics: CurriculumTopic[] };
 
@@ -27,5 +28,5 @@ export const adminCurriculum = () => axiosClient.get<CurriculumTree>("/admin/cur
 export const toggleCurriculum = (type: "topic" | "module" | "level" | "lesson", id: string) =>
   axiosClient.put<CurriculumTree>(`/admin/curriculum/${type}/${id}/toggle`).then(r => r.data);
 
-export const createCurriculumNode = (path: string, payload: { name: string; slug?: string; sortOrder?: number }) =>
+export const createCurriculumNode = (path: string, payload: { name: string | LocalizedName; slug?: string; sortOrder?: number }) =>
   axiosClient.post<CurriculumTree>(`/admin/curriculum/${path}`, payload).then(r => r.data);

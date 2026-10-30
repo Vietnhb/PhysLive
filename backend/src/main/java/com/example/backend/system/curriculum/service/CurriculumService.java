@@ -36,7 +36,8 @@ public class CurriculumService {
 
     @Transactional(readOnly = true)
     public CurriculumTreeResponse getActiveTreeForTopic(String topic) {
-        return new CurriculumTreeResponse(topicRepository.findByNameIgnoreCaseAndEnabledTrueOrderBySortOrderAsc(topic)
+        String slug = topic.trim().toLowerCase(java.util.Locale.ROOT).replace('_', '-');
+        return new CurriculumTreeResponse(topicRepository.findBySlugIgnoreCaseAndEnabledTrueOrderBySortOrderAsc(slug)
                 .stream().map(item -> toTopic(item, false)).toList());
     }
 
