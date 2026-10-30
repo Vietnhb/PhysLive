@@ -3,8 +3,8 @@
   min-width: 0;
 }
 
-.account-menu button.account-menu__trigger,
-.account-menu button.account-menu__trigger:hover:not(:disabled) {
+/* Keep geometry in the base rule so hover cannot override variant sizing. */
+.account-menu button.account-menu__trigger {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -18,11 +18,17 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+  transform: none;
 }
 
 .account-menu button.account-menu__trigger:hover:not(:disabled),
 .account-menu button.account-menu__trigger[aria-expanded="true"] {
   background: var(--surface-3);
+}
+
+.account-menu button.account-menu__trigger:active:not(:disabled) {
+  transform: none;
 }
 
 .account-menu__avatar {
