@@ -5,7 +5,7 @@ import { ArrowTopRightIcon, ChevronRightIcon, Cross2Icon, MagnifyingGlassIcon, P
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import PhysicsScene from "../../simulation/components/BackendSimulationView";
 import SavedScene from "../../simulation/components/SavedScene";
-import type { GeneratedSimulationResult } from "../../simulation/api/simulationUnderstandingApi";
+import { hasSavedScene, type GeneratedSimulationResult } from "../../simulation/api/simulationUnderstandingApi";
 import type { Curriculum, LibraryItem, Simulation } from "../../../shared/types/physlive";
 import { SpotlightCard } from "../../../shared/effects/Motion";
 import { buildCatalog, filterLibrary, indexLessonPaths, type CatalogSelection, type CatalogSubject, type LibraryScope } from "../model/catalogModel";
@@ -145,22 +145,27 @@ export function ResourceDiscovery({ items, curriculum = null, generated = null, 
   const selectedLesson = selectedModule?.lessons.find(lesson => lesson.id === selection.lessonId);
   const breadcrumb = [selectedGrade?.name, selectedModule?.name, selectedLesson?.name].filter(Boolean);
   const selectedPath = selectedItem ? paths.get(selectedItem.lessonId) : undefined;
-  const filtered = Boolean(query || selection.subjectId);
+  const savedScene = generated ?? (hasSavedScene(simulation?.result) ? simulation.result : null);
+  const filtered = Boolean(query.trim() || selection.subjectId || (allowSchoolScope && scope !== "ALL"));
+  const resetFilters = () => { setQuery(""); setSelection({}); setScope("ALL"); };
 
   return <Theme asChild accentColor="indigo" grayColor="slate" radius="large" scaling="100%" hasBackground={false}><motion.section className={styles.discovery} aria-label="Kho cộng đồng" initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={transition}>
+    <header className={styles.pageHeading}><div><h1>Kho mô phỏng</h1><p>Khám phá mô phỏng vật lý được chia sẻ để quan sát, thực hành và củng cố bài học.</p></div><Badge size="2" variant="soft">{loading || error ? "Đang cập nhật" : `${scopedItems.length} mô phỏng khả dụng`}</Badge></header>
     <div className={`${styles.layout} ${curriculum ? "" : styles.withoutCatalog}`}>
-      {curriculum && <aside className={styles.catalog}><CatalogNav catalog={catalog} selection={selection} total={scopedItems.length} counts={counts} onSelect={setSelection} /></aside>}
       <div className={styles.results}>
         <div className={styles.toolbar}>
           <TextField.Root className={styles.search} size="3" type="search" aria-label="Tìm tài nguyên" value={query} onChange={event => setQuery(event.target.value)} placeholder="Tìm mô phỏng, bài học, giáo viên…"><TextField.Slot><MagnifyingGlassIcon width="18" height="18" /></TextField.Slot></TextField.Root>
+          <div className={styles.filterRow}>
+          {curriculum && <details className={styles.catalogFilter}><summary><ReaderIcon />{breadcrumb.length ? breadcrumb.join(" › ") : "Lọc theo khối, chương, bài"}<ChevronRightIcon /></summary><div className={styles.catalog}><CatalogNav catalog={catalog} selection={selection} total={scopedItems.length} counts={counts} onSelect={setSelection} /></div></details>}
           {allowSchoolScope && <SegmentedControl.Root size="2" value={scope} onValueChange={value => { if (value) setScope(value as LibraryScope); }} aria-label="Phạm vi chia sẻ"><SegmentedControl.Item value="ALL">Tất cả</SegmentedControl.Item><SegmentedControl.Item value="PUBLIC">Toàn hệ thống</SegmentedControl.Item><SegmentedControl.Item value="SHARED">Trong trường</SegmentedControl.Item></SegmentedControl.Root>}
           <Select.Root size="3" value={sort} onValueChange={value => setSort(value as typeof sort)}><Select.Trigger aria-label="Sắp xếp tài nguyên" className={styles.sort} variant="surface" /><Select.Content><Select.Item value="latest">Mới nhất</Select.Item><Select.Item value="featured">Nổi bật</Select.Item><Select.Item value="title">Tên A–Z</Select.Item></Select.Content></Select.Root>
+          </div>
         </div>
         <div className={styles.resultHead} aria-live="polite">
           <p>{loading ? "Đang tải…" : <><strong>{visible.length}</strong> mô phỏng{breadcrumb.length > 0 && <> trong <span className={styles.crumbs}>{breadcrumb.join(" › ")}</span></>}</>}</p>
-          {filtered && !loading && <button type="button" className={styles.navReset} onClick={() => { setQuery(""); setSelection({}); }}><Cross2Icon /> Xóa bộ lọc</button>}
+          {filtered && !loading && <button type="button" className={styles.navReset} onClick={resetFilters}><Cross2Icon /> Xóa bộ lọc</button>}
         </div>
-        {loading ? <div className={styles.loading} aria-label="Đang tải thư viện"><span /><span /><span /><span /><span /><span /></div> : error ? <div className={styles.empty}><h2>Không tải được tài nguyên</h2><p>{error}</p>{onRetry && <Button variant="soft" onClick={onRetry}>Thử lại</Button>}</div> : visible.length === 0 ? <div className={styles.empty}><span className={styles.emptyIcon}><ReaderIcon width="26" height="26" /></span><h2>{filtered ? "Không tìm thấy mô phỏng phù hợp" : "Chưa có mô phỏng nào"}</h2><p>{filtered ? "Thử từ khóa khác hoặc chọn mục khác trong mục lục." : scope === "SHARED" ? "Chưa có mô phỏng được chia sẻ trong trường." : "Mô phỏng do giáo viên chia sẻ và được kiểm duyệt sẽ xuất hiện tại đây."}</p>{filtered && <Button variant="soft" onClick={() => { setQuery(""); setSelection({}); }}>Xóa bộ lọc</Button>}</div> : <motion.div layout className={styles.resourceGrid} transition={transition}><AnimatePresence initial={false} mode="popLayout">{visible.map((item, index) => {
+        {loading ? <div className={styles.loading} aria-label="Đang tải thư viện"><span /><span /><span /><span /><span /><span /></div> : error ? <div className={styles.empty}><h2>Không tải được tài nguyên</h2><p>{error}</p>{onRetry && <Button variant="soft" onClick={onRetry}>Thử lại</Button>}</div> : visible.length === 0 ? <div className={styles.empty}><span className={styles.emptyIcon}><ReaderIcon width="26" height="26" /></span><h2>{filtered ? "Không tìm thấy mô phỏng phù hợp" : "Chưa có mô phỏng nào"}</h2><p>{filtered ? "Thử từ khóa khác hoặc chọn mục khác trong mục lục." : scope === "SHARED" ? "Chưa có mô phỏng được chia sẻ trong trường." : "Mô phỏng do giáo viên chia sẻ và được kiểm duyệt sẽ xuất hiện tại đây."}</p>{filtered && <Button variant="soft" onClick={resetFilters}>Xóa bộ lọc</Button>}</div> : <motion.div layout className={styles.resourceGrid} transition={transition}><AnimatePresence initial={false} mode="popLayout">{visible.map((item, index) => {
           const path = paths.get(item.lessonId);
           const seed = path?.moduleId || item.topic || item.id;
           const accent = resourceAccent(seed);
@@ -170,8 +175,8 @@ export function ResourceDiscovery({ items, curriculum = null, generated = null, 
               <div className={styles.cover} data-accent={accent}><SimulationThumb simulationId={item.simulationId} />{featured && <span className={styles.featured}><StarFilledIcon /> Nổi bật</span>}</div>
               <div className={styles.resourceBody}>
                 <p className={styles.eyebrow}>{[path?.grade, path?.module].filter(Boolean).join(" · ") || "Mô phỏng vật lý"}</p>
-                <h2>{item.title}</h2>
-                {path?.lesson && <p className={styles.lesson}>{path.lesson}</p>}
+                <h2 title={item.title}>{item.title}</h2>
+                {path?.lesson && <p className={styles.lesson}>Bài học: {path.lesson}</p>}
                 <div className={styles.resourceFooter}>
                   <div className={styles.author}><Avatar size="1" color={accent} radius="full" fallback={(item.sharedByName || "GV").trim().charAt(0).toUpperCase()} /><div><strong>{item.sharedByName || "Giáo viên"}</strong><span>{item.visibility === "PUBLIC" ? item.schoolName || "PhysLive" : "Trong trường"}</span></div></div>
                   <Button size="2" variant="soft" onClick={event => { returnFocusRef.current = event.currentTarget; onOpen(item); }} aria-label={`Mở ${item.title}`}>Mở <ArrowTopRightIcon /></Button>
@@ -182,16 +187,18 @@ export function ResourceDiscovery({ items, curriculum = null, generated = null, 
         })}</AnimatePresence></motion.div>}
       </div>
     </div>
-    <Dialog.Root open={Boolean(selectedItem)} onOpenChange={open => { if (!open) onClose(); }}><Dialog.Content maxWidth="980px" size="3" onCloseAutoFocus={event => { event.preventDefault(); returnFocusRef.current?.focus(); }}>
+    <Dialog.Root open={Boolean(selectedItem)} onOpenChange={open => { if (!open) onClose(); }}><Dialog.Content className={styles.resourceDialog} maxWidth="980px" size="3" onCloseAutoFocus={event => { event.preventDefault(); returnFocusRef.current?.focus(); }}>
+      <div className={styles.dialogScroll}>
       <div className={styles.dialogHeading}><div><Badge color="indigo" variant="soft">Vật lý{selectedPath?.grade ? ` · ${selectedPath.grade}` : ""}</Badge><Dialog.Title mt="3" mb="2">{selectedItem?.title || "Mô phỏng"}</Dialog.Title><Dialog.Description size="2" color="gray">{selectedItem?.sharedByName || "Giáo viên"}{selectedItem?.schoolName ? ` · ${selectedItem.schoolName}` : ""}</Dialog.Description></div><Dialog.Close><IconButton size="2" variant="soft" color="gray" aria-label="Đóng mô phỏng"><Cross2Icon /></IconButton></Dialog.Close></div>
       {simulationLoading && <div className={styles.playerState}><Spinner size="3" /> Đang mở mô phỏng…</div>}
       {!simulationLoading && simulationError && <p className={`${styles.playerState} ${styles.error}`}>{simulationError}</p>}
-      {!simulationLoading && !simulationError && generated?.simulationSpec.solverTimeline && <div>
-        <SavedScene scene={generated} />
+      {!simulationLoading && !simulationError && savedScene?.simulationSpec.solverTimeline && <div className={styles.savedScene}>
+        <SavedScene scene={savedScene} />
       </div>}
-      {!simulationLoading && !simulationError && !generated && simulation && <motion.div initial={reducedMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={transition}><div className={styles.scene}><PhysicsScene simulation={simulation} index={frame} overlays={vectors} time={time} playing={playing} onTimeChange={onTimeChange} onPlaybackEnd={onPlaybackEnd} /></div><div className={styles.playback}><Button onClick={onTogglePlaying}>{playing ? <PauseIcon /> : <PlayIcon />}{playing ? "Tạm dừng" : "Chạy mô phỏng"}</Button><Button color="gray" variant="soft" onClick={onReset}><ResetIcon /> Về đầu</Button><input aria-label="Thời gian mô phỏng" type="range" min={0} max={Math.max(0, simulation.time.length - 1)} value={frame} onChange={event => onFrameChange(Number(event.target.value))} /><span>{time.toFixed(2)} s</span></div></motion.div>}
+      {!simulationLoading && !simulationError && !savedScene && simulation && <motion.div initial={reducedMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={transition}><div className={styles.scene}><PhysicsScene simulation={simulation} index={frame} overlays={vectors} time={time} playing={playing} onTimeChange={onTimeChange} onPlaybackEnd={onPlaybackEnd} /></div><div className={styles.playback}><Button onClick={onTogglePlaying}>{playing ? <PauseIcon /> : <PlayIcon />}{playing ? "Tạm dừng" : "Chạy mô phỏng"}</Button><Button color="gray" variant="soft" onClick={onReset}><ResetIcon /> Về đầu</Button><input aria-label="Thời gian mô phỏng" type="range" min={0} max={Math.max(0, simulation.time.length - 1)} value={frame} onChange={event => onFrameChange(Number(event.target.value))} /><span>{time.toFixed(2)} s</span></div></motion.div>}
       {selectedItem && canClone && <CloneToLibrary key={`clone-${selectedItem.id}`} item={selectedItem} />}
       {selectedItem && <ResourceDiscussion key={selectedItem.id} resourceId={selectedItem.id} />}
+      </div>
     </Dialog.Content></Dialog.Root>
   </motion.section></Theme>;
 }
