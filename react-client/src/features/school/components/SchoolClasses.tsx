@@ -1,20 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertDialog, Badge, Button, Card, Flex, Select, Table, TextField } from "@radix-ui/themes";
-import { EyeOpenIcon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { AlertDialog, Badge, Button, Callout, Card, Dialog, Flex, Select, Table, TextField } from "@radix-ui/themes";
+import { EyeOpenIcon, MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
-import { archiveSchoolClass, schoolClasses } from "../api/schoolApi";
-import type { SchoolClassSummary } from "../types";
+import { archiveSchoolClass, createSchoolClass, schoolClasses } from "../api/schoolApi";
+import type { SchoolClassRequest, SchoolClassSummary } from "../types";
 import { apiMessage } from "../../../shared/lib/apiError";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
 import s from "./SchoolClasses.module.css";
 import { ClassTableLoading } from "./SchoolLoading";
+import { FormField } from "../../../shared/ui/ManagementUI";
+import modal from "../../../shared/ui/ModalScroll.module.css";
 
 const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("vi");
+const blankClass = (): SchoolClassRequest => {
+  const today = new Date();
+  const year = today.getMonth() >= 7 ? today.getFullYear() : today.getFullYear() - 1;
+  return { name: "", gradeLevel: 10, schoolYear: `${year}-${year + 1}`, subject: "Vật lý" };
+};
+
 export default function SchoolClasses() {
   const reducedMotion = useReducedMotion();
   const navigate = useNavigate();
   const schoolId = useSessionStore(state => state.user?.schoolId);
+  const actorRole = useSessionStore(state => state.user?.role);
   const [items, setItems] = useState<SchoolClassSummary[]>([]);
   const [query, setQuery] = useState("");
   const [grade, setGrade] = useState("ALL");
@@ -24,6 +33,28 @@ export default function SchoolClasses() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [archiveTarget, setArchiveTarget] = useState<SchoolClassSummary | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [form, setForm] = useState<SchoolClassRequest>(blankClass);
+  const [formError, setFormError] = useState("");
+  const [notice, setNotice] = useState("");
+  const createLock = useRef(false);
+
+  const submitClass = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!schoolId || busy || createLock.current) return;
+    createLock.current = true; setBusy(true); setFormError(""); setNotice("");
+    try {
+      const created = await createSchoolClass(schoolId, { ...form, name: form.name.trim(), schoolYear: form.schoolYear.trim(), subject: form.subject.trim() });
+      setItems(current => [{ ...created, teacherCount: created.teachers.length, studentCount: created.students.length }, ...current]);
+      setQuery(""); setGrade("ALL"); setSchoolYear("ALL"); setClassPage(1);
+      setShowCreate(false); setForm(blankClass());
+      setNotice(`Đã tạo lớp ${created.name}. Bạn có thể chọn Sửa để phân công giáo viên và thêm học sinh.`);
+    } catch (err) {
+      setFormError(apiMessage(err, "Không thể tạo lớp học."));
+    } finally {
+      createLock.current = false; setBusy(false);
+    }
+  };
 
   const load = useCallback(async () => {
     if (!schoolId) return;
@@ -81,12 +112,14 @@ export default function SchoolClasses() {
   if (!schoolId) return null;
 
   return <div className="admin-content">
+    {notice && <Callout.Root color="green" role="status" mb="4"><Callout.Text>{notice}</Callout.Text></Callout.Root>}
     {error && <div className="admin-error-banner" role="alert">{error}<Button variant="soft" color="red" onClick={() => void load()}>Tải lại</Button></div>}
 
     <motion.div className="school-classes-grid" initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .18 }}>
       <Card asChild size="3"><section className="admin-panel">
         <div className="admin-panel-heading">
           <div><h2>Danh sách lớp</h2><p className="admin-panel-description">{loading ? "Đang tải dữ liệu lớp học…" : `${filteredItems.length.toLocaleString("vi-VN")} lớp đang hoạt động`}</p></div>
+          {actorRole === "SCHOOL" && <Button disabled={busy || loading} onClick={() => { setForm(blankClass()); setFormError(""); setNotice(""); setShowCreate(true); }}><PlusIcon />Tạo lớp</Button>}
         </div>
 
         <div className={s.filters}>
@@ -137,6 +170,23 @@ export default function SchoolClasses() {
       </section></Card>
 
     </motion.div>
+
+    <Dialog.Root open={showCreate} onOpenChange={open => { if (!createLock.current) setShowCreate(open); }}>
+      <Dialog.Content className={modal.dialog} maxWidth="620px" onEscapeKeyDown={event => { if (createLock.current) event.preventDefault(); }} onInteractOutside={event => { if (createLock.current) event.preventDefault(); }}>
+        <div className={modal.body}>
+          <Dialog.Title>Tạo lớp học</Dialog.Title>
+          <Dialog.Description size="2" mb="5">Nhập thông tin lớp. Sau khi tạo, bạn có thể phân công giáo viên và thêm học sinh.</Dialog.Description>
+          {formError && <Callout.Root color="red" role="alert" mb="4"><Callout.Text>{formError}</Callout.Text></Callout.Root>}
+          <form className="admin-form-grid" onSubmit={submitClass}>
+            <FormField label="Tên lớp" htmlFor="create-class-name"><input id="create-class-name" required maxLength={100} disabled={busy} value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} placeholder="Ví dụ: 10A1" /></FormField>
+            <FormField label="Khối" htmlFor="create-class-grade"><Select.Root size="3" value={String(form.gradeLevel)} disabled={busy} onValueChange={value => setForm({ ...form, gradeLevel: Number(value) })}><Select.Trigger id="create-class-grade" /><Select.Content position="popper" align="start">{[10, 11, 12].map(value => <Select.Item key={value} value={String(value)}>Khối {value}</Select.Item>)}</Select.Content></Select.Root></FormField>
+            <FormField label="Năm học" htmlFor="create-class-year"><input id="create-class-year" required maxLength={20} pattern="[0-9]{4}-[0-9]{4}" title="Nhập năm học dạng 2026-2027" disabled={busy} value={form.schoolYear} onChange={event => setForm({ ...form, schoolYear: event.target.value })} /></FormField>
+            <FormField label="Môn học" htmlFor="create-class-subject"><input id="create-class-subject" maxLength={50} disabled={busy} value={form.subject} onChange={event => setForm({ ...form, subject: event.target.value })} /></FormField>
+            <div className="admin-form-actions"><Button type="button" variant="soft" color="gray" disabled={busy} onClick={() => setShowCreate(false)}>Hủy</Button><Button type="submit" loading={busy} disabled={busy}>Tạo lớp</Button></div>
+          </form>
+        </div>
+      </Dialog.Content>
+    </Dialog.Root>
 
     <AlertDialog.Root open={archiveTarget !== null} onOpenChange={open => { if (!open) setArchiveTarget(null); }}><AlertDialog.Content maxWidth="460px"><AlertDialog.Title>Tắt lớp học?</AlertDialog.Title><AlertDialog.Description size="2">Lớp “{archiveTarget?.name}” sẽ không còn xuất hiện trong danh sách lớp đang hoạt động.</AlertDialog.Description><Flex gap="3" mt="4" justify="end"><AlertDialog.Cancel><Button variant="soft" color="gray">Hủy</Button></AlertDialog.Cancel><AlertDialog.Action><Button color="red" disabled={busy} onClick={() => void confirmArchive()}>Tắt lớp</Button></AlertDialog.Action></Flex></AlertDialog.Content></AlertDialog.Root>
   </div>;
