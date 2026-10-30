@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
 
 /** Platform school-management inputs and detached school details. */
 public final class SchoolContracts {
@@ -24,14 +25,26 @@ public final class SchoolContracts {
                            Integer monthlyTokenQuota, Integer studentQuota, String planCode,
                            Long annualPriceVnd, String nextPlanCode, Long usedTokens,
                            LocalDate tokenUsageMonth, Instant createdAt, Instant updatedAt,
-                           boolean licenseActive) {
+                           boolean licenseActive, String subscriptionStatus) {
         public static Response from(School school) {
             return new Response(school.getId(), school.getName(), school.getCode(), school.getShortName(),
                     school.getAddress(), school.getProvinceCity(), school.getPhoneNumber(), school.getContactEmail(),
                     school.getLicenseStart(), school.getLicenseEnd(), school.isActive(), school.getMonthlyTokenQuota(),
                     school.getStudentQuota(), school.getPlanCode(), school.getAnnualPriceVnd(), school.getNextPlanCode(),
                     school.getUsedTokens(), school.getTokenUsageMonth(), school.getCreatedAt(), school.getUpdatedAt(),
-                    school.isLicenseActive());
+                    school.isLicenseActive(), subscriptionStatus(school));
+        }
+
+        private static String subscriptionStatus(School school) {
+            if (!school.isActive()) return "SUSPENDED";
+            if (school.getLicenseStart() == null || school.getLicenseEnd() == null) return "UNLICENSED";
+            if (school.getLicenseEnd().isBefore(LocalDate.now())) return "EXPIRED";
+            if (school.getLicenseStart().isAfter(LocalDate.now())) return "UPCOMING";
+            return "ACTIVE";
         }
     }
+
+    public record ManagerAccount(Integer id, String fullName, String email, boolean active) { }
+    public record Subscription(Response school, String planName, List<ManagerAccount> managers,
+                               long studentsUsed, long tokensUsed, LocalDate usageMonth) { }
 }

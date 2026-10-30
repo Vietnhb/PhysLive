@@ -53,7 +53,10 @@ export const downloadSchoolClassesCsv = async (schoolId: string) => {
   window.setTimeout(() => URL.revokeObjectURL(url), 0);
 };
 
-export type ManagedSchool = { id: string; code: string; name: string; address?: string | null; active: boolean; licenseStart?: string | null; licenseEnd?: string | null; monthlyTokenQuota?: number | null };
+export type ManagedSchool = { id: string; code: string; name: string; address?: string | null; active: boolean; licenseStart?: string | null; licenseEnd?: string | null; monthlyTokenQuota?: number | null; studentQuota?: number | null; planCode?: string | null; annualPriceVnd?: number | null; nextPlanCode?: string | null; subscriptionStatus?: "ACTIVE" | "UPCOMING" | "EXPIRED" | "UNLICENSED" | "SUSPENDED" };
+
+export type SchoolSubscription = { school: ManagedSchool; planName: string | null; managers: { id: number; fullName: string; email: string; active: boolean }[]; studentsUsed: number; tokensUsed: number; usageMonth: string };
+export const schoolSubscription = (id: string) => axiosClient.get<SchoolSubscription>(`/admin/schools/${id}/subscription`).then(r => r.data);
 
 export type SchoolRequest = { code: string; name: string; address?: string; active: boolean; licenseStart?: string | null; licenseEnd?: string | null; monthlyTokenQuota?: number | null };
 

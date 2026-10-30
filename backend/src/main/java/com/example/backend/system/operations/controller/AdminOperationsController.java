@@ -58,6 +58,11 @@ public class AdminOperationsController {
         return service.createSchool(request);
     }
 
+    @GetMapping("/schools/{id}/subscription")
+    public SchoolContracts.Subscription schoolSubscription(@PathVariable UUID id) {
+        return service.schoolSubscription(id);
+    }
+
     @PutMapping("/schools/{id}")
     public SchoolContracts.Response updateSchool(@PathVariable UUID id,
                                @Valid @RequestBody SchoolContracts.Save request) {

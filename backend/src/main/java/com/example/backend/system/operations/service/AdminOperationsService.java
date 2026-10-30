@@ -31,6 +31,8 @@ public class AdminOperationsService {
     private final CurriculumService curriculumService;
     private final LicensePlanRepository planRepository;
     private final TopicRepository topicRepository;
+    private final com.example.backend.system.account.repository.UserRepository users;
+    private final com.example.backend.system.school.service.AiQuotaService aiQuota;
 
     @Transactional(readOnly = true)
     public List<LicensePlanResponse> plans() {
@@ -60,6 +62,21 @@ public class AdminOperationsService {
     @Transactional(readOnly = true)
     public List<SchoolContracts.Response> schools() {
         return schoolRepository.findAll().stream().map(SchoolContracts.Response::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public SchoolContracts.Subscription schoolSubscription(UUID id) {
+        School school = schoolRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("Không tìm thấy trường."));
+        String planName = school.getPlanCode() == null ? null : planRepository.findById(school.getPlanCode())
+                .map(LicensePlan::getName).orElse(school.getPlanCode());
+        var managers = users.findBySchoolId(id).stream()
+                .filter(user -> user.getRole() != null && "SCHOOL".equalsIgnoreCase(user.getRole().getName()))
+                .map(user -> new SchoolContracts.ManagerAccount(user.getId(), user.getFullName(), user.getEmail(),
+                        !Boolean.FALSE.equals(user.getActive())))
+                .toList();
+        return new SchoolContracts.Subscription(SchoolContracts.Response.from(school), planName, managers,
+                users.countActiveStudents(id), aiQuota.usedThisMonth(school), aiQuota.currentMonth());
     }
 
     @Transactional
