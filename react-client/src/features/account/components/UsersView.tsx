@@ -12,6 +12,8 @@ import { AccountPermissionFields, AccountProfileFields, ResetManagedPasswordDial
 import { accountDetails, accountDetailsPayload, blankAccountDetails, missingPermission, type AccountDetails } from "../model/accountDetailsModel";
 import { permissionSummary, permissionsForRole } from "../../../shared/auth/permissions";
 import { Panel, Loading, ErrorNotice, Button, FormField, Stat } from "../../../shared/ui/ManagementUI";
+import modal from "../../../shared/ui/ModalScroll.module.css";
+import tableScroll from "../../../shared/ui/TableScroll.module.css";
 
 function roleColor(role: string): NonNullable<BadgeProps["color"]> {
   switch (role) {
@@ -127,7 +129,8 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
       </Select.Root>
       <IconButton type="button" variant="surface" size="3" aria-label="Làm mới danh sách tài khoản" onClick={() => void load()} disabled={loading}><LearningIcon name="refresh" /></IconButton>
     </div>
-    <Dialog.Root open={showForm} onOpenChange={open => { if (!busyRef.current) setShowForm(open); }}><Dialog.Content maxWidth="620px" aria-describedby={undefined} onEscapeKeyDown={event => { if (busyRef.current) event.preventDefault(); }} onInteractOutside={event => { if (busyRef.current) event.preventDefault(); }}>
+    <Dialog.Root open={showForm} onOpenChange={open => { if (!busyRef.current) setShowForm(open); }}><Dialog.Content className={modal.dialog} maxWidth="620px" aria-describedby={undefined} onEscapeKeyDown={event => { if (busyRef.current) event.preventDefault(); }} onInteractOutside={event => { if (busyRef.current) event.preventDefault(); }}>
+      <div className={modal.body}>
       <Dialog.Title>{editing === null ? "Tạo tài khoản" : "Cập nhật tài khoản"}</Dialog.Title>
       {error && <Callout.Root color="red" size="1" mb="4" role="alert"><Callout.Text>{error}</Callout.Text></Callout.Root>}
       <form className="admin-form-grid" onSubmit={submit}>
@@ -141,8 +144,9 @@ export function UsersView({ schoolId }: Readonly<{ schoolId?: string }> = {}) {
         {editing === null && <Text size="2" color="gray" style={{ gridColumn: "1 / -1" }}>Tài khoản phải đổi mật khẩu khi đăng nhập lần đầu.</Text>}
         <div className="admin-form-actions"><Button disabled={busy} onClick={() => setShowForm(false)}>Hủy</Button><ThemeButton type="submit" size="3" disabled={busy || missingPermission(form, form.role)} loading={busy}>{busy ? "Đang lưu…" : "Lưu tài khoản"}</ThemeButton></div>
       </form>
+      </div>
     </Dialog.Content></Dialog.Root>
-    <Panel title="Danh sách tài khoản" className="admin-users-panel" hideHeader>{loading ? <Loading text="Đang tải danh sách tài khoản…" headers={schoolScoped ? ["Họ tên / Email", "Vai trò", "Đăng nhập gần nhất", "Trạng thái", "Thao tác"] : ["Họ tên / Email", "Vai trò", "Trường", "Đăng nhập gần nhất", "Trạng thái", "Thao tác"]} /> : <><Table.Root className="admin-user-table" size="2" variant="ghost"><Table.Header><Table.Row><Table.ColumnHeaderCell>Họ tên / Email</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Vai trò</Table.ColumnHeaderCell>{!schoolScoped && <Table.ColumnHeaderCell>Trường</Table.ColumnHeaderCell>}<Table.ColumnHeaderCell>Đăng nhập gần nhất</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Thao tác</Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>{filtered.length === 0 ? <Table.Row><Table.Cell colSpan={schoolScoped ? 5 : 6} className="admin-empty-table">Không tìm thấy tài khoản phù hợp.</Table.Cell></Table.Row> : visibleItems.map(item => <Table.Row key={item.id}>
+    <Panel title="Danh sách tài khoản" className="admin-users-panel" hideHeader>{loading ? <Loading text="Đang tải danh sách tài khoản…" headers={schoolScoped ? ["Họ tên / Email", "Vai trò", "Đăng nhập gần nhất", "Trạng thái", "Thao tác"] : ["Họ tên / Email", "Vai trò", "Trường", "Đăng nhập gần nhất", "Trạng thái", "Thao tác"]} /> : <><Table.Root className={`admin-user-table ${tableScroll.viewport}`} size="2" variant="ghost"><Table.Header><Table.Row><Table.ColumnHeaderCell>Họ tên / Email</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Vai trò</Table.ColumnHeaderCell>{!schoolScoped && <Table.ColumnHeaderCell>Trường</Table.ColumnHeaderCell>}<Table.ColumnHeaderCell>Đăng nhập gần nhất</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Trạng thái</Table.ColumnHeaderCell><Table.ColumnHeaderCell>Thao tác</Table.ColumnHeaderCell></Table.Row></Table.Header><Table.Body>{filtered.length === 0 ? <Table.Row><Table.Cell colSpan={schoolScoped ? 5 : 6} className="admin-empty-table">Không tìm thấy tài khoản phù hợp.</Table.Cell></Table.Row> : visibleItems.map(item => <Table.Row key={item.id}>
       <Table.Cell><div className="admin-table-user"><Avatar size="3" radius="full" src={item.avatarUrl || undefined} color={roleColor(item.role)} fallback={(item.fullName || item.email).slice(0, 1).toUpperCase()} /><span><Text as="div" size="3" weight="medium">{item.fullName || "Chưa có họ tên"}</Text><Text as="div" color="gray" size="2">{item.email}</Text>{item.dateOfBirth && <Text as="div" color="gray" size="1">{new Date(`${item.dateOfBirth}T00:00:00`).toLocaleDateString("vi-VN")}</Text>}</span></div></Table.Cell>
       <Table.Cell><div style={{ display: "grid", gap: 6, justifyItems: "start" }}><Badge color={roleColor(item.role)} size="2" title={item.role}>{getRoleLabel(item.role)}</Badge>{permissionsForRole(item.role).length > 0 && permissionSummary(item) !== getRoleLabel(item.role) && <Text size="1" color="gray">{permissionSummary(item)}</Text>}</div></Table.Cell>
       {!schoolScoped && <Table.Cell>{availableSchools.find(school => school.id === item.institutionId)?.name || "—"}</Table.Cell>}

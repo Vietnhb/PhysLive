@@ -5,8 +5,7 @@ import { adminSchools, type ManagedSchool } from "../../school/api/schoolApi";
 import { validationMetrics } from "../api/operationsApi";
 import type { User } from "../../../shared/auth/types";
 import { apiMessage } from "../../../shared/lib/apiError";
-import LearningIcon from "../../../shared/ui/LearningIcon";
-import { Button, ErrorNotice, PageHeader, Panel, Stat } from "../../../shared/ui/ManagementUI";
+import { ErrorNotice, Panel, Stat } from "../../../shared/ui/ManagementUI";
 import { DashboardLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
 
 const SYSTEM_ROLES = new Set(["ADMIN", "MANAGER"]);
