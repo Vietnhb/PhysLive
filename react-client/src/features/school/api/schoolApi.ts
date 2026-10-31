@@ -7,6 +7,18 @@ export const schoolClasses = (schoolId: string) => axiosClient.get<SchoolClassSu
 
 export const schoolClass = (schoolId: string, classId: string) => axiosClient.get<SchoolClassDetail>(`${classesPath(schoolId)}/${classId}`).then(r => r.data);
 
+export const downloadSchoolClassStudentsCsv = async (schoolId: string, classId: string, className: string, schoolYear: string) => {
+  const response = await axiosClient.get<Blob>(`${classesPath(schoolId)}/${classId}/students.csv`, { responseType: "blob" });
+  const url = URL.createObjectURL(response.data);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  const fileName = `${className}-${schoolYear}`.replace(/[^\p{L}\p{N}._-]+/gu, "-").slice(0, 120);
+  anchor.download = `danh-sach-hoc-sinh-${fileName || classId}.csv`;
+  document.body.append(anchor);
+  anchor.click(); anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
 export const createSchoolClass = (schoolId: string, payload: SchoolClassRequest) => axiosClient.post<SchoolClassDetail>(classesPath(schoolId), payload).then(r => r.data);
 
 export const updateSchoolClass = (schoolId: string, classId: string, payload: SchoolClassRequest) => axiosClient.put<SchoolClassDetail>(`${classesPath(schoolId)}/${classId}`, payload).then(r => r.data);

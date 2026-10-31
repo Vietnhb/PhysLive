@@ -5,6 +5,10 @@
   margin-bottom: 16px;
 }
 
+.classFilters {
+  grid-template-columns: minmax(220px, 1fr) 140px 170px 180px;
+}
+
 .pageToolbar {
   display: flex;
   align-items: center;
@@ -113,7 +117,8 @@
 }
 
 .summary span,
-.sectionHeading span {
+.sectionHeading > span,
+.sectionActions > span {
   color: var(--admin-muted);
   font-size: 12px;
 }
@@ -224,7 +229,21 @@
   font-weight: 700;
 }
 
-.sectionHeading span {
+.classFormHeading {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+.sectionActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sectionHeading > span,
+.sectionActions > span {
   padding: 4px 9px;
   border-radius: 999px;
   background: var(--gray-a3);
@@ -288,6 +307,43 @@
   width: 126px;
 }
 
+.studentTableScroll {
+  max-height: min(420px, 50dvh);
+  overflow: auto;
+  border-radius: 12px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-8) var(--gray-3);
+}
+
+/* The outer region owns both scroll axes so the table header sticks to it. */
+.studentTableScroll :global(.rt-TableRoot),
+.studentTableScroll :global(.rt-TableRootTable),
+.studentTableScroll :global(.rt-ScrollAreaRoot),
+.studentTableScroll :global(.rt-ScrollAreaViewport) {
+  overflow: visible !important;
+}
+
+.studentTableScroll :global(.rt-ScrollAreaScrollbar) {
+  display: none;
+}
+
+.studentTableScroll :global(.rt-TableHeader) {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--admin-surface-muted);
+}
+
+.studentTableScroll:focus-visible {
+  outline: 2px solid var(--accent-8);
+  outline-offset: 2px;
+}
+
+.studentTableScroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.studentTableScroll::-webkit-scrollbar-thumb { border-radius: 8px; background: var(--gray-8); }
+.studentTableScroll::-webkit-scrollbar-track { background: var(--gray-3); }
+
 .manageList small {
   margin-top: 2px;
   color: var(--admin-muted);
@@ -348,6 +404,16 @@
   flex: 1 1 auto;
 }
 
+@media (max-width: 1200px) {
+  .classFilters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .classFilters > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 860px) {
   .filters {
     grid-template-columns: minmax(0, 1fr) 150px;
@@ -367,6 +433,13 @@
 }
 
 @media (max-width: 560px) {
+  .sectionHeading:has(.sectionActions) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sectionActions { justify-content: flex-start; }
+
   .filters,
   .summary,
   .teacherList,

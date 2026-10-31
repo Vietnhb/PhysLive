@@ -5,6 +5,11 @@ import com.example.backend.system.school.dto.SchoolClassContracts.EnrollStudentR
 import com.example.backend.system.school.dto.SchoolClassContracts.SchoolClassRequest;
 import com.example.backend.system.school.dto.SchoolClassContracts;
 import com.example.backend.system.school.service.SchoolClassService;
+import com.example.backend.system.school.dataio.service.SchoolClassCsv;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ContentDisposition;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +26,15 @@ public class SchoolClassController {
     public List<SchoolClassContracts.ClassSummary> list(@PathVariable UUID schoolId) { return service.list(schoolId); }
     @GetMapping("/{classId}")
     public SchoolClassContracts.ClassDetail get(@PathVariable UUID schoolId, @PathVariable UUID classId) { return service.get(schoolId, classId); }
+    @GetMapping(value = "/{classId}/students.csv", produces = "text/csv")
+    public ResponseEntity<byte[]> exportStudents(@PathVariable UUID schoolId, @PathVariable UUID classId) {
+        // Reuse the detail access check: the class must belong to a school the actor can read.
+        var detail = service.get(schoolId, classId);
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                        .filename("danh-sach-hoc-sinh-" + classId + ".csv").build().toString())
+                .body(SchoolClassCsv.students(detail));
+    }
     @PostMapping
     public SchoolClassContracts.ClassDetail create(@PathVariable UUID schoolId, @Valid @RequestBody SchoolClassRequest request) { return service.create(schoolId, request); }
     @PutMapping("/{classId}")
