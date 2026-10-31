@@ -31,10 +31,25 @@ public class SchoolReportController {
         return service.tokenAudit(schoolId);
     }
 
+    @GetMapping("/token-audit/page")
+    public SchoolReportContracts.TokenPage tokenPage(@PathVariable UUID schoolId,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int size,
+            @RequestParam(required = false) String query, @RequestParam(required = false) String operation,
+            @RequestParam(required = false) String month) {
+        return service.tokenPage(schoolId, page, size, query, operation, month);
+    }
+
+    @GetMapping("/token-audit/options")
+    public SchoolReportContracts.TokenOptions tokenOptions(@PathVariable UUID schoolId) {
+        return service.tokenOptions(schoolId);
+    }
+
     @GetMapping(value = "/classes.csv", produces = "text/csv")
-    public ResponseEntity<byte[]> exportClasses(@PathVariable UUID schoolId) {
+    public ResponseEntity<byte[]> exportClasses(@PathVariable UUID schoolId,
+            @RequestParam(required = false) Integer grade, @RequestParam(required = false) String year,
+            @RequestParam(required = false) String query) {
         StringBuilder csv = new StringBuilder("\uFEFFname,gradeLevel,schoolYear,teachers,students\r\n");
-        service.classes(schoolId)
+        service.filteredClasses(schoolId, grade, year, query)
                 .forEach(row -> csv.append(csv(row.name())).append(',').append(row.gradeLevel()).append(',')
                         .append(csv(row.schoolYear())).append(',').append(row.teachers()).append(',')
                         .append(row.students()).append("\r\n"));

@@ -41,7 +41,7 @@ export type StudentClassSummary = { id: string; name: string; gradeLevel: number
 
 export const studentClasses = () => axiosClient.get<StudentClassSummary[]>("/student/classes").then(r => r.data);
 
-export type SchoolReportSummary = { schoolId: string; schoolName: string; students: number; teachers: number; managers: number; activeClasses: number; enrolledStudents: number; usedTokens: number; tokenQuota: number | null; licenseEnd: string | null };
+export type SchoolReportSummary = { schoolId: string; schoolName: string; students: number; teachers: number; managers: number; activeClasses: number; enrolledStudents: number; usedTokens: number; tokenQuota: number | null; licenseEnd: string | null; usageMonth: string; studentQuota: number | null; planCode: string | null; licenseStart: string | null; licenseStatus: "ACTIVE" | "EXPIRED" | "UPCOMING" | "UNLICENSED" | "SUSPENDED" };
 
 export type SchoolReportClass = { id: string; name: string; gradeLevel: number; schoolYear: string; teachers: number; students: number };
 
@@ -55,8 +55,14 @@ export const schoolReportClasses = (schoolId: string) => axiosClient.get<SchoolR
 
 export const schoolReportTokenAudit = (schoolId: string) => axiosClient.get<SchoolTokenAudit[]>(`${reportPath(schoolId)}/token-audit`).then(r => r.data);
 
-export const downloadSchoolClassesCsv = async (schoolId: string) => {
-  const response = await axiosClient.get<Blob>(`${reportPath(schoolId)}/classes.csv`, { responseType: "blob" });
+export type SchoolTokenPage = { items: SchoolTokenAudit[]; totalElements: number; totalPages: number; page: number; size: number };
+export type SchoolTokenOptions = { operations: string[]; months: string[] };
+export const schoolReportTokenPage = (schoolId: string, params: { page: number; size: number; query?: string; operation?: string; month?: string }, signal?: AbortSignal) =>
+  axiosClient.get<SchoolTokenPage>(`${reportPath(schoolId)}/token-audit/page`, { params, signal }).then(r => r.data);
+export const schoolReportTokenOptions = (schoolId: string) => axiosClient.get<SchoolTokenOptions>(`${reportPath(schoolId)}/token-audit/options`).then(r => r.data);
+
+export const downloadSchoolClassesCsv = async (schoolId: string, params?: { grade?: number; year?: string; query?: string }) => {
+  const response = await axiosClient.get<Blob>(`${reportPath(schoolId)}/classes.csv`, { responseType: "blob", params });
   const url = URL.createObjectURL(response.data);
   const anchor = document.createElement("a");
   anchor.href = url;

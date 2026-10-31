@@ -9,8 +9,11 @@ public final class SchoolReportContracts {
 
     public record Summary(UUID schoolId, String schoolName, long students, long teachers, long managers,
                           long activeClasses, long enrolledStudents, long usedTokens, Integer tokenQuota,
-                          LocalDate licenseEnd) { }
+                          LocalDate licenseEnd, LocalDate usageMonth, Integer studentQuota, String planCode,
+                          LocalDate licenseStart, String licenseStatus) { }
     public record ClassRow(UUID id, String name, Integer gradeLevel, String schoolYear,
                            long teachers, long students) { }
     public record TokenRow(String userEmail, String operation, long tokens, LocalDate usageMonth, java.time.Instant recordedAt) { }
+    public record TokenPage(java.util.List<TokenRow> items, long totalElements, int totalPages, int page, int size) { }
+    public record TokenOptions(java.util.List<String> operations, java.util.List<LocalDate> months) { }
 }
