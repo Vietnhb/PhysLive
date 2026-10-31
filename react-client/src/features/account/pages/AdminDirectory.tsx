@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Avatar, Badge, Button, Card, Flex, Heading, IconButton, Select, Table, Text, TextField } from "@radix-ui/themes";
+import { Avatar, Badge, Button, Callout, Card, Dialog, Flex, Heading, IconButton, Select, Table, Text, TextField } from "@radix-ui/themes";
 import { ArrowRightIcon, CheckCircledIcon, Cross2Icon, ExclamationTriangleIcon, LockClosedIcon, MagnifyingGlassIcon, PersonIcon, ReloadIcon } from "@radix-ui/react-icons";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { adminUsers } from "../api/userApi";
 import { apiMessage } from "../../../shared/lib/apiError";
 import LearningIcon from "../../../shared/ui/LearningIcon";
@@ -10,6 +10,9 @@ import type { User, AccountStatus } from "../../../shared/auth/types";
 import { permissionSummary, permissionsForRole } from "../../../shared/auth/permissions";
 import "../styles/admin-directory.css";
 import { TableLoadingSkeleton } from "../../../shared/ui/LoadingSkeleton";
+import { useSessionStore } from "../../../shared/auth/sessionStore";
+import ManagerAccountActions from "../components/ManagerAccountActions";
+import modal from "../../../shared/ui/ModalScroll.module.css";
 
 type UserTier = "ALL" | "SYSTEM" | "SCHOOL" | "INDIVIDUAL";
 
@@ -47,9 +50,11 @@ function accountStatusBadge(user: User) {
 }
 
 export default function AdminDirectory() {
+  const canManageManagers = useSessionStore(state => state.user?.role === "ADMIN");
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [query, setQuery] = useState("");
   const [tier, setTier] = useState<UserTier>("ALL");
   const [role, setRole] = useState("");
@@ -59,6 +64,13 @@ export default function AdminDirectory() {
   const [page, setPage] = useState(1);
 
   const selected = users.find(item => item.id === selectedId);
+  const openDetails = (id: number) => { setNotice(""); setSelectedId(id); };
+  const managerSaved = (saved: User, message: string) => {
+    const exists = users.some(item => item.id === saved.id);
+    setUsers(current => exists ? current.map(item => item.id === saved.id ? saved : item) : [saved, ...current]);
+    setSelectedId(saved.id); setNotice(message);
+    if (!exists) { setQuery(""); setTier("SYSTEM"); setRole("MANAGER"); setStatus(""); setPage(1); }
+  };
 
   const load = async () => {
     setLoading(true); setError("");
@@ -101,20 +113,22 @@ export default function AdminDirectory() {
   return (
     <div className="directory-main">
       <div className="directory-content">
-        {/* Page Heading & Strict View-only Badge */}
+        {/* Admin may manage Manager accounts; other roles remain read-only. */}
         <div className="directory-heading">
           <div>
             <Flex align="center" gap="3">
               <Heading as="h1" size="7">Tài khoản người dùng</Heading>
               <Badge color="amber" size="2" variant="surface">
-                <LockClosedIcon /> Chế độ xem (View-only)
+                <LearningIcon name="shield" /> Quản lý Manager
               </Badge>
             </Flex>
             <Text as="p" size="2" color="gray" mt="1">
-              Tra cứu và kiểm toán tài khoản theo nhóm quản lý. Toàn bộ thao tác sửa đổi được khóa để bảo vệ dữ liệu hệ thống.
+              Tra cứu tài khoản toàn hệ thống. Admin có thể tạo và quản lý Manager; các vai trò khác chỉ được xem.
             </Text>
           </div>
+          {canManageManagers && <ManagerAccountActions onSaved={managerSaved} />}
         </div>
+        {notice && <Callout.Root color="green" role="status"><Callout.Text>{notice}</Callout.Text></Callout.Root>}
 
         {/* High-level Stats */}
         <div className="directory-stats" aria-label="Thống kê tài khoản">
@@ -139,7 +153,7 @@ export default function AdminDirectory() {
         {/* View-Only Audit Callout */}
         <div className="directory-readonly-notice" role="status">
           <LockClosedIcon />
-          <span><strong>Chế độ kiểm toán:</strong> Chỉ cho phép tra cứu và xem chi tiết. Mọi thao tác thêm, sửa hoặc xóa tài khoản đều bị khóa.</span>
+          <span>Chọn <strong>Quản lý</strong> trên tài khoản Manager để sửa hồ sơ, đặt lại mật khẩu hoặc khóa/mở tài khoản. Các vai trò khác chỉ cho phép tra cứu.</span>
         </div>
 
         {/* Full-width User List & Detail Panel */}
@@ -260,8 +274,8 @@ export default function AdminDirectory() {
                           {accountStatusBadge(item)}
                         </Table.Cell>
                         <Table.Cell>
-                          <Button variant="ghost" aria-label={`Xem chi tiết ${item.fullName || item.email}`} onClick={() => setSelectedId(item.id)}>
-                            Xem <ArrowRightIcon />
+                          <Button variant="ghost" aria-label={`${canManageManagers && item.role === "MANAGER" ? "Quản lý Manager" : "Xem chi tiết"} ${item.fullName || item.email}`} onClick={() => openDetails(item.id)}>
+                            {canManageManagers && item.role === "MANAGER" ? "Quản lý" : "Xem"} <ArrowRightIcon />
                           </Button>
                         </Table.Cell>
                       </Table.Row>
@@ -286,7 +300,7 @@ export default function AdminDirectory() {
                         {accountStatusBadge(item)}
                       </div>
                       <Text as="p" size="2" color="gray" className="directory-user-card__organization">{organizationLabel(item)}</Text>
-                      <Button variant="soft" onClick={() => setSelectedId(item.id)}>Xem chi tiết <ArrowRightIcon /></Button>
+                      <Button variant="soft" onClick={() => openDetails(item.id)}>{canManageManagers && item.role === "MANAGER" ? "Quản lý" : "Xem chi tiết"} <ArrowRightIcon /></Button>
                     </article>
                   ))}
                 </div>
@@ -316,24 +330,26 @@ export default function AdminDirectory() {
 
               <footer className="directory-table-footer">
                 <LearningIcon name="shield" />
-                <span>Chế độ kiểm toán View-only dành cho Quản trị viên · Đồng bộ trực tuyến với Supabase Auth & Users</span>
+                <span>Admin quản lý tài khoản Manager · Các vai trò khác chỉ được xem</span>
               </footer>
             </Card>
 
-            {/* Read-Only Account Detail Drawer */}
-            <AnimatePresence initial={false}>
+            {/* Open details immediately in view instead of below the full account list. */}
+            <Dialog.Root open={!!selected} onOpenChange={open => { if (!open) setSelectedId(null); }}>
               {selected && (
-                <motion.div key={selected.id} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
-                  <Card className="directory-detail" size="3" aria-label="Thông tin tài khoản (Chỉ xem)">
+                <Dialog.Content className={modal.dialog} maxWidth="880px" aria-describedby={undefined}>
+                  <div className={`${modal.body} directory-detail`}>
                     <Flex justify="between" align="center" mb="4">
                       <div>
-                        <Heading as="h2" size="4">Chi tiết tài khoản</Heading>
-                        <Badge color="amber" size="1" variant="surface">Chỉ xem</Badge>
+                        <Dialog.Title size="4">Chi tiết tài khoản</Dialog.Title>
+                        <Badge color={canManageManagers && selected.role === "MANAGER" ? "indigo" : "amber"} size="1" variant="surface">{canManageManagers && selected.role === "MANAGER" ? "Có thể quản lý" : "Chỉ xem"}</Badge>
                       </div>
                       <IconButton variant="ghost" color="gray" aria-label="Đóng chi tiết" onClick={() => setSelectedId(null)}>
                         <Cross2Icon />
                       </IconButton>
                     </Flex>
+
+                    {notice && <Callout.Root color="green" role="status" mb="4"><Callout.Text>{notice}</Callout.Text></Callout.Root>}
 
                     <div className="directory-detail-identity">
                       <Avatar size="5" src={selected.avatarUrl || undefined} color={roleColors[selected.role]} fallback={(selected.fullName || selected.email).slice(0, 1).toUpperCase()} />
@@ -344,6 +360,7 @@ export default function AdminDirectory() {
                       </Flex>
                     </div>
 
+                    {canManageManagers && selected.role === "MANAGER" && <div style={{ marginBottom: 20 }}><ManagerAccountActions key={selected.id} user={selected} onSaved={managerSaved} /></div>}
                     <dl>
                       {[
                         ["Mã tài khoản", `#${selected.id}`],
@@ -365,10 +382,10 @@ export default function AdminDirectory() {
                         </div>
                       ))}
                     </dl>
-                  </Card>
-                </motion.div>
+                  </div>
+                </Dialog.Content>
               )}
-            </AnimatePresence>
+            </Dialog.Root>
         </div>
       </div>
     </div>
