@@ -3,7 +3,7 @@ import type { SchoolClassDetail, SchoolClassRequest, SchoolClassSummary } from "
 
 const classesPath = (schoolId: string) => `/schools/${schoolId}/classes`;
 
-export const schoolClasses = (schoolId: string) => axiosClient.get<SchoolClassSummary[]>(classesPath(schoolId)).then(r => r.data);
+export const schoolClasses = (schoolId: string, includeInactive = false) => axiosClient.get<SchoolClassSummary[]>(classesPath(schoolId), { params: { includeInactive } }).then(r => r.data);
 
 export const schoolClass = (schoolId: string, classId: string) => axiosClient.get<SchoolClassDetail>(`${classesPath(schoolId)}/${classId}`).then(r => r.data);
 
@@ -24,6 +24,8 @@ export const createSchoolClass = (schoolId: string, payload: SchoolClassRequest)
 export const updateSchoolClass = (schoolId: string, classId: string, payload: SchoolClassRequest) => axiosClient.put<SchoolClassDetail>(`${classesPath(schoolId)}/${classId}`, payload).then(r => r.data);
 
 export const archiveSchoolClass = (schoolId: string, classId: string) => axiosClient.delete<void>(`${classesPath(schoolId)}/${classId}`).then(r => r.data);
+
+export const restoreSchoolClass = (schoolId: string, classId: string) => axiosClient.post<SchoolClassSummary>(`${classesPath(schoolId)}/${classId}/restore`).then(r => r.data);
 
 export const assignClassTeacher = (schoolId: string, classId: string, teacherId: number) => axiosClient.post(`${classesPath(schoolId)}/${classId}/teachers`, { teacherId }).then(r => r.data);
 

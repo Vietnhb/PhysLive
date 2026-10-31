@@ -68,8 +68,14 @@ public class SchoolClassService {
 
     @Transactional(readOnly = true)
     public List<ClassSummary> list(UUID schoolId) {
+        return list(schoolId, false);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ClassSummary> list(UUID schoolId, boolean includeInactive) {
         requireSchoolAccess(schoolId);
-        return classes.findBySchoolIdAndIsActiveTrue(schoolId).stream().map(this::summary).toList();
+        return (includeInactive ? classes.findBySchoolIdOrderByNameAsc(schoolId)
+                : classes.findBySchoolIdAndIsActiveTrue(schoolId)).stream().map(this::summary).toList();
     }
 
     @Transactional(readOnly = true)
@@ -126,10 +132,24 @@ public class SchoolClassService {
     @Transactional
     public void archive(UUID schoolId, UUID classId) {
         requireWriteAccess(schoolId);
+        schools.findByIdForUpdate(schoolId).orElseThrow(() -> ApiException.notFound("Không tìm thấy trường."));
         SchoolClass schoolClass = activeClassInSchool(schoolId, classId);
         schoolClass.setIsActive(false); classes.save(schoolClass);
         teacherAssignments.findByClassIdAndIsActiveTrue(classId).forEach(item -> { item.setIsActive(false); teacherAssignments.save(item); });
         enrollments.findActiveStudentsByClassId(classId).forEach(item -> { item.setStatus(ClassEnrollment.EnrollmentStatus.COMPLETED); enrollments.save(item); });
+    }
+
+    @Transactional
+    public ClassSummary restore(UUID schoolId, UUID classId) {
+        requireWriteAccess(schoolId);
+        schools.findByIdForUpdate(schoolId).orElseThrow(() -> ApiException.notFound("Không tìm thấy trường."));
+        SchoolClass schoolClass = classInSchool(schoolId, classId);
+        if (!Boolean.TRUE.equals(schoolClass.getIsActive())) {
+            // Old memberships remain closed: people may have joined a different class since archiving.
+            schoolClass.setIsActive(true);
+            classes.save(schoolClass);
+        }
+        return summary(schoolClass);
     }
 
     @Transactional

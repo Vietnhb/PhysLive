@@ -3,7 +3,7 @@ import { AlertDialog, Badge, Button, Callout, Card, Dialog, Flex, Select, Table,
 import { EyeOpenIcon, MagnifyingGlassIcon, PlusIcon } from "@radix-ui/react-icons";
 import { motion, useReducedMotion } from "motion/react";
 import { useNavigate } from "react-router-dom";
-import { archiveSchoolClass, createSchoolClass, schoolClasses } from "../api/schoolApi";
+import { archiveSchoolClass, createSchoolClass, restoreSchoolClass, schoolClasses } from "../api/schoolApi";
 import type { SchoolClassRequest, SchoolClassSummary } from "../types";
 import { apiMessage } from "../../../shared/lib/apiError";
 import { useSessionStore } from "../../../shared/auth/sessionStore";
@@ -28,11 +28,12 @@ export default function SchoolClasses() {
   const [query, setQuery] = useState("");
   const [grade, setGrade] = useState("ALL");
   const [schoolYear, setSchoolYear] = useState("ALL");
+  const [status, setStatus] = useState("ACTIVE");
   const [classPage, setClassPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [archiveTarget, setArchiveTarget] = useState<SchoolClassSummary | null>(null);
+  const [statusTarget, setStatusTarget] = useState<SchoolClassSummary | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState<SchoolClassRequest>(blankClass);
   const [formError, setFormError] = useState("");
@@ -46,7 +47,7 @@ export default function SchoolClasses() {
     try {
       const created = await createSchoolClass(schoolId, { ...form, name: form.name.trim(), schoolYear: form.schoolYear.trim(), subject: form.subject.trim() });
       setItems(current => [{ ...created, teacherCount: created.teachers.length, studentCount: created.students.length }, ...current]);
-      setQuery(""); setGrade("ALL"); setSchoolYear("ALL"); setClassPage(1);
+      setQuery(""); setGrade("ALL"); setSchoolYear("ALL"); setStatus("ACTIVE"); setClassPage(1);
       setShowCreate(false); setForm(blankClass());
       setNotice(`Đã tạo lớp ${created.name}. Bạn có thể chọn Sửa để phân công giáo viên và thêm học sinh.`);
     } catch (err) {
@@ -61,7 +62,7 @@ export default function SchoolClasses() {
     setLoading(true);
     setError("");
     try {
-      setItems(await schoolClasses(schoolId));
+      setItems(await schoolClasses(schoolId, true));
     } catch (err) {
       setError(apiMessage(err, "Không thể tải danh sách lớp."));
     } finally {
@@ -79,9 +80,10 @@ export default function SchoolClasses() {
     const needle = normalize(query.trim());
     return items.filter(item => {
       const matchesQuery = !needle || normalize(`${item.name} ${item.subject ?? ""}`).includes(needle);
-      return matchesQuery && (grade === "ALL" || String(item.gradeLevel) === grade) && (schoolYear === "ALL" || item.schoolYear === schoolYear);
+      return matchesQuery && (grade === "ALL" || String(item.gradeLevel) === grade) && (schoolYear === "ALL" || item.schoolYear === schoolYear)
+        && (status === "ALL" || item.active === (status === "ACTIVE"));
     });
-  }, [grade, items, query, schoolYear]);
+  }, [grade, items, query, schoolYear, status]);
 
   const classPageSize = 10;
   const classPageCount = Math.max(1, Math.ceil(filteredItems.length / classPageSize));
@@ -93,17 +95,25 @@ export default function SchoolClasses() {
   const updateGrade = (value: string) => { setGrade(value); setClassPage(1); };
   const updateSchoolYear = (value: string) => { setSchoolYear(value); setClassPage(1); };
 
-  const confirmArchive = async () => {
-    if (!schoolId || !archiveTarget || busy) return;
-    const target = archiveTarget;
-    setArchiveTarget(null);
+  const confirmStatusChange = async () => {
+    if (!schoolId || !statusTarget || busy) return;
+    const target = statusTarget;
+    setStatusTarget(null);
     setBusy(true);
-    setError("");
+    setError(""); setNotice("");
     try {
-      await archiveSchoolClass(schoolId, target.id);
-      await load();
+      if (target.active) {
+        await archiveSchoolClass(schoolId, target.id);
+        setItems(current => current.map(item => item.id === target.id ? { ...item, active: false, teacherCount: 0, studentCount: 0 } : item));
+        setNotice(`Đã tắt lớp ${target.name}. Có thể mở lại trong bộ lọc Đã tắt.`);
+      } else {
+        const restored = await restoreSchoolClass(schoolId, target.id);
+        setItems(current => current.map(item => item.id === restored.id ? restored : item));
+        setStatus("ACTIVE"); setClassPage(1);
+        setNotice(`Đã mở lại lớp ${restored.name}. Chọn Sửa để phân công giáo viên và xếp học sinh lại.`);
+      }
     } catch (err) {
-      setError(apiMessage(err, "Không thể tắt lớp học."));
+      setError(apiMessage(err, target.active ? "Không thể tắt lớp học." : "Không thể mở lại lớp học."));
     } finally {
       setBusy(false);
     }
@@ -118,11 +128,11 @@ export default function SchoolClasses() {
     <motion.div className="school-classes-grid" initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .18 }}>
       <Card asChild size="3"><section className="admin-panel">
         <div className="admin-panel-heading">
-          <div><h2>Danh sách lớp</h2><p className="admin-panel-description">{loading ? "Đang tải dữ liệu lớp học…" : `${filteredItems.length.toLocaleString("vi-VN")} lớp đang hoạt động`}</p></div>
+          <div><h2>Danh sách lớp</h2><p className="admin-panel-description">{loading ? "Đang tải dữ liệu lớp học…" : `${filteredItems.length.toLocaleString("vi-VN")} lớp ${status === "ACTIVE" ? "đang hoạt động" : status === "INACTIVE" ? "đã tắt" : "phù hợp"}`}</p></div>
           {actorRole === "SCHOOL" && <Button disabled={busy || loading} onClick={() => { setForm(blankClass()); setFormError(""); setNotice(""); setShowCreate(true); }}><PlusIcon />Tạo lớp</Button>}
         </div>
 
-        <div className={s.filters}>
+        <div className={`${s.filters} ${s.classFilters}`}>
           <TextField.Root type="search" value={query} onChange={event => updateQuery(event.target.value)} placeholder="Tìm theo tên lớp hoặc môn học…" aria-label="Tìm lớp học">
             <TextField.Slot><MagnifyingGlassIcon /></TextField.Slot>
           </TextField.Root>
@@ -133,6 +143,10 @@ export default function SchoolClasses() {
           <Select.Root value={schoolYear} onValueChange={updateSchoolYear}>
             <Select.Trigger aria-label="Lọc theo năm học" />
             <Select.Content><Select.Item value="ALL">Tất cả năm học</Select.Item>{years.map(value => <Select.Item key={value} value={value}>{value}</Select.Item>)}</Select.Content>
+          </Select.Root>
+          <Select.Root value={status} disabled={busy} onValueChange={value => { setStatus(value); setClassPage(1); }}>
+            <Select.Trigger aria-label="Lọc theo trạng thái lớp" />
+            <Select.Content position="popper"><Select.Item value="ACTIVE">Đang hoạt động</Select.Item><Select.Item value="INACTIVE">Đã tắt</Select.Item><Select.Item value="ALL">Tất cả trạng thái</Select.Item></Select.Content>
           </Select.Root>
         </div>
 
@@ -156,11 +170,13 @@ export default function SchoolClasses() {
                 <Table.Cell>{item.subject || "—"}</Table.Cell>
                 <Table.Cell>{item.teacherCount}</Table.Cell>
                 <Table.Cell>{item.studentCount}</Table.Cell>
-                <Table.Cell><Badge color="green" variant="soft">Hoạt động</Badge></Table.Cell>
+                <Table.Cell><Badge color={item.active ? "green" : "gray"} variant="soft">{item.active ? "Hoạt động" : "Đã tắt"}</Badge></Table.Cell>
                 <Table.Cell><div className={s.actions}>
-                  <Button size="1" variant="soft" disabled={busy} onClick={() => navigate(`/school/classes/${item.id}`)}><EyeOpenIcon />Xem</Button>
-                  <Button size="1" variant="soft" color="cyan" disabled={busy} onClick={() => navigate(`/school/classes/${item.id}?mode=edit`)}>Sửa</Button>
-                  <Button size="1" variant="soft" color="red" disabled={busy} onClick={() => setArchiveTarget(item)}>Tắt</Button>
+                  {item.active ? <>
+                    <Button size="1" variant="soft" disabled={busy} onClick={() => navigate(`/school/classes/${item.id}`)}><EyeOpenIcon />Xem</Button>
+                    <Button size="1" variant="soft" color="cyan" disabled={busy} onClick={() => navigate(`/school/classes/${item.id}?mode=edit`)}>Sửa</Button>
+                    <Button size="1" variant="soft" color="red" disabled={busy} onClick={() => setStatusTarget(item)}>Tắt</Button>
+                  </> : <Button size="1" variant="soft" color="green" disabled={busy} onClick={() => setStatusTarget(item)}>Mở lại</Button>}
                 </div></Table.Cell>
               </Table.Row>)}
             </Table.Body>
@@ -188,7 +204,7 @@ export default function SchoolClasses() {
       </Dialog.Content>
     </Dialog.Root>
 
-    <AlertDialog.Root open={archiveTarget !== null} onOpenChange={open => { if (!open) setArchiveTarget(null); }}><AlertDialog.Content maxWidth="460px"><AlertDialog.Title>Tắt lớp học?</AlertDialog.Title><AlertDialog.Description size="2">Lớp “{archiveTarget?.name}” sẽ không còn xuất hiện trong danh sách lớp đang hoạt động.</AlertDialog.Description><Flex gap="3" mt="4" justify="end"><AlertDialog.Cancel><Button variant="soft" color="gray">Hủy</Button></AlertDialog.Cancel><AlertDialog.Action><Button color="red" disabled={busy} onClick={() => void confirmArchive()}>Tắt lớp</Button></AlertDialog.Action></Flex></AlertDialog.Content></AlertDialog.Root>
+    <AlertDialog.Root open={statusTarget !== null} onOpenChange={open => { if (!open) setStatusTarget(null); }}><AlertDialog.Content maxWidth="480px"><AlertDialog.Title>{statusTarget?.active ? "Tắt lớp học?" : "Mở lại lớp học?"}</AlertDialog.Title><AlertDialog.Description size="2">{statusTarget?.active ? `Lớp “${statusTarget.name}” sẽ ngừng hoạt động. Phân công giáo viên sẽ được gỡ và xếp lớp học sinh sẽ kết thúc. Dữ liệu lớp vẫn được giữ lại.` : `Lớp “${statusTarget?.name}” sẽ hoạt động trở lại. Bạn cần phân công giáo viên và xếp học sinh lại; các phân công cũ không tự động khôi phục.`}</AlertDialog.Description><Flex gap="3" mt="4" justify="end"><AlertDialog.Cancel><Button variant="soft" color="gray">Hủy</Button></AlertDialog.Cancel><AlertDialog.Action><Button color={statusTarget?.active ? "red" : "green"} disabled={busy} onClick={() => void confirmStatusChange()}>{statusTarget?.active ? "Tắt lớp" : "Mở lại lớp"}</Button></AlertDialog.Action></Flex></AlertDialog.Content></AlertDialog.Root>
   </div>;
 }
 

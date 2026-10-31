@@ -23,7 +23,8 @@ public class SchoolClassController {
     private final SchoolClassService service;
 
     @GetMapping
-    public List<SchoolClassContracts.ClassSummary> list(@PathVariable UUID schoolId) { return service.list(schoolId); }
+    public List<SchoolClassContracts.ClassSummary> list(@PathVariable UUID schoolId,
+            @RequestParam(defaultValue = "false") boolean includeInactive) { return service.list(schoolId, includeInactive); }
     @GetMapping("/{classId}")
     public SchoolClassContracts.ClassDetail get(@PathVariable UUID schoolId, @PathVariable UUID classId) { return service.get(schoolId, classId); }
     @GetMapping(value = "/{classId}/students.csv", produces = "text/csv")
@@ -42,6 +43,8 @@ public class SchoolClassController {
     @DeleteMapping("/{classId}")
     @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
     public void archive(@PathVariable UUID schoolId, @PathVariable UUID classId) { service.archive(schoolId, classId); }
+    @PostMapping("/{classId}/restore")
+    public SchoolClassContracts.ClassSummary restore(@PathVariable UUID schoolId, @PathVariable UUID classId) { return service.restore(schoolId, classId); }
     @PostMapping("/{classId}/teachers")
     public SchoolClassContracts.TeacherAssignment assignTeacher(@PathVariable UUID schoolId, @PathVariable UUID classId, @Valid @RequestBody AssignTeacherRequest request) { return service.assignTeacher(schoolId, classId, request.teacherId()); }
     @DeleteMapping("/{classId}/teachers/{teacherId}")
